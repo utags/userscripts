@@ -8,8 +8,8 @@
 // @description          Auto load new topics with smart detection and error handling
 // @description:zh-CN    智能自动加载新话题，带有错误处理和检测优化
 // @author               Pipecraft
-// @match                https://linux.do/*
 // @license              MIT
+// @match                https://linux.do/*
 // @icon                 https://www.google.com/s2/favicons?sz=64&domain=linux.do
 // @grant                none
 // ==/UserScript==
