@@ -4,7 +4,7 @@
 // @namespace            https://www.pipecraft.net/
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.0
+// @version              0.1.1
 // @description          Auto load new topics with smart detection and error handling
 // @description:zh-CN    智能自动加载新话题，带有错误处理和检测优化
 // @author               Pipecraft
@@ -45,6 +45,25 @@
   }
 
   /**
+   * Check if a modal dialog is currently open
+   * @returns {boolean} True if a modal is open
+   */
+  function isModalOpen() {
+    const modals = document.querySelectorAll('[role="dialog"]')
+    for (const modal of modals) {
+      if (
+        modal &&
+        modal.offsetParent !== null &&
+        modal.offsetHeight > 0 &&
+        modal.offsetWidth > 0
+      ) {
+        return true
+      }
+    }
+    return false
+  }
+
+  /**
    * Find the clickable element using multiple selectors
    * @returns {HTMLElement|null} The clickable element or null
    */
@@ -74,6 +93,12 @@
    */
   function attemptClick() {
     try {
+      // Check if modal is open and pause auto-loading
+      if (isModalOpen()) {
+        debugLog('Modal dialog is open, pausing auto-loader')
+        return false
+      }
+
       const clickable = findClickableElement()
 
       if (!clickable) {
