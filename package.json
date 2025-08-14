@@ -1,0 +1,16 @@
+{
+  "name": "userscripts",
+  "version": "1.0.0",
+  "description": "Simple userscripts",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --write .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Pipecraft",
+  "license": "MIT",
+  "dependencies": {
+    "prettier": "^3.6.2"
+  }
+}
