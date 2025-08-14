@@ -4,7 +4,7 @@
 // @namespace            https://www.pipecraft.net/
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.1
+// @version              0.1.2
 // @description          Auto load new topics with smart detection and error handling
 // @description:zh-CN    智能自动加载新话题，带有错误处理和检测优化
 // @author               Pipecraft
@@ -32,6 +32,19 @@
   let retryCount = 0
   let lastClickTime = 0
   let intervalId = null
+
+  /**
+   * Apply CSS styles to hide show-more elements
+   */
+  function applyStyles() {
+    const style = document.createElement('style')
+    style.textContent = `
+      #list-area .show-more {
+        display: none !important;
+      }
+    `
+    document.head.appendChild(style)
+  }
 
   /**
    * Log debug messages if debug mode is enabled
@@ -70,8 +83,7 @@
   function findClickableElement() {
     for (const selector of CONFIG.SELECTORS) {
       const element = document.querySelector(selector)
-      if (element && element.offsetParent !== null) {
-        // Check if element is visible
+      if (element) {
         return element
       }
     }
@@ -164,6 +176,9 @@
    * Initialize the script when DOM is ready
    */
   function initialize() {
+    // Apply CSS styles to hide show-more elements
+    applyStyles()
+
     // Wait for DOM to be ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', startAutoLoader)
