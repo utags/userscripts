@@ -4,7 +4,7 @@
 // @namespace            https://www.pipecraft.net/
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.0
+// @version              0.1.1
 // @description          Load more topics manually with enhanced UI and error handling.
 // @description:zh-CN    手动加载更多话题，具有增强的用户界面和错误处理。
 // @author               Pipecraft
@@ -20,7 +20,7 @@
   // Configuration constants
   const CONFIG = {
     BUTTON_ID: 'userscript-load-more-button',
-    SENTINEL_SELECTOR: '.load-more-sentinel',
+    SENTINEL_SELECTOR: '.--topic-list .load-more-sentinel',
     LOAD_TIMEOUT: 1000,
     OBSERVER_DELAY: 100,
     DEBUG: false,
