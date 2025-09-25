@@ -157,7 +157,7 @@ A: 尝试：
 
 ## 📄 许可证
 
-本项目采用 [MIT 许可证](../LICENSE)。
+本项目采用 [MIT 许可证](https://github.com/utags/userscripts/blob/main/LICENSE)。
 
 ## 🔗 相关链接
 

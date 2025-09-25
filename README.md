@@ -4,7 +4,16 @@
 
 ## 📦 脚本列表
 
-### 1. LINUX.DO Auto Load New Topics
+### 1. [Find Scripts For This Site](./find-scripts-for-this-site/)
+
+**查找适用于当前网站的脚本**
+
+- **文件**: [`find-scripts-for-this-site.user.js`](./find-scripts-for-this-site/find-scripts-for-this-site.user.js)
+- **功能**: 快速查找适用于当前网站的用户脚本，支持多个主流脚本仓库
+- **适用网站**: 所有网站
+- **说明**: 获取当前网站的一级域名，并添加命令菜单，跳转到 Greasy Fork、OpenUserJS、ScriptCat、GitHub 和 GitHub Gist 的搜索结果页面
+
+### 2. [LINUX.DO Auto Load New Topics](./linux.do-auto-load-new-topics/)
 
 **自动加载新话题**
 
@@ -13,7 +22,7 @@
 - **适用网站**: [Linux.do](https://linux.do/)
 - **说明**: 自动检测并加载页面中的新话题，提升浏览效率
 
-### 2. LINUX.DO Load More Topics Manually
+### 3. [LINUX.DO Load More Topics Manually](./linux.do-manual-load-more/)
 
 **手动加载更多话题**
 
@@ -22,7 +31,7 @@
 - **适用网站**: [Linux.do](https://linux.do/)
 - **说明**: 在页面底部添加"加载更多"按钮，支持手动控制内容加载
 
-### 3. No GIF Avatars
+### 4. [No GIF Avatars](./no-gif-avatars/)
 
 **屏蔽 GIF 头像**
 

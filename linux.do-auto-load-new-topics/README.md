@@ -165,7 +165,7 @@ A: 有以下几种方法：
 
 ## 许可证
 
-本项目采用 [MIT 许可证](https://opensource.org/licenses/MIT)。
+本项目采用 [MIT 许可证](https://github.com/utags/userscripts/blob/main/LICENSE)。
 
 ## 贡献
 

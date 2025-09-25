@@ -162,7 +162,7 @@ A: 可能是页面 CSS 冲突，脚本使用内联样式应该能覆盖大部分
 
 ## 许可证
 
-MIT License - 详见 [LICENSE](../../LICENSE) 文件
+MIT License - 详见 [LICENSE](https://github.com/utags/userscripts/blob/main/LICENSE) 文件
 
 ## 相关链接
 
