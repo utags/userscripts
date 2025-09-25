@@ -11,7 +11,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.1
+// @version              0.1.2
 // @description          Find userscripts for the current website from popular script repositories
 // @description:zh-CN    查找适用于当前网站的用户脚本，支持多个脚本仓库
 // @description:zh-TW    查找適用於當前網站的用戶腳本，支持多個腳本倉庫
@@ -25,6 +25,7 @@
 // @license              MIT
 // @match                *://*/*
 // @icon                 https://www.google.com/s2/favicons?sz=64&domain=www.tampermonkey.net
+// @noframes
 // @grant                GM_registerMenuCommand
 // @grant                GM_openInTab
 // ==/UserScript==
