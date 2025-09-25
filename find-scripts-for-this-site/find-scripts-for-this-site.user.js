@@ -11,7 +11,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.0
+// @version              0.1.1
 // @description          Find userscripts for the current website from popular script repositories
 // @description:zh-CN    查找适用于当前网站的用户脚本，支持多个脚本仓库
 // @description:zh-TW    查找適用於當前網站的用戶腳本，支持多個腳本倉庫
@@ -37,27 +37,31 @@
     REPOSITORIES: [
       {
         name: 'Greasy Fork',
-        url: 'https://greasyfork.org/scripts/by-site/{domain}',
+        domainSearchUrl: 'https://greasyfork.org/scripts/by-site/{domain}',
+        keywordSearchUrl: 'https://greasyfork.org/scripts/search?q={keyword}',
         icon: '🍴',
       },
       {
         name: 'OpenUserJS',
-        url: 'https://openuserjs.org/?q={domain}',
+        keywordSearchUrl: 'https://openuserjs.org/?q={keyword}',
         icon: '📜',
       },
       {
         name: 'ScriptCat',
-        url: 'https://scriptcat.org/search?domain={domain}',
+        domainSearchUrl: 'https://scriptcat.org/search?domain={domain}',
+        keywordSearchUrl: 'https://scriptcat.org/search?keyword={keyword}',
         icon: '🐱',
       },
       {
         name: 'GitHub',
-        url: 'https://github.com/search?type=code&q=language%3AJavaScript+%22%3D%3DUserScript%3D%3D%22+{domain}',
+        keywordSearchUrl:
+          'https://github.com/search?type=code&q=language%3AJavaScript+%22%3D%3DUserScript%3D%3D%22+{keyword}',
         icon: '🐙',
       },
       {
         name: 'GitHub Gist',
-        url: 'https://gist.github.com/search?l=JavaScript&q=%22%3D%3DUserScript%3D%3D%22+{domain}',
+        keywordSearchUrl:
+          'https://gist.github.com/search?l=JavaScript&q=%22%3D%3DUserScript%3D%3D%22+{keyword}',
         icon: '📝',
       },
     ],
@@ -66,17 +70,29 @@
 
   // Internationalization support
   const I18N = {
-    // Menu text template: "{icon} Find scripts on {name}"
+    // Menu text template for domain search: "{icon} Find scripts by domain on {name}"
     menuTemplate: {
-      en: '{icon} Find scripts on {name}',
-      'zh-CN': '{icon} 在 {name} 上查找脚本',
-      'zh-TW': '{icon} 在 {name} 上查找腳本',
-      ja: '{icon} {name} でスクリプトを探す',
-      ko: '{icon} {name}에서 스크립트 찾기',
-      es: '{icon} Buscar scripts en {name}',
-      fr: '{icon} Trouver des scripts sur {name}',
-      de: '{icon} Skripte auf {name} finden',
-      ru: '{icon} Найти скрипты на {name}',
+      en: '{icon} Find scripts by domain on {name}',
+      'zh-CN': '{icon} 在 {name} 上按域名查找脚本',
+      'zh-TW': '{icon} 在 {name} 上按域名查找腳本',
+      ja: '{icon} {name} でドメインからスクリプトを探す',
+      ko: '{icon} {name}에서 도메인으로 스크립트 찾기',
+      es: '{icon} Buscar scripts por dominio en {name}',
+      fr: '{icon} Trouver des scripts par domaine sur {name}',
+      de: '{icon} Skripte nach Domain auf {name} finden',
+      ru: '{icon} Найти скрипты по домену на {name}',
+    },
+    // Menu text template for keyword search: "{icon} Find scripts by keyword on {name}"
+    keywordSearchTemplate: {
+      en: '{icon} Find scripts by keyword on {name}',
+      'zh-CN': '{icon} 在 {name} 上按关键字查找脚本',
+      'zh-TW': '{icon} 在 {name} 上按關鍵字查找腳本',
+      ja: '{icon} {name} でキーワードからスクリプトを探す',
+      ko: '{icon} {name}에서 키워드로 스크립트 찾기',
+      es: '{icon} Buscar scripts por palabra clave en {name}',
+      fr: '{icon} Trouver des scripts par mot-clé sur {name}',
+      de: '{icon} Skripte nach Stichwort auf {name} finden',
+      ru: '{icon} Найти скрипты по ключевому слову на {name}',
     },
   }
 
@@ -175,11 +191,15 @@
    * Get localized menu text based on user's language
    * @param {Object} repo - Repository information
    * @param {string} lang - Language code
+   * @param {boolean} isKeywordSearch - Whether this is for keyword search
    * @returns {string} Localized menu text
    */
-  function getLocalizedMenuText(repo, lang) {
+  function getLocalizedMenuText(repo, lang, isKeywordSearch = false) {
     // Get template for user's language or fallback to English
-    const template = I18N.menuTemplate[lang] || I18N.menuTemplate['en']
+    const templateKey = isKeywordSearch
+      ? 'keywordSearchTemplate'
+      : 'menuTemplate'
+    const template = I18N[templateKey][lang] || I18N[templateKey]['en']
 
     // Replace placeholders with actual values
     return template.replace('{icon}', repo.icon).replace('{name}', repo.name)
@@ -195,13 +215,27 @@
     debugLog('Detected user language:', userLang)
 
     CONFIG.REPOSITORIES.forEach((repo) => {
-      const url = repo.url.replace('{domain}', domain)
-      const menuText = getLocalizedMenuText(repo, userLang)
+      // Register domain search menu if domainSearchUrl is defined
+      if (repo.domainSearchUrl) {
+        const url = repo.domainSearchUrl.replace('{domain}', domain)
+        const menuText = getLocalizedMenuText(repo, userLang)
 
-      GM_registerMenuCommand(menuText, () => {
-        debugLog(`Opening ${repo.name} for domain:`, domain)
-        GM_openInTab(url, { active: true, insert: true })
-      })
+        GM_registerMenuCommand(menuText, () => {
+          debugLog(`Opening ${repo.name} for domain:`, domain)
+          GM_openInTab(url, { active: true, insert: true })
+        })
+      }
+
+      // Register keyword search menu if keywordSearchUrl is defined
+      if (repo.keywordSearchUrl) {
+        const keywordUrl = repo.keywordSearchUrl.replace('{keyword}', domain)
+        const keywordMenuText = getLocalizedMenuText(repo, userLang, true)
+
+        GM_registerMenuCommand(keywordMenuText, () => {
+          debugLog(`Opening ${repo.name} for keyword search:`, domain)
+          GM_openInTab(keywordUrl, { active: true, insert: true })
+        })
+      }
     })
   }
 

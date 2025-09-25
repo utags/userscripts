@@ -4,7 +4,7 @@ A practical userscript that helps you quickly find userscripts for the current w
 
 [中文版](https://github.com/utags/userscripts/blob/main/find-scripts-for-this-site/README.zh-CN.md)
 
-![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-25-19-06-40.png)
+![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-25-19-47-18.png)
 
 ## Features
 
@@ -36,11 +36,13 @@ Ensure your browser has one of the following userscript managers installed:
 1. Visit any website
 2. Click on the userscript manager icon in your browser toolbar
 3. In the popup menu, you'll see the following options:
-   - 🍴 Find scripts on Greasy Fork
-   - 📜 Find scripts on OpenUserJS
-   - 🐱 Find scripts on ScriptCat
-   - 🐙 Find scripts on GitHub
-   - 📝 Find scripts on GitHub Gist
+   - 🍴 Find scripts by domain on Greasy Fork
+   - 🍴 Find scripts by keyword on Greasy Fork
+   - 📜 Find scripts by keyword on OpenUserJS
+   - 🐱 Find scripts by domain on ScriptCat
+   - 🐱 Find scripts by keyword on ScriptCat
+   - 🐙 Find scripts by keyword on GitHub
+   - 📝 Find scripts by keyword on GitHub Gist
 4. Click any option to open the search results in a new tab
 
 ### Multilingual Support
@@ -68,13 +70,13 @@ The script automatically detects your browser language and displays the appropri
 
 ### Supported Script Repositories
 
-| Repository  | Icon | Search Method     |
-| ----------- | ---- | ----------------- |
-| Greasy Fork | 🍴   | Site-based search |
-| OpenUserJS  | 📜   | Keyword search    |
-| ScriptCat   | 🐱   | Domain search     |
-| GitHub      | 🐙   | Code search       |
-| GitHub Gist | 📝   | Code search       |
+| Repository  | Icon | Search Methods                   |
+| ----------- | ---- | -------------------------------- |
+| Greasy Fork | 🍴   | Domain search, Keyword search    |
+| OpenUserJS  | 📜   | Keyword search                   |
+| ScriptCat   | 🐱   | Domain search, Keyword search    |
+| GitHub      | 🐙   | Keyword search (JavaScript code) |
+| GitHub Gist | 📝   | Keyword search (JavaScript code) |
 
 ## Configuration Options
 
@@ -131,6 +133,13 @@ A: Possible reasons:
 4. Identify issues based on log information
 
 ## Changelog
+
+### v0.1.1
+
+- ✨ Added keyword search functionality for all repositories
+- 🔍 Optimized menu display based on repository capabilities
+- 🧹 Code refactoring for better maintainability
+- 📊 Updated repository search methods in documentation
 
 ### v0.1.0 (Initial Release)
 
