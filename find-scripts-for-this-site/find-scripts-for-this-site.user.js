@@ -11,7 +11,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.2
+// @version              0.1.5
 // @description          Find userscripts for the current website from popular script repositories
 // @description:zh-CN    查找适用于当前网站的用户脚本，支持多个脚本仓库
 // @description:zh-TW    查找適用於當前網站的用戶腳本，支持多個腳本倉庫
@@ -38,8 +38,8 @@
     REPOSITORIES: [
       {
         name: 'Greasy Fork',
-        domainSearchUrl: 'https://greasyfork.org/scripts/by-site/{domain}',
-        keywordSearchUrl: 'https://greasyfork.org/scripts/search?q={keyword}',
+        domainSearchUrl: 'https://greasyfork.org/scripts/by-site/{domain}?filter_locale=0',
+        keywordSearchUrl: 'https://greasyfork.org/scripts?filter_locale=0&q={keyword}',
         icon: '🍴',
       },
       {
