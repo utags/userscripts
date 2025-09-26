@@ -73,6 +73,7 @@ The script automatically detects your browser language and displays the appropri
 | Repository  | Icon | Search Methods                   |
 | ----------- | ---- | -------------------------------- |
 | Greasy Fork | 🍴   | Domain search, Keyword search    |
+| Sleazy Fork | 🔞   | Domain search, Keyword search    |
 | OpenUserJS  | 📜   | Keyword search                   |
 | ScriptCat   | 🐱   | Domain search, Keyword search    |
 | GitHub      | 🐙   | Keyword search (JavaScript code) |
@@ -138,6 +139,7 @@ A: Possible reasons:
 
 - ⚙️ Added settings interface to enable/disable specific search methods
 - 🔄 Separate toggles for domain search and keyword search for each repository
+- 🔞 Added Sleazy Fork repository support
 
 ### v0.1.1
 

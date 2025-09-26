@@ -82,6 +82,17 @@
         keywordSearchEnabled: true,
         icon: '📝',
       },
+      {
+        id: 'sleazy_fork',
+        name: 'Sleazy Fork',
+        domainSearchUrl:
+          'https://sleazyfork.org/scripts/by-site/{domain}?filter_locale=0',
+        domainSearchEnabled: false,
+        keywordSearchUrl:
+          'https://sleazyfork.org/scripts?filter_locale=0&q={keyword}',
+        keywordSearchEnabled: false,
+        icon: '🔞',
+      },
     ],
     DEBUG: false, // Set to true for debug logging
     SETTINGS_KEY: 'find_scripts_settings', // Key for storing settings
