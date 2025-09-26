@@ -134,6 +134,11 @@ A: Possible reasons:
 
 ## Changelog
 
+### v0.2.0
+
+- ⚙️ Added settings interface to enable/disable specific search methods
+- 🔄 Separate toggles for domain search and keyword search for each repository
+
 ### v0.1.1
 
 - ✨ Added keyword search functionality for all repositories
