@@ -9,6 +9,7 @@
 // @description:zh-CN    智能自动加载新话题，带有错误处理和检测优化
 // @author               Pipecraft
 // @license              MIT
+// @noframes
 // @match                https://linux.do/*
 // @icon                 https://www.google.com/s2/favicons?sz=64&domain=linux.do
 // @grant                none

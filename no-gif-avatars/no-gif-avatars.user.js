@@ -9,6 +9,7 @@
 // @description:zh-CN    将动图头像转换为静态图片，具有增强的性能和错误处理。
 // @author               Pipecraft
 // @license              MIT
+// @noframes
 // @match                https://linux.do/*
 // @match                https://www.nodeloc.com/*
 // @icon                 https://www.google.com/s2/favicons?sz=64&domain=github.com
