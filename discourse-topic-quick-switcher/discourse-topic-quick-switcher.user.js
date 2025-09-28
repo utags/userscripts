@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.1
+// @version              0.1.2
 // @description          Enhance Discourse forums with instant topic switching, current topic highlighting, and smart theme detection
 // @description:zh-CN    增强 Discourse 论坛体验，提供即时话题切换、当前话题高亮和智能主题检测功能
 // @author               Pipecraft
@@ -33,8 +33,8 @@
   const CONFIG = {
     // Hotkey (default is backtick key `)
     HOTKEY: '`',
-    // Cache key name
-    CACHE_KEY: 'discourse_topic_list_cache',
+    // Cache key base name
+    CACHE_KEY_BASE: 'discourse_topic_list_cache',
     // Cache expiry time (milliseconds) - 1 hour
     CACHE_EXPIRY: 60 * 60 * 1000,
     // Whether to show floating button on topic pages
@@ -45,6 +45,17 @@
     AUTO_DARK_MODE: true,
     // Default language (en or zh-CN)
     DEFAULT_LANGUAGE: 'en',
+  }
+
+  /**
+   * Get site-specific cache key
+   * @returns {string} The cache key for the current site
+   */
+  function getSiteCacheKey() {
+    // Get current hostname
+    const hostname = window.location.hostname
+    // Create a site-specific cache key
+    return `${CONFIG.CACHE_KEY_BASE}_${hostname}`
   }
 
   // Internationalization support
@@ -532,8 +543,8 @@
     cachedTopicListUrl = currentUrl
     cachedTopicListTitle = listTitle
 
-    // Save to GM storage
-    GM_setValue(CONFIG.CACHE_KEY, {
+    // Save to GM storage with site-specific key
+    GM_setValue(getSiteCacheKey(), {
       html: cachedTopicList,
       timestamp: cachedTopicListTimestamp,
       url: cachedTopicListUrl,
@@ -553,7 +564,7 @@
    * Load the cached topic list from storage
    */
   function loadCachedTopicList() {
-    const cache = GM_getValue(CONFIG.CACHE_KEY)
+    const cache = GM_getValue(getSiteCacheKey())
     if (cache) {
       cachedTopicList = cache.html
       cachedTopicListTimestamp = cache.timestamp
