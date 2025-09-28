@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.0
+// @version              0.1.1
 // @description          Enhance Discourse forums with instant topic switching, current topic highlighting, and smart theme detection
 // @description:zh-CN    增强 Discourse 论坛体验，提供即时话题切换、当前话题高亮和智能主题检测功能
 // @author               Pipecraft
@@ -18,6 +18,8 @@
 // @match                https://community.cloudflare.com/*
 // @match                https://community.wanikani.com/*
 // @match                https://forum.cursor.com/*
+// @match                https://forum.obsidian.md/*
+// @match                https://forum-zh.obsidian.md/*
 // @noframes
 // @grant                GM_addStyle
 // @grant                GM_setValue
@@ -27,27 +29,114 @@
 ;(function () {
   'use strict'
 
-  // 配置
+  // Configuration
   const CONFIG = {
-    // 快捷键 (默认为反引号键 `)
+    // Hotkey (default is backtick key `)
     HOTKEY: '`',
-    // 缓存键名
+    // Cache key name
     CACHE_KEY: 'discourse_topic_list_cache',
-    // 缓存过期时间（毫秒）- 1小时
+    // Cache expiry time (milliseconds) - 1 hour
     CACHE_EXPIRY: 60 * 60 * 1000,
-    // 是否在话题页显示悬浮按钮
+    // Whether to show floating button on topic pages
     SHOW_FLOATING_BUTTON: true,
-    // 路由检查间隔（毫秒）
+    // Route check interval (milliseconds)
     ROUTE_CHECK_INTERVAL: 500,
-    // 是否自动跟随系统深色模式
+    // Whether to automatically follow system dark mode
     AUTO_DARK_MODE: true,
+    // Default language (en or zh-CN)
+    DEFAULT_LANGUAGE: 'en',
   }
 
-  // 状态变量
+  // Internationalization support
+  const I18N = {
+    en: {
+      viewTopicList: 'View topic list (press ` key)',
+      topicList: 'Topic List',
+      cacheExpired: 'Cache expired',
+      cachedAgo: 'Cached {time} ago',
+      searchPlaceholder: 'Search topics...',
+      noResults: 'No matching topics found',
+      backToList: 'Back to list',
+      topicsCount: '{count} topics',
+      currentTopic: 'Current topic',
+      sourceFrom: 'Source: {source}',
+      close: 'Close',
+      loading: 'Loading...',
+      refresh: 'Refresh',
+      replies: 'Replies',
+      views: 'Views',
+      activity: 'Activity',
+      language: 'Language',
+      noCachedList:
+        'No cached topic list available. Please visit a topic list page first.',
+    },
+    'zh-CN': {
+      viewTopicList: '查看话题列表（按 ` 键）',
+      topicList: '话题列表',
+      cacheExpired: '缓存已过期',
+      cachedAgo: '{time}前缓存',
+      searchPlaceholder: '搜索话题...',
+      noResults: '未找到匹配的话题',
+      backToList: '返回列表',
+      topicsCount: '{count}个话题',
+      currentTopic: '当前话题',
+      sourceFrom: '来源：{source}',
+      close: '关闭',
+      loading: '加载中...',
+      refresh: '刷新',
+      replies: '回复',
+      views: '浏览',
+      activity: '活动',
+      language: '语言',
+      noCachedList: '没有可用的话题列表缓存。请先访问一个话题列表页面。',
+    },
+  }
+
+  // Get user language
+  function getUserLanguage() {
+    // Try to get saved language preference first
+    const savedLanguage = GM_getValue('discourse_topic_switcher_language')
+    if (
+      savedLanguage &&
+      (savedLanguage === 'en' || savedLanguage === 'zh-CN')
+    ) {
+      return savedLanguage
+    }
+
+    // Try to get language from browser
+    const browserLang = navigator.language || navigator.userLanguage
+
+    // Check if we support this language
+    if (browserLang.startsWith('zh')) {
+      return 'zh-CN'
+    }
+
+    // Default to English
+    return CONFIG.DEFAULT_LANGUAGE
+  }
+
+  // Current language
+  let currentLanguage = getUserLanguage()
+
+  // Translate function
+  function t(key, params = {}) {
+    // Get the translation
+    let text = I18N[currentLanguage][key] || I18N['en'][key] || key
+
+    // Replace parameters
+    for (const param in params) {
+      text = text.replace(`{${param}}`, params[param])
+    }
+
+    return text
+  }
+
+  // Status variables
   let isListVisible = false
   let cachedTopicList = null
   let cachedTopicListTimestamp = 0
   let cachedTopicListUrl = ''
+  let cachedTopicListTitle = ''
   let floatingButton = null
   let topicListContainer = null
   let lastUrl = window.location.href
@@ -55,17 +144,17 @@
   let isDarkMode = false
 
   /**
-   * 检测深色模式
+   * Detect dark mode
    */
   function detectDarkMode() {
-    // 检查系统深色模式
+    // Check system dark mode
     if (CONFIG.AUTO_DARK_MODE && window.matchMedia) {
-      // 检查系统偏好
+      // Check system preference
       const systemDarkMode = window.matchMedia(
         '(prefers-color-scheme: dark)'
       ).matches
 
-      // 检查 Discourse 网站是否处于深色模式
+      // Check if the Discourse site is in dark mode
       const discourseBodyClass =
         document.body.classList.contains('dark-scheme') ||
         document.documentElement.classList.contains('dark-scheme') ||
@@ -75,14 +164,14 @@
         // linux.do
         document.querySelector('header picture > source')?.media === 'all'
 
-      // 如果系统或网站使用深色模式，则启用深色模式
+      // Enable dark mode if the system or site uses it
       isDarkMode = systemDarkMode || discourseBodyClass
 
       console.log(
-        `Discourse Quick List Viewer: 深色模式检测 - 系统: ${systemDarkMode}, 网站: ${discourseBodyClass}, 最终: ${isDarkMode}`
+        `[DTQS] Dark mode detection - System: ${systemDarkMode}, Site: ${discourseBodyClass}, Final: ${isDarkMode}`
       )
 
-      // 添加或移除深色模式类
+      // Add or remove dark mode class
       if (isDarkMode) {
         document.body.classList.add('topic-list-viewer-dark-mode')
       } else {
@@ -92,28 +181,28 @@
   }
 
   /**
-   * 设置深色模式监听器
+   * Set up dark mode listener
    */
   function setupDarkModeListener() {
     if (CONFIG.AUTO_DARK_MODE && window.matchMedia) {
-      // 监听系统深色模式变化
+      // Listen for system dark mode changes
       const darkModeMediaQuery = window.matchMedia(
         '(prefers-color-scheme: dark)'
       )
 
-      // 添加变化监听器
+      // Add change listener
       if (darkModeMediaQuery.addEventListener) {
         darkModeMediaQuery.addEventListener('change', (e) => {
           detectDarkMode()
         })
       } else if (darkModeMediaQuery.addListener) {
-        // 兼容旧版浏览器
+        // Fallback for older browsers
         darkModeMediaQuery.addListener((e) => {
           detectDarkMode()
         })
       }
 
-      // 监听 Discourse 主题变化
+      // Listen for Discourse theme changes
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (
@@ -125,129 +214,126 @@
         })
       })
 
-      // 观察 body 和 html 元素的类变化
+      // Observe class changes on body and html elements
       observer.observe(document.body, { attributes: true })
       observer.observe(document.documentElement, { attributes: true })
     }
   }
 
   /**
-   * 初始化脚本
+   * Initialize the script
    */
   function init() {
-    // 从存储中加载缓存的话题列表
+    // Load cached topic list from storage
     loadCachedTopicList()
 
-    // 检测深色模式
+    // Detect dark mode
     detectDarkMode()
 
-    // 设置深色模式监听器
+    // Set up dark mode listener
     // setupDarkModeListener()
 
-    // 初始处理当前页面
+    // Initial handling of the current page
     handleCurrentPage()
 
-    // 设置URL变化监听
+    // Set up URL change detection
     setupUrlChangeDetection()
 
-    // 添加全局快捷键监听
+    // Add global hotkey listener
     addHotkeyListener()
   }
 
   /**
-   * 设置URL变化监听
-   * 使用多种方式确保能够可靠地检测URL变化
+   * Set up URL change detection
+   * Use multiple methods to reliably detect URL changes
    */
   function setupUrlChangeDetection() {
-    // 记录初始URL
+    // Record initial URL
     lastUrl = window.location.href
 
-    // 方法1: 监听popstate事件（处理浏览器前进/后退按钮）
+    // Method 1: Listen for popstate events (handles browser back/forward buttons)
     window.addEventListener('popstate', () => {
-      console.log('Discourse Quick List Viewer: 检测到popstate事件')
+      console.log('[DTQS] Detected popstate event')
       handleCurrentPage()
     })
 
-    // 方法2: 使用MutationObserver监听DOM变化，可能暗示URL变化
+    // Method 2: Use MutationObserver to listen for DOM changes that might indicate a URL change
     const pageObserver = new MutationObserver(() => {
       checkUrlChange('MutationObserver')
     })
 
-    // 开始观察DOM变化
+    // Start observing DOM changes
     pageObserver.observe(document.body, {
       childList: true,
       subtree: true,
     })
 
-    // 方法3: 设置定期检查，作为备用方案
+    // Method 3: Set up a regular check as a fallback
     if (urlCheckTimer) {
       clearInterval(urlCheckTimer)
     }
 
     urlCheckTimer = setInterval(() => {
-      checkUrlChange('定时检查')
+      checkUrlChange('Interval check')
     }, CONFIG.ROUTE_CHECK_INTERVAL)
   }
 
   /**
-   * 检查URL是否发生变化
-   * @param {string} source 触发检查的来源
+   * Check if the URL has changed
+   * @param {string} source The source that triggered the check
    */
   function checkUrlChange(source) {
     const currentUrl = window.location.href
     if (currentUrl !== lastUrl) {
-      console.log(
-        `Discourse Quick List Viewer: 检测到URL变化 (来源: ${source})`,
-        currentUrl
-      )
+      console.log(`[DTQS] URL change detected (Source: ${source})`, currentUrl)
       lastUrl = currentUrl
       handleCurrentPage()
     }
   }
 
   /**
-   * 处理当前页面
+   * Handle the current page
    */
   function handleCurrentPage() {
-    // 如果列表已显示，关闭
+    // If the list is visible, hide it
     if (isListVisible) {
       hideTopicList()
     }
 
-    // 根据当前页面类型执行不同的操作
+    // Perform different actions based on the current page type
     if (isTopicPage()) {
-      // 在话题页面，添加悬浮按钮
-      console.log('Discourse Quick List Viewer: 当前是话题页，显示按钮')
+      // On a topic page, add the floating button
+      console.log('[DTQS] On a topic page, show button')
       if (CONFIG.SHOW_FLOATING_BUTTON) {
         addFloatingButton()
       }
 
-      // 在话题页面，提前渲染列表（如果有缓存）
+      // On a topic page, pre-render the list (if cached)
       if (cachedTopicList && !topicListContainer) {
-        // 使用setTimeout确保DOM已完全加载
+        // Use setTimeout to ensure the DOM is fully loaded
         setTimeout(() => {
           prerenderTopicList()
         }, 100)
       }
     } else if (isTopicListPage()) {
-      // 在话题列表页面，缓存当前列表
-      console.log('Discourse Quick List Viewer: 当前是列表页，更新缓存')
+      // On a topic list page, cache the current list
+      console.log('[DTQS] On a list page, update cache')
       cacheCurrentTopicList()
 
-      // 在列表页隐藏按钮
+      // Hide the button on the list page
       hideFloatingButton()
     } else {
-      // 其他页面，隐藏按钮
+      // On other pages, hide the button
       hideFloatingButton()
 
-      // 监听列表元素
+      // Observe the topic list element
       observeTopicListElement()
     }
   }
 
   /**
-   * 判断当前是否为话题列表页面
-   * @returns {boolean} 是否为话题列表页面
+   * Check if the current page is a topic list page
+   * @returns {boolean} Whether it is a topic list page
    */
   function isTopicListPage() {
     return (
@@ -258,164 +344,164 @@
   }
 
   /**
-   * 监听话题列表元素的出现
-   * 解决页面加载时列表元素可能尚未渲染的问题
+   * Observe the appearance of the topic list element
+   * Solves the problem that the list element may not be rendered when the page loads
    */
   function observeTopicListElement() {
-    // 创建一个观察器实例
+    // Create an observer instance
     const observer = new MutationObserver((mutations, obs) => {
-      // 检查列表元素是否已出现
+      // Check if the list element has appeared
       if (
         document.querySelector(
           '.contents table.topic-list tbody.topic-list-body'
         )
       ) {
-        console.log('Discourse Quick List Viewer: 检测到列表元素已渲染')
-        // 如果列表元素出现，重新处理当前页面
+        console.log('[DTQS] Detected that the list element has been rendered')
+        // If the list element appears, re-handle the current page
         handleCurrentPage()
-        // 列表元素已找到，停止观察
+        // The list element has been found, stop observing
         obs.disconnect()
       }
     })
 
-    // 配置观察选项
+    // Configure observer options
     const config = {
-      childList: true, // 观察目标子节点的变化
-      subtree: true, // 观察所有后代节点
+      childList: true, // Observe changes to the target's child nodes
+      subtree: true, // Observe all descendant nodes
     }
 
-    // 开始观察文档主体
+    // Start observing the document body
     observer.observe(document.body, config)
 
-    // 设置超时，避免无限期观察
+    // Set a timeout to avoid indefinite observation
     setTimeout(() => {
       observer.disconnect()
-    }, 10000) // 10秒后停止观察
+    }, 10000) // Stop observing after 10 seconds
   }
 
   /**
-   * 判断当前是否为话题页面
-   * @returns {boolean} 是否为话题页面
+   * Check if the current page is a topic page
+   * @returns {boolean} Whether it is a topic page
    */
   function isTopicPage() {
     return window.location.pathname.includes('/t/')
   }
 
   /**
-   * 获取当前话题ID
-   * @returns {number|null} 当前话题ID或null
+   * Get the current topic ID
+   * @returns {number|null} The current topic ID or null
    */
   function getCurrentTopicId() {
-    // 从URL中提取话题ID
+    // Extract topic ID from the URL
     const match = window.location.pathname.match(/\/t\/[^\/]+\/(\d+)/)
     return match ? parseInt(match[1]) : null
   }
 
   /**
-   * 缓存当前话题列表
+   * Cache the current topic list
    */
   function cacheCurrentTopicList() {
-    // 检查列表元素是否存在
+    // Check if the list element exists
     const topicListBody = document.querySelector('tbody.topic-list-body')
     if (topicListBody) {
-      // 列表元素已存在，直接处理
+      // If the list element exists, process it directly
       updateTopicListCache(topicListBody)
 
-      // 监听列表内容变化（滚动加载更多时）
+      // Listen for list content changes (when scrolling to load more)
       observeTopicListChanges(topicListBody)
     } else {
-      // 列表元素不存在，监听其出现
-      console.log('Discourse Quick List Viewer: 等待话题列表元素出现')
+      // If the list element does not exist, listen for its appearance
+      console.log('[DTQS] Waiting for the topic list element to appear')
       observeTopicListAppearance()
     }
   }
 
   /**
-   * 监听话题列表元素的出现
+   * Observe the appearance of the topic list element
    */
   function observeTopicListAppearance() {
-    // 创建一个观察器实例
+    // Create an observer instance
     const observer = new MutationObserver((mutations, obs) => {
-      // 检查列表元素是否已出现
+      // Check if the list element has appeared
       const topicListBody = document.querySelector('tbody.topic-list-body')
       if (topicListBody) {
-        console.log('Discourse Quick List Viewer: 检测到列表元素已渲染')
-        // 处理列表内容
+        console.log('[DTQS] Detected that the list element has been rendered')
+        // Process the list content
         processTopicList(topicListBody)
-        // 监听列表内容变化
+        // Listen for list content changes
         observeTopicListChanges(topicListBody)
-        // 列表元素已找到，停止观察
+        // The list element has been found, stop observing
         obs.disconnect()
       }
     })
 
-    // 配置观察选项
+    // Configure observer options
     const config = {
-      childList: true, // 观察目标子节点的变化
-      subtree: true, // 观察所有后代节点
+      childList: true, // Observe changes to the target's child nodes
+      subtree: true, // Observe all descendant nodes
     }
 
-    // 开始观察文档主体
+    // Start observing the document body
     observer.observe(document.body, config)
   }
 
   /**
-   * 监听话题列表内容变化（滚动加载更多时）
-   * @param {Element} topicListBody 话题列表元素
+   * Observe topic list content changes (when scrolling to load more)
+   * @param {Element} topicListBody The topic list element
    */
   function observeTopicListChanges(topicListBody) {
-    // 记录当前行数
+    // Record the current number of rows
     let previousRowCount = topicListBody.querySelectorAll('tr').length
 
-    // 创建一个观察器实例
+    // Create an observer instance
     const observer = new MutationObserver((mutations) => {
-      // 获取当前行数
+      // Get the current number of rows
       const currentRowCount = topicListBody.querySelectorAll('tr').length
 
-      // 如果行数增加，说明加载了更多话题
+      // If the number of rows increases, it means more topics have been loaded
       if (currentRowCount > previousRowCount) {
         console.log(
-          `Discourse Quick List Viewer: 检测到列表更新，行数从 ${previousRowCount} 增加到 ${currentRowCount}`
+          `[DTQS] Detected list update, rows increased from ${previousRowCount} to ${currentRowCount}`
         )
-        // 更新缓存
+        // Update the cache
         updateTopicListCache(topicListBody)
-        // 更新行数记录
+        // Update the row count record
         previousRowCount = currentRowCount
       }
     })
 
-    // 配置观察选项
+    // Configure observer options
     const config = {
-      childList: true, // 观察目标子节点的变化
-      subtree: true, // 观察所有后代节点
+      childList: true, // Observe changes to the target's child nodes
+      subtree: true, // Observe all descendant nodes
     }
 
-    // 开始观察列表元素
+    // Start observing the list element
     observer.observe(topicListBody, config)
   }
 
   /**
-   * 更新话题列表缓存
-   * @param {Element} topicListBody 话题列表元素
+   * Update the topic list cache
+   * @param {Element} topicListBody The topic list element
    */
   function updateTopicListCache(topicListBody) {
-    // 确保列表中有内容
+    // Ensure the list has content
     const topicRows = topicListBody.querySelectorAll('tr')
     if (topicRows.length === 0) {
-      console.log('Discourse Quick List Viewer: 话题列表为空，不缓存')
+      console.log('[DTQS] Topic list is empty, not caching')
       return
     }
 
-    console.log('Discourse Quick List Viewer: 更新话题列表缓存')
+    console.log('[DTQS] Updating topic list cache')
 
-    // 克隆节点以保存完整的话题列表
+    // Clone the node to save the complete topic list
     const clonedTopicList = topicListBody.cloneNode(true)
 
-    // 保存当前URL，以便在弹出列表时显示来源
+    // Save the current URL to show the source when the list is popped up
     const currentUrl = window.location.href
 
-    // 获取列表标题
-    let listTitle = '话题列表'
+    // Get the list title
+    let listTitle = t('topicList')
     // const titleElement = document.querySelector(
     //   '.category-name, .page-title h1, .topic-list-heading h2'
     // )
@@ -427,7 +513,7 @@
       listTitle = title
     }
 
-    // 获取当前分类信息（如果有）
+    // Get current category information (if any)
     let categoryInfo = ''
     const categoryBadge = document.querySelector(
       '.category-name .badge-category'
@@ -437,25 +523,26 @@
     }
 
     console.log(
-      `Discourse Quick List Viewer: 缓存话题列表 "${listTitle}"，包含 ${topicRows.length} 个话题`
+      `[DTQS] Caching topic list "${listTitle}", containing ${topicRows.length} topics`
     )
 
-    // 保存到缓存
+    // Save to cache
     cachedTopicList = clonedTopicList.outerHTML
     cachedTopicListTimestamp = Date.now()
     cachedTopicListUrl = currentUrl
+    cachedTopicListTitle = listTitle
 
-    // 保存到GM存储
+    // Save to GM storage
     GM_setValue(CONFIG.CACHE_KEY, {
       html: cachedTopicList,
       timestamp: cachedTopicListTimestamp,
       url: cachedTopicListUrl,
-      title: listTitle,
+      title: cachedTopicListTitle,
       category: categoryInfo,
       topicCount: topicRows.length,
     })
 
-    // 移除列表容器，需要重新渲染
+    // Remove the list container, it needs to be re-rendered
     if (topicListContainer) {
       topicListContainer.remove()
       topicListContainer = null
@@ -463,7 +550,7 @@
   }
 
   /**
-   * 从存储中加载缓存的话题列表
+   * Load the cached topic list from storage
    */
   function loadCachedTopicList() {
     const cache = GM_getValue(CONFIG.CACHE_KEY)
@@ -471,46 +558,47 @@
       cachedTopicList = cache.html
       cachedTopicListTimestamp = cache.timestamp
       cachedTopicListUrl = cache.url
+      cachedTopicListTitle = cache.title
     }
   }
 
   /**
-   * 添加悬浮按钮
+   * Add a floating button
    */
   function addFloatingButton() {
-    // 如果已经存在按钮，则不重复添加
+    // If the button already exists, do not add it again
     if (document.getElementById('topic-list-viewer-button')) return
 
-    // 创建悬浮按钮
+    // Create the floating button
     floatingButton = document.createElement('button')
     floatingButton.id = 'topic-list-viewer-button'
     floatingButton.innerHTML =
       '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>'
-    floatingButton.title = '查看话题列表 (按 ` 键)'
+    floatingButton.title = t('viewTopicList')
 
-    // 添加点击事件
+    // Add click event
     floatingButton.addEventListener('click', toggleTopicList)
 
-    // 添加到页面
+    // Add to page
     document.body.appendChild(floatingButton)
   }
 
   /**
-   * 添加快捷键监听器
+   * Add a hotkey listener
    */
   function addHotkeyListener() {
     document.addEventListener('keydown', function (event) {
-      // 检查是否按下了配置的快捷键
+      // Check if the configured hotkey is pressed
       if (event.key === CONFIG.HOTKEY) {
-        // 防止默认行为和事件冒泡
+        // Prevent default behavior and event bubbling
         event.preventDefault()
         event.stopPropagation()
 
-        // 切换话题列表显示
+        // Toggle topic list display
         toggleTopicList()
       }
 
-      // 如果列表已显示，按ESC键关闭
+      // If the list is visible, close it with the ESC key
       if (isListVisible && event.key === 'Escape') {
         hideTopicList()
       }
@@ -518,7 +606,7 @@
   }
 
   /**
-   * 隐藏悬浮按钮
+   * Hide the floating button
    */
   function hideFloatingButton() {
     if (floatingButton && floatingButton.parentNode) {
@@ -528,7 +616,7 @@
   }
 
   /**
-   * 切换话题列表显示状态
+   * Toggle the display state of the topic list
    */
   function toggleTopicList() {
     if (isListVisible) {
@@ -539,33 +627,33 @@
   }
 
   /**
-   * 使用SPA路由方式导航到指定URL
-   * @param {string} url 目标URL
+   * Navigate to the specified URL using SPA routing
+   * @param {string} url The target URL
    */
   function navigateWithSPA(url) {
-    // 隐藏话题列表
+    // Hide the topic list
     hideTopicList()
 
-    // 尝试使用pushState进行SPA导航
+    // Try to use pushState for SPA navigation
     try {
-      console.log(`Discourse Quick List Viewer: 使用SPA路由导航到 ${url}`)
+      console.log(`[DTQS] Navigating to ${url} using SPA routing`)
 
-      // 使用history API进行导航
+      // Use history API for navigation
       const urlObj = new URL(url)
       const pathname = urlObj.pathname
 
-      // 更新历史记录
+      // Update history
       history.pushState({}, '', pathname)
 
-      // 触发popstate事件以便Discourse可以处理路由变化
+      // Trigger popstate event so Discourse can handle the route change
       window.dispatchEvent(new Event('popstate'))
 
-      // 处理当前页面
+      // Handle the current page
       setTimeout(handleCurrentPage, 100)
     } catch (error) {
-      // 如果SPA导航失败，回退到普通导航
+      // If SPA navigation fails, fall back to normal navigation
       console.log(
-        `Discourse Quick List Viewer: SPA导航失败，使用普通导航到 ${url}`,
+        `[DTQS] SPA navigation failed, falling back to normal navigation to ${url}`,
         error
       )
       window.location.href = url
@@ -573,78 +661,76 @@
   }
 
   /**
-   * 预渲染话题列表
+   * Pre-render the topic list
    */
   function prerenderTopicList() {
-    // 记录开始时间
+    // Record start time
     const startTime = performance.now()
 
-    // 如果没有缓存的话题列表，则不预渲染
+    // If there is no cached topic list, do not pre-render
     if (!cachedTopicList) {
-      console.log(
-        'Discourse Quick List Viewer: 没有可用的话题列表缓存，无法预渲染'
-      )
+      console.log('[DTQS] No cached topic list available, cannot pre-render')
       return
     }
 
-    // 如果容器已存在，则不重复创建
+    // If the container already exists, do not create it again
     if (topicListContainer) {
       return
     }
 
-    console.log('Discourse Quick List Viewer: 预渲染话题列表')
+    console.log('[DTQS] Pre-rendering topic list')
 
-    // 检查缓存是否过期
+    // Check if the cache is expired
     const now = Date.now()
     const cacheAge = now - cachedTopicListTimestamp
     let cacheStatus = ''
 
     if (cacheAge > CONFIG.CACHE_EXPIRY) {
-      cacheStatus = `<div class="cache-status expired">缓存已过期 (${formatTimeAgo(cacheAge)})</div>`
+      cacheStatus = `<div class="cache-status expired">${t('cacheExpired')} (${formatTimeAgo(cacheAge)})</div>`
     } else {
-      cacheStatus = `<div class="cache-status">缓存于 ${formatTimeAgo(cacheAge)} 前</div>`
+      cacheStatus = `<div class="cache-status">${t('cachedAgo', { time: formatTimeAgo(cacheAge) })}</div>`
     }
 
-    // 创建主容器
+    // Create the main container
     topicListContainer = document.createElement('div')
     topicListContainer.id = 'topic-list-viewer-container'
 
-    // 创建遮罩层
+    // Create the overlay
     const overlay = document.createElement('div')
     overlay.className = 'topic-list-viewer-overlay'
 
-    // 添加点击遮罩层关闭列表的事件监听器
+    // Add an event listener to close the list when clicking the overlay
     overlay.addEventListener('click', (event) => {
-      // 确保点击的是遮罩层本身，而不是其子元素
+      // Make sure the click is on the overlay itself, not its children
       if (event.target === overlay) {
         hideTopicList()
       }
     })
 
-    // 创建内容容器
+    // Create the content container
     const contentContainer = document.createElement('div')
     contentContainer.className = 'topic-list-viewer-wrapper'
 
-    // 将内容容器添加到主容器
+    // Add the content container to the main container
     topicListContainer.appendChild(overlay)
     topicListContainer.appendChild(contentContainer)
 
-    // 添加到 body
+    // Add to body
     document.body.appendChild(topicListContainer)
 
-    // 尝试获取 #main-outlet 元素的位置和宽度
+    // Try to get the position and width of the #main-outlet element
     const mainOutlet = document.getElementById('main-outlet')
     if (mainOutlet) {
       console.log(
-        'Discourse Quick List Viewer: 调整列表容器位置和宽度与 #main-outlet 一致'
+        '[DTQS] Adjusting list container position and width to match #main-outlet'
       )
 
-      // 在显示容器时调整位置和宽度
+      // Adjust position and width when the container is displayed
       const adjustContainerPosition = () => {
-        if (topicListContainer.style.display === 'flex') {
+        if (topicListContainer && topicListContainer.style.display === 'flex') {
           const mainOutletRect = mainOutlet.getBoundingClientRect()
 
-          // 设置内容容器的位置和宽度与 #main-outlet 一致
+          // Set the position and width of the content container to match #main-outlet
           contentContainer.style.width = `${mainOutletRect.width}px`
           contentContainer.style.maxWidth = `${mainOutletRect.width}px`
           contentContainer.style.marginLeft = 'auto'
@@ -652,11 +738,12 @@
         }
       }
 
-      // 添加调整位置的监听器
+      // Add a listener to adjust the position
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (
             mutation.attributeName === 'style' &&
+            topicListContainer &&
             topicListContainer.style.display === 'flex'
           ) {
             adjustContainerPosition()
@@ -666,24 +753,39 @@
 
       observer.observe(topicListContainer, { attributes: true })
 
-      // 窗口大小变化时重新调整
+      // Readjust on window resize
       window.addEventListener('resize', adjustContainerPosition)
     } else {
-      console.log(
-        'Discourse Quick List Viewer: #main-outlet 不存在，使用默认样式'
-      )
+      console.log('[DTQS] #main-outlet does not exist, using default styles')
     }
 
-    // 获取缓存的标题
-    const cache = GM_getValue(CONFIG.CACHE_KEY)
-    const listTitle = cache && cache.title ? cache.title : '话题列表'
+    // Get the cached title
+    const listTitle = cachedTopicListTitle || 'Topic List'
 
-    // 填充内容容器
+    // Fill the content container
     contentContainer.innerHTML = `
           <div class="topic-list-viewer-header">
               <h3>${listTitle}</h3>
               <div class="topic-list-viewer-controls">
-                  <a href="${cachedTopicListUrl}" class="source-link" title="打开源列表页面">源页面</a>
+                  <select id="language-selector" onchange="this.dataset.lang = this.value" style="
+                      margin-right: 15px;
+                      margin-bottom: 0px;
+                      padding: 4px 8px;
+                      width: 100px;
+                      border-radius: 4px;
+                      border: 1px solid #e9e9e9;
+                      background-color: #f8f8f8;
+                      font-size: 14px;
+                      color: #333;
+                      cursor: pointer;
+                      outline: none;
+                      box-shadow: none;
+                      appearance: auto;
+                  ">
+                      <option value="en" ${currentLanguage === 'en' ? 'selected' : ''}>English</option>
+                      <option value="zh-CN" ${currentLanguage === 'zh-CN' ? 'selected' : ''}>中文</option>
+                  </select>
+                  <a href="${cachedTopicListUrl}" class="source-link" title="${t('sourceFrom', { source: 'Page' })}">${t('sourceFrom', { source: 'Page' })}</a>
                   <button id="topic-list-viewer-close">×</button>
               </div>
           </div>
@@ -692,11 +794,11 @@
               <table class="topic-list">
                   <thead>
                       <tr>
-                          <th class="topic-list-data default">话题</th>
+                          <th class="topic-list-data default">${t('topicList')}</th>
                           <th class="topic-list-data posters"></th>
-                          <th class="topic-list-data posts num">回复</th>
-                          <th class="topic-list-data views num">查看</th>
-                          <th class="topic-list-data activity num">活动</th>
+                          <th class="topic-list-data posts num">${t('replies')}</th>
+                          <th class="topic-list-data views num">${t('views')}</th>
+                          <th class="topic-list-data activity num">${t('activity')}</th>
                       </tr>
                   </thead>
                   ${cachedTopicList}
@@ -704,18 +806,36 @@
           </div>
       `
 
-    // 添加关闭按钮事件
+    // Add close button event
     contentContainer
       .querySelector('#topic-list-viewer-close')
       .addEventListener('click', hideTopicList)
 
-    // 为话题列表中的所有链接添加SPA路由事件
+    // Add language selector event
+    const languageSelector =
+      contentContainer.querySelector('#language-selector')
+    if (languageSelector) {
+      languageSelector.addEventListener('change', function () {
+        currentLanguage = this.value
+        // Save language preference
+        GM_setValue('discourse_topic_switcher_language', currentLanguage)
+        // Refresh UI with new language
+        hideTopicList()
+        topicListContainer.remove()
+        topicListContainer = null
+        setTimeout(() => {
+          showTopicList()
+        }, 350)
+      })
+    }
+
+    // Add SPA routing events to all links in the topic list
     const topicLinks = contentContainer.querySelectorAll('.topic-list-item a')
     topicLinks.forEach((link) => {
       link.addEventListener(
         'click',
         function (event) {
-          console.log(`Discourse Quick List Viewer: 链接被点击 ${link.href}`)
+          console.log(`[DTQS] Link clicked ${link.href}`)
           event.preventDefault()
           event.stopPropagation()
           navigateWithSPA(link.href, null)
@@ -725,54 +845,54 @@
       )
     })
 
-    // 初始状态为隐藏
+    // Initially hidden
     topicListContainer.style.display = 'none'
     topicListContainer.classList.remove('visible')
 
-    // 计算并打印执行时间
+    // Calculate and print execution time
     const endTime = performance.now()
     console.log(
-      `Discourse Quick List Viewer: 预渲染话题列表完成，耗时 ${(endTime - startTime).toFixed(2)}ms`
+      `[DTQS] Pre-rendering topic list completed in ${(endTime - startTime).toFixed(2)}ms`
     )
   }
 
   /**
-   * 显示话题列表
+   * Show the topic list
    */
   function showTopicList() {
-    // 记录开始时间
+    // Record start time
     const startTime = performance.now()
 
-    // 如果没有缓存的话题列表，则不显示
+    // If there is no cached topic list, do not show
     if (!cachedTopicList) {
-      alert('没有可用的话题列表缓存。请先访问一个话题列表页面。')
+      alert(t('noCachedList'))
       return
     }
 
-    // 如果容器不存在，先预渲染
+    // If the container does not exist, pre-render it first
     if (!topicListContainer) {
       prerenderTopicList()
     }
 
-    // 隐藏 body 和 html 的滚动条
+    // Hide body and html scrollbars
     document.body.style.overflow = 'hidden'
     document.documentElement.style.overflow = 'hidden'
 
-    // 记录当前滚动位置，以便恢复时使用
+    // Record the current scroll position for restoration
     window._savedScrollPosition =
       window.scrollY || document.documentElement.scrollTop
 
-    // 显示容器并立即添加可见类
+    // Show the container and add the visible class immediately
     topicListContainer.style.display = 'flex'
-    // 强制重绘
+    // Force reflow
     // void topicListContainer.offsetWidth
     topicListContainer.classList.add('visible')
     isListVisible = true
 
-    // 高亮当前话题
+    // Highlight the current topic
     const currentTopicId = getCurrentTopicId()
 
-    // 先移除所有已有的高亮
+    // First, remove any existing highlights
     const previousHighlightedRows = topicListContainer.querySelectorAll(
       '.topic-list-item.current-topic'
     )
@@ -781,18 +901,18 @@
     })
 
     if (currentTopicId) {
-      // 查找所有话题行
+      // Find all topic rows
       const topicRows = topicListContainer.querySelectorAll('.topic-list-item')
       topicRows.forEach((row) => {
-        // 获取话题链接
+        // Get the topic link
         const topicLink = row.querySelector('a.title')
         if (topicLink) {
-          // 从链接中提取话题ID
+          // Extract the topic ID from the link
           const match = topicLink.href.match(/\/t\/[^\/]+\/(\d+)/)
           if (match && parseInt(match[1]) === currentTopicId) {
-            // 添加高亮类
+            // Add highlight class
             row.classList.add('current-topic')
-            // 滚动到当前话题
+            // Scroll to the current topic
             setTimeout(() => {
               row.scrollIntoView({ behavior: 'smooth', block: 'center' })
             }, 300)
@@ -801,43 +921,45 @@
       })
     }
 
-    // 计算并打印执行时间
+    // Calculate and print execution time
     const endTime = performance.now()
     console.log(
-      `Discourse Quick List Viewer: 显示话题列表完成，耗时 ${(endTime - startTime).toFixed(2)}ms`
+      `[DTQS] Showing topic list completed in ${(endTime - startTime).toFixed(2)}ms`
     )
   }
 
   /**
-   * 隐藏话题列表
+   * Hide the topic list
    */
   function hideTopicList() {
     if (!topicListContainer) return
 
-    // 恢复 body 和 html 的滚动条
+    // Restore body and html scrollbars
     document.body.style.overflow = ''
     document.documentElement.style.overflow = ''
 
-    // 恢复滚动位置
+    // Restore scroll position
     if (window._savedScrollPosition !== undefined) {
       window.scrollTo(0, window._savedScrollPosition)
       window._savedScrollPosition = undefined
     }
 
-    // 移除可见类以触发淡出动画
+    // Remove the visible class to trigger the fade-out animation
     topicListContainer.classList.remove('visible')
 
-    // 等待动画完成后隐藏
+    // Hide after the animation is complete
     setTimeout(() => {
-      topicListContainer.style.display = 'none'
+      if (topicListContainer) {
+        topicListContainer.style.display = 'none'
+      }
       isListVisible = false
     }, 300)
   }
 
   /**
-   * 格式化时间差
-   * @param {number} ms - 毫秒数
-   * @returns {string} - 格式化后的时间差
+   * Format time difference
+   * @param {number} ms - Milliseconds
+   * @returns {string} - Formatted time difference
    */
   function formatTimeAgo(ms) {
     const seconds = Math.floor(ms / 1000)
@@ -845,13 +967,13 @@
     const hours = Math.floor(minutes / 60)
     const days = Math.floor(hours / 24)
 
-    if (days > 0) return `${days}天`
-    if (hours > 0) return `${hours}小时`
-    if (minutes > 0) return `${minutes}分钟`
-    return `${seconds}秒`
+    if (days > 0) return `${days}d`
+    if (hours > 0) return `${hours}h`
+    if (minutes > 0) return `${minutes}m`
+    return `${seconds}s`
   }
 
-  // 添加样式
+  // Add styles
   GM_addStyle(`
         #topic-list-viewer-button {
             position: fixed;
@@ -999,7 +1121,7 @@
              background-color: #f5f5f5;
          }
 
-         /* 当前话题高亮样式 */
+         /* Current topic highlight style */
          .topic-list-viewer-content tr.current-topic {
              background-color: #e6f7ff;
              border-left: 3px solid #1890ff;
@@ -1022,7 +1144,7 @@
             text-align: center;
         }
 
-        /* 深色模式样式 */
+        /* Dark mode styles */
         .topic-list-viewer-dark-mode #topic-list-viewer-button {
             background-color: #2196f3;
             box-shadow: 0 2px 5px rgba(0,0,0,0.4);
@@ -1087,7 +1209,7 @@
              background-color: #3a3a3a;
          }
 
-         /* 深色模式下当前话题高亮样式 */
+         /* Current topic highlight style in dark mode */
          .topic-list-viewer-dark-mode .topic-list-viewer-content tr.current-topic {
              background-color: #1a365d;
              border-left: 3px solid #1890ff;
@@ -1120,7 +1242,7 @@
         }
     `)
 
-  // 等待页面加载完成后初始化
+  // Initialize after the page has loaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init)
   } else {

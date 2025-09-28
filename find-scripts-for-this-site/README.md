@@ -1,6 +1,6 @@
 # Find Scripts For This Site
 
-A practical userscript that helps you quickly find userscripts for the current website you're browsing, supporting multiple mainstream script repositories.
+A useful user script that helps you quickly find user scripts for the current website, with support for multiple popular script repositories.
 
 [中文版](https://github.com/utags/userscripts/blob/main/find-scripts-for-this-site/README.zh-CN.md)
 
@@ -8,34 +8,35 @@ A practical userscript that helps you quickly find userscripts for the current w
 
 ## Features
 
-- 🔍 **One-Click Search** - Quickly find scripts for the current website across multiple repositories
-- 🌐 **Multi-Repository Support** - Supports Greasy Fork, OpenUserJS, ScriptCat, GitHub, and GitHub Gist
-- 🌍 **Multilingual Support** - Automatically adapts to browser language, supporting 8 common languages
-- 🧩 **Smart Domain Extraction** - Automatically extracts top-level domains for accurate search results
-- 🛡️ **Error Handling** - Comprehensive exception handling ensures script stability
-- 🔧 **Configurable** - Supports debug mode and custom settings
+- 🔍 **One-Click Search** - Quickly find scripts for the current website in multiple script repositories.
+- 🌐 **Multi-Repository Support** - Supports Greasy Fork, OpenUserJS, ScriptCat, GitHub, and GitHub Gist.
+- 🌍 **Multi-Language Support** - Automatically adapts to the browser's language, supporting 8 common languages.
+- 🧩 **Smart Domain Extraction** - Automatically extracts the top-level domain to ensure accurate search results.
+- 🛡️ **Error Handling** - Robust exception handling to ensure stable script operation.
+- 🔧 **Configurable** - Supports debug mode and custom settings.
 
 ## Installation
 
 ### Prerequisites
 
-Ensure your browser has one of the following userscript managers installed:
+Ensure your browser has one of the following user script managers installed:
 
 - [Tampermonkey](https://www.tampermonkey.net/)
 - [Violentmonkey](https://violentmonkey.github.io/)
+- [ScriptCat](https://scriptcat.org/)
 
 ### Installation Steps
 
-1. Click [here](https://github.com/utags/userscripts/raw/main/find-scripts-for-this-site/find-scripts-for-this-site.user.js) to install from GitHub
-2. Click [here](https://greasyfork.org/scripts/550659-find-scripts-for-this-site) to install from Greasy Fork
+1. [Click here to install the script from GitHub](https://github.com/utags/userscripts/raw/main/find-scripts-for-this-site/find-scripts-for-this-site.user.js)
+2. [Click here to install the script from Greasy Fork](https://greasyfork.org/scripts/550659-find-scripts-for-this-site)
 
-## Usage Instructions
+## Usage
 
 ### Basic Usage
 
-1. Visit any website
-2. Click on the userscript manager icon in your browser toolbar
-3. In the popup menu, you'll see the following options:
+1. Visit any website.
+2. Click the user script manager's icon in your browser's toolbar.
+3. In the popup menu, you will see the following options:
    - 🍴 Find scripts by domain on Greasy Fork
    - 🍴 Find scripts by keyword on Greasy Fork
    - 📜 Find scripts by keyword on OpenUserJS
@@ -43,11 +44,11 @@ Ensure your browser has one of the following userscript managers installed:
    - 🐱 Find scripts by keyword on ScriptCat
    - 🐙 Find scripts by keyword on GitHub
    - 📝 Find scripts by keyword on GitHub Gist
-4. Click any option to open the search results in a new tab
+4. Click any option to open the search results in a new tab.
 
-### Multilingual Support
+### Multi-Language Support
 
-The script automatically detects your browser language and displays the appropriate menu text. Currently supports:
+The script automatically detects the browser's language and displays the corresponding menu text. The following languages are currently supported:
 
 - English
 - Simplified Chinese
@@ -61,23 +62,23 @@ The script automatically detects your browser language and displays the appropri
 
 ## Technical Implementation
 
-### Core Functionality
+### Core Features
 
-- **Domain Extraction**: Intelligently extracts the top-level domain of the current website, handling subdomains and special domain formats
-- **Menu Registration**: Uses `GM_registerMenuCommand` to register multiple search options
-- **Internationalization**: Automatically selects appropriate menu text based on browser language
-- **New Tab Opening**: Uses `GM_openInTab` to open search results in a new tab
+- **Domain Extraction**: Intelligently extracts the top-level domain of the current website, handling subdomains and special domain formats.
+- **Menu Registration**: Uses `GM_registerMenuCommand` to register multiple search options.
+- **Internationalization Support**: Automatically selects the appropriate menu text based on the browser's language.
+- **New Tab Opening**: Uses `GM_openInTab` to open search results in a new tab.
 
 ### Supported Script Repositories
 
 | Repository  | Icon | Search Methods                   |
 | ----------- | ---- | -------------------------------- |
-| Greasy Fork | 🍴   | Domain search, Keyword search    |
-| Sleazy Fork | 🔞   | Domain search, Keyword search    |
-| OpenUserJS  | 📜   | Keyword search                   |
-| ScriptCat   | 🐱   | Domain search, Keyword search    |
-| GitHub      | 🐙   | Keyword search (JavaScript code) |
-| GitHub Gist | 📝   | Keyword search (JavaScript code) |
+| Greasy Fork | 🍴   | Domain Search, Keyword Search    |
+| Sleazy Fork | 🔞   | Domain Search, Keyword Search    |
+| OpenUserJS  | 📜   | Keyword Search                   |
+| ScriptCat   | 🐱   | Domain Search, Keyword Search    |
+| GitHub      | 🐙   | Keyword Search (JavaScript code) |
+| GitHub Gist | 📝   | Keyword Search (JavaScript code) |
 
 ## Configuration Options
 
@@ -92,9 +93,9 @@ const CONFIG = {
 }
 ```
 
-### Enable Debug Mode
+### Enabling Debug Mode
 
-To view detailed operation logs, set `CONFIG.DEBUG` to `true`:
+To see detailed logs, you can set `CONFIG.DEBUG` to `true`:
 
 ```javascript
 DEBUG: true,
@@ -111,49 +112,49 @@ DEBUG: true,
 
 ### Common Issues
 
-**Q: Menu items not showing?**
+**Q: The menu items are not showing up?**
 
-A: Please check:
+A: Please check the following:
 
-1. Confirm the script is properly installed
-2. Confirm the script is enabled
-3. Refresh the page and try again
+1. Confirm that the script is installed correctly.
+2. Confirm that the script is enabled.
+3. Refresh the page and try again.
 
-**Q: Search results not accurate?**
+**Q: The search results are inaccurate?**
 
 A: Possible reasons:
 
-1. The website uses a complex domain structure
-2. Enable debug mode to check if the extracted domain is correct
+1. The website uses a complex domain structure.
+2. Enable debug mode to check if the extracted domain is correct.
 
 ### Debugging Steps
 
-1. Enable debug mode (set `DEBUG: true`)
-2. Open the browser developer tools console
-3. Refresh the page and check the log output
-4. Identify issues based on log information
+1. Enable debug mode (set `DEBUG: true`).
+2. Open the browser's developer tools console.
+3. Refresh the page and check the log output.
+4. Use the log information to identify the problem.
 
 ## Changelog
 
 ### v0.2.0
 
-- ⚙️ Added settings interface to enable/disable specific search methods
-- 🔄 Separate toggles for domain search and keyword search for each repository
-- 🔞 Added Sleazy Fork repository support
+- ⚙️ Added a settings interface to enable/disable specific search methods.
+- 🔄 Provided separate switches for domain and keyword searches for each repository.
+- 🔞 Added support for the Sleazy Fork repository.
 
 ### v0.1.1
 
-- ✨ Added keyword search functionality for all repositories
-- 🔍 Optimized menu display based on repository capabilities
-- 🧹 Code refactoring for better maintainability
-- 📊 Updated repository search methods in documentation
+- ✨ Added keyword search functionality for all repositories.
+- 🔍 Optimized menu display based on repository features.
+- 🧹 Refactored code for improved maintainability.
+- 📊 Updated repository search method descriptions in the documentation.
 
 ### v0.1.0 (Initial Release)
 
-- ✨ Support for multiple script repository searches
-- 🌍 Added multilingual support
-- 🧩 Smart domain extraction functionality
-- 🛡️ Comprehensive error handling
+- ✨ Support for searching multiple script repositories.
+- 🌍 Added multi-language support.
+- 🧩 Smart domain extraction functionality.
+- 🛡️ Robust error handling mechanism.
 
 ## Contribution Guidelines
 
@@ -161,7 +162,7 @@ Issues and Pull Requests are welcome!
 
 ## License
 
-MIT License - See [LICENSE](https://github.com/utags/userscripts/blob/main/LICENSE) file for details
+MIT License - see the [LICENSE](https://github.com/utags/userscripts/blob/main/LICENSE) file for details.
 
 ## Related Links
 
