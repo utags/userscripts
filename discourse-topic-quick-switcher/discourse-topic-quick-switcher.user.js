@@ -153,6 +153,7 @@
   let lastUrl = window.location.href
   let urlCheckTimer = null
   let isDarkMode = false
+  let isButtonClickable = true // Flag to prevent consecutive clicks
 
   /**
    * Detect dark mode
@@ -628,13 +629,28 @@
 
   /**
    * Toggle the display state of the topic list
+   * Includes debounce logic to prevent rapid consecutive clicks
    */
   function toggleTopicList() {
+    // If button is not clickable, return immediately
+    if (!isButtonClickable) {
+      return
+    }
+
+    // Set button to non-clickable state
+    isButtonClickable = false
+
+    // Execute the original toggle logic
     if (isListVisible) {
       hideTopicList()
     } else {
       showTopicList()
     }
+
+    // Set a timeout to restore button clickable state after 800ms
+    setTimeout(() => {
+      isButtonClickable = true
+    }, 800)
   }
 
   /**
@@ -712,6 +728,10 @@
 
     // Add an event listener to close the list when clicking the overlay
     overlay.addEventListener('click', (event) => {
+      // If button is not clickable, return immediately
+      if (!isButtonClickable) {
+        return
+      }
       // Make sure the click is on the overlay itself, not its children
       if (event.target === overlay) {
         hideTopicList()
