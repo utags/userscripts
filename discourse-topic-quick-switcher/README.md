@@ -14,6 +14,9 @@ A powerful user script that brings seamless topic navigation, intelligent curren
   - Close with the ESC key, a close button, or by clicking outside the panel
   - Highlights the current topic for easy identification
   - Automatically scrolls to the current topic in the list
+  - Quick navigation buttons for previous and next topics
+  - Intelligently skips hidden topics during navigation
+  - Settings panel to customize language preferences and navigation button visibility
 - **Smart Theme Detection**:
   - Automatically adapts to light/dark mode based on system and site preferences
 - **Cache Management**:
@@ -107,6 +110,21 @@ This script is designed for all Discourse forums and has been tested on the foll
 - Safari
 
 ## Release Notes
+
+### v0.3.0
+
+- Added settings dialog for customizing user experience
+- Added language selection option in settings
+- Added toggle for navigation button visibility
+
+### v0.2.0
+
+- Added quick navigation buttons for previous and next topics
+- Intelligently skips hidden topics during navigation
+
+### v0.1.1
+
+- Added internationalization support with English and Chinese translations
 
 ### v0.1.0
 

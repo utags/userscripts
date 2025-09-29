@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.2
+// @version              0.3.1
 // @description          Enhance Discourse forums with instant topic switching, current topic highlighting, and smart theme detection
 // @description:zh-CN    增强 Discourse 论坛体验，提供即时话题切换、当前话题高亮和智能主题检测功能
 // @author               Pipecraft
@@ -45,6 +45,14 @@
     AUTO_DARK_MODE: true,
     // Default language (en or zh-CN)
     DEFAULT_LANGUAGE: 'en',
+    // Settings storage key
+    SETTINGS_KEY: 'discourse_topic_switcher_settings',
+  }
+
+  // User settings with defaults
+  let userSettings = {
+    language: CONFIG.DEFAULT_LANGUAGE,
+    showNavigationButtons: true,
   }
 
   /**
@@ -70,7 +78,7 @@
       backToList: 'Back to list',
       topicsCount: '{count} topics',
       currentTopic: 'Current topic',
-      sourceFrom: 'Source: {source}',
+      sourceFrom: 'Source',
       close: 'Close',
       loading: 'Loading...',
       refresh: 'Refresh',
@@ -80,6 +88,14 @@
       language: 'Language',
       noCachedList:
         'No cached topic list available. Please visit a topic list page first.',
+      prevTopic: 'Previous Topic',
+      nextTopic: 'Next Topic',
+      noPrevTopic: 'No previous topic',
+      noNextTopic: 'No next topic',
+      settings: 'Settings',
+      save: 'Save',
+      cancel: 'Cancel',
+      showNavigationButtons: 'Show navigation buttons',
     },
     'zh-CN': {
       viewTopicList: '查看话题列表（按 ` 键）',
@@ -91,7 +107,7 @@
       backToList: '返回列表',
       topicsCount: '{count}个话题',
       currentTopic: '当前话题',
-      sourceFrom: '来源：{source}',
+      sourceFrom: '来源',
       close: '关闭',
       loading: '加载中...',
       refresh: '刷新',
@@ -100,18 +116,48 @@
       activity: '活动',
       language: '语言',
       noCachedList: '没有可用的话题列表缓存。请先访问一个话题列表页面。',
+      prevTopic: '上一个话题',
+      nextTopic: '下一个话题',
+      noPrevTopic: '没有上一个话题',
+      noNextTopic: '没有下一个话题',
+      settings: '设置',
+      save: '保存',
+      cancel: '取消',
+      showNavigationButtons: '显示导航按钮',
     },
+  }
+
+  /**
+   * Load user settings from storage
+   */
+  function loadUserSettings() {
+    const savedSettings = GM_getValue(CONFIG.SETTINGS_KEY)
+    if (savedSettings) {
+      try {
+        const parsedSettings = JSON.parse(savedSettings)
+        userSettings = { ...userSettings, ...parsedSettings }
+      } catch (e) {
+        console.error('[DTQS] Error parsing saved settings:', e)
+      }
+    }
+    return userSettings
+  }
+
+  /**
+   * Save user settings to storage
+   */
+  function saveUserSettings() {
+    GM_setValue(CONFIG.SETTINGS_KEY, JSON.stringify(userSettings))
   }
 
   // Get user language
   function getUserLanguage() {
-    // Try to get saved language preference first
-    const savedLanguage = GM_getValue('discourse_topic_switcher_language')
+    // Use language from settings
     if (
-      savedLanguage &&
-      (savedLanguage === 'en' || savedLanguage === 'zh-CN')
+      userSettings.language &&
+      (userSettings.language === 'en' || userSettings.language === 'zh-CN')
     ) {
-      return savedLanguage
+      return userSettings.language
     }
 
     // Try to get language from browser
@@ -128,6 +174,114 @@
 
   // Current language
   let currentLanguage = getUserLanguage()
+
+  /**
+   * Create and show settings dialog
+   */
+  function showSettingsDialog() {
+    // If dialog already exists, don't create another one
+    if (document.getElementById('dtqs-settings-overlay')) {
+      return
+    }
+
+    // Create overlay
+    const overlay = document.createElement('div')
+    overlay.id = 'dtqs-settings-overlay'
+
+    // Create dialog
+    const dialog = document.createElement('div')
+    dialog.id = 'dtqs-settings-dialog'
+
+    // Create dialog content
+    dialog.innerHTML = `
+      <h2>${t('settings')}</h2>
+
+      <div class="dtqs-setting-item">
+        <label for="dtqs-language-select">${t('language')}</label>
+        <select id="dtqs-language-select">
+          <option value="en" ${userSettings.language === 'en' ? 'selected' : ''}>English</option>
+          <option value="zh-CN" ${userSettings.language === 'zh-CN' ? 'selected' : ''}>中文</option>
+        </select>
+      </div>
+
+      <div class="dtqs-setting-item checkbox-item">
+        <label for="dtqs-show-nav-buttons">
+          <input type="checkbox" id="dtqs-show-nav-buttons" ${userSettings.showNavigationButtons ? 'checked' : ''}>
+          <span>${t('showNavigationButtons')}</span>
+        </label>
+      </div>
+
+      <div class="dtqs-buttons">
+        <button id="dtqs-settings-save">${t('save')}</button>
+        <button id="dtqs-settings-cancel">${t('cancel')}</button>
+      </div>
+    `
+
+    // Add dialog to overlay
+    overlay.appendChild(dialog)
+
+    // Add overlay to page
+    document.body.appendChild(overlay)
+
+    // Add event listeners
+    document
+      .getElementById('dtqs-settings-save')
+      .addEventListener('click', () => {
+        // Save language setting
+        const languageSelect = document.getElementById('dtqs-language-select')
+        userSettings.language = languageSelect.value
+
+        // Save navigation buttons setting
+        const showNavButtons = document.getElementById('dtqs-show-nav-buttons')
+        userSettings.showNavigationButtons = showNavButtons.checked
+
+        // Save settings
+        saveUserSettings()
+
+        // Update language
+        currentLanguage = userSettings.language
+
+        // Close dialog
+        closeSettingsDialog()
+
+        // Remove and recreate floating button to apply new settings
+        if (floatingButton) {
+          hideFloatingButton()
+          addFloatingButton()
+        }
+
+        // If topic list is open, reopen it to apply new settings
+        if (topicListContainer) {
+          hideTopicList()
+          topicListContainer.remove()
+          topicListContainer = null
+          setTimeout(() => {
+            showTopicList()
+          }, 350)
+        }
+      })
+
+    document
+      .getElementById('dtqs-settings-cancel')
+      .addEventListener('click', closeSettingsDialog)
+
+    // Close when clicking on overlay (outside dialog)
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        closeSettingsDialog()
+      }
+    })
+  }
+
+  /**
+   * Close settings dialog
+   */
+  function closeSettingsDialog() {
+    const overlay = document.getElementById('dtqs-settings-overlay')
+    if (overlay) {
+      overlay.remove()
+    }
+  }
 
   // Translate function
   function t(key, params = {}) {
@@ -154,6 +308,8 @@
   let urlCheckTimer = null
   let isDarkMode = false
   let isButtonClickable = true // Flag to prevent consecutive clicks
+  let prevTopic = null // Previous topic data
+  let nextTopic = null // Next topic data
 
   /**
    * Detect dark mode
@@ -236,6 +392,9 @@
    * Initialize the script
    */
   function init() {
+    // Load user settings
+    loadUserSettings()
+
     // Load cached topic list from storage
     loadCachedTopicList()
 
@@ -318,6 +477,9 @@
       console.log('[DTQS] On a topic page, show button')
       if (CONFIG.SHOW_FLOATING_BUTTON) {
         addFloatingButton()
+
+        // Update navigation buttons if we're on a topic page
+        updateNavigationButtons()
       }
 
       // On a topic page, pre-render the list (if cached)
@@ -400,12 +562,221 @@
   }
 
   /**
+   * Check for URL changes
+   */
+  function checkForUrlChanges() {
+    const currentUrl = window.location.href
+    if (currentUrl !== lastUrl) {
+      lastUrl = currentUrl
+
+      // If we're on a topic page, update the button
+      if (isTopicPage()) {
+        addFloatingButton()
+        // Update navigation buttons with new adjacent topics
+        updateNavigationButtons()
+      } else {
+        // Remove the button if not on a topic page
+        if (floatingButton) {
+          floatingButton.remove()
+          floatingButton = null
+        }
+      }
+
+      // Hide the topic list if it's visible
+      if (isListVisible) {
+        hideTopicList()
+      }
+    }
+  }
+
+  /**
    * Get the current topic ID
    * @returns {number|null} The current topic ID or null
    */
   function getCurrentTopicId() {
     // Extract topic ID from the URL
     const match = window.location.pathname.match(/\/t\/[^\/]+\/(\d+)/)
+    return match ? parseInt(match[1]) : null
+  }
+
+  /**
+   * Check if a topic row is visible (not hidden)
+   * @param {Element} row - The topic row element
+   * @returns {boolean} - Whether the topic is visible
+   */
+  function isTopicVisible(row) {
+    // Use more reliable method to detect element visibility
+    if (typeof row.checkVisibility === 'function') {
+      return row.checkVisibility()
+    }
+
+    // If checkVisibility is not available, use offsetParent for detection
+    return row.offsetParent !== null
+  }
+
+  /**
+   * Find adjacent topics (previous and next) from the cached topic list
+   * @returns {Object} Object containing previous and next topics
+   */
+  function findAdjacentTopics() {
+    // If no cached topic list, return empty result
+    if (!cachedTopicList) {
+      return { prev: null, next: null }
+    }
+
+    // Get current topic ID
+    const currentId = getCurrentTopicId()
+    if (!currentId) {
+      return { prev: null, next: null }
+    }
+
+    // Create a temporary container to parse the cached HTML
+    const tempContainer = document.createElement('div')
+    tempContainer.style.position = 'absolute'
+    tempContainer.style.visibility = 'hidden'
+    tempContainer.innerHTML = `<table>${cachedTopicList}</table>`
+
+    // Add to document.body to ensure offsetParent works correctly
+    document.body.appendChild(tempContainer)
+
+    // Get all topic rows
+    const topicRows = tempContainer.querySelectorAll('tr')
+    if (!topicRows.length) {
+      return { prev: null, next: null }
+    }
+
+    // Find the current topic index
+    let currentIndex = -1
+    for (let i = 0; i < topicRows.length; i++) {
+      const row = topicRows[i]
+      const topicLink = row.querySelector('a.title')
+      if (!topicLink) continue
+
+      // Extract topic ID from the link
+      const match = topicLink.href.match(/\/t\/[^\/]+\/(\d+)/)
+      if (match && parseInt(match[1]) === currentId) {
+        currentIndex = i
+        break
+      }
+    }
+
+    // If current topic not found in the list
+    if (currentIndex === -1) {
+      return { prev: null, next: null }
+    }
+
+    // Get previous visible topic
+    let prevTopic = null
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      const prevRow = topicRows[i]
+      if (!isTopicVisible(prevRow)) continue
+
+      const prevLink = prevRow.querySelector('a.title')
+      if (prevLink) {
+        prevTopic = {
+          id: extractTopicId(prevLink.href),
+          title: prevLink.textContent.trim(),
+          url: prevLink.href,
+        }
+        break
+      }
+    }
+
+    // Get next visible topic
+    let nextTopic = null
+    for (let i = currentIndex + 1; i < topicRows.length; i++) {
+      const nextRow = topicRows[i]
+      if (!isTopicVisible(nextRow)) continue
+
+      const nextLink = nextRow.querySelector('a.title')
+      if (nextLink) {
+        nextTopic = {
+          id: extractTopicId(nextLink.href),
+          title: nextLink.textContent.trim(),
+          url: nextLink.href,
+        }
+        break
+      }
+    }
+
+    // Remove the temporary container from document.body
+    tempContainer.remove()
+
+    return { prev: prevTopic, next: nextTopic }
+  }
+
+  /**
+   * Update navigation buttons with adjacent topics
+   */
+  function updateNavigationButtons() {
+    // Find adjacent topics
+    const { prev, next } = findAdjacentTopics()
+    console.log('[DTQS] Adjacent topics:', prev, next)
+
+    // Store for global access
+    prevTopic = prev
+    nextTopic = next
+
+    // Update previous topic button
+    const prevButton = document.querySelector('.topic-nav-button.prev-topic')
+    if (prevButton) {
+      const titleSpan = prevButton.querySelector('.topic-nav-title')
+      if (prev) {
+        titleSpan.textContent = prev.title
+        prevButton.title = prev.title
+        prevButton.style.opacity = '1'
+        prevButton.style.pointerEvents = 'auto'
+      } else {
+        titleSpan.textContent = ''
+        prevButton.title = t('noPrevTopic')
+        prevButton.style.opacity = '0.5'
+        prevButton.style.pointerEvents = 'none'
+      }
+    }
+
+    // Update next topic button
+    const nextButton = document.querySelector('.topic-nav-button.next-topic')
+    if (nextButton) {
+      const titleSpan = nextButton.querySelector('.topic-nav-title')
+      if (next) {
+        titleSpan.textContent = next.title
+        nextButton.title = next.title
+        nextButton.style.opacity = '1'
+        nextButton.style.pointerEvents = 'auto'
+      } else {
+        titleSpan.textContent = ''
+        nextButton.title = t('noNextTopic')
+        nextButton.style.opacity = '0.5'
+        nextButton.style.pointerEvents = 'none'
+      }
+    }
+  }
+
+  /**
+   * Navigate to previous topic
+   */
+  function navigateToPrevTopic() {
+    if (prevTopic && prevTopic.url) {
+      navigateWithSPA(prevTopic.url)
+    }
+  }
+
+  /**
+   * Navigate to next topic
+   */
+  function navigateToNextTopic() {
+    if (nextTopic && nextTopic.url) {
+      navigateWithSPA(nextTopic.url)
+    }
+  }
+
+  /**
+   * Extract topic ID from a topic URL
+   * @param {string} url The topic URL
+   * @returns {number|null} The topic ID or null
+   */
+  function extractTopicId(url) {
+    const match = url.match(/\/t\/[^\/]+\/(\d+)/)
     return match ? parseInt(match[1]) : null
   }
 
@@ -581,18 +952,63 @@
     // If the button already exists, do not add it again
     if (document.getElementById('topic-list-viewer-button')) return
 
-    // Create the floating button
-    floatingButton = document.createElement('button')
+    // Create the button container
+    floatingButton = document.createElement('div')
     floatingButton.id = 'topic-list-viewer-button'
-    floatingButton.innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>'
-    floatingButton.title = t('viewTopicList')
 
-    // Add click event
-    floatingButton.addEventListener('click', toggleTopicList)
+    // Create navigation container
+    const navContainer = document.createElement('div')
+    navContainer.className = 'topic-nav-container'
+
+    // Control navigation buttons visibility based on user settings
+    if (!userSettings.showNavigationButtons) {
+      navContainer.classList.add('hide-nav-buttons')
+    }
+
+    // Create previous topic button
+    const prevButton = document.createElement('div')
+    prevButton.className = 'topic-nav-button prev-topic'
+    prevButton.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+      <span class="topic-nav-title"></span>
+    `
+    prevButton.title = t('prevTopic')
+    prevButton.addEventListener('click', navigateToPrevTopic)
+
+    // Create center button
+    const centerButton = document.createElement('div')
+    centerButton.className = 'topic-nav-button center-button'
+    centerButton.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+    `
+    centerButton.title = t('viewTopicList')
+    centerButton.addEventListener('click', toggleTopicList)
+
+    // Create next topic button
+    const nextButton = document.createElement('div')
+    nextButton.className = 'topic-nav-button next-topic'
+    nextButton.innerHTML = `
+      <span class="topic-nav-title"></span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    `
+    nextButton.title = t('nextTopic')
+    nextButton.addEventListener('click', navigateToNextTopic)
+
+    // Add all elements to the container
+    navContainer.appendChild(prevButton)
+    navContainer.appendChild(centerButton)
+    navContainer.appendChild(nextButton)
+    floatingButton.appendChild(navContainer)
 
     // Add to page
     document.body.appendChild(floatingButton)
+
+    // Update navigation buttons
+    updateNavigationButtons()
   }
 
   /**
@@ -798,25 +1214,13 @@
           <div class="topic-list-viewer-header">
               <h3>${listTitle}</h3>
               <div class="topic-list-viewer-controls">
-                  <select id="language-selector" onchange="this.dataset.lang = this.value" style="
-                      margin-right: 15px;
-                      margin-bottom: 0px;
-                      padding: 4px 8px;
-                      width: 100px;
-                      border-radius: 4px;
-                      border: 1px solid #e9e9e9;
-                      background-color: #f8f8f8;
-                      font-size: 14px;
-                      color: #333;
-                      cursor: pointer;
-                      outline: none;
-                      box-shadow: none;
-                      appearance: auto;
-                  ">
-                      <option value="en" ${currentLanguage === 'en' ? 'selected' : ''}>English</option>
-                      <option value="zh-CN" ${currentLanguage === 'zh-CN' ? 'selected' : ''}>中文</option>
-                  </select>
-                  <a href="${cachedTopicListUrl}" class="source-link" title="${t('sourceFrom', { source: 'Page' })}">${t('sourceFrom', { source: 'Page' })}</a>
+                  <a href="${cachedTopicListUrl}" class="source-link" title="${t('sourceFrom')}">${t('sourceFrom')}</a>
+                  <button id="topic-list-viewer-settings" title="${t('settings')}" style="margin-right: 5px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="3"></circle>
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                  </button>
                   <button id="topic-list-viewer-close">×</button>
               </div>
           </div>
@@ -842,23 +1246,10 @@
       .querySelector('#topic-list-viewer-close')
       .addEventListener('click', hideTopicList)
 
-    // Add language selector event
-    const languageSelector =
-      contentContainer.querySelector('#language-selector')
-    if (languageSelector) {
-      languageSelector.addEventListener('change', function () {
-        currentLanguage = this.value
-        // Save language preference
-        GM_setValue('discourse_topic_switcher_language', currentLanguage)
-        // Refresh UI with new language
-        hideTopicList()
-        topicListContainer.remove()
-        topicListContainer = null
-        setTimeout(() => {
-          showTopicList()
-        }, 350)
-      })
-    }
+    // Add settings button event
+    contentContainer
+      .querySelector('#topic-list-viewer-settings')
+      .addEventListener('click', showSettingsDialog)
 
     // Add SPA routing events to all links in the topic list
     const topicLinks = contentContainer.querySelectorAll('.topic-list-item a')
@@ -1009,26 +1400,153 @@
         #topic-list-viewer-button {
             position: fixed;
             bottom: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 20px;
             background-color: #0078d7;
             color: white;
             border: none;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             cursor: pointer;
-            z-index: 9998;
+            z-index: 99999;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            padding: 5px 10px;
+            user-select: none;
         }
 
-        #topic-list-viewer-button:hover {
-            background-color: #0063b1;
-            transform: scale(1.1);
+        /* Settings Dialog Styles */
+        #dtqs-settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
+        #dtqs-settings-dialog {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        #dtqs-settings-dialog h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .dtqs-setting-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .dtqs-setting-item label {
+            margin-right: 10px;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .dtqs-setting-item input[type="checkbox"] {
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        .dtqs-setting-item select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .dtqs-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .dtqs-buttons button {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background: #f5f5f5;
+            cursor: pointer;
+        }
+
+        .dtqs-buttons button:hover {
+            background: #e5e5e5;
+        }
+
+        .topic-nav-container {
+             display: grid;
+             grid-template-columns: 1fr auto 1fr;
+             align-items: center;
+             position: relative;
+             width: 100%;
+         }
+
+         .hide-nav-buttons .prev-topic,
+         .hide-nav-buttons .next-topic {
+             display: none;
+         }
+
+         .topic-nav-button {
+             display: flex;
+             align-items: center;
+             padding: 5px 8px;
+             cursor: pointer;
+             border-radius: 4px;
+             transition: all 0.2s ease;
+         }
+
+         .topic-nav-button:hover {
+             background-color: rgba(255,255,255,0.2);
+         }
+
+         .topic-nav-title {
+             max-width: 180px;
+             white-space: nowrap;
+             overflow: hidden;
+             text-overflow: ellipsis;
+             font-size: 13px;
+             margin: 0 6px;
+             font-weight: 500;
+         }
+
+         .center-button {
+             grid-column: 2;
+             z-index: 1;
+             margin: 0 15px;
+         }
+
+         .prev-topic {
+             grid-column: 1;
+             justify-self: end;
+         }
+
+         .next-topic {
+             grid-column: 3;
+             justify-self: start;
+         }
+
+        #topic-list-viewer-button:hover {
+             background-color: #0063b1;
+             transform: translateX(-50%) scale(1.05);
+         }
 
         #topic-list-viewer-container {
             position: fixed;
