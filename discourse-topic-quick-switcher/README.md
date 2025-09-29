@@ -20,6 +20,36 @@ A powerful user script that brings seamless topic navigation, intelligent curren
   - 1-hour cache expiration with a visual indicator
   - Source link to return to the original list page
 
+## How It Works
+
+This script operates entirely on the client-side with a focus on efficiency and minimal resource usage:
+
+1. **Client-Side Caching**: When you visit a topic list page, the script captures the HTML content of the topic list and stores it in your browser's local storage.
+
+2. **Zero Additional Server Requests**: The script works with content that's already been loaded by your browser, creating no additional load on the Discourse server.
+
+3. **SPA Navigation**: The script leverages Discourse's Single Page Application architecture to navigate between topics without full page reloads, making navigation nearly instantaneous.
+
+4. **DOM Manipulation**: The cached topic list is displayed through careful DOM manipulation, creating a seamless overlay that matches your forum's current theme.
+
+5. **Event-Based Interaction**: All user interactions (keyboard shortcuts, button clicks) are handled through efficient event listeners.
+
+The design philosophy prioritizes performance and server friendliness - the script adds convenient navigation without generating any additional server requests beyond what Discourse normally requires.
+
+## Limitations
+
+Due to the caching mechanism used by the script, there are some limitations:
+
+1. **Non-Real-Time Data**: The reply counts and view counts displayed in the cached topic list are not real-time data, but rather the data at the time of caching.
+
+2. **Cache Freshness**: The topic list is only updated when you visit a list page. If you haven't visited a list page for a long time, the cached data may differ significantly from the actual situation.
+
+3. **New Topics Not Automatically Displayed**: New topics posted after you cached the list won't appear in the quick switcher until you visit the list page again to refresh the cache.
+
+4. **Limited Topic Count**: The quick switcher can only display topics included in the last list page you visited, typically one page worth of content.
+
+These limitations are design choices made to maintain the script's lightweight nature and zero additional server request advantage.
+
 ## Installation
 
 1. Install a user script manager like [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/)
