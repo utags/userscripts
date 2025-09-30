@@ -116,6 +116,10 @@ This script is designed for all Discourse forums and has been tested on the foll
 ### v0.4.x
 
 - Added comprehensive mobile device optimization
+- Refactored GM API calls to modern async format (`GM.*` instead of `GM_*`)
+- Improved dark mode settings dialog styling and contrast
+- Optimized site-specific key generation for better performance (pre-initialized at script load)
+- Settings are now site-specific (each website maintains its own settings independently)
 
 ### v0.3.x
 

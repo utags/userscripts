@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.4.0
+// @version              0.4.2
 // @description          Enhance Discourse forums with instant topic switching, current topic highlighting, and quick navigation to previous/next topics
 // @description:zh-CN    增强 Discourse 论坛体验，提供即时话题切换、当前话题高亮和上一个/下一个话题的快速导航功能
 // @author               Pipecraft
@@ -21,12 +21,12 @@
 // @match                https://forum.obsidian.md/*
 // @match                https://forum-zh.obsidian.md/*
 // @noframes
-// @grant                GM_addStyle
-// @grant                GM_setValue
-// @grant                GM_getValue
+// @grant                GM.addStyle
+// @grant                GM.setValue
+// @grant                GM.getValue
 // ==/UserScript==
 
-;(function () {
+;(async function () {
   'use strict'
 
   // Configuration
@@ -55,16 +55,9 @@
     showNavigationButtons: true,
   }
 
-  /**
-   * Get site-specific cache key
-   * @returns {string} The cache key for the current site
-   */
-  function getSiteCacheKey() {
-    // Get current hostname
-    const hostname = window.location.hostname
-    // Create a site-specific cache key
-    return `${CONFIG.CACHE_KEY_BASE}_${hostname}`
-  }
+  // Pre-initialized site-specific keys (calculated once at script load)
+  const SITE_CACHE_KEY = `${CONFIG.CACHE_KEY_BASE}_${window.location.hostname}`
+  const SITE_SETTINGS_KEY = `${CONFIG.SETTINGS_KEY}_${window.location.hostname}`
 
   // Internationalization support
   const I18N = {
@@ -130,8 +123,8 @@
   /**
    * Load user settings from storage
    */
-  function loadUserSettings() {
-    const savedSettings = GM_getValue(CONFIG.SETTINGS_KEY)
+  async function loadUserSettings() {
+    const savedSettings = await GM.getValue(SITE_SETTINGS_KEY)
     if (savedSettings) {
       try {
         const parsedSettings = JSON.parse(savedSettings)
@@ -146,8 +139,8 @@
   /**
    * Save user settings to storage
    */
-  function saveUserSettings() {
-    GM_setValue(CONFIG.SETTINGS_KEY, JSON.stringify(userSettings))
+  async function saveUserSettings() {
+    await GM.setValue(SITE_SETTINGS_KEY, JSON.stringify(userSettings))
   }
 
   // Get user language
@@ -178,7 +171,7 @@
   /**
    * Create and show settings dialog
    */
-  function showSettingsDialog() {
+  async function showSettingsDialog() {
     // If dialog already exists, don't create another one
     if (document.getElementById('dtqs-settings-overlay')) {
       return
@@ -227,7 +220,7 @@
     const saveButton = document.getElementById('dtqs-settings-save')
     const cancelButton = document.getElementById('dtqs-settings-cancel')
 
-    addTouchSupport(saveButton, () => {
+    addTouchSupport(saveButton, async () => {
       // Save language setting
       const languageSelect = document.getElementById('dtqs-language-select')
       userSettings.language = languageSelect.value
@@ -237,7 +230,7 @@
       userSettings.showNavigationButtons = showNavButtons.checked
 
       // Save settings
-      saveUserSettings()
+      await saveUserSettings()
 
       // Update language
       currentLanguage = userSettings.language
@@ -423,12 +416,12 @@
   /**
    * Initialize the script
    */
-  function init() {
+  async function init() {
     // Load user settings
-    loadUserSettings()
+    await loadUserSettings()
 
     // Load cached topic list from storage
-    loadCachedTopicList()
+    await loadCachedTopicList()
 
     // Detect mobile device
     detectMobileDevice()
@@ -911,7 +904,7 @@
    * Update the topic list cache
    * @param {Element} topicListBody The topic list element
    */
-  function updateTopicListCache(topicListBody) {
+  async function updateTopicListCache(topicListBody) {
     // Ensure the list has content
     const topicRows = topicListBody.querySelectorAll('tr')
     if (topicRows.length === 0) {
@@ -960,7 +953,7 @@
     cachedTopicListTitle = listTitle
 
     // Save to GM storage with site-specific key
-    GM_setValue(getSiteCacheKey(), {
+    await GM.setValue(SITE_CACHE_KEY, {
       html: cachedTopicList,
       timestamp: cachedTopicListTimestamp,
       url: cachedTopicListUrl,
@@ -979,8 +972,8 @@
   /**
    * Load the cached topic list from storage
    */
-  function loadCachedTopicList() {
-    const cache = GM_getValue(getSiteCacheKey())
+  async function loadCachedTopicList() {
+    const cache = await GM.getValue(SITE_CACHE_KEY)
     if (cache) {
       cachedTopicList = cache.html
       cachedTopicListTimestamp = cache.timestamp
@@ -1545,7 +1538,7 @@
   }
 
   // Add styles
-  GM_addStyle(`
+  GM.addStyle(`
         #topic-list-viewer-button {
             position: fixed;
             bottom: 20px;
@@ -2286,6 +2279,6 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init)
   } else {
-    init()
+    await init()
   }
 })()
