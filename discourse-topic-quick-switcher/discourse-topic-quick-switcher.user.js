@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.4.2
+// @version              0.4.3
 // @description          Enhance Discourse forums with instant topic switching, current topic highlighting, and quick navigation to previous/next topics
 // @description:zh-CN    增强 Discourse 论坛体验，提供即时话题切换、当前话题高亮和上一个/下一个话题的快速导航功能
 // @author               Pipecraft
@@ -53,6 +53,7 @@
   let userSettings = {
     language: CONFIG.DEFAULT_LANGUAGE,
     showNavigationButtons: true,
+    darkMode: 'auto', // auto, light, dark
   }
 
   // Pre-initialized site-specific keys (calculated once at script load)
@@ -89,6 +90,10 @@
       save: 'Save',
       cancel: 'Cancel',
       showNavigationButtons: 'Show navigation buttons',
+      darkMode: 'Dark Mode',
+      darkModeAuto: 'Auto',
+      darkModeLight: 'Light',
+      darkModeDark: 'Dark',
     },
     'zh-CN': {
       viewTopicList: '查看话题列表（按 ` 键）',
@@ -117,6 +122,10 @@
       save: '保存',
       cancel: '取消',
       showNavigationButtons: '显示导航按钮',
+      darkMode: '深色模式',
+      darkModeAuto: '自动',
+      darkModeLight: '浅色',
+      darkModeDark: '深色',
     },
   }
 
@@ -197,6 +206,15 @@
         </select>
       </div>
 
+      <div class="dtqs-setting-item">
+        <label for="dtqs-dark-mode-select">${t('darkMode')}</label>
+        <select id="dtqs-dark-mode-select">
+          <option value="auto" ${userSettings.darkMode === 'auto' ? 'selected' : ''}>${t('darkModeAuto')}</option>
+          <option value="light" ${userSettings.darkMode === 'light' ? 'selected' : ''}>${t('darkModeLight')}</option>
+          <option value="dark" ${userSettings.darkMode === 'dark' ? 'selected' : ''}>${t('darkModeDark')}</option>
+        </select>
+      </div>
+
       <div class="dtqs-setting-item checkbox-item">
         <label for="dtqs-show-nav-buttons">
           <input type="checkbox" id="dtqs-show-nav-buttons" ${userSettings.showNavigationButtons ? 'checked' : ''}>
@@ -225,6 +243,10 @@
       const languageSelect = document.getElementById('dtqs-language-select')
       userSettings.language = languageSelect.value
 
+      // Save dark mode setting
+      const darkModeSelect = document.getElementById('dtqs-dark-mode-select')
+      userSettings.darkMode = darkModeSelect.value
+
       // Save navigation buttons setting
       const showNavButtons = document.getElementById('dtqs-show-nav-buttons')
       userSettings.showNavigationButtons = showNavButtons.checked
@@ -234,6 +256,9 @@
 
       // Update language
       currentLanguage = userSettings.language
+
+      // Update dark mode
+      detectDarkMode()
 
       // Close dialog
       closeSettingsDialog()
@@ -337,39 +362,62 @@
   }
 
   /**
-   * Detect dark mode
+   * Detect dark mode based on user settings
    */
   function detectDarkMode() {
-    // Check system dark mode
-    if (CONFIG.AUTO_DARK_MODE && window.matchMedia) {
-      // Check system preference
-      const systemDarkMode = window.matchMedia(
-        '(prefers-color-scheme: dark)'
-      ).matches
+    let shouldUseDarkMode = false
 
-      // Check if the Discourse site is in dark mode
-      const discourseBodyClass =
-        document.body.classList.contains('dark-scheme') ||
-        document.documentElement.classList.contains('dark-scheme') ||
-        document.body.dataset.colorScheme === 'dark' ||
-        document.documentElement.dataset.colorScheme === 'dark' ||
-        document.documentElement.dataset.themeType === 'dark' ||
-        // linux.do
-        document.querySelector('header picture > source')?.media === 'all'
+    // Check user's dark mode preference
+    switch (userSettings.darkMode) {
+      case 'dark':
+        // Force dark mode
+        shouldUseDarkMode = true
+        console.log('[DTQS] Dark mode: Force enabled by user setting')
+        break
 
-      // Enable dark mode if the system or site uses it
-      isDarkMode = systemDarkMode || discourseBodyClass
+      case 'light':
+        // Force light mode
+        shouldUseDarkMode = false
+        console.log('[DTQS] Dark mode: Force disabled by user setting')
+        break
 
-      console.log(
-        `[DTQS] Dark mode detection - System: ${systemDarkMode}, Site: ${discourseBodyClass}, Final: ${isDarkMode}`
-      )
+      case 'auto':
+      default:
+        // Auto mode - check system and site preferences
+        if (window.matchMedia) {
+          // Check system preference
+          const systemDarkMode = window.matchMedia(
+            '(prefers-color-scheme: dark)'
+          ).matches
 
-      // Add or remove dark mode class
-      if (isDarkMode) {
-        document.body.classList.add('topic-list-viewer-dark-mode')
-      } else {
-        document.body.classList.remove('topic-list-viewer-dark-mode')
-      }
+          // Check if the Discourse site is in dark mode
+          const discourseBodyClass =
+            document.body.classList.contains('dark-scheme') ||
+            document.documentElement.classList.contains('dark-scheme') ||
+            document.body.dataset.colorScheme === 'dark' ||
+            document.documentElement.dataset.colorScheme === 'dark' ||
+            document.documentElement.dataset.themeType === 'dark' ||
+            // linux.do
+            document.querySelector('header picture > source')?.media === 'all'
+
+          // Enable dark mode if the system or site uses it
+          shouldUseDarkMode = systemDarkMode || discourseBodyClass
+
+          console.log(
+            `[DTQS] Dark mode (auto): System: ${systemDarkMode}, Site: ${discourseBodyClass}, Final: ${shouldUseDarkMode}`
+          )
+        }
+        break
+    }
+
+    // Update global dark mode state
+    isDarkMode = shouldUseDarkMode
+
+    // Add or remove dark mode class
+    if (isDarkMode) {
+      document.body.classList.add('topic-list-viewer-dark-mode')
+    } else {
+      document.body.classList.remove('topic-list-viewer-dark-mode')
     }
   }
 
@@ -377,34 +425,38 @@
    * Set up dark mode listener
    */
   function setupDarkModeListener() {
-    if (CONFIG.AUTO_DARK_MODE && window.matchMedia) {
+    if (window.matchMedia) {
       // Listen for system dark mode changes
       const darkModeMediaQuery = window.matchMedia(
         '(prefers-color-scheme: dark)'
       )
 
-      // Add change listener
-      if (darkModeMediaQuery.addEventListener) {
-        darkModeMediaQuery.addEventListener('change', (e) => {
+      // Add change listener (only trigger if user is in auto mode)
+      const handleSystemChange = (e) => {
+        if (userSettings.darkMode === 'auto') {
           detectDarkMode()
-        })
-      } else if (darkModeMediaQuery.addListener) {
-        // Fallback for older browsers
-        darkModeMediaQuery.addListener((e) => {
-          detectDarkMode()
-        })
+        }
       }
 
-      // Listen for Discourse theme changes
+      if (darkModeMediaQuery.addEventListener) {
+        darkModeMediaQuery.addEventListener('change', handleSystemChange)
+      } else if (darkModeMediaQuery.addListener) {
+        // Fallback for older browsers
+        darkModeMediaQuery.addListener(handleSystemChange)
+      }
+
+      // Listen for Discourse theme changes (only trigger if user is in auto mode)
       const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (
-            mutation.attributeName === 'class' ||
-            mutation.attributeName === 'data-color-scheme'
-          ) {
-            detectDarkMode()
-          }
-        })
+        if (userSettings.darkMode === 'auto') {
+          mutations.forEach((mutation) => {
+            if (
+              mutation.attributeName === 'class' ||
+              mutation.attributeName === 'data-color-scheme'
+            ) {
+              detectDarkMode()
+            }
+          })
+        }
       })
 
       // Observe class changes on body and html elements
@@ -1630,10 +1682,35 @@
             border: 1px solid #ccc;
             background: #f5f5f5;
             cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
 
         .dtqs-buttons button:hover {
             background: #e5e5e5;
+        }
+
+        /* Primary save button styling */
+        .dtqs-buttons #dtqs-settings-save {
+            background: #007bff;
+            border-color: #007bff;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+        }
+
+        .dtqs-buttons #dtqs-settings-save:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+            box-shadow: 0 3px 6px rgba(0, 123, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .dtqs-buttons #dtqs-settings-save:active {
+            background: #004085;
+            border-color: #004085;
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 123, 255, 0.2);
         }
 
         /* Settings Dialog Dark Mode Styles */
@@ -1685,6 +1762,29 @@
 
         .topic-list-viewer-dark-mode .dtqs-buttons button:active {
             background: #2a2a2a;
+        }
+
+        /* Primary save button styling for dark mode */
+        .topic-list-viewer-dark-mode .dtqs-buttons #dtqs-settings-save {
+            background: #1976d2;
+            border-color: #1976d2;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-buttons #dtqs-settings-save:hover {
+            background: #1565c0;
+            border-color: #1565c0;
+            box-shadow: 0 3px 6px rgba(25, 118, 210, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-buttons #dtqs-settings-save:active {
+            background: #0d47a1;
+            border-color: #0d47a1;
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(25, 118, 210, 0.3);
         }
 
         .topic-nav-container {

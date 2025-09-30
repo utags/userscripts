@@ -120,6 +120,8 @@ This script is designed for all Discourse forums and has been tested on the foll
 - Improved dark mode settings dialog styling and contrast
 - Optimized site-specific key generation for better performance (pre-initialized at script load)
 - Settings are now site-specific (each website maintains its own settings independently)
+- Added dark mode toggle in settings with three options: Auto (default), Light, and Dark
+- Enhanced save button styling with prominent primary button design and smooth animations
 
 ### v0.3.x
 
