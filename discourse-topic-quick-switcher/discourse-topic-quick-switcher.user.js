@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.4.3
+// @version              0.4.5
 // @description          Enhance Discourse forums with instant topic switching, current topic highlighting, and quick navigation to previous/next topics
 // @description:zh-CN    增强 Discourse 论坛体验，提供即时话题切换、当前话题高亮和上一个/下一个话题的快速导航功能
 // @author               Pipecraft
@@ -1609,12 +1609,10 @@
             transition: all 0.3s ease;
             padding: 5px 10px;
             user-select: none;
-            /* Mobile optimization */
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
         }
 
-        /* Settings Dialog Styles */
         #dtqs-settings-overlay {
             position: fixed;
             top: 0;
@@ -1690,7 +1688,6 @@
             background: #e5e5e5;
         }
 
-        /* Primary save button styling */
         .dtqs-buttons #dtqs-settings-save {
             background: #007bff;
             border-color: #007bff;
@@ -1713,7 +1710,6 @@
             box-shadow: 0 1px 2px rgba(0, 123, 255, 0.2);
         }
 
-        /* Settings Dialog Dark Mode Styles */
         .topic-list-viewer-dark-mode #dtqs-settings-overlay {
             background: rgba(0, 0, 0, 0.7);
         }
@@ -1764,7 +1760,6 @@
             background: #2a2a2a;
         }
 
-        /* Primary save button styling for dark mode */
         .topic-list-viewer-dark-mode .dtqs-buttons #dtqs-settings-save {
             background: #1976d2;
             border-color: #1976d2;
@@ -1898,26 +1893,26 @@
             font-size: 18px;
             color: #333;
             flex: 1;
-            min-width: 0; /* Allow text to shrink */
+            min-width: 0;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            margin-right: 15px; /* Add space between title and controls */
+            margin-right: 15px;
         }
 
         .topic-list-viewer-controls {
             display: flex;
             align-items: center;
             gap: 15px;
-            height: 32px; /* Set consistent height for alignment */
-            flex-shrink: 0; /* Prevent controls from shrinking */
+            height: 32px;
+            flex-shrink: 0;
         }
 
         .source-link {
             color: #0078d7;
             text-decoration: none;
             font-size: 14px;
-            height: 32px; /* Match container height */
+            height: 32px;
             display: flex;
             align-items: center;
             transition: all 0.2s ease;
@@ -1929,16 +1924,16 @@
 
         #topic-list-viewer-settings {
             background: none;
-            border: none; /* Remove border */
+            border: none;
             padding: 8px;
             cursor: pointer;
             color: #666;
-            height: 32px; /* Match container height */
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 4px;
-            transition: all 0.2s ease; /* Add smooth animation */
+            transition: all 0.2s ease;
         }
 
         #topic-list-viewer-settings:hover {
@@ -2005,7 +2000,6 @@
              background-color: #f5f5f5;
          }
 
-         /* Current topic highlight style */
          .topic-list-viewer-content tr.current-topic {
              background-color: #e6f7ff;
              border-left: 3px solid #1890ff;
@@ -2016,10 +2010,9 @@
          }
 
          .topic-list-viewer-content tr.current-topic td:first-child {
-             padding-left: 7px; /* 10px - 3px border */
+             padding-left: 7px;
          }
 
-        /* Dark mode styles */
         .topic-list-viewer-dark-mode #topic-list-viewer-button {
             background-color: #2196f3;
             box-shadow: 0 2px 5px rgba(0,0,0,0.4);
@@ -2095,7 +2088,6 @@
              background-color: #3a3a3a;
          }
 
-         /* Current topic highlight style in dark mode */
          .topic-list-viewer-dark-mode .topic-list-viewer-content tr.current-topic {
              background-color: #1a365d;
              border-left: 3px solid #1890ff;
@@ -2113,14 +2105,11 @@
             color: #b39ddb;
         }
 
-        /* Mobile device specific styles */
         .dtqs-mobile-device #topic-list-viewer-container {
-            /* Improve mobile performance */
             -webkit-overflow-scrolling: touch;
         }
 
         .dtqs-mobile-device .topic-list-viewer-content {
-            /* Better touch scrolling */
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
         }
@@ -2129,7 +2118,6 @@
             display: none;
         }
 
-        /* Swipe gesture support styles */
         .dtqs-mobile-device .topic-list-viewer-wrapper {
             position: relative;
             overflow: hidden;
@@ -2139,14 +2127,12 @@
             transition: transform 0.3s ease;
         }
 
-        /* Search input mobile optimization */
         .dtqs-mobile-device #topic-search-input {
-            font-size: 16px; /* Prevent zoom on iOS */
+            font-size: 16px;
             padding: 12px 15px;
             border-radius: 8px;
         }
 
-        /* Settings dialog mobile optimization */
         .dtqs-mobile-device #dtqs-settings-dialog {
             width: 90% !important;
             max-width: 400px !important;
@@ -2207,46 +2193,43 @@
             transform: scale(0.98) !important;
         }
 
-        /* Mobile responsive styles */
         @media (max-width: 768px) {
-            /* Floating button mobile optimization */
             #topic-list-viewer-button {
                 bottom: 12px;
-                padding: 6px 8px;
-                border-radius: 20px;
-                box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+                padding: 4px 6px;
+                border-radius: 18px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.2);
                 max-width: calc(100vw - 30px);
                 overflow: hidden;
             }
 
             .topic-nav-container {
-                gap: 4px;
+                gap: 3px;
             }
 
             .topic-nav-button {
-                padding: 4px 6px;
-                min-height: 36px; /* Reduced from 44px for more compact design */
-                min-width: 36px;
+                padding: 3px 5px;
+                min-height: 32px;
+                min-width: 32px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }
 
             .topic-nav-title {
-                max-width: 100px;
-                font-size: 11px;
-                margin: 0 2px;
-                line-height: 1.2;
+                max-width: 90px;
+                font-size: 10px;
+                margin: 0 1px;
+                line-height: 1.1;
             }
 
             .center-button {
-                margin: 0 4px;
+                margin: 0 3px;
                 background-color: rgba(255,255,255,0.2);
                 border-radius: 50%;
-                padding: 6px;
+                padding: 4px;
             }
 
-            /* Topic list mobile optimization */
             .topic-list-viewer-content {
                 padding: 10px;
             }
@@ -2259,17 +2242,17 @@
 
             .topic-list-viewer-header {
                 padding: 12px 15px;
-                flex-wrap: nowrap; /* Prevent wrapping on mobile */
+                flex-wrap: nowrap;
             }
 
             .topic-list-viewer-header h3 {
                 font-size: 16px;
-                margin-right: 10px; /* Reduce margin on mobile */
+                margin-right: 10px;
             }
 
             .topic-list-viewer-controls {
-                gap: 8px; /* Reduce gap on mobile */
-                flex-shrink: 0; /* Ensure controls don't shrink */
+                gap: 8px;
+                flex-shrink: 0;
             }
 
             #topic-list-viewer-close {
@@ -2282,13 +2265,11 @@
                 justify-content: center;
             }
 
-            /* Hide some columns on very small screens */
             @media (max-width: 480px) {
-                /* More compact floating button for smaller screens */
                 #topic-list-viewer-button {
                     bottom: 10px;
-                    padding: 4px 6px;
-                    border-radius: 18px;
+                    padding: 3px 5px;
+                    border-radius: 16px;
                 }
 
                 .topic-list-viewer-header {
@@ -2309,14 +2290,21 @@
                 }
 
                 .topic-nav-button {
-                    padding: 3px 4px;
-                    min-height: 32px;
-                    min-width: 32px;
+                    padding: 2px 3px;
+                    min-height: 28px;
+                    min-width: 28px;
+                }
+
+                .topic-nav-title {
+                    max-width: 80px;
+                    font-size: 9px;
+                    margin: 0;
+                    line-height: 1.0;
                 }
 
                 .center-button {
                     margin: 0 2px;
-                    padding: 4px;
+                    padding: 3px;
                 }
 
                 .topic-nav-title {
@@ -2329,7 +2317,6 @@
             }
         }
 
-        /* Very small screens optimization */
         @media (max-width: 360px) {
             #topic-list-viewer-button {
                 bottom: 8px;
