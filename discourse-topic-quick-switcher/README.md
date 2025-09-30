@@ -1,6 +1,8 @@
 # Discourse Topic Quick Switcher
 
-A powerful user script that brings seamless topic navigation, intelligent current topic highlighting, and adaptive theme switching to Discourse forums. Browse your favorite forums with unprecedented speed and efficiency.
+A powerful user script that brings seamless topic navigation, effective current topic highlighting, and quick navigation to previous/next topics in Discourse forums. Browse your favorite forums with enhanced speed and efficiency.
+
+![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-30-08-15-02.gif)
 
 ## Features
 
@@ -15,10 +17,10 @@ A powerful user script that brings seamless topic navigation, intelligent curren
   - Highlights the current topic for easy identification
   - Automatically scrolls to the current topic in the list
   - Quick navigation buttons for previous and next topics
-  - Intelligently skips hidden topics during navigation
+  - Automatically skips hidden topics during navigation
   - Settings panel to customize language preferences and navigation button visibility
-- **Smart Theme Detection**:
-  - Automatically adapts to light/dark mode based on system and site preferences
+- **Adaptive Theme**:
+  - Automatically adjusts to light/dark mode based on system and site preferences
 - **Cache Management**:
   - 1-hour cache expiration with a visual indicator
   - Source link to return to the original list page
@@ -120,7 +122,7 @@ This script is designed for all Discourse forums and has been tested on the foll
 ### v0.2.0
 
 - Added quick navigation buttons for previous and next topics
-- Intelligently skips hidden topics during navigation
+- Added feature to automatically skip hidden topics during navigation
 
 ### v0.1.1
 
@@ -138,6 +140,34 @@ This script is designed for all Discourse forums and has been tested on the foll
 - Added closing the list by clicking outside of it
 - Improved dark mode support with automatic theme detection
 
+## More Useful Scripts
+
+Here are some other useful scripts that can enhance your browsing experience:
+
+### 🏷️ UTags - Add User Tags to Links
+
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/460718-utags-add-usertags-to-links)
+- **Features**: Add custom tags and notes to user, post, video and other links
+- **Highlights**: Support special tag filtering (like spam, block, clickbait, etc.), data export/import, auto-mark viewed posts
+- **Supported Sites**: V2EX, X(Twitter), Reddit, GitHub, Bilibili, Zhihu, Linux.do, Youtube and 50+ websites
+- **Description**: Super useful tag management tool for adding tags to forum users or posts, making it easy to identify or block low-quality content
+
+### 🔗 Links Helper
+
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/464541-links-helper)
+- **Features**: Open third-party website links in new tabs, parse text links into hyperlinks
+- **Highlights**: Support custom rules, parse Markdown and BBCode formats, convert image links to image tags
+- **Supported Sites**: Universal for all websites, including Google, YouTube, GitHub, V2EX, etc.
+- **Description**: Enhance link browsing experience, automatically process various link formats for more convenient web browsing
+
+### 🔍 Find Scripts For This Site
+
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/550659-find-scripts-for-this-site)
+- **Features**: Quickly find user scripts for the current website
+- **Highlights**: Support for multiple popular script repositories, easy discovery of useful scripts
+- **Supported Sites**: Works on any website to find relevant userscripts
+- **Description**: A convenient tool to discover and install userscripts specifically designed for the websites you visit
+
 ## License
 
 MIT License - see the [LICENSE](https://github.com/utags/userscripts/blob/main/LICENSE) file for details
@@ -145,3 +175,8 @@ MIT License - see the [LICENSE](https://github.com/utags/userscripts/blob/main/L
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a pull request.
+
+## Related Links
+
+- [Project Homepage](https://github.com/utags/userscripts)
+- [Issue Reporting](https://github.com/utags/userscripts/issues)

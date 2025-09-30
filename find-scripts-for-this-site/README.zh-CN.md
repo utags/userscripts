@@ -156,6 +156,34 @@ A: 可能原因：
 - 🧩 智能域名提取功能
 - 🛡️ 完善的错误处理机制
 
+## 更多实用脚本
+
+以下是一些其他有用的脚本，可以增强您的浏览体验：
+
+### 🏷️ UTags - 为链接添加用户标签
+
+- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/460718-utags-add-usertags-to-links)
+- **功能**：为用户、帖子、视频和其他链接添加自定义标签和备注
+- **亮点**：支持特殊标签过滤（如垃圾、屏蔽、标题党等），数据导出/导入，自动标记已查看帖子
+- **支持网站**：V2EX、X(Twitter)、Reddit、GitHub、哔哩哔哩、知乎、Linux.do、Youtube 等 50+ 网站
+- **描述**：超级实用的标签管理工具，可为论坛用户或帖子添加标签，轻松识别或屏蔽低质量内容
+
+### 🔄 Discourse 话题快捷切换器
+
+- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/550982-discourse-topic-quick-switcher)
+- **功能**：在 Discourse 论坛中快速导航切换主题
+- **亮点**：键盘快捷键、导航按钮、带语言选项的设置对话框
+- **支持网站**：所有基于 Discourse 的论坛，包括 Discourse Meta、LINUX.DO 等
+- **描述**：通过便捷的主题切换和可自定义设置，增强 Discourse 论坛中的导航体验
+
+### 🔗 链接助手
+
+- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/464541-links-helper)
+- **功能**：在新标签页中打开第三方网站链接，将文本链接解析为超链接
+- **亮点**：支持自定义规则，解析 Markdown 和 BBCode 格式，将图片链接转换为图片标签
+- **支持网站**：适用于所有网站，包括谷歌、YouTube、GitHub、V2EX 等
+- **描述**：增强链接浏览体验，自动处理各种链接格式，使网页浏览更加便捷
+
 ## 贡献指南
 
 欢迎提交 Issue 和 Pull Request！

@@ -4,9 +4,9 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.3.1
-// @description          Enhance Discourse forums with instant topic switching, current topic highlighting, and smart theme detection
-// @description:zh-CN    增强 Discourse 论坛体验，提供即时话题切换、当前话题高亮和智能主题检测功能
+// @version              0.3.2
+// @description          Enhance Discourse forums with instant topic switching, current topic highlighting, and quick navigation to previous/next topics
+// @description:zh-CN    增强 Discourse 论坛体验，提供即时话题切换、当前话题高亮和上一个/下一个话题的快速导航功能
 // @author               Pipecraft
 // @license              MIT
 // @icon                 https://www.google.com/s2/favicons?sz=64&domain=meta.discourse.org
