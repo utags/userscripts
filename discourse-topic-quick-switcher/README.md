@@ -113,13 +113,17 @@ This script is designed for all Discourse forums and has been tested on the foll
 
 ## Release Notes
 
-### v0.3.0
+### v0.4.x
+
+- Added comprehensive mobile device optimization
+
+### v0.3.x
 
 - Added settings dialog for customizing user experience
 - Added language selection option in settings
 - Added toggle for navigation button visibility
 
-### v0.2.0
+### v0.2.x
 
 - Added quick navigation buttons for previous and next topics
 - Added feature to automatically skip hidden topics during navigation

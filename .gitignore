@@ -3,3 +3,5 @@
 
 # dependencies
 /node_modules
+
+discourse-topic-quick-switcher/*.html

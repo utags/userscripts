@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.3.2
+// @version              0.4.0
 // @description          Enhance Discourse forums with instant topic switching, current topic highlighting, and quick navigation to previous/next topics
 // @description:zh-CN    增强 Discourse 论坛体验，提供即时话题切换、当前话题高亮和上一个/下一个话题的快速导航功能
 // @author               Pipecraft
@@ -224,46 +224,45 @@
     document.body.appendChild(overlay)
 
     // Add event listeners
-    document
-      .getElementById('dtqs-settings-save')
-      .addEventListener('click', () => {
-        // Save language setting
-        const languageSelect = document.getElementById('dtqs-language-select')
-        userSettings.language = languageSelect.value
+    const saveButton = document.getElementById('dtqs-settings-save')
+    const cancelButton = document.getElementById('dtqs-settings-cancel')
 
-        // Save navigation buttons setting
-        const showNavButtons = document.getElementById('dtqs-show-nav-buttons')
-        userSettings.showNavigationButtons = showNavButtons.checked
+    addTouchSupport(saveButton, () => {
+      // Save language setting
+      const languageSelect = document.getElementById('dtqs-language-select')
+      userSettings.language = languageSelect.value
 
-        // Save settings
-        saveUserSettings()
+      // Save navigation buttons setting
+      const showNavButtons = document.getElementById('dtqs-show-nav-buttons')
+      userSettings.showNavigationButtons = showNavButtons.checked
 
-        // Update language
-        currentLanguage = userSettings.language
+      // Save settings
+      saveUserSettings()
 
-        // Close dialog
-        closeSettingsDialog()
+      // Update language
+      currentLanguage = userSettings.language
 
-        // Remove and recreate floating button to apply new settings
-        if (floatingButton) {
-          hideFloatingButton()
-          addFloatingButton()
-        }
+      // Close dialog
+      closeSettingsDialog()
 
-        // If topic list is open, reopen it to apply new settings
-        if (topicListContainer) {
-          hideTopicList()
-          topicListContainer.remove()
-          topicListContainer = null
-          setTimeout(() => {
-            showTopicList()
-          }, 350)
-        }
-      })
+      // Remove and recreate floating button to apply new settings
+      if (floatingButton) {
+        hideFloatingButton()
+        addFloatingButton()
+      }
 
-    document
-      .getElementById('dtqs-settings-cancel')
-      .addEventListener('click', closeSettingsDialog)
+      // If topic list is open, reopen it to apply new settings
+      if (topicListContainer) {
+        hideTopicList()
+        topicListContainer.remove()
+        topicListContainer = null
+        setTimeout(() => {
+          showTopicList()
+        }, 350)
+      }
+    })
+
+    addTouchSupport(cancelButton, closeSettingsDialog)
 
     // Close when clicking on overlay (outside dialog)
     overlay.addEventListener('click', (e) => {
@@ -310,6 +309,39 @@
   let isButtonClickable = true // Flag to prevent consecutive clicks
   let prevTopic = null // Previous topic data
   let nextTopic = null // Next topic data
+  let isMobileDevice = false // Mobile device detection
+
+  /**
+   * Detect if the current device is a mobile device
+   */
+  function detectMobileDevice() {
+    // Check user agent for mobile devices
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera
+    const mobileRegex =
+      /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i
+
+    // Check screen width
+    const isSmallScreen = window.innerWidth <= 768
+
+    // Check for touch support
+    const hasTouchSupport =
+      'ontouchstart' in window || navigator.maxTouchPoints > 0
+
+    // Combine all checks
+    isMobileDevice =
+      mobileRegex.test(userAgent) || (isSmallScreen && hasTouchSupport)
+
+    console.log(`[DTQS] Mobile device detection: ${isMobileDevice}`)
+
+    // Add mobile class to body for CSS targeting
+    if (isMobileDevice) {
+      document.body.classList.add('dtqs-mobile-device')
+    } else {
+      document.body.classList.remove('dtqs-mobile-device')
+    }
+
+    return isMobileDevice
+  }
 
   /**
    * Detect dark mode
@@ -398,11 +430,19 @@
     // Load cached topic list from storage
     loadCachedTopicList()
 
+    // Detect mobile device
+    detectMobileDevice()
+
     // Detect dark mode
     detectDarkMode()
 
     // Set up dark mode listener
     // setupDarkModeListener()
+
+    // Set up mobile device detection on window resize
+    window.addEventListener('resize', () => {
+      detectMobileDevice()
+    })
 
     // Initial handling of the current page
     handleCurrentPage()
@@ -642,6 +682,8 @@
     // Get all topic rows
     const topicRows = tempContainer.querySelectorAll('tr')
     if (!topicRows.length) {
+      // Remove the temporary container from document.body
+      tempContainer.remove()
       return { prev: null, next: null }
     }
 
@@ -662,6 +704,8 @@
 
     // If current topic not found in the list
     if (currentIndex === -1) {
+      // Remove the temporary container from document.body
+      tempContainer.remove()
       return { prev: null, next: null }
     }
 
@@ -975,7 +1019,8 @@
       <span class="topic-nav-title"></span>
     `
     prevButton.title = t('prevTopic')
-    prevButton.addEventListener('click', navigateToPrevTopic)
+
+    addTouchSupport(prevButton, navigateToPrevTopic)
 
     // Create center button
     const centerButton = document.createElement('div')
@@ -984,7 +1029,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
     `
     centerButton.title = t('viewTopicList')
-    centerButton.addEventListener('click', toggleTopicList)
+    addTouchSupport(centerButton, toggleTopicList)
 
     // Create next topic button
     const nextButton = document.createElement('div')
@@ -996,7 +1041,7 @@
       </svg>
     `
     nextButton.title = t('nextTopic')
-    nextButton.addEventListener('click', navigateToNextTopic)
+    addTouchSupport(nextButton, navigateToNextTopic)
 
     // Add all elements to the container
     navContainer.appendChild(prevButton)
@@ -1215,7 +1260,7 @@
               <h3>${listTitle}</h3>
               <div class="topic-list-viewer-controls">
                   <a href="${cachedTopicListUrl}" class="source-link" title="${t('sourceFrom')}">${t('sourceFrom')}</a>
-                  <button id="topic-list-viewer-settings" title="${t('settings')}" style="margin-right: 5px;">
+                  <button id="topic-list-viewer-settings" title="${t('settings')}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <circle cx="12" cy="12" r="3"></circle>
                       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -1267,6 +1312,9 @@
       )
     })
 
+    // Add swipe support for mobile devices
+    // addSwipeSupport(contentContainer)
+
     // Initially hidden
     topicListContainer.style.display = 'none'
     topicListContainer.classList.remove('visible')
@@ -1275,6 +1323,107 @@
     const endTime = performance.now()
     console.log(
       `[DTQS] Pre-rendering topic list completed in ${(endTime - startTime).toFixed(2)}ms`
+    )
+  }
+
+  // Add touch support for mobile devices
+  const addTouchSupport = (button, clickHandler) => {
+    button.addEventListener('click', clickHandler)
+    if (isMobileDevice) {
+      button.addEventListener('touchstart', (e) => {
+        e.preventDefault()
+        button.style.transform = 'scale(0.95)'
+        button.style.opacity = '0.8'
+      })
+
+      button.addEventListener('touchend', (e) => {
+        e.preventDefault()
+        button.style.transform = ''
+        button.style.opacity = ''
+        clickHandler()
+      })
+
+      button.addEventListener('touchcancel', (e) => {
+        button.style.transform = ''
+        button.style.opacity = ''
+      })
+    }
+  }
+
+  /**
+   * Add swipe gesture support for mobile devices
+   * @param {Element} element - The element to add swipe support to
+   */
+  function addSwipeSupport(element) {
+    if (!isMobileDevice) return
+
+    let startY = 0
+    let currentY = 0
+    let isDragging = false
+    let startTime = 0
+
+    element.addEventListener(
+      'touchstart',
+      (e) => {
+        startY = e.touches[0].clientY
+        currentY = startY
+        startTime = Date.now()
+        isDragging = true
+      },
+      { passive: true }
+    )
+
+    element.addEventListener(
+      'touchmove',
+      (e) => {
+        if (!isDragging) return
+
+        currentY = e.touches[0].clientY
+        const deltaY = currentY - startY
+
+        // Only allow downward swipe to close
+        if (deltaY > 0 && deltaY < 100) {
+          const opacity = Math.max(0.3, 1 - deltaY / 200)
+          element.style.opacity = opacity
+          element.style.transform = `translateY(${deltaY}px)`
+        }
+      },
+      { passive: true }
+    )
+
+    element.addEventListener(
+      'touchend',
+      (e) => {
+        if (!isDragging) return
+
+        const deltaY = currentY - startY
+        const deltaTime = Date.now() - startTime
+        const velocity = deltaY / deltaTime
+
+        // Close if swipe down is significant or fast
+        if (deltaY > 50 || (velocity > 0.3 && deltaY > 20)) {
+          hideTopicList()
+        } else {
+          // Reset position
+          element.style.opacity = ''
+          element.style.transform = ''
+        }
+
+        isDragging = false
+      },
+      { passive: true }
+    )
+
+    element.addEventListener(
+      'touchcancel',
+      (e) => {
+        if (isDragging) {
+          element.style.opacity = ''
+          element.style.transform = ''
+          isDragging = false
+        }
+      },
+      { passive: true }
     )
   }
 
@@ -1415,6 +1564,9 @@
             transition: all 0.3s ease;
             padding: 5px 10px;
             user-select: none;
+            /* Mobile optimization */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         /* Settings Dialog Styles */
@@ -1489,6 +1641,57 @@
 
         .dtqs-buttons button:hover {
             background: #e5e5e5;
+        }
+
+        /* Settings Dialog Dark Mode Styles */
+        .topic-list-viewer-dark-mode #dtqs-settings-overlay {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .topic-list-viewer-dark-mode #dtqs-settings-dialog {
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+
+        .topic-list-viewer-dark-mode #dtqs-settings-dialog h2 {
+            color: #e0e0e0;
+            border-bottom: 1px solid #444;
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-setting-item label {
+            color: #e0e0e0;
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-setting-item select {
+            background: #3a3a3a;
+            color: #e0e0e0;
+            border: 1px solid #555;
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-setting-item select:focus {
+            border-color: #64b5f6;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-setting-item input[type="checkbox"] {
+            accent-color: #64b5f6;
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-buttons button {
+            background: #3a3a3a;
+            color: #e0e0e0;
+            border: 1px solid #555;
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-buttons button:hover {
+            background: #4a4a4a;
+            border-color: #666;
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-buttons button:active {
+            background: #2a2a2a;
         }
 
         .topic-nav-container {
@@ -1601,30 +1804,74 @@
             margin: 0;
             font-size: 18px;
             color: #333;
+            flex: 1;
+            min-width: 0; /* Allow text to shrink */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 15px; /* Add space between title and controls */
         }
 
         .topic-list-viewer-controls {
             display: flex;
             align-items: center;
             gap: 15px;
+            height: 32px; /* Set consistent height for alignment */
+            flex-shrink: 0; /* Prevent controls from shrinking */
         }
 
         .source-link {
             color: #0078d7;
             text-decoration: none;
             font-size: 14px;
+            height: 32px; /* Match container height */
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
         }
 
         .source-link:hover {
             text-decoration: underline;
         }
 
-        #topic-list-viewer-close {
+        #topic-list-viewer-settings {
             background: none;
-            border: none;
-            font-size: 24px;
+            border: none; /* Remove border */
+            padding: 8px;
             cursor: pointer;
             color: #666;
+            height: 32px; /* Match container height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease; /* Add smooth animation */
+        }
+
+        #topic-list-viewer-settings:hover {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        #topic-list-viewer-close {
+            background: #f0f0f0;
+            color: #666;
+            border: none;
+            font-size: 18px;
+            font-weight: normal;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 4px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        #topic-list-viewer-close:hover {
+            background-color: #e0e0e0;
+            color: #333;
         }
 
         .cache-status {
@@ -1661,11 +1908,6 @@
             font-weight: bold;
         }
 
-        .topic-list-viewer-content td {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
         .topic-list-viewer-content tr:hover {
              background-color: #f5f5f5;
          }
@@ -1683,15 +1925,6 @@
          .topic-list-viewer-content tr.current-topic td:first-child {
              padding-left: 7px; /* 10px - 3px border */
          }
-
-        .topic-list-data {
-            width: 60%;
-        }
-
-        .topic-list-replies, .topic-list-views, .topic-list-activity {
-            width: 13%;
-            text-align: center;
-        }
 
         /* Dark mode styles */
         .topic-list-viewer-dark-mode #topic-list-viewer-button {
@@ -1725,8 +1958,23 @@
             color: #64b5f6;
         }
 
-        .topic-list-viewer-dark-mode #topic-list-viewer-close {
+        .topic-list-viewer-dark-mode #topic-list-viewer-settings {
             color: #aaa;
+        }
+
+        .topic-list-viewer-dark-mode #topic-list-viewer-settings:hover {
+            background-color: #444;
+            color: #e0e0e0;
+        }
+
+        .topic-list-viewer-dark-mode #topic-list-viewer-close {
+            background: #444;
+            color: #aaa;
+        }
+
+        .topic-list-viewer-dark-mode #topic-list-viewer-close:hover {
+            background-color: #555;
+            color: #ccc;
         }
 
         .topic-list-viewer-dark-mode .cache-status {
@@ -1748,10 +1996,6 @@
         .topic-list-viewer-dark-mode .topic-list-viewer-content th {
             border-bottom: 2px solid #555;
             color: #bbb;
-        }
-
-        .topic-list-viewer-dark-mode .topic-list-viewer-content td {
-            border-bottom: 1px solid #444;
         }
 
         .topic-list-viewer-dark-mode .topic-list-viewer-content tr:hover {
@@ -1776,17 +2020,264 @@
             color: #b39ddb;
         }
 
+        /* Mobile device specific styles */
+        .dtqs-mobile-device #topic-list-viewer-container {
+            /* Improve mobile performance */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .dtqs-mobile-device .topic-list-viewer-content {
+            /* Better touch scrolling */
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+
+        .dtqs-mobile-device .topic-list-viewer-content table thead {
+            display: none;
+        }
+
+        /* Swipe gesture support styles */
+        .dtqs-mobile-device .topic-list-viewer-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dtqs-mobile-device .topic-list-viewer-content {
+            transition: transform 0.3s ease;
+        }
+
+        /* Search input mobile optimization */
+        .dtqs-mobile-device #topic-search-input {
+            font-size: 16px; /* Prevent zoom on iOS */
+            padding: 12px 15px;
+            border-radius: 8px;
+        }
+
+        /* Settings dialog mobile optimization */
+        .dtqs-mobile-device #dtqs-settings-dialog {
+            width: 90% !important;
+            max-width: 400px !important;
+            margin: 20px auto !important;
+            padding: 20px !important;
+            border-radius: 12px !important;
+        }
+
+        .dtqs-mobile-device #dtqs-settings-dialog h2 {
+            font-size: 18px !important;
+            margin-bottom: 20px !important;
+        }
+
+        .dtqs-mobile-device .dtqs-setting-item {
+            margin-bottom: 20px !important;
+        }
+
+        .dtqs-mobile-device .dtqs-setting-item label {
+            font-size: 16px !important;
+            line-height: 1.4 !important;
+        }
+
+        .dtqs-mobile-device .dtqs-setting-item select {
+            padding: 12px !important;
+            font-size: 16px !important;
+            border-radius: 8px !important;
+            min-height: 44px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        .dtqs-mobile-device .dtqs-setting-item input[type="checkbox"] {
+            width: 20px !important;
+            height: 20px !important;
+            margin-right: 12px !important;
+        }
+
+        .dtqs-mobile-device .dtqs-buttons {
+            display: flex !important;
+            gap: 12px !important;
+            margin-top: 24px !important;
+        }
+
+        .dtqs-mobile-device .dtqs-buttons button {
+            flex: 1 !important;
+            padding: 14px 20px !important;
+            font-size: 16px !important;
+            border-radius: 8px !important;
+            min-height: 44px !important;
+            border: none !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            -webkit-tap-highlight-color: transparent !important;
+            touch-action: manipulation !important;
+        }
+
+        .dtqs-mobile-device .dtqs-buttons button:active {
+            transform: scale(0.98) !important;
+        }
+
+        /* Mobile responsive styles */
         @media (max-width: 768px) {
+            /* Floating button mobile optimization */
+            #topic-list-viewer-button {
+                bottom: 12px;
+                padding: 6px 8px;
+                border-radius: 20px;
+                box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+                max-width: calc(100vw - 30px);
+                overflow: hidden;
+            }
+
+            .topic-nav-container {
+                gap: 4px;
+            }
+
+            .topic-nav-button {
+                padding: 4px 6px;
+                min-height: 36px; /* Reduced from 44px for more compact design */
+                min-width: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .topic-nav-title {
+                max-width: 100px;
+                font-size: 11px;
+                margin: 0 2px;
+                line-height: 1.2;
+            }
+
+            .center-button {
+                margin: 0 4px;
+                background-color: rgba(255,255,255,0.2);
+                border-radius: 50%;
+                padding: 6px;
+            }
+
+            /* Topic list mobile optimization */
             .topic-list-viewer-content {
                 padding: 10px;
             }
 
-            .topic-list-data {
-                width: 70%;
+            .topic-list-viewer-header {
+                padding: 12px 15px;
+                flex-wrap: wrap;
+                gap: 10px;
             }
 
-            .topic-list-replies, .topic-list-views, .topic-list-activity {
-                width: 10%;
+            .topic-list-viewer-header {
+                padding: 12px 15px;
+                flex-wrap: nowrap; /* Prevent wrapping on mobile */
+            }
+
+            .topic-list-viewer-header h3 {
+                font-size: 16px;
+                margin-right: 10px; /* Reduce margin on mobile */
+            }
+
+            .topic-list-viewer-controls {
+                gap: 8px; /* Reduce gap on mobile */
+                flex-shrink: 0; /* Ensure controls don't shrink */
+            }
+
+            #topic-list-viewer-close {
+                font-size: 28px;
+                padding: 8px;
+                min-height: 44px;
+                min-width: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Hide some columns on very small screens */
+            @media (max-width: 480px) {
+                /* More compact floating button for smaller screens */
+                #topic-list-viewer-button {
+                    bottom: 10px;
+                    padding: 4px 6px;
+                    border-radius: 18px;
+                }
+
+                .topic-list-viewer-header {
+                    padding: 10px 12px;
+                }
+
+                .topic-list-viewer-header h3 {
+                    font-size: 14px;
+                    margin-right: 8px;
+                }
+
+                .topic-list-viewer-controls {
+                    gap: 6px;
+                }
+
+                .topic-nav-container {
+                    gap: 2px;
+                }
+
+                .topic-nav-button {
+                    padding: 3px 4px;
+                    min-height: 32px;
+                    min-width: 32px;
+                }
+
+                .center-button {
+                    margin: 0 2px;
+                    padding: 4px;
+                }
+
+                .topic-nav-title {
+                    display: none;
+                }
+
+                .prev-topic, .next-topic {
+                    padding: 8px;
+                }
+            }
+        }
+
+        /* Very small screens optimization */
+        @media (max-width: 360px) {
+            #topic-list-viewer-button {
+                bottom: 8px;
+                padding: 3px 5px;
+                border-radius: 16px;
+            }
+
+            .topic-list-viewer-header {
+                padding: 8px 10px;
+            }
+
+            .topic-list-viewer-header h3 {
+                font-size: 13px;
+                margin-right: 6px;
+            }
+
+            .topic-list-viewer-controls {
+                gap: 4px;
+            }
+
+            .topic-nav-container {
+                gap: 1px;
+            }
+
+            .topic-nav-button {
+                padding: 2px 3px;
+                min-height: 28px;
+                min-width: 28px;
+            }
+
+            .center-button {
+                margin: 0 1px;
+                padding: 3px;
+            }
+
+            .topic-list-viewer-header {
+                padding: 10px 12px;
+            }
+
+            .topic-list-viewer-content {
+                padding: 8px;
             }
         }
     `)
