@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.4.5
+// @version              0.5.0
 // @description          Enhance Discourse forums with instant topic switching, current topic highlighting, and quick navigation to previous/next topics
 // @description:zh-CN    增强 Discourse 论坛体验，提供即时话题切换、当前话题高亮和上一个/下一个话题的快速导航功能
 // @author               Pipecraft
@@ -31,8 +31,8 @@
 
   // Configuration
   const CONFIG = {
-    // Hotkey (default is backtick key `)
-    HOTKEY: '`',
+    // Settings storage key
+    SETTINGS_KEY: 'discourse_topic_switcher_settings',
     // Cache key base name
     CACHE_KEY_BASE: 'discourse_topic_list_cache',
     // Cache expiry time (milliseconds) - 1 hour
@@ -41,12 +41,8 @@
     SHOW_FLOATING_BUTTON: true,
     // Route check interval (milliseconds)
     ROUTE_CHECK_INTERVAL: 500,
-    // Whether to automatically follow system dark mode
-    AUTO_DARK_MODE: true,
     // Default language (en or zh-CN)
     DEFAULT_LANGUAGE: 'en',
-    // Settings storage key
-    SETTINGS_KEY: 'discourse_topic_switcher_settings',
   }
 
   // User settings with defaults
@@ -54,6 +50,12 @@
     language: CONFIG.DEFAULT_LANGUAGE,
     showNavigationButtons: true,
     darkMode: 'auto', // auto, light, dark
+    // Custom hotkey settings
+    hotkeys: {
+      showTopicList: 'Alt+KeyQ',
+      nextTopic: 'Alt+KeyW',
+      prevTopic: 'Alt+KeyE',
+    },
   }
 
   // Pre-initialized site-specific keys (calculated once at script load)
@@ -63,7 +65,7 @@
   // Internationalization support
   const I18N = {
     en: {
-      viewTopicList: 'View topic list (press ` key)',
+      viewTopicList: 'View topic list (press Alt + Q)',
       topicList: 'Topic List',
       cacheExpired: 'Cache expired',
       cachedAgo: 'Cached {time} ago',
@@ -94,9 +96,16 @@
       darkModeAuto: 'Auto',
       darkModeLight: 'Light',
       darkModeDark: 'Dark',
+      // Hotkey settings
+      hotkeys: 'Hotkeys',
+      hotkeyShowTopicList: 'Show topic list',
+      hotkeyNextTopic: 'Next topic',
+      hotkeyPrevTopic: 'Previous topic',
+      hotkeyInputPlaceholder: 'e.g., Alt+KeyQ, Ctrl+KeyK, KeyG',
+      hotkeyInvalidFormat: 'Invalid hotkey format',
     },
     'zh-CN': {
-      viewTopicList: '查看话题列表（按 ` 键）',
+      viewTopicList: '查看话题列表（按 Alt + Q 键）',
       topicList: '话题列表',
       cacheExpired: '缓存已过期',
       cachedAgo: '{time}前缓存',
@@ -126,6 +135,13 @@
       darkModeAuto: '自动',
       darkModeLight: '浅色',
       darkModeDark: '深色',
+      // Hotkey settings
+      hotkeys: '快捷键',
+      hotkeyShowTopicList: '显示话题列表',
+      hotkeyNextTopic: '下一个话题',
+      hotkeyPrevTopic: '上一个话题',
+      hotkeyInputPlaceholder: '例如：Alt+KeyQ, Ctrl+KeyK, KeyG',
+      hotkeyInvalidFormat: '快捷键格式无效',
     },
   }
 
@@ -222,6 +238,25 @@
         </label>
       </div>
 
+      <div class="dtqs-setting-section">
+        <h3>${t('hotkeys')}</h3>
+
+        <div class="dtqs-setting-item">
+          <label for="dtqs-hotkey-show-list">${t('hotkeyShowTopicList')}</label>
+          <input type="text" id="dtqs-hotkey-show-list" value="${userSettings.hotkeys.showTopicList}" placeholder="${t('hotkeyInputPlaceholder')}">
+        </div>
+
+        <div class="dtqs-setting-item">
+          <label for="dtqs-hotkey-next-topic">${t('hotkeyNextTopic')}</label>
+          <input type="text" id="dtqs-hotkey-next-topic" value="${userSettings.hotkeys.nextTopic}" placeholder="${t('hotkeyInputPlaceholder')}">
+        </div>
+
+        <div class="dtqs-setting-item">
+          <label for="dtqs-hotkey-prev-topic">${t('hotkeyPrevTopic')}</label>
+          <input type="text" id="dtqs-hotkey-prev-topic" value="${userSettings.hotkeys.prevTopic}" placeholder="${t('hotkeyInputPlaceholder')}">
+        </div>
+      </div>
+
       <div class="dtqs-buttons">
         <button id="dtqs-settings-save">${t('save')}</button>
         <button id="dtqs-settings-cancel">${t('cancel')}</button>
@@ -250,6 +285,39 @@
       // Save navigation buttons setting
       const showNavButtons = document.getElementById('dtqs-show-nav-buttons')
       userSettings.showNavigationButtons = showNavButtons.checked
+
+      // Save hotkey settings with validation
+      const hotkeyShowList = document.getElementById('dtqs-hotkey-show-list')
+      const hotkeyNextTopic = document.getElementById('dtqs-hotkey-next-topic')
+      const hotkeyPrevTopic = document.getElementById('dtqs-hotkey-prev-topic')
+
+      // Validate hotkey format
+      const hotkeyPattern =
+        /^(Ctrl\+|Alt\+|Shift\+|Meta\+)*(Key[A-Z]|Digit[0-9]|Space|Enter|Escape|Backspace|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|F[1-9]|F1[0-2])$/
+
+      const hotkeys = {
+        showTopicList: hotkeyShowList.value.trim(),
+        nextTopic: hotkeyNextTopic.value.trim(),
+        prevTopic: hotkeyPrevTopic.value.trim(),
+      }
+
+      // Validate each hotkey
+      for (const [key, value] of Object.entries(hotkeys)) {
+        if (value && !hotkeyPattern.test(value)) {
+          alert(`${t('hotkeyInvalidFormat')}: ${value}`)
+          return
+        }
+      }
+
+      // Check for duplicate hotkeys
+      const hotkeyValues = Object.values(hotkeys).filter((v) => v)
+      const uniqueHotkeys = new Set(hotkeyValues)
+      if (hotkeyValues.length !== uniqueHotkeys.size) {
+        alert('Duplicate hotkeys are not allowed')
+        return
+      }
+
+      userSettings.hotkeys = hotkeys
 
       // Save settings
       await saveUserSettings()
@@ -1102,25 +1170,182 @@
   }
 
   /**
+   * Check if any unwanted modifier keys are pressed
+   * @param {KeyboardEvent} event - The keyboard event
+   * @returns {boolean} True if any unwanted modifier key is pressed
+   */
+  function hasUnwantedModifierKeys(event) {
+    return event.shiftKey || event.ctrlKey || event.metaKey
+  }
+
+  /**
+   * Check if the focus is on an input element
+   * @returns {boolean} True if focus is on an input element
+   */
+  function isFocusOnInput() {
+    const activeElement = document.activeElement
+    if (!activeElement) return false
+
+    const tagName = activeElement.tagName.toLowerCase()
+    const inputTypes = ['input', 'textarea', 'select']
+
+    // Check if it's an input element
+    if (inputTypes.includes(tagName)) {
+      return true
+    }
+
+    // Check if it's a contenteditable element
+    if (activeElement.contentEditable === 'true') {
+      return true
+    }
+
+    // Check if it's inside a contenteditable element
+    let parent = activeElement.parentElement
+    while (parent) {
+      if (parent.contentEditable === 'true') {
+        return true
+      }
+      parent = parent.parentElement
+    }
+
+    return false
+  }
+
+  /**
+   * Parse hotkey string into components
+   * @param {string} hotkeyStr - Hotkey string like "Alt+KeyQ" or "Ctrl+Shift+KeyA"
+   * @returns {Object} - Object with modifier flags and key code
+   */
+  function parseHotkey(hotkeyStr) {
+    if (!hotkeyStr || typeof hotkeyStr !== 'string') {
+      return null
+    }
+
+    const parts = hotkeyStr.split('+')
+    const result = {
+      ctrl: false,
+      alt: false,
+      shift: false,
+      meta: false,
+      code: null,
+    }
+
+    for (const part of parts) {
+      const trimmed = part.trim()
+      switch (trimmed) {
+        case 'Ctrl':
+          result.ctrl = true
+          break
+        case 'Alt':
+          result.alt = true
+          break
+        case 'Shift':
+          result.shift = true
+          break
+        case 'Meta':
+          result.meta = true
+          break
+        default:
+          result.code = trimmed
+          break
+      }
+    }
+
+    return result.code ? result : null
+  }
+
+  /**
+   * Check if event matches the parsed hotkey
+   * @param {KeyboardEvent} event - Keyboard event
+   * @param {Object} parsedHotkey - Parsed hotkey object
+   * @returns {boolean} - True if event matches hotkey
+   */
+  function matchesHotkey(event, parsedHotkey) {
+    if (!parsedHotkey) {
+      return false
+    }
+
+    return (
+      event.ctrlKey === parsedHotkey.ctrl &&
+      event.altKey === parsedHotkey.alt &&
+      event.shiftKey === parsedHotkey.shift &&
+      event.metaKey === parsedHotkey.meta &&
+      event.code === parsedHotkey.code
+    )
+  }
+
+  /**
    * Add a hotkey listener
    */
   function addHotkeyListener() {
-    document.addEventListener('keydown', function (event) {
-      // Check if the configured hotkey is pressed
-      if (event.key === CONFIG.HOTKEY) {
-        // Prevent default behavior and event bubbling
-        event.preventDefault()
-        event.stopPropagation()
+    document.addEventListener(
+      'keydown',
+      function (event) {
+        // Skip if unwanted modifier keys are pressed (but allow Alt)
+        // if (hasUnwantedModifierKeys(event)) {
+        //   return
+        // }
 
-        // Toggle topic list display
-        toggleTopicList()
-      }
+        // Skip if focus is on an input element
+        if (isFocusOnInput()) {
+          return
+        }
 
-      // If the list is visible, close it with the ESC key
-      if (isListVisible && event.key === 'Escape') {
-        hideTopicList()
-      }
-    })
+        // Check for hotkeys only on topic pages
+        if (!isTopicPage()) {
+          return
+        }
+
+        console.log(
+          `[DTQS] keydown event: key=${event.key}, code=${event.code}, modifiers: Ctrl=${event.ctrlKey}, Alt=${event.altKey}, Shift=${event.shiftKey}, Meta=${event.metaKey}`
+        )
+
+        // Parse configured hotkeys
+        const showListHotkey = parseHotkey(userSettings.hotkeys.showTopicList)
+        const nextTopicHotkey = parseHotkey(userSettings.hotkeys.nextTopic)
+        const prevTopicHotkey = parseHotkey(userSettings.hotkeys.prevTopic)
+
+        // Check for show topic list hotkey
+        if (showListHotkey && matchesHotkey(event, showListHotkey)) {
+          event.preventDefault()
+          event.stopPropagation()
+          toggleTopicList()
+          return
+        }
+
+        // Check for next topic hotkey
+        if (nextTopicHotkey && matchesHotkey(event, nextTopicHotkey)) {
+          event.preventDefault()
+          event.stopPropagation()
+          navigateToNextTopic()
+          return
+        }
+
+        // Check for previous topic hotkey
+        if (prevTopicHotkey && matchesHotkey(event, prevTopicHotkey)) {
+          event.preventDefault()
+          event.stopPropagation()
+          navigateToPrevTopic()
+          return
+        }
+
+        // ESC key to close topic list (hardcoded for usability)
+        if (
+          !event.ctrlKey &&
+          !event.altKey &&
+          !event.shiftKey &&
+          !event.metaKey &&
+          event.key === 'Escape' &&
+          isListVisible
+        ) {
+          event.preventDefault()
+          event.stopPropagation()
+          hideTopicList()
+          return
+        }
+      },
+      true
+    )
   }
 
   /**
@@ -1667,6 +1892,28 @@
             border: 1px solid #ddd;
         }
 
+        .dtqs-setting-item input[type="text"] {
+            padding: 5px 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-family: monospace;
+            font-size: 12px;
+            min-width: 120px;
+        }
+
+        .dtqs-setting-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .dtqs-setting-section h3 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+        }
+
         .dtqs-buttons {
             display: flex;
             justify-content: flex-end;
@@ -1743,6 +1990,26 @@
 
         .topic-list-viewer-dark-mode .dtqs-setting-item input[type="checkbox"] {
             accent-color: #64b5f6;
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-setting-item input[type="text"] {
+            background: #3a3a3a;
+            color: #e0e0e0;
+            border: 1px solid #555;
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-setting-item input[type="text"]:focus {
+            border-color: #64b5f6;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-setting-section {
+            border-top: 1px solid #444;
+        }
+
+        .topic-list-viewer-dark-mode .dtqs-setting-section h3 {
+            color: #e0e0e0;
         }
 
         .topic-list-viewer-dark-mode .dtqs-buttons button {

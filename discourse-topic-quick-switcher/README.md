@@ -9,16 +9,18 @@ A powerful user script that brings seamless topic navigation, effective current 
 - **Topic List Caching**: Automatically caches the topic list when you visit a list page.
 - **Quick Access**: Access the cached list from any topic page via:
   - A floating button in the bottom-right corner
-  - A keyboard shortcut (backtick key `` ` ``)
+  - Customizable keyboard shortcuts (default: Alt+Q for topic list)
+- **Enhanced Navigation**: Navigate between topics using:
+  - Customizable keyboard shortcuts (default: Alt+W for next, Alt+E for previous)
+  - Quick navigation buttons for previous and next topics
+  - Automatically skips hidden topics during navigation
 - **User-Friendly Interface**:
   - Displays cache time and source information
   - Navigate directly to topics from the popup panel
   - Close with the ESC key, a close button, or by clicking outside the panel
   - Highlights the current topic for easy identification
   - Automatically scrolls to the current topic in the list
-  - Quick navigation buttons for previous and next topics
-  - Automatically skips hidden topics during navigation
-  - Settings panel to customize language preferences and navigation button visibility
+  - Settings panel to customize language preferences, navigation button visibility, and hotkeys
 - **Adaptive Theme**:
   - Automatically adjusts to light/dark mode based on system and site preferences
 - **Cache Management**:
@@ -70,38 +72,26 @@ These limitations are design choices made to maintain the script's lightweight n
 2. **View the Cached List**:
    - While viewing a topic, you can:
      - Click the floating button in the bottom-right corner
-     - Press the backtick key (`` ` ``)
+     - Use the configured hotkey (default: Alt+Q)
    - A popup will appear showing the cached topic list
 
 3. **Navigate Between Topics**:
    - Click any topic in the popup to navigate to it
+   - Use keyboard shortcuts for quick navigation:
+     - Next topic: configured hotkey (default: Alt+W)
+     - Previous topic: configured hotkey (default: Alt+E)
+   - Use the navigation buttons in the popup
    - The popup will automatically close after selection
 
-4. **Close the Popup**:
+4. **Customize Hotkeys**:
+   - Access the settings dialog from the popup or floating button
+   - Configure custom keyboard shortcuts for each action
+   - Supported formats: Alt+KeyQ, Ctrl+KeyK, Shift+KeyG, etc.
+
+5. **Close the Popup**:
    - Click the × button
    - Press the ESC key
    - Click outside the popup
-
-## Configuration
-
-You can modify the following settings at the top of the script:
-
-```javascript
-const CONFIG = {
-  // Keyboard shortcut (default: backtick key)
-  HOTKEY: '`',
-  // Cache key name
-  CACHE_KEY: 'discourse_topic_list_cache',
-  // Cache expiration time (in milliseconds) - 1 hour
-  CACHE_EXPIRY: 60 * 60 * 1000,
-  // Whether to show the floating button on topic pages
-  SHOW_FLOATING_BUTTON: true,
-  // Route check interval (in milliseconds)
-  ROUTE_CHECK_INTERVAL: 500,
-  // Whether to automatically follow system dark mode
-  AUTO_DARK_MODE: true,
-}
-```
 
 ## Compatibility
 
@@ -112,6 +102,16 @@ This script is designed for all Discourse forums and has been tested on the foll
 - Safari
 
 ## Release Notes
+
+### v0.5.x
+
+- Added customizable hotkey settings for enhanced navigation control
+- Implemented hotkey configuration in settings dialog with validation and duplicate checking
+- Added support for custom keyboard shortcuts for show topic list, next topic, and previous topic actions
+- Enhanced hotkey parser with support for modifier keys (Ctrl, Alt, Shift, Meta) and various key codes
+- Improved settings interface with dedicated hotkey configuration section
+- Added internationalization support for hotkey-related text in both English and Chinese
+- Maintained backward compatibility with existing default hotkeys while allowing full customization
 
 ### v0.4.x
 
