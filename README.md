@@ -40,7 +40,16 @@
 - **适用网站**: [Linux.do](https://linux.do/)
 - **说明**: 在页面底部添加"加载更多"按钮，支持手动控制内容加载
 
-### 5. [No GIF Avatars](./no-gif-avatars/)
+### 5. [LINUX.DO CloudFlare 5秒盾自动跳转](./linux.do-auto-challenge/)
+
+**CloudFlare 5秒盾自动跳转**
+
+- **文件**: [`linux.do-auto-challenge.user.js`](./linux.do-auto-challenge/linux.do-auto-challenge.user.js)
+- **功能**: 自动检测 CloudFlare 保护失败状态并重定向到 challenge 页面
+- **适用网站**: [Linux.do](https://linux.do/)
+- **说明**: 提供自动和手动触发 Challenge 跳转功能，无需手动干预，提升浏览体验
+
+### 6. [No GIF Avatars](./no-gif-avatars/)
 
 **屏蔽 GIF 头像**
 
@@ -73,6 +82,7 @@
 - [Discourse Topic Quick Switcher 说明](./discourse-topic-quick-switcher/README.md)
 - [LINUX.DO Auto Load New Topics 说明](./linux.do-auto-load-new-topics/README.md)
 - [LINUX.DO Load More Topics Manually 说明](./linux.do-manual-load-more/README.md)
+- [LINUX.DO CloudFlare 5秒盾自动跳转说明](./linux.do-auto-challenge/README.md)
 - [No GIF Avatars 说明](./no-gif-avatars/README.md)
 
 ## 🔧 更多实用脚本

@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.1
+// @version              0.2.0
 // @description          Automatically redirects to the challenge page when CloudFlare protection fails, improving browsing experience on linux.do
 // @description:zh-CN    当 CloudFlare 5秒盾检测失败时，自动跳转到 challenge 页面，提升 linux.do 的浏览体验
 // @author               Pipecraft
@@ -12,7 +12,7 @@
 // @noframes
 // @match                https://linux.do/*
 // @icon                 https://www.google.com/s2/favicons?sz=64&domain=linux.do
-// @grant                none
+// @grant                GM_registerMenuCommand
 // ==/UserScript==
 
 ;(function () {
@@ -33,6 +33,8 @@
     CHALLENGE_PATH: '/challenge',
     // 调试模式
     DEBUG: false,
+    // 菜单文本
+    MENU_TEXT: '手动触发 Challenge 跳转',
   }
 
   /**
@@ -108,6 +110,21 @@
   }
 
   /**
+   * 手动触发 Challenge 跳转
+   * 直接跳转到 challenge 页面，或在已经在 challenge 页面时提示用户
+   */
+  function manualTrigger() {
+    log('手动触发 Challenge 跳转')
+
+    if (isChallengePage()) {
+      alert('已在 Challenge 页面，无需跳转')
+      return
+    }
+
+    redirectToChallenge()
+  }
+
+  /**
    * 初始化脚本
    */
   function initScript() {
@@ -137,6 +154,14 @@
       log('DOM 观察器已启动')
     } catch (error) {
       log('启动 DOM 观察器时出错:', error)
+    }
+
+    // 注册菜单命令
+    try {
+      GM_registerMenuCommand(CONFIG.MENU_TEXT, manualTrigger)
+      log('菜单命令已注册')
+    } catch (error) {
+      log('注册菜单命令时出错:', error)
     }
   }
 
