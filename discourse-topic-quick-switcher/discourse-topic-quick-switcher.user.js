@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.5.0
+// @version              0.5.1
 // @description          Enhance Discourse forums with instant topic switching, current topic highlighting, and quick navigation to previous/next topics
 // @description:zh-CN    增强 Discourse 论坛体验，提供即时话题切换、当前话题高亮和上一个/下一个话题的快速导航功能
 // @author               Pipecraft
@@ -13,6 +13,7 @@
 // @match                https://meta.discourse.org/*
 // @match                https://linux.do/*
 // @match                https://idcflare.com/*
+// @match                https://www.nodeloc.com/*
 // @match                https://meta.appinn.net/*
 // @match                https://community.openai.com/*
 // @match                https://community.cloudflare.com/*
