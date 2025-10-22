@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.0.2
+// @version            0.1.0
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -13,7 +13,12 @@
 // @license            MIT
 // @icon               data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+PHJlY3QgeD0iOCIgeT0iOCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTAiIHN0cm9rZT0iIzFmMjkzNyIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHBhdGggZD0iTTMyIDIwbC0xMiAxMmg3djE4aDEwVjMyaDdsLTEyLTEyeiIgZmlsbD0iIzFmMjkzNyIvPjwvc3ZnPg==
 // @noframes
-// @match              *://*/*
+// @match              https://*.v2ex.com/*
+// @match              https://*.v2ex.co/*
+// @match              https://www.nodeseek.com/*
+// @match              https://www.deepflood.com/*
+// @match              https://2libra.com/*
+// @match              *://*/*removethis
 // @grant              GM_setValue
 // @grant              GM_getValue
 // @grant              GM_addStyle
@@ -25,6 +30,64 @@
 
 ;(function () {
   'use strict'
+
+  // CONFIG: Preset site configuration (host without port; strip leading 'www.')
+  const CONFIG = {
+    // Examples: local preview page and common sites; add/remove as needed
+    localhost: {
+      format: 'markdown',
+      buttons: [{ selector: 'textarea', position: 'after', text: '插入图片' }],
+    },
+    'v2ex.com': {
+      format: 'markdown',
+      buttons: [
+        {
+          selector: '#reply-box > div.cell.flex-one-row > div:nth-child(1)',
+          position: 'inside',
+          text: '<a style="padding-left: 10px;"> + 插入图片</a>',
+        },
+        {
+          selector: '#tab-preview',
+          position: 'after',
+          text: '<a class="tab-alt"> + 插入图片</a>',
+        },
+      ],
+    },
+    'nodeseek.com': {
+      format: 'markdown',
+      buttons: [
+        {
+          selector:
+            '#editor-body > div.mde-toolbar > .toolbar-item:last-of-type',
+          position: 'after',
+          text: '插入图片',
+        },
+      ],
+    },
+    'deepflood.com': {
+      format: 'markdown',
+      buttons: [
+        {
+          selector:
+            '#editor-body > div.mde-toolbar > .toolbar-item:last-of-type',
+          position: 'after',
+          text: '插入图片',
+        },
+      ],
+    },
+    '2libra.com': {
+      format: 'markdown',
+      buttons: [
+        {
+          selector:
+            '.w-md-editor > div.w-md-editor-toolbar > ul:nth-child(1) > li:last-of-type',
+          position: 'after',
+          text: '插入图片',
+        },
+      ],
+    },
+    'github.com': { format: 'markdown' },
+  }
 
   // I18N: language detection and translations
   const I18N = {
@@ -58,6 +121,10 @@
       log_failed: '❌ Failed: ',
       btn_copy: 'Copy',
       btn_open: 'Open',
+      btn_delete: 'Delete',
+      btn_edit: 'Edit',
+      btn_update: 'Update',
+      btn_cancel: 'Cancel',
       menu_open_panel: 'Open upload panel',
       menu_select_images: 'Select images',
       menu_settings: 'Settings',
@@ -96,6 +163,10 @@
       log_failed: '❌ 失败：',
       btn_copy: '复制',
       btn_open: '打开',
+      btn_delete: '删除',
+      btn_edit: '编辑',
+      btn_update: '更新',
+      btn_cancel: '取消',
       menu_open_panel: '打开图片上传面板',
       menu_select_images: '选择图片',
       menu_settings: '设置',
@@ -134,6 +205,10 @@
       log_failed: '❌ 失敗：',
       btn_copy: '複製',
       btn_open: '打開',
+      btn_delete: '刪除',
+      btn_edit: '編輯',
+      btn_update: '更新',
+      btn_cancel: '取消',
       menu_open_panel: '打開圖片上傳面板',
       menu_select_images: '選擇圖片',
       menu_settings: '設定',
@@ -170,7 +245,7 @@
     return String(str).replace(/\{(\w+)\}/g, (_, k) => `${params?.[k] ?? ''}`)
   }
 
-  // Imgur Client ID 池（参考 upload-image.ts）
+  // Imgur Client ID pool (see upload-image.ts)
   const IMGUR_CLIENT_IDS = [
     '3107b9ef8b316f3',
     '442b04f26eefc8a',
@@ -185,7 +260,69 @@
 
   const HISTORY_KEY = 'iu_history'
   const FORMAT_MAP_KEY = 'iu_format_map'
+  const BTN_SETTINGS_MAP_KEY = 'iu_site_btn_settings_map'
   const DEFAULT_FORMAT = 'markdown'
+
+  // Apply preset config to storage (only if the site has no saved settings)
+  function applyPresetConfig() {
+    try {
+      const normalize = (h) => {
+        try {
+          h = String(h || '')
+            .trim()
+            .toLowerCase()
+          return h.startsWith('www.') ? h.slice(4) : h
+        } catch {
+          return h
+        }
+      }
+      const formatMap = GM_getValue(FORMAT_MAP_KEY, {})
+      const btnMap = GM_getValue(BTN_SETTINGS_MAP_KEY, {})
+      let changedFmt = false
+      let changedBtn = false
+      Object.entries(CONFIG || {}).forEach(([host, preset]) => {
+        const key = normalize(host)
+        if (!key || typeof preset !== 'object') return
+        // Preset format
+        if (preset.format && !(key in formatMap)) {
+          const allowed = ['markdown', 'html', 'bbcode', 'link']
+          const fmt = allowed.includes(preset.format)
+            ? preset.format
+            : DEFAULT_FORMAT
+          formatMap[key] = fmt
+          changedFmt = true
+        }
+        // Preset buttons (single or array)
+        const raw = preset.buttons || preset.button || []
+        const arr = Array.isArray(raw) ? raw : raw ? [raw] : []
+        if (arr.length && !(key in btnMap)) {
+          const list = arr
+            .map((c) => {
+              const selector = String(c?.selector || '').trim()
+              if (!selector) return null
+              const p = String(c?.position || '').trim()
+              const pos =
+                p === 'before' ? 'before' : p === 'inside' ? 'inside' : 'after'
+              const text = String(
+                c?.text || t('insert_image_button_default')
+              ).trim()
+              return { selector, position: pos, text }
+            })
+            .filter(Boolean)
+          if (list.length) {
+            btnMap[key] = list
+            changedBtn = true
+          }
+        }
+      })
+      if (changedFmt) GM_setValue(FORMAT_MAP_KEY, formatMap)
+      if (changedBtn) GM_setValue(BTN_SETTINGS_MAP_KEY, btnMap)
+    } catch {}
+  }
+
+  // Initialize once at runtime
+  applyPresetConfig()
+
   const siteKey = () => {
     let h = location.hostname || ''
     return h.startsWith('www.') ? h.slice(4) : h
@@ -199,30 +336,50 @@
     map[siteKey()] = fmt
     GM_setValue(FORMAT_MAP_KEY, map)
   }
-  // 站点按钮设置（选择器/位置/文字）
-  const BTN_SETTINGS_MAP_KEY = 'iu_site_btn_settings_map'
-  const getSiteBtnSettings = () => {
+  // Support multiple site button configurations
+  const getSiteBtnSettingsList = () => {
     const map = GM_getValue(BTN_SETTINGS_MAP_KEY, {})
-    return map[siteKey()] || null
+    const val = map[siteKey()]
+    if (!val) return []
+    return Array.isArray(val) ? val : val?.selector ? [val] : []
   }
-  const setSiteBtnSettings = (cfg) => {
+  const setSiteBtnSettingsList = (list) => {
     const map = GM_getValue(BTN_SETTINGS_MAP_KEY, {})
     const key = siteKey()
-    const selector = (cfg?.selector || '').trim()
-    if (!selector) {
+    if (!list || !list.length) {
       delete map[key]
     } else {
-      // 规范化插入位置（英文）：'before' | 'after' | 'inside'
-      const p = (cfg?.position || '').trim()
-      const pos =
-        p === 'before' ? 'before' : p === 'inside' ? 'inside' : 'after'
-      map[key] = {
-        selector,
-        position: pos,
-        text: cfg?.text || '插入图片',
-      }
+      map[key] = list
     }
     GM_setValue(BTN_SETTINGS_MAP_KEY, map)
+  }
+  const addSiteBtnSetting = (cfg) => {
+    const selector = (cfg?.selector || '').trim()
+    if (!selector) return
+    const p = (cfg?.position || '').trim()
+    const pos = p === 'before' ? 'before' : p === 'inside' ? 'inside' : 'after'
+    const text = (cfg?.text || t('insert_image_button_default')).trim()
+    const list = getSiteBtnSettingsList()
+    list.push({ selector, position: pos, text })
+    setSiteBtnSettingsList(list)
+  }
+  const removeSiteBtnSetting = (index) => {
+    const list = getSiteBtnSettingsList()
+    if (index >= 0 && index < list.length) {
+      list.splice(index, 1)
+      setSiteBtnSettingsList(list)
+    }
+  }
+  const updateSiteBtnSetting = (index, cfg) => {
+    const list = getSiteBtnSettingsList()
+    if (!list || index < 0 || index >= list.length) return
+    const selector = (cfg?.selector || '').trim()
+    if (!selector) return
+    const p = (cfg?.position || '').trim()
+    const pos = p === 'before' ? 'before' : p === 'inside' ? 'inside' : 'after'
+    const text = (cfg?.text || t('insert_image_button_default')).trim()
+    list[index] = { selector, position: pos, text }
+    setSiteBtnSettingsList(list)
   }
   const MAX_HISTORY = 50
 
@@ -238,28 +395,37 @@
   }
 
   const css = `
-  #iu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 999999; width: 440px; background: #111827cc; color: #fff; backdrop-filter: blur(6px); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; }
-  #iu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; }
-  #iu-panel header .actions { display:flex; gap:8px; }
-  #iu-panel .body { padding: 8px 12px; }
-  #iu-panel .controls { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }
-  #iu-panel select, #iu-panel button { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; }
-  #iu-panel button.primary { background:#2563eb; border-color:#1d4ed8; }
-  #iu-panel .progress { font-size: 12px; opacity:.9; }
-  #iu-panel .list { margin-top:8px; max-height: 140px; overflow-y:auto; overflow-x:hidden; font-size: 12px; }
-  #iu-panel .list .item { padding:6px 0; border-bottom: 1px dashed #334155; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
-  #iu-panel .history { display:none; margin-top:8px; }
-  #iu-panel.show-history .history { display:block; }
-  #iu-panel .history .list { max-height: 240px; }
-  #iu-panel .history .row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }
-  #iu-panel .history .row .ops { display:flex; gap:6px; }
-  #iu-panel .history .row .name { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  #iu-panel .hint { font-size: 11px; opacity:.85; margin-top:6px; }
-  #iu-drop { position: fixed; inset: 0; background: rgba(37,99,235,.12); border: 2px dashed #2563eb; display:none; align-items:center; justify-content:center; z-index: 999998; color:#2563eb; font-size: 18px; font-weight: 600; }
-  #iu-drop.show { display:flex; }
-  .iu-insert-btn { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; cursor:pointer; }
-  #iu-panel .settings { display:none; margin-top:8px; }
-  #iu-panel.show-settings .settings { display:block; }
+  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 999999; width: 440px; background: #111827cc; color: #fff; backdrop-filter: blur(6px); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }
+  #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; }
+  #uiu-panel header .uiu-actions { display:flex; gap:8px; }
+  #uiu-panel header .uiu-actions button { font-size: 12px; }
+  #uiu-panel .uiu-body { padding: 8px 12px; }
+  #uiu-panel .uiu-controls { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }
+  #uiu-panel select, #uiu-panel button { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; }
+  #uiu-panel button.uiu-primary { background:#2563eb; border-color:#1d4ed8; }
+  #uiu-panel .uiu-list { margin-top:8px; max-height: 140px; overflow-y:auto; overflow-x:hidden; font-size: 12px; }
+  #uiu-panel .uiu-list .uiu-item { padding:6px 0; border-bottom: 1px dashed #334155; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
+  #uiu-panel .uiu-history { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }
+  #uiu-panel.uiu-show-history .uiu-history { display:block; }
+  #uiu-panel .uiu-history .uiu-controls > span { font-size: 16px; font-weight: 600;}
+  #uiu-panel .uiu-history .uiu-list { max-height: 240px; }
+  #uiu-panel .uiu-history .uiu-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }
+  #uiu-panel .uiu-history .uiu-row .uiu-ops { display:flex; gap:6px; }
+  #uiu-panel .uiu-history .uiu-row .uiu-name { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #uiu-panel .uiu-hint { font-size: 11px; opacity:.85; margin-top:6px; }
+  #uiu-panel .uiu-settings { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }
+  #uiu-panel.uiu-show-settings .uiu-settings { display:block; }
+  #uiu-panel .uiu-settings .uiu-controls > span { font-size: 16px; font-weight: 600;}
+  #uiu-panel .uiu-settings .uiu-settings-list { margin-top:6px; max-height: 240px; overflow-y:auto; overflow-x:hidden; }
+  #uiu-panel .uiu-settings .uiu-settings-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; font-size: 12px; flex-wrap: nowrap; }
+  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item { flex:1; display:flex; align-items:center; gap:6px; min-width:0; }
+  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item input[type="text"] { flex:1; min-width:0; }
+  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item select { flex:0 0 auto; }
+  #uiu-panel .uiu-settings .uiu-settings-row .uiu-ops { display:flex; gap:6px; flex-shrink:0; white-space:nowrap; }
+  #uiu-drop { position: fixed; inset: 0; background: rgba(37,99,235,.12); border: 2px dashed #2563eb; display:none; align-items:center; justify-content:center; z-index: 999998; color:#2563eb; font-size: 18px; font-weight: 600; }
+  #uiu-drop.show { display:flex; }
+  .uiu-insert-btn { cursor:pointer; }
+  .uiu-insert-btn.uiu-default { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; cursor:pointer; }
   `
   GM_addStyle(css)
 
@@ -297,7 +463,7 @@
   }
 
   async function uploadToImgur(file) {
-    // 随机打乱 Client-ID 列表，保证每次失败后更换不同 ID
+    // Shuffle Client-ID list to ensure a different ID on each retry
     const ids = [...IMGUR_CLIENT_IDS]
     for (let i = ids.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
@@ -362,18 +528,18 @@
   }
 
   function createPanel() {
-    const panel = createEl('div', { id: 'iu-panel' })
+    const panel = createEl('div', { id: 'uiu-panel' })
     const header = createEl('header')
     header.appendChild(createEl('span', { text: t('header_title') }))
-    const actions = createEl('div', { class: 'actions' })
+    const actions = createEl('div', { class: 'uiu-actions' })
     const toggleHistoryBtn = createEl('button', { text: t('btn_history') })
     toggleHistoryBtn.addEventListener('click', () => {
-      panel.classList.toggle('show-history')
+      panel.classList.toggle('uiu-show-history')
       renderHistory()
     })
     const settingsBtn = createEl('button', { text: t('btn_settings') })
     settingsBtn.addEventListener('click', () => {
-      panel.classList.toggle('show-settings')
+      panel.classList.toggle('uiu-show-settings')
       try {
         refreshSettingsUI()
       } catch {}
@@ -387,8 +553,8 @@
     actions.appendChild(closeBtn)
     header.appendChild(actions)
 
-    const body = createEl('div', { class: 'body' })
-    const controls = createEl('div', { class: 'controls' })
+    const body = createEl('div', { class: 'uiu-body' })
+    const controls = createEl('div', { class: 'uiu-controls' })
 
     const format = getFormat()
     const formatSel = createEl('select')
@@ -403,7 +569,7 @@
       formatSel.appendChild(opt)
     })
     formatSel.addEventListener('change', () => setFormat(formatSel.value))
-    // 新增：抽取文件选择逻辑为函数，供按钮与菜单复用
+
     function openFilePicker() {
       const input = createEl('input', {
         type: 'file',
@@ -417,15 +583,14 @@
       input.click()
     }
 
-    // 选择图片按钮（调用统一的 openFilePicker）
     const selectBtn = createEl('button', {
-      class: 'primary',
+      class: 'uiu-primary',
       text: t('btn_select_images'),
     })
     selectBtn.addEventListener('click', openFilePicker)
 
     const progressEl = createEl('span', {
-      class: 'progress',
+      class: 'uiu-progress',
       text: t('progress_initial'),
     })
 
@@ -434,26 +599,25 @@
     controls.appendChild(progressEl)
     body.appendChild(controls)
 
-    const list = createEl('div', { class: 'list' })
+    const list = createEl('div', { class: 'uiu-list' })
     body.appendChild(list)
 
     const hint = createEl('div', {
-      class: 'hint',
+      class: 'uiu-hint',
       text: t('hint_text'),
     })
     body.appendChild(hint)
 
-    const history = createEl('div', { class: 'history' })
+    const history = createEl('div', { class: 'uiu-history' })
     body.appendChild(history)
 
-    // 设置面板：站点“插入图片”按钮配置
-    const settings = createEl('div', { class: 'settings' })
-    const settingsHeader = createEl('div', { class: 'controls' })
+    const settings = createEl('div', { class: 'uiu-settings' })
+    const settingsHeader = createEl('div', { class: 'uiu-controls' })
     settingsHeader.appendChild(
       createEl('span', { text: t('settings_section_title') })
     )
     settings.appendChild(settingsHeader)
-    const settingsForm = createEl('div', { class: 'controls' })
+    const settingsForm = createEl('div', { class: 'uiu-controls' })
     const selInput = createEl('input', {
       type: 'text',
       placeholder: t('placeholder_css_selector'),
@@ -475,32 +639,43 @@
     textInput.value = t('insert_image_button_default')
     const saveBtn = createEl('button', { text: t('btn_save_and_insert') })
     saveBtn.addEventListener('click', () => {
-      setSiteBtnSettings({
+      addSiteBtnSetting({
         selector: selInput.value,
         position: posSel.value,
         text: textInput.value,
       })
-      document.querySelectorAll('.iu-insert-btn').forEach((el) => el.remove())
-      applySiteButton()
+
+      selInput.value = ''
+      Array.from(posSel.options).forEach((opt) => {
+        opt.selected = opt.value === 'after'
+      })
+      textInput.value = t('insert_image_button_default')
+      renderSettingsList()
+
+      document.querySelectorAll('.uiu-insert-btn').forEach((el) => el.remove())
+      applySiteButtons()
       try {
         restartSiteButtonObserver()
       } catch {}
     })
     const removeBtn = createEl('button', { text: t('btn_remove_button_temp') })
     removeBtn.addEventListener('click', () => {
-      document.querySelectorAll('.iu-insert-btn').forEach((el) => el.remove())
+      document.querySelectorAll('.uiu-insert-btn').forEach((el) => el.remove())
       try {
         if (siteBtnObserver) siteBtnObserver.disconnect()
       } catch {}
     })
     const clearBtn = createEl('button', { text: t('btn_clear_settings') })
     clearBtn.addEventListener('click', () => {
-      setSiteBtnSettings({ selector: '' })
-      document.querySelectorAll('.iu-insert-btn').forEach((el) => el.remove())
+      setSiteBtnSettingsList([])
+      renderSettingsList()
+      document.querySelectorAll('.uiu-insert-btn').forEach((el) => el.remove())
       try {
         if (siteBtnObserver) siteBtnObserver.disconnect()
       } catch {}
     })
+    const settingsList = createEl('div', { class: 'uiu-settings-list' })
+    settings.appendChild(settingsList)
     settingsForm.appendChild(selInput)
     settingsForm.appendChild(posSel)
     settingsForm.appendChild(textInput)
@@ -510,28 +685,100 @@
     settings.appendChild(settingsForm)
     body.appendChild(settings)
 
-    function refreshSettingsUI() {
-      const cur = getSiteBtnSettings() || {
-        selector: '',
-        position: 'after',
-        text: '插入图片',
-      }
-      selInput.value = cur.selector || ''
-      Array.from(posSel.options).forEach((opt) => {
-        opt.selected = opt.value === (cur.position || 'after')
+    function renderSettingsList() {
+      settingsList.innerHTML = ''
+      const listData = getSiteBtnSettingsList()
+      listData.forEach((cfg, idx) => {
+        const row = createEl('div', { class: 'uiu-settings-row' })
+        const info = createEl('span', {
+          class: 'uiu-settings-item',
+          text: `${cfg.selector} [${cfg.position || 'after'}] - ${cfg.text || t('insert_image_button_default')}`,
+        })
+        const editBtn = createEl('button', { text: t('btn_edit') })
+        editBtn.addEventListener('click', () => {
+          row.innerHTML = ''
+          row.classList.add('uiu-editing')
+          const fields = createEl('span', { class: 'uiu-settings-item' })
+          const eSel = createEl('input', { type: 'text' })
+          eSel.value = cfg.selector || ''
+          const ePos = createEl('select')
+          ;[
+            { value: 'before', text: t('pos_before') },
+            { value: 'after', text: t('pos_after') },
+            { value: 'inside', text: t('pos_inside') },
+          ].forEach(({ value, text }) => {
+            const opt = createEl('option', { value, text })
+            if (value === (cfg.position || 'after')) opt.selected = true
+            ePos.appendChild(opt)
+          })
+          const eText = createEl('input', { type: 'text' })
+          eText.value = cfg.text || t('insert_image_button_default')
+          fields.appendChild(eSel)
+          fields.appendChild(ePos)
+          fields.appendChild(eText)
+          const ops = createEl('span', { class: 'uiu-ops' })
+          const updateBtn = createEl('button', { text: t('btn_update') })
+          updateBtn.addEventListener('click', () => {
+            updateSiteBtnSetting(idx, {
+              selector: eSel.value,
+              position: ePos.value,
+              text: eText.value,
+            })
+            renderSettingsList()
+            document
+              .querySelectorAll('.uiu-insert-btn')
+              .forEach((el) => el.remove())
+            applySiteButtons()
+            try {
+              restartSiteButtonObserver()
+            } catch {}
+          })
+          const cancelBtn = createEl('button', { text: t('btn_cancel') })
+          cancelBtn.addEventListener('click', () => {
+            renderSettingsList()
+          })
+          ops.appendChild(updateBtn)
+          ops.appendChild(cancelBtn)
+          row.appendChild(fields)
+          row.appendChild(ops)
+        })
+        const delBtn = createEl('button', { text: t('btn_delete') })
+        delBtn.addEventListener('click', () => {
+          removeSiteBtnSetting(idx)
+          renderSettingsList()
+          document
+            .querySelectorAll('.uiu-insert-btn')
+            .forEach((el) => el.remove())
+          applySiteButtons()
+          try {
+            restartSiteButtonObserver()
+          } catch {}
+        })
+        row.appendChild(info)
+        const ops = createEl('span', { class: 'uiu-ops' })
+        ops.appendChild(editBtn)
+        ops.appendChild(delBtn)
+        row.appendChild(ops)
+        settingsList.appendChild(row)
       })
-      textInput.value = cur.text || '插入图片'
+    }
+
+    function refreshSettingsUI() {
+      selInput.value = ''
+      Array.from(posSel.options).forEach((opt) => {
+        opt.selected = opt.value === 'after'
+      })
+      textInput.value = t('insert_image_button_default')
+      renderSettingsList()
     }
 
     panel.appendChild(header)
     panel.appendChild(body)
     document.body.appendChild(panel)
-    // 默认隐藏面板，避免初始显示
+
     panel.style.display = 'none'
 
-    // 根据站点设置，在指定位置插入“插入图片”按钮
-    function applySiteButton() {
-      const cfg = getSiteBtnSettings()
+    function applySingle(cfg) {
       if (!cfg?.selector) return
       let target
       try {
@@ -549,32 +796,35 @@
             : 'after'
       const exists =
         pos === 'inside'
-          ? !!target.querySelector('.iu-insert-btn')
+          ? !!target.querySelector('.uiu-insert-btn')
           : pos === 'before'
             ? !!(
                 target.previousElementSibling &&
                 target.previousElementSibling.classList?.contains(
-                  'iu-insert-btn'
+                  'uiu-insert-btn'
                 )
               )
             : !!(
                 target.nextElementSibling &&
-                target.nextElementSibling.classList?.contains('iu-insert-btn')
+                target.nextElementSibling.classList?.contains('uiu-insert-btn')
               )
       if (exists) return
       let btn
-      const content = (cfg.text || '插入图片').trim()
+      const content = (cfg.text || t('insert_image_button_default')).trim()
       try {
-        const t = document.createElement('template')
-        t.innerHTML = content
-        if (t.content && t.content.childElementCount === 1) {
-          btn = t.content.firstElementChild
+        const tEl = document.createElement('template')
+        tEl.innerHTML = content
+        if (tEl.content && tEl.content.childElementCount === 1) {
+          btn = tEl.content.firstElementChild
         }
       } catch {}
       if (!btn) {
-        btn = createEl('button', { class: 'iu-insert-btn', text: content })
+        btn = createEl('button', {
+          class: 'uiu-insert-btn uiu-default',
+          text: content,
+        })
       } else {
-        btn.classList.add('iu-insert-btn')
+        btn.classList.add('uiu-insert-btn')
       }
       btn.addEventListener('click', (event) => {
         panel.style.display = 'block'
@@ -591,76 +841,65 @@
         target.insertAdjacentElement('afterend', btn)
       }
     }
-    applySiteButton()
+    function applySiteButtons() {
+      const list = getSiteBtnSettingsList()
+      list.forEach((cfg) => {
+        try {
+          applySingle(cfg)
+        } catch {}
+      })
+    }
+    applySiteButtons()
 
-    // SPA/延迟渲染：观察 DOM，目标出现即插入按钮
     let siteBtnObserver
     function restartSiteButtonObserver() {
       try {
         if (siteBtnObserver) siteBtnObserver.disconnect()
       } catch {}
-      const cfg = getSiteBtnSettings()
-      if (!cfg?.selector) {
+      const list = getSiteBtnSettingsList()
+      if (!list.length) {
         siteBtnObserver = null
         return
       }
-      let inserted = false
-      const checkAndInsert = () => {
-        if (inserted) return
-        let target
-        try {
-          target = document.querySelector(cfg.selector)
-        } catch (e) {
-          return
-        }
-        if (!target) return
-        const posRaw = (cfg.position || '').trim()
-        const pos =
-          posRaw === 'before'
-            ? 'before'
-            : posRaw === 'inside'
-              ? 'inside'
-              : 'after'
-        const exists =
-          pos === 'inside'
-            ? !!target.querySelector('.iu-insert-btn')
-            : pos === 'before'
-              ? !!(
-                  target.previousElementSibling &&
-                  target.previousElementSibling.classList?.contains(
-                    'iu-insert-btn'
-                  )
-                )
-              : !!(
-                  target.nextElementSibling &&
-                  target.nextElementSibling.classList?.contains('iu-insert-btn')
-                )
-        if (!exists) {
-          applySiteButton()
-        }
-        const existsAfter =
-          pos === 'inside'
-            ? !!target.querySelector('.iu-insert-btn')
-            : pos === 'before'
-              ? !!(
-                  target.previousElementSibling &&
-                  target.previousElementSibling.classList?.contains(
-                    'iu-insert-btn'
-                  )
-                )
-              : !!(
-                  target.nextElementSibling &&
-                  target.nextElementSibling.classList?.contains('iu-insert-btn')
-                )
-        if (existsAfter) {
-          inserted = true
+      const checkAndInsertAll = () => {
+        list.forEach((cfg) => {
           try {
-            siteBtnObserver.disconnect()
+            let target
+            try {
+              target = document.querySelector(cfg.selector)
+            } catch (e) {
+              return
+            }
+            if (!target) return
+            const posRaw = (cfg.position || '').trim()
+            const pos =
+              posRaw === 'before'
+                ? 'before'
+                : posRaw === 'inside'
+                  ? 'inside'
+                  : 'after'
+            const exists =
+              pos === 'inside'
+                ? !!target.querySelector('.uiu-insert-btn')
+                : pos === 'before'
+                  ? !!(
+                      target.previousElementSibling &&
+                      target.previousElementSibling.classList?.contains(
+                        'uiu-insert-btn'
+                      )
+                    )
+                  : !!(
+                      target.nextElementSibling &&
+                      target.nextElementSibling.classList?.contains(
+                        'uiu-insert-btn'
+                      )
+                    )
+            if (!exists) applySingle(cfg)
           } catch {}
-        }
+        })
       }
-      checkAndInsert()
-      siteBtnObserver = new MutationObserver(() => checkAndInsert())
+      checkAndInsertAll()
+      siteBtnObserver = new MutationObserver(() => checkAndInsertAll())
       siteBtnObserver.observe(document.body || document.documentElement, {
         childList: true,
         subtree: true,
@@ -668,11 +907,9 @@
     }
     restartSiteButtonObserver()
 
-    // Drop 覆盖层
-    const drop = createEl('div', { id: 'iu-drop', text: t('drop_overlay') })
+    const drop = createEl('div', { id: 'uiu-drop', text: t('drop_overlay') })
     document.body.appendChild(drop)
 
-    // 队列与并发
     const queue = []
     let running = 0
     let done = 0
@@ -723,7 +960,6 @@
       processQueue()
     }
 
-    // 粘贴图片
     document.addEventListener(
       'paste',
       (event) => {
@@ -738,7 +974,6 @@
       true
     )
 
-    // 拖拽上传
     document.addEventListener('dragover', (e) => {
       drop.classList.add('show')
       e.preventDefault()
@@ -753,7 +988,7 @@
 
     function renderHistory() {
       history.innerHTML = ''
-      const header = createEl('div', { class: 'controls' })
+      const header = createEl('div', { class: 'uiu-controls' })
       header.appendChild(
         createEl('span', {
           text: tpl(t('btn_history_count'), { count: loadHistory().length }),
@@ -767,11 +1002,11 @@
       header.appendChild(clearBtn)
       history.appendChild(header)
 
-      const listWrap = createEl('div', { class: 'list' })
+      const listWrap = createEl('div', { class: 'uiu-list' })
       const items = loadHistory()
       items.forEach((it) => {
-        const row = createEl('div', { class: 'row' })
-        // 预览图片
+        const row = createEl('div', { class: 'uiu-row' })
+
         const preview = createEl('img', {
           src: it.link,
           style:
@@ -779,14 +1014,13 @@
         })
         row.appendChild(preview)
 
-        // 信息栏：名称与来源网址
         const info = createEl('div', {
           style:
             'flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding:0 8px;',
         })
         info.appendChild(
           createEl('span', {
-            class: 'name',
+            class: 'uiu-name',
             text: it.name || it.link,
             title: it.name || it.link,
           })
@@ -807,7 +1041,7 @@
         }
         row.appendChild(info)
 
-        const ops = createEl('div', { class: 'ops' })
+        const ops = createEl('div', { class: 'uiu-ops' })
         const copyBtn = createEl('button', { text: t('btn_copy') })
         copyBtn.addEventListener('click', () => {
           const fmt = getFormat()
@@ -828,7 +1062,6 @@
       history.appendChild(listWrap)
     }
 
-    // 监听历史记录的变化，实时刷新列表
     try {
       if (typeof GM_addValueChangeListener === 'function') {
         GM_addValueChangeListener(
@@ -849,7 +1082,7 @@
     })
     GM_registerMenuCommand(t('menu_settings'), () => {
       panel.style.display = 'block'
-      panel.classList.add('show-settings')
+      panel.classList.add('uiu-show-settings')
       try {
         refreshSettingsUI()
       } catch {}
@@ -858,10 +1091,9 @@
     return { handleFiles }
   }
 
-  // 初始化
-  if (!document.getElementById('iu-panel')) {
+  if (!document.getElementById('uiu-panel')) {
     const { handleFiles } = createPanel()
-    // 支持通过菜单外部触发（例如其他脚本集成）
+
     window.addEventListener('iu:uploadFiles', (e) => {
       const files = e.detail?.files
       if (files?.length) handleFiles(files)
