@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.1.0
+// @version            0.1.1
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -15,10 +15,11 @@
 // @noframes
 // @match              https://*.v2ex.com/*
 // @match              https://*.v2ex.co/*
+// @match              https://greasyfork.org/*
 // @match              https://www.nodeseek.com/*
 // @match              https://www.deepflood.com/*
 // @match              https://2libra.com/*
-// @match              *://*/*removethis
+// @match              *://*/*remove-this-to-apply-to-all-sites
 // @grant              GM_setValue
 // @grant              GM_getValue
 // @grant              GM_addStyle
@@ -50,6 +51,20 @@
           selector: '#tab-preview',
           position: 'after',
           text: '<a class="tab-alt"> + 插入图片</a>',
+        },
+        {
+          selector: 'button[onclick^="previewTopicContent"]',
+          position: 'before',
+          text: `<button type="button" class="super normal button" style="margin-right: 12px;"><li class="fa fa-plus"></li> &nbsp;插入图片</button>`,
+        },
+      ],
+    },
+    'greasyfork.org': {
+      format: 'markdown',
+      buttons: [
+        {
+          selector: '.comment-screenshot-control',
+          position: 'before'
         },
       ],
     },
