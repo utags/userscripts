@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name               Universal Image Uploader
 // @name:zh-CN         通用图片上传助手
+// @name:zh-TW         通用圖片上傳助手
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.0.1
+// @version            0.0.2
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
+// @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
 // @author             Pipecraft
 // @license            MIT
 // @icon               data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+PHJlY3QgeD0iOCIgeT0iOCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTAiIHN0cm9rZT0iIzFmMjkzNyIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHBhdGggZD0iTTMyIDIwbC0xMiAxMmg3djE4aDEwVjMyaDdsLTEyLTEyeiIgZmlsbD0iIzFmMjkzNyIvPjwvc3ZnPg==
@@ -23,6 +25,150 @@
 
 ;(function () {
   'use strict'
+
+  // I18N: language detection and translations
+  const I18N = {
+    en: {
+      header_title: 'Universal Image Uploader',
+      btn_history: 'History',
+      btn_settings: 'Settings',
+      btn_close: 'Close',
+      format_markdown: 'Markdown',
+      format_html: 'HTML',
+      format_bbcode: 'BBCode',
+      format_link: 'Link',
+      btn_select_images: 'Select Images',
+      progress_initial: 'Done 0/0',
+      progress_done: 'Done {done}/{total}',
+      hint_text:
+        'Paste or drag images onto the page, or click Select to batch upload',
+      settings_section_title: 'Site Button Settings',
+      placeholder_css_selector: 'CSS Selector',
+      pos_before: 'Before',
+      pos_after: 'After',
+      pos_inside: 'Inside',
+      placeholder_button_content: 'Button content (HTML allowed)',
+      insert_image_button_default: 'Insert image',
+      btn_save_and_insert: 'Save & Insert',
+      btn_remove_button_temp: 'Remove button (temporary)',
+      btn_clear_settings: 'Clear settings',
+      drop_overlay: 'Release to upload images',
+      log_uploading: 'Uploading: ',
+      log_success: '✅ Success: ',
+      log_failed: '❌ Failed: ',
+      btn_copy: 'Copy',
+      btn_open: 'Open',
+      menu_open_panel: 'Open upload panel',
+      menu_select_images: 'Select images',
+      menu_settings: 'Settings',
+      history_upload_page_prefix: 'Upload page: ',
+      history_upload_page: 'Upload page: {host}',
+      btn_history_count: 'History ({count})',
+      btn_clear_history: 'Clear',
+      default_image_name: 'image',
+    },
+    'zh-CN': {
+      header_title: '通用图片上传助手',
+      btn_history: '历史',
+      btn_settings: '设置',
+      btn_close: '关闭',
+      format_markdown: 'Markdown',
+      format_html: 'HTML',
+      format_bbcode: 'BBCode',
+      format_link: '链接',
+      btn_select_images: '选择图片',
+      progress_initial: '完成 0/0',
+      progress_done: '完成 {done}/{total}',
+      hint_text: '支持粘贴图片、拖拽图片到页面或点击选择图片进行批量上传',
+      settings_section_title: '站点按钮设置',
+      placeholder_css_selector: 'CSS 选择器',
+      pos_before: '之前',
+      pos_after: '之后',
+      pos_inside: '里面',
+      placeholder_button_content: '按钮内容（可为 HTML）',
+      insert_image_button_default: '插入图片',
+      btn_save_and_insert: '保存并插入',
+      btn_remove_button_temp: '移除按钮（临时）',
+      btn_clear_settings: '清空设置',
+      drop_overlay: '释放以上传图片',
+      log_uploading: '上传中：',
+      log_success: '✅ 成功：',
+      log_failed: '❌ 失败：',
+      btn_copy: '复制',
+      btn_open: '打开',
+      menu_open_panel: '打开图片上传面板',
+      menu_select_images: '选择图片',
+      menu_settings: '设置',
+      history_upload_page_prefix: '上传页面：',
+      history_upload_page: '上传页面：{host}',
+      btn_history_count: '历史（{count}）',
+      btn_clear_history: '清空',
+      default_image_name: '图片',
+    },
+    'zh-TW': {
+      header_title: '通用圖片上傳助手',
+      btn_history: '歷史',
+      btn_settings: '設定',
+      btn_close: '關閉',
+      format_markdown: 'Markdown',
+      format_html: 'HTML',
+      format_bbcode: 'BBCode',
+      format_link: '連結',
+      btn_select_images: '選擇圖片',
+      progress_initial: '完成 0/0',
+      progress_done: '完成 {done}/{total}',
+      hint_text: '支援貼上、拖曳圖片到頁面或點擊選擇檔案進行批次上傳',
+      settings_section_title: '站點按鈕設定',
+      placeholder_css_selector: 'CSS 選擇器',
+      pos_before: '之前',
+      pos_after: '之後',
+      pos_inside: '裡面',
+      placeholder_button_content: '按鈕內容（可為 HTML）',
+      insert_image_button_default: '插入圖片',
+      btn_save_and_insert: '保存並插入',
+      btn_remove_button_temp: '移除按鈕（暫時）',
+      btn_clear_settings: '清空設定',
+      drop_overlay: '放開以上傳圖片',
+      log_uploading: '上傳中：',
+      log_success: '✅ 成功：',
+      log_failed: '❌ 失敗：',
+      btn_copy: '複製',
+      btn_open: '打開',
+      menu_open_panel: '打開圖片上傳面板',
+      menu_select_images: '選擇圖片',
+      menu_settings: '設定',
+      history_upload_page_prefix: '上傳頁面：',
+      history_upload_page: '上傳頁面：{host}',
+      btn_history_count: '歷史（{count}）',
+      btn_clear_history: '清空',
+      default_image_name: '圖片',
+    },
+  }
+
+  function detectLanguage() {
+    try {
+      const browserLang = (
+        navigator.language ||
+        navigator.userLanguage ||
+        'en'
+      ).toLowerCase()
+      const supported = Object.keys(I18N)
+      if (supported.includes(browserLang)) return browserLang
+      const base = browserLang.split('-')[0]
+      const match = supported.find((l) => l.startsWith(base + '-'))
+      return match || 'en'
+    } catch {
+      return 'en'
+    }
+  }
+
+  const USER_LANG = detectLanguage()
+  function t(key) {
+    return (I18N[USER_LANG] && I18N[USER_LANG][key]) || I18N.en[key] || key
+  }
+  function tpl(str, params) {
+    return String(str).replace(/\{(\w+)\}/g, (_, k) => `${params?.[k] ?? ''}`)
+  }
 
   // Imgur Client ID 池（参考 upload-image.ts）
   const IMGUR_CLIENT_IDS = [
@@ -132,7 +278,7 @@
 
   function basename(name) {
     const n = (name || '').trim()
-    if (!n) return 'image'
+    if (!n) return t('default_image_name')
     return n.replace(/\.[^.]+$/, '')
   }
 
@@ -218,21 +364,21 @@
   function createPanel() {
     const panel = createEl('div', { id: 'iu-panel' })
     const header = createEl('header')
-    header.appendChild(createEl('span', { text: '图片上传' }))
+    header.appendChild(createEl('span', { text: t('header_title') }))
     const actions = createEl('div', { class: 'actions' })
-    const toggleHistoryBtn = createEl('button', { text: '历史' })
+    const toggleHistoryBtn = createEl('button', { text: t('btn_history') })
     toggleHistoryBtn.addEventListener('click', () => {
       panel.classList.toggle('show-history')
       renderHistory()
     })
-    const settingsBtn = createEl('button', { text: '设置' })
+    const settingsBtn = createEl('button', { text: t('btn_settings') })
     settingsBtn.addEventListener('click', () => {
       panel.classList.toggle('show-settings')
       try {
         refreshSettingsUI()
       } catch {}
     })
-    const closeBtn = createEl('button', { text: '关闭' })
+    const closeBtn = createEl('button', { text: t('btn_close') })
     closeBtn.addEventListener('click', () => {
       panel.style.display = 'none'
     })
@@ -247,10 +393,10 @@
     const format = getFormat()
     const formatSel = createEl('select')
     ;[
-      ['markdown', 'Markdown'],
-      ['html', 'HTML'],
-      ['bbcode', 'BBCode'],
-      ['link', '链接'],
+      ['markdown', t('format_markdown')],
+      ['html', t('format_html')],
+      ['bbcode', t('format_bbcode')],
+      ['link', t('format_link')],
     ].forEach(([val, label]) => {
       const opt = createEl('option', { value: val, text: label })
       if (val === format) opt.selected = true
@@ -272,10 +418,16 @@
     }
 
     // 选择图片按钮（调用统一的 openFilePicker）
-    const selectBtn = createEl('button', { class: 'primary', text: '选择图片' })
+    const selectBtn = createEl('button', {
+      class: 'primary',
+      text: t('btn_select_images'),
+    })
     selectBtn.addEventListener('click', openFilePicker)
 
-    const progressEl = createEl('span', { class: 'progress', text: '完成 0/0' })
+    const progressEl = createEl('span', {
+      class: 'progress',
+      text: t('progress_initial'),
+    })
 
     controls.appendChild(formatSel)
     controls.appendChild(selectBtn)
@@ -287,7 +439,7 @@
 
     const hint = createEl('div', {
       class: 'hint',
-      text: '支持粘贴图片、拖拽图片到页面或点击选择图片进行批量上传',
+      text: t('hint_text'),
     })
     body.appendChild(hint)
 
@@ -297,18 +449,20 @@
     // 设置面板：站点“插入图片”按钮配置
     const settings = createEl('div', { class: 'settings' })
     const settingsHeader = createEl('div', { class: 'controls' })
-    settingsHeader.appendChild(createEl('span', { text: '站点按钮设置' }))
+    settingsHeader.appendChild(
+      createEl('span', { text: t('settings_section_title') })
+    )
     settings.appendChild(settingsHeader)
     const settingsForm = createEl('div', { class: 'controls' })
     const selInput = createEl('input', {
       type: 'text',
-      placeholder: 'CSS 选择器',
+      placeholder: t('placeholder_css_selector'),
     })
     const posSel = createEl('select')
     ;[
-      { value: 'before', text: '之前' },
-      { value: 'after', text: '之后' },
-      { value: 'inside', text: '里面' },
+      { value: 'before', text: t('pos_before') },
+      { value: 'after', text: t('pos_after') },
+      { value: 'inside', text: t('pos_inside') },
     ].forEach(({ value, text }) => {
       const opt = createEl('option', { value, text })
       if (value === 'after') opt.selected = true
@@ -316,10 +470,10 @@
     })
     const textInput = createEl('input', {
       type: 'text',
-      placeholder: '按钮内容（可为 HTML）',
+      placeholder: t('placeholder_button_content'),
     })
-    textInput.value = '插入图片'
-    const saveBtn = createEl('button', { text: '保存并插入' })
+    textInput.value = t('insert_image_button_default')
+    const saveBtn = createEl('button', { text: t('btn_save_and_insert') })
     saveBtn.addEventListener('click', () => {
       setSiteBtnSettings({
         selector: selInput.value,
@@ -332,14 +486,14 @@
         restartSiteButtonObserver()
       } catch {}
     })
-    const removeBtn = createEl('button', { text: '移除按钮（临时）' })
+    const removeBtn = createEl('button', { text: t('btn_remove_button_temp') })
     removeBtn.addEventListener('click', () => {
       document.querySelectorAll('.iu-insert-btn').forEach((el) => el.remove())
       try {
         if (siteBtnObserver) siteBtnObserver.disconnect()
       } catch {}
     })
-    const clearBtn = createEl('button', { text: '清空设置' })
+    const clearBtn = createEl('button', { text: t('btn_clear_settings') })
     clearBtn.addEventListener('click', () => {
       setSiteBtnSettings({ selector: '' })
       document.querySelectorAll('.iu-insert-btn').forEach((el) => el.remove())
@@ -515,7 +669,7 @@
     restartSiteButtonObserver()
 
     // Drop 覆盖层
-    const drop = createEl('div', { id: 'iu-drop', text: '释放以上传图片' })
+    const drop = createEl('div', { id: 'iu-drop', text: t('drop_overlay') })
     document.body.appendChild(drop)
 
     // 队列与并发
@@ -526,7 +680,7 @@
     const CONCURRENCY = 3
 
     function updateProgress() {
-      progressEl.textContent = `完成 ${done}/${total}`
+      progressEl.textContent = tpl(t('progress_done'), { done, total })
     }
 
     function addLog(text) {
@@ -537,7 +691,7 @@
       while (running < CONCURRENCY && queue.length) {
         const item = queue.shift()
         running++
-        addLog(`上传中：${item.file.name}`)
+        addLog(`${t('log_uploading')}${item.file.name}`)
         try {
           const link = await uploadToImgur(item.file)
           const fmt = getFormat()
@@ -549,9 +703,9 @@
             ts: Date.now(),
             pageUrl: location.href,
           })
-          addLog(`✅ 成功：${item.file.name} → ${link}`)
+          addLog(`${t('log_success')}${item.file.name} → ${link}`)
         } catch (e) {
-          addLog(`❌ 失败：${item.file.name}（${e?.message || e}）`)
+          addLog(`${t('log_failed')}${item.file.name}（${e?.message || e}）`)
         } finally {
           running--
           done++
@@ -601,9 +755,11 @@
       history.innerHTML = ''
       const header = createEl('div', { class: 'controls' })
       header.appendChild(
-        createEl('span', { text: `历史（${loadHistory().length}）` })
+        createEl('span', {
+          text: tpl(t('btn_history_count'), { count: loadHistory().length }),
+        })
       )
-      const clearBtn = createEl('button', { text: '清空' })
+      const clearBtn = createEl('button', { text: t('btn_clear_history') })
       clearBtn.addEventListener('click', () => {
         saveHistory([])
         renderHistory()
@@ -642,7 +798,7 @@
           } catch {}
           const pageLink = createEl('a', {
             href: it.pageUrl,
-            text: `上传页面：${host}`,
+            text: tpl(t('history_upload_page'), { host }),
             target: '_blank',
             rel: 'noopener noreferrer',
             style: 'color:#93c5fd;text-decoration:none;font-size:11px;',
@@ -652,13 +808,17 @@
         row.appendChild(info)
 
         const ops = createEl('div', { class: 'ops' })
-        const copyBtn = createEl('button', { text: '复制' })
+        const copyBtn = createEl('button', { text: t('btn_copy') })
         copyBtn.addEventListener('click', () => {
           const fmt = getFormat()
-          const out = formatText(it.link, it.name || 'image', fmt)
+          const out = formatText(
+            it.link,
+            it.name || t('default_image_name'),
+            fmt
+          )
           copyAndInsert(out)
         })
-        const openBtn = createEl('button', { text: '打开' })
+        const openBtn = createEl('button', { text: t('btn_open') })
         openBtn.addEventListener('click', () => window.open(it.link, '_blank'))
         ops.appendChild(copyBtn)
         ops.appendChild(openBtn)
@@ -680,14 +840,14 @@
       }
     } catch {}
 
-    GM_registerMenuCommand('打开图片上传面板', () => {
+    GM_registerMenuCommand(t('menu_open_panel'), () => {
       panel.style.display = 'block'
     })
-    GM_registerMenuCommand('选择图片', () => {
+    GM_registerMenuCommand(t('menu_select_images'), () => {
       panel.style.display = 'block'
       openFilePicker()
     })
-    GM_registerMenuCommand('设置', () => {
+    GM_registerMenuCommand(t('menu_settings'), () => {
       panel.style.display = 'block'
       panel.classList.add('show-settings')
       try {
