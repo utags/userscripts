@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.1.2
+// @version            0.1.3
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -795,13 +795,13 @@
 
     function applySingle(cfg) {
       if (!cfg?.selector) return
-      let target
+      let targets
       try {
-        target = document.querySelector(cfg.selector)
+        targets = document.querySelectorAll(cfg.selector)
       } catch (e) {
         return
       }
-      if (!target) return
+      if (!targets || !targets.length) return
       const posRaw = (cfg.position || '').trim()
       const pos =
         posRaw === 'before'
@@ -809,52 +809,56 @@
           : posRaw === 'inside'
             ? 'inside'
             : 'after'
-      const exists =
-        pos === 'inside'
-          ? !!target.querySelector('.uiu-insert-btn')
-          : pos === 'before'
-            ? !!(
-                target.previousElementSibling &&
-                target.previousElementSibling.classList?.contains(
-                  'uiu-insert-btn'
-                )
-              )
-            : !!(
-                target.nextElementSibling &&
-                target.nextElementSibling.classList?.contains('uiu-insert-btn')
-              )
-      if (exists) return
-      let btn
       const content = (cfg.text || t('insert_image_button_default')).trim()
-      try {
-        const tEl = document.createElement('template')
-        tEl.innerHTML = content
-        if (tEl.content && tEl.content.childElementCount === 1) {
-          btn = tEl.content.firstElementChild
-        }
-      } catch {}
-      if (!btn) {
-        btn = createEl('button', {
-          class: 'uiu-insert-btn uiu-default',
-          text: content,
-        })
-      } else {
-        btn.classList.add('uiu-insert-btn')
-      }
-      btn.addEventListener('click', (event) => {
-        panel.style.display = 'block'
-        event.preventDefault()
+      Array.from(targets).forEach((target) => {
+        const exists =
+          pos === 'inside'
+            ? !!target.querySelector('.uiu-insert-btn')
+            : pos === 'before'
+              ? !!(
+                  target.previousElementSibling &&
+                  target.previousElementSibling.classList?.contains(
+                    'uiu-insert-btn'
+                  )
+                )
+              : !!(
+                  target.nextElementSibling &&
+                  target.nextElementSibling.classList?.contains(
+                    'uiu-insert-btn'
+                  )
+                )
+        if (exists) return
+        let btn
         try {
-          openFilePicker()
+          const tEl = document.createElement('template')
+          tEl.innerHTML = content
+          if (tEl.content && tEl.content.childElementCount === 1) {
+            btn = tEl.content.firstElementChild
+          }
         } catch {}
+        if (!btn) {
+          btn = createEl('button', {
+            class: 'uiu-insert-btn uiu-default',
+            text: content,
+          })
+        } else {
+          btn.classList.add('uiu-insert-btn')
+        }
+        btn.addEventListener('click', (event) => {
+          panel.style.display = 'block'
+          event.preventDefault()
+          try {
+            openFilePicker()
+          } catch {}
+        })
+        if (pos === 'before') {
+          target.insertAdjacentElement('beforebegin', btn)
+        } else if (pos === 'inside') {
+          target.insertAdjacentElement('beforeend', btn)
+        } else {
+          target.insertAdjacentElement('afterend', btn)
+        }
       })
-      if (pos === 'before') {
-        target.insertAdjacentElement('beforebegin', btn)
-      } else if (pos === 'inside') {
-        target.insertAdjacentElement('beforeend', btn)
-      } else {
-        target.insertAdjacentElement('afterend', btn)
-      }
     }
     function applySiteButtons() {
       const list = getSiteBtnSettingsList()
@@ -879,37 +883,7 @@
       const checkAndInsertAll = () => {
         list.forEach((cfg) => {
           try {
-            let target
-            try {
-              target = document.querySelector(cfg.selector)
-            } catch (e) {
-              return
-            }
-            if (!target) return
-            const posRaw = (cfg.position || '').trim()
-            const pos =
-              posRaw === 'before'
-                ? 'before'
-                : posRaw === 'inside'
-                  ? 'inside'
-                  : 'after'
-            const exists =
-              pos === 'inside'
-                ? !!target.querySelector('.uiu-insert-btn')
-                : pos === 'before'
-                  ? !!(
-                      target.previousElementSibling &&
-                      target.previousElementSibling.classList?.contains(
-                        'uiu-insert-btn'
-                      )
-                    )
-                  : !!(
-                      target.nextElementSibling &&
-                      target.nextElementSibling.classList?.contains(
-                        'uiu-insert-btn'
-                      )
-                    )
-            if (!exists) applySingle(cfg)
+            applySingle(cfg)
           } catch {}
         })
       }
