@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.1.1
+// @version            0.1.2
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -64,7 +64,7 @@
       buttons: [
         {
           selector: '.comment-screenshot-control',
-          position: 'before'
+          position: 'before',
         },
       ],
     },
@@ -411,7 +411,7 @@
 
   const css = `
   #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 999999; width: 440px; background: #111827cc; color: #fff; backdrop-filter: blur(6px); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }
-  #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; }
+  #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; background-color: unset; box-shadow: unset; transition: unset; }
   #uiu-panel header .uiu-actions { display:flex; gap:8px; }
   #uiu-panel header .uiu-actions button { font-size: 12px; }
   #uiu-panel .uiu-body { padding: 8px 12px; }
@@ -990,8 +990,19 @@
     )
 
     document.addEventListener('dragover', (e) => {
-      drop.classList.add('show')
-      e.preventDefault()
+      const dt = e.dataTransfer
+      const types = dt?.types ? Array.from(dt.types) : []
+      const hasFileType =
+        types.includes('Files') || dt?.types?.contains?.('Files')
+      const hasFileItem = dt?.items
+        ? Array.from(dt.items).some((it) => it.kind === 'file')
+        : false
+      if (hasFileType || hasFileItem) {
+        drop.classList.add('show')
+        e.preventDefault()
+      } else {
+        drop.classList.remove('show')
+      }
     })
     document.addEventListener('dragleave', () => drop.classList.remove('show'))
     document.addEventListener('drop', (event) => {
