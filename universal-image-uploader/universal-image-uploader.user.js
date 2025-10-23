@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.1.3
+// @version            0.2.0
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -26,7 +26,10 @@
 // @grant              GM_registerMenuCommand
 // @grant              GM_setClipboard
 // @grant              GM_addValueChangeListener
+// @grant              GM.xmlhttpRequest
+// @grant              GM_xmlhttpRequest
 // @connect            api.imgur.com
+// @connect            tikolu.net
 // ==/UserScript==
 
 ;(function () {
@@ -115,6 +118,8 @@
       format_html: 'HTML',
       format_bbcode: 'BBCode',
       format_link: 'Link',
+      host_imgur: 'Imgur',
+      host_tikolu: 'Tikolu',
       btn_select_images: 'Select Images',
       progress_initial: 'Done 0/0',
       progress_done: 'Done {done}/{total}',
@@ -148,6 +153,8 @@
       btn_history_count: 'History ({count})',
       btn_clear_history: 'Clear',
       default_image_name: 'image',
+      error_network: 'Network error',
+      error_upload_failed: 'Upload failed',
     },
     'zh-CN': {
       header_title: '通用图片上传助手',
@@ -158,6 +165,8 @@
       format_html: 'HTML',
       format_bbcode: 'BBCode',
       format_link: '链接',
+      host_imgur: 'Imgur',
+      host_tikolu: 'Tikolu',
       btn_select_images: '选择图片',
       progress_initial: '完成 0/0',
       progress_done: '完成 {done}/{total}',
@@ -190,6 +199,8 @@
       btn_history_count: '历史（{count}）',
       btn_clear_history: '清空',
       default_image_name: '图片',
+      error_network: '网络错误',
+      error_upload_failed: '上传失败',
     },
     'zh-TW': {
       header_title: '通用圖片上傳助手',
@@ -200,6 +211,8 @@
       format_html: 'HTML',
       format_bbcode: 'BBCode',
       format_link: '連結',
+      host_imgur: 'Imgur',
+      host_tikolu: 'Tikolu',
       btn_select_images: '選擇圖片',
       progress_initial: '完成 0/0',
       progress_done: '完成 {done}/{total}',
@@ -232,6 +245,8 @@
       btn_history_count: '歷史（{count}）',
       btn_clear_history: '清空',
       default_image_name: '圖片',
+      error_network: '網路錯誤',
+      error_upload_failed: '上傳失敗',
     },
   }
 
@@ -273,10 +288,35 @@
     '81be04b9e4a08ce',
   ]
 
-  const HISTORY_KEY = 'iu_history'
-  const FORMAT_MAP_KEY = 'iu_format_map'
-  const BTN_SETTINGS_MAP_KEY = 'iu_site_btn_settings_map'
+  const HISTORY_KEY = 'uiu_history'
+  const FORMAT_MAP_KEY = 'uiu_format_map'
+  const BTN_SETTINGS_MAP_KEY = 'uiu_site_btn_settings_map'
+  const HOST_MAP_KEY = 'uiu_host_map'
   const DEFAULT_FORMAT = 'markdown'
+  const DEFAULT_HOST = 'imgur'
+
+  // Migrate legacy storage keys from older versions (iu_*) to new (uiu_*) - v0.1 to v0.2
+  function migrateLegacyStorage() {
+    try {
+      const maybeMove = (oldKey, newKey) => {
+        const hasNew = GM_getValue(newKey, undefined) !== undefined
+        const oldVal = GM_getValue(oldKey, undefined)
+        const hasOld = oldVal !== undefined
+        if (!hasNew && hasOld) {
+          GM_setValue(newKey, oldVal)
+          try {
+            if (typeof GM_deleteValue === 'function') GM_deleteValue(oldKey)
+          } catch {}
+        }
+      }
+      maybeMove('iu_history', HISTORY_KEY)
+      maybeMove('iu_format_map', FORMAT_MAP_KEY)
+      maybeMove('iu_site_btn_settings_map', BTN_SETTINGS_MAP_KEY)
+    } catch {}
+  }
+
+  // Run migration early before any reads/writes
+  migrateLegacyStorage()
 
   // Apply preset config to storage (only if the site has no saved settings)
   function applyPresetConfig() {
@@ -293,8 +333,10 @@
       }
       const formatMap = GM_getValue(FORMAT_MAP_KEY, {})
       const btnMap = GM_getValue(BTN_SETTINGS_MAP_KEY, {})
+      const hostMap = GM_getValue(HOST_MAP_KEY, {})
       let changedFmt = false
       let changedBtn = false
+      let changedHost = false
       Object.entries(CONFIG || {}).forEach(([host, preset]) => {
         const key = normalize(host)
         if (!key || typeof preset !== 'object') return
@@ -306,6 +348,15 @@
             : DEFAULT_FORMAT
           formatMap[key] = fmt
           changedFmt = true
+        }
+        // Preset host
+        if (preset.host && !(key in hostMap)) {
+          const allowedHosts = ['imgur', 'tikolu']
+          const h = allowedHosts.includes(preset.host)
+            ? preset.host
+            : DEFAULT_HOST
+          hostMap[key] = h
+          changedHost = true
         }
         // Preset buttons (single or array)
         const raw = preset.buttons || preset.button || []
@@ -332,6 +383,7 @@
       })
       if (changedFmt) GM_setValue(FORMAT_MAP_KEY, formatMap)
       if (changedBtn) GM_setValue(BTN_SETTINGS_MAP_KEY, btnMap)
+      if (changedHost) GM_setValue(HOST_MAP_KEY, hostMap)
     } catch {}
   }
 
@@ -350,6 +402,15 @@
     const map = GM_getValue(FORMAT_MAP_KEY, {})
     map[siteKey()] = fmt
     GM_setValue(FORMAT_MAP_KEY, map)
+  }
+  const getHost = () => {
+    const map = GM_getValue(HOST_MAP_KEY, {})
+    return map[siteKey()] || DEFAULT_HOST
+  }
+  const setHost = (host) => {
+    const map = GM_getValue(HOST_MAP_KEY, {})
+    map[siteKey()] = host
+    GM_setValue(HOST_MAP_KEY, map)
   }
   // Support multiple site button configurations
   const getSiteBtnSettingsList = () => {
@@ -496,20 +557,73 @@
           body: formData,
         })
         if (!res.ok) {
-          lastError = new Error('网络错误')
+          lastError = new Error(t('error_network'))
           continue
         }
         const data = await res.json()
         if (data?.success && data?.data?.link) {
           return data.data.link
         }
-        lastError = new Error('上传失败')
+        lastError = new Error(t('error_upload_failed'))
       } catch (e) {
         lastError = e
       }
     }
 
-    throw lastError || new Error('上传失败')
+    throw lastError || new Error(t('error_upload_failed'))
+  }
+
+  async function uploadToTikolu(file) {
+    // 8mb size limit (server also checks)
+    if (Math.floor(file.size / 1000) > 8000) {
+      throw new Error('8mb limit')
+    }
+    const formData = new FormData()
+    formData.append('upload', true)
+    formData.append('file', file)
+    return new Promise((resolve, reject) => {
+      const req =
+        typeof GM !== 'undefined' && GM?.xmlHttpRequest
+          ? GM.xmlHttpRequest
+          : typeof GM_xmlhttpRequest !== 'undefined'
+            ? GM_xmlhttpRequest
+            : null
+      if (!req) {
+        reject(new Error('GM.xmlHttpRequest unavailable'))
+        return
+      }
+      try {
+        req({
+          method: 'POST',
+          url: 'https://tikolu.net/i/',
+          data: formData,
+          responseType: 'json',
+          onload: (res) => {
+            try {
+              const data = res.response ?? JSON.parse(res.responseText || '{}')
+              if (data?.status === 'uploaded' && data?.id) {
+                resolve(`https://tikolu.net/i/${data.id}`)
+              } else {
+                reject(new Error(t('error_upload_failed')))
+              }
+            } catch (e) {
+              reject(e)
+            }
+          },
+          onerror: () => reject(new Error(t('error_network'))),
+          ontimeout: () => reject(new Error(t('error_network'))),
+        })
+      } catch (e) {
+        reject(e)
+      }
+    })
+  }
+
+  async function uploadImage(file) {
+    const host = getHost()
+    if (host === 'tikolu') return uploadToTikolu(file)
+    // Default
+    return uploadToImgur(file)
   }
 
   function insertIntoFocused(text) {
@@ -585,6 +699,18 @@
     })
     formatSel.addEventListener('change', () => setFormat(formatSel.value))
 
+    const host = getHost()
+    const hostSel = createEl('select')
+    ;[
+      ['imgur', t('host_imgur')],
+      ['tikolu', t('host_tikolu')],
+    ].forEach(([val, label]) => {
+      const optH = createEl('option', { value: val, text: label })
+      if (val === host) optH.selected = true
+      hostSel.appendChild(optH)
+    })
+    hostSel.addEventListener('change', () => setHost(hostSel.value))
+
     function openFilePicker() {
       const input = createEl('input', {
         type: 'file',
@@ -610,6 +736,7 @@
     })
 
     controls.appendChild(formatSel)
+    controls.appendChild(hostSel)
     controls.appendChild(selectBtn)
     controls.appendChild(progressEl)
     body.appendChild(controls)
@@ -919,7 +1046,7 @@
         running++
         addLog(`${t('log_uploading')}${item.file.name}`)
         try {
-          const link = await uploadToImgur(item.file)
+          const link = await uploadImage(item.file)
           const fmt = getFormat()
           const out = formatText(link, item.file.name, fmt)
           copyAndInsert(out)
@@ -928,6 +1055,7 @@
             name: item.file.name,
             ts: Date.now(),
             pageUrl: location.href,
+            provider: getHost(),
           })
           addLog(`${t('log_success')}${item.file.name} → ${link}`)
         } catch (e) {
@@ -1025,6 +1153,17 @@
             title: it.name || it.link,
           })
         )
+        try {
+          const providerKey = it.provider || 'imgur'
+          const providerText = t('host_' + providerKey)
+          info.appendChild(
+            createEl('span', {
+              text: providerText,
+              style:
+                'font-size:11px;color:#cbd5e1;border:1px solid #334155;border-radius:4px;padding:1px 6px;width:fit-content;',
+            })
+          )
+        } catch {}
         if (it.pageUrl) {
           let host = it.pageUrl
           try {

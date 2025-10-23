@@ -1,6 +1,6 @@
 # 通用图片上传助手（Universal Image Uploader）
 
-一个用户脚本：在任意网站上粘贴、拖拽或选择图片，批量上传到 Imgur，并按需自动复制为 Markdown/HTML/BBCode/纯链接。支持可配置的站点按钮（兼容单页应用），提供本地上传历史便于快速复用。
+一个用户脚本：在任意网站上粘贴、拖拽或选择图片，批量上传到 Imgur 或 Tikolu（可选择图床），并按需自动复制为 Markdown/HTML/BBCode/纯链接。支持可配置的站点按钮（兼容单页应用），提供本地上传历史便于快速复用。
 
 [English](https://github.com/utags/userscripts/blob/main/universal-image-uploader/README.md)
 
@@ -19,7 +19,7 @@
 ## 功能（MVP）
 
 - 📥 支持粘贴、拖拽、文件选择收集图片
-- 📤 批量上传到 Imgur，实时显示进度
+- 📤 批量上传到 Imgur/Tikolu，实时显示进度
 - 📋 自动复制输出：`Markdown` / `HTML` / `BBCode` / `Link`
 - 🕘 本地历史记录，便于再次复制与复用
 - 🔘 可选站点按钮注入，兼容 SPA（按站点配置）
@@ -43,6 +43,7 @@
 
 - 在页面中粘贴/拖拽图片，或使用面板选择文件
 - 队列中可查看上传进度
+- 在面板的图床选择器中选择上传平台（Imgur/Tikolu）
 - 完成后按所选格式自动复制
 - 历史记录中可快速再次复制
 
@@ -55,6 +56,7 @@
 
 ## 配置项
 
+- 站点记忆图床：`Imgur` / `Tikolu`
 - 站点记忆输出格式：`Markdown` / `HTML` / `BBCode` / `Link`
 - 可选站点按钮注入：选择器、位置（`before` | `inside` | `after`）、按钮文案
 
@@ -80,7 +82,13 @@
 
 ## 更新记录
 
-- v0.1.0 — 初始 MVP：Imgur 上传、批量与进度、自动复制（Markdown/HTML/BBCode/Link）、本地历史、兼容 SPA 的站点按钮注入
+### v0.2.0
+
+- 新增 Tikolu 图床，面板支持选择 Imgur/Tikolu
+
+### v0.1.0
+
+- 初始 MVP：Imgur 上传、批量与进度、自动复制（Markdown/HTML/BBCode/Link）、本地历史、兼容 SPA 的站点按钮注入
 
 ## 更多实用脚本
 
