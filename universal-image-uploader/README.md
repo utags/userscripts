@@ -44,6 +44,7 @@ Install one of the following user script managers:
 - Open any site, paste or drop images onto the page, or use the panel’s file picker
 - Watch the upload queue and progress
 - Choose upload provider via the panel’s host selector (Imgur/Tikolu)
+- Choose proxy via the panel’s proxy selector (default None; Imgur not supported)
 - When finished, the script auto-copies based on your selected format
 - Use history to quickly copy past uploads
 
@@ -57,6 +58,7 @@ Install one of the following user script managers:
 ## Configuration
 
 - Per-site upload provider: remember `Imgur` / `Tikolu`
+- Per-site proxy: remember `None` / `wsrv.nl` (Imgur not supported; when `wsrv.nl` is selected, outputs and history copy/open use `https://wsrv.nl/?url=${encodeURIComponent(url)}`)
 - Per-site output format: remember `Markdown` / `HTML` / `BBCode` / `Link`
 - Per-site button injection (optional): selector, position (`before` | `inside` | `after`), text
 
@@ -82,8 +84,9 @@ Install one of the following user script managers:
 
 ## Changelog
 
-### v0.2.0
+### v0.2.x
 
+- Added proxy option: `None` / `wsrv.nl`; Imgur not supported; when `wsrv.nl` is selected, outputs and history copy/open use `https://wsrv.nl/?url=${encodeURIComponent(url)}`
 - Added Tikolu upload provider; choose Imgur/Tikolu via panel host selector
 
 ### v0.1.0

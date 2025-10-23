@@ -44,6 +44,7 @@
 - 在页面中粘贴/拖拽图片，或使用面板选择文件
 - 队列中可查看上传进度
 - 在面板的图床选择器中选择上传平台（Imgur/Tikolu）
+- 在面板的代理选择器中选择是否使用代理（默认“无”；Imgur 不支持）
 - 完成后按所选格式自动复制
 - 历史记录中可快速再次复制
 
@@ -57,6 +58,7 @@
 ## 配置项
 
 - 站点记忆图床：`Imgur` / `Tikolu`
+- 站点记忆代理：`无` / `wsrv.nl`（Imgur 不支持；当选择 `wsrv.nl` 时，输出与历史复制/打开将使用 `https://wsrv.nl/?url=${encodeURIComponent(url)}`）
 - 站点记忆输出格式：`Markdown` / `HTML` / `BBCode` / `Link`
 - 可选站点按钮注入：选择器、位置（`before` | `inside` | `after`）、按钮文案
 
@@ -82,8 +84,9 @@
 
 ## 更新记录
 
-### v0.2.0
+### v0.2.x
 
+- 新增代理选项：`无` / `wsrv.nl`；Imgur 不支持；当选择 `wsrv.nl` 时，输出与历史复制/打开将使用 `https://wsrv.nl/?url=${encodeURIComponent(url)}`
 - 新增 Tikolu 图床，面板支持选择 Imgur/Tikolu
 
 ### v0.1.0

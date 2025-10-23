@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.2.0
+// @version            0.2.1
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -153,6 +153,8 @@
       btn_history_count: 'History ({count})',
       btn_clear_history: 'Clear',
       default_image_name: 'image',
+      proxy_none: 'No proxy',
+      proxy_wsrv_nl: 'wsrv.nl',
       error_network: 'Network error',
       error_upload_failed: 'Upload failed',
     },
@@ -199,6 +201,8 @@
       btn_history_count: '历史（{count}）',
       btn_clear_history: '清空',
       default_image_name: '图片',
+      proxy_none: '无代理',
+      proxy_wsrv_nl: 'wsrv.nl',
       error_network: '网络错误',
       error_upload_failed: '上传失败',
     },
@@ -245,6 +249,8 @@
       btn_history_count: '歷史（{count}）',
       btn_clear_history: '清空',
       default_image_name: '圖片',
+      proxy_none: '不使用代理',
+      proxy_wsrv_nl: 'wsrv.nl',
       error_network: '網路錯誤',
       error_upload_failed: '上傳失敗',
     },
@@ -292,8 +298,10 @@
   const FORMAT_MAP_KEY = 'uiu_format_map'
   const BTN_SETTINGS_MAP_KEY = 'uiu_site_btn_settings_map'
   const HOST_MAP_KEY = 'uiu_host_map'
+  const PROXY_MAP_KEY = 'uiu_proxy_map'
   const DEFAULT_FORMAT = 'markdown'
   const DEFAULT_HOST = 'imgur'
+  const DEFAULT_PROXY = 'none'
 
   // Migrate legacy storage keys from older versions (iu_*) to new (uiu_*) - v0.1 to v0.2
   function migrateLegacyStorage() {
@@ -412,6 +420,15 @@
     map[siteKey()] = host
     GM_setValue(HOST_MAP_KEY, map)
   }
+  const getProxy = () => {
+    const map = GM_getValue(PROXY_MAP_KEY, {})
+    return map[siteKey()] || DEFAULT_PROXY
+  }
+  const setProxy = (px) => {
+    const map = GM_getValue(PROXY_MAP_KEY, {})
+    map[siteKey()] = px
+    GM_setValue(PROXY_MAP_KEY, map)
+  }
   // Support multiple site button configurations
   const getSiteBtnSettingsList = () => {
     const map = GM_getValue(BTN_SETTINGS_MAP_KEY, {})
@@ -502,6 +519,13 @@
   #uiu-drop.show { display:flex; }
   .uiu-insert-btn { cursor:pointer; }
   .uiu-insert-btn.uiu-default { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; cursor:pointer; }
+  /* Hover effects for all buttons */
+  #uiu-panel button { transition: background-color .12s ease, box-shadow .12s ease, transform .06s ease, opacity .12s ease, border-color .12s ease; }
+  #uiu-panel button:hover { background:#334155; border-color:#475569; box-shadow: 0 0 0 1px #475569 inset; transform: translateY(-0.5px); }
+  #uiu-panel button.uiu-primary:hover { background:#1d4ed8; border-color:#1e40af; }
+  #uiu-panel button:active { transform: translateY(0); }
+  /* Disabled style for proxy selector */
+  #uiu-panel select:disabled { opacity:.55; cursor:not-allowed; filter: grayscale(80%); background:#111827; color:#9ca3af; border-color:#475569; }
   `
   GM_addStyle(css)
 
@@ -535,6 +559,31 @@
         return link
       default:
         return `![${alt}](${link})`
+    }
+  }
+
+  function isImgurUrl(url) {
+    try {
+      const u = new URL(url)
+      const h = u.hostname.toLowerCase()
+      return h.includes('imgur.com')
+    } catch {
+      return false
+    }
+  }
+
+  function applyProxy(url, providerKey) {
+    try {
+      const px = getProxy()
+      if (px === 'none') return url
+      const provider = providerKey || getHost()
+      if (provider === 'imgur' || isImgurUrl(url)) return url
+      if (px === 'wsrv.nl') {
+        return `https://wsrv.nl/?url=${encodeURIComponent(url)}`
+      }
+      return url
+    } catch {
+      return url
     }
   }
 
@@ -709,7 +758,41 @@
       if (val === host) optH.selected = true
       hostSel.appendChild(optH)
     })
-    hostSel.addEventListener('change', () => setHost(hostSel.value))
+    hostSel.addEventListener('change', () => {
+      setHost(hostSel.value)
+      updateProxyState()
+    })
+
+    const proxy = getProxy()
+    const proxySel = createEl('select')
+    ;[
+      ['none', t('proxy_none')],
+      ['wsrv.nl', t('proxy_wsrv_nl')],
+    ].forEach(([val, label]) => {
+      const optP = createEl('option', { value: val, text: label })
+      if (val === proxy) optP.selected = true
+      proxySel.appendChild(optP)
+    })
+    function updateProxyState() {
+      const currentHost = hostSel.value
+      if (currentHost === 'imgur') {
+        proxySel.value = 'none'
+        proxySel.disabled = true
+        setProxy('none')
+        try {
+          renderHistory()
+        } catch {}
+      } else {
+        proxySel.disabled = false
+      }
+    }
+    updateProxyState()
+    proxySel.addEventListener('change', () => {
+      setProxy(proxySel.value)
+      try {
+        renderHistory()
+      } catch {}
+    })
 
     function openFilePicker() {
       const input = createEl('input', {
@@ -737,6 +820,7 @@
 
     controls.appendChild(formatSel)
     controls.appendChild(hostSel)
+    controls.appendChild(proxySel)
     controls.appendChild(selectBtn)
     controls.appendChild(progressEl)
     body.appendChild(controls)
@@ -1048,7 +1132,11 @@
         try {
           const link = await uploadImage(item.file)
           const fmt = getFormat()
-          const out = formatText(link, item.file.name, fmt)
+          const out = formatText(
+            applyProxy(link, getHost()),
+            item.file.name,
+            fmt
+          )
           copyAndInsert(out)
           addToHistory({
             link,
@@ -1136,7 +1224,10 @@
         const row = createEl('div', { class: 'uiu-row' })
 
         const preview = createEl('img', {
-          src: it.link,
+          src: applyProxy(
+            it.link,
+            it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
+          ),
           style:
             'width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid #334155;',
         })
@@ -1184,15 +1275,25 @@
         const copyBtn = createEl('button', { text: t('btn_copy') })
         copyBtn.addEventListener('click', () => {
           const fmt = getFormat()
-          const out = formatText(
+          const proxied = applyProxy(
             it.link,
+            it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
+          )
+          const out = formatText(
+            proxied,
             it.name || t('default_image_name'),
             fmt
           )
           copyAndInsert(out)
         })
         const openBtn = createEl('button', { text: t('btn_open') })
-        openBtn.addEventListener('click', () => window.open(it.link, '_blank'))
+        openBtn.addEventListener('click', () => {
+          const url = applyProxy(
+            it.link,
+            it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
+          )
+          window.open(url, '_blank')
+        })
         ops.appendChild(copyBtn)
         ops.appendChild(openBtn)
         row.appendChild(ops)
