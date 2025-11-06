@@ -1,10 +1,10 @@
 # Discourse 排序快速切换器
 
-通过用户脚本菜单快速切换 Discourse 列表排序，直接更新页面 URL 参数实现。支持创建时间、回复时间、回复数量与浏览量等多种排序，并提供升/降序两个方向。内置中英文菜单文案（自动按浏览器语言选择）。
+通过用户脚本菜单快速切换 Discourse 列表排序，直接更新页面 URL 参数实现。支持创建时间、回复时间、回复数量、浏览量与点赞数等多种排序，并提供升/降序两个方向。内置中英文菜单文案（自动按浏览器语言选择）。
 
 [English Version](https://github.com/utags/userscripts/blob/main/discourse-sort-option-quick-switcher/README.md)
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-11-06-10-43-30.png)
+![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-11-06-15-17-47.png)
 
 ## 功能特点
 
@@ -14,6 +14,7 @@
   - 回复时间：新→老 / 老→新
   - 回复数量：多→少 / 少→多
   - 浏览量：多→少 / 少→多
+  - 点赞数：多→少 / 少→多
 - 保留现有查询参数，仅更新 `order` 与 `ascending`
 - 中英文双语菜单，自动语言检测（浏览器语言以 `zh` 开头使用中文，否则英文）
 - 通过 `@match` 限定只在特定 Discourse 论坛运行，避免干扰其他站点
@@ -73,6 +74,10 @@
 适配现代浏览器的 Tampermonkey/Violentmonkey，适用于基于 Discourse 的论坛网站。
 
 ## 更新记录
+
+### v0.1.1
+
+- 新增点赞数排序（多→少 / 少→多）
 
 ### v0.1.0
 

@@ -1,10 +1,10 @@
 # Discourse Sort Option Quick Switcher
 
-Quickly switch Discourse topic list sorting via menu commands by updating URL parameters. Supports multiple sort options (created time, activity time, replies count, views) in both directions, with bilingual labels (English and Chinese).
+Quickly switch Discourse topic list sorting via menu commands by updating URL parameters. Supports multiple sort options (created time, activity time, replies count, views, likes) in both directions, with bilingual labels (English and Chinese).
 
 [中文版](https://github.com/utags/userscripts/blob/main/discourse-sort-option-quick-switcher/README.zh-CN.md)
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-11-06-10-44-05.png)
+![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-11-06-15-17-11.png)
 
 ## Features
 
@@ -14,6 +14,7 @@ Quickly switch Discourse topic list sorting via menu commands by updating URL pa
   - Activity time: New → Old / Old → New
   - Replies count: High → Low / Low → High
   - Views: High → Low / Low → High
+  - Likes: High → Low / Low → High
 - Preserves existing query parameters; only updates `order` and `ascending`
 - Bilingual menu labels (English and Simplified Chinese) with auto language detection
 - Restricted to specific Discourse forums via `@match`, avoiding non-target sites
@@ -73,6 +74,10 @@ This script runs only on these domains:
 Tested on modern browsers with Tampermonkey/Violentmonkey, and designed for Discourse-based forums.
 
 ## Changelog
+
+### v0.1.1
+
+- Add likes sorting options (High → Low / Low → High)
 
 ### v0.1.0
 

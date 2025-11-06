@@ -4,9 +4,9 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.0
-// @description          Quickly switch Discourse list sorting by updating URL params.
-// @description:zh-CN    通过菜单快速切换 Discourse 列表排序（创建/回复时间、回复数、浏览量，升/降序），修改当前 URL 参数实现。
+// @version              0.1.1
+// @description          Quickly switch Discourse list sorting (created, activity, replies, views, likes) via menu by updating URL params.
+// @description:zh-CN    通过菜单快速切换 Discourse 列表排序（创建/回复时间、回复数、浏览量、点赞数，升/降序），通过修改 URL 参数实现。
 // @author               Pipecraft
 // @license              MIT
 // @icon                 https://www.google.com/s2/favicons?sz=64&domain=meta.discourse.org
@@ -40,6 +40,8 @@
       posts_low_to_high: 'Sort by replies (Low → High)',
       views_high_to_low: 'Sort by views (High → Low)',
       views_low_to_high: 'Sort by views (Low → High)',
+      likes_high_to_low: 'Sort by likes (High → Low)',
+      likes_low_to_high: 'Sort by likes (Low → High)',
     },
     'zh-CN': {
       created_new_to_old: '按创建时间（新→老）',
@@ -50,6 +52,8 @@
       posts_low_to_high: '按回复数量（少→多）',
       views_high_to_low: '按浏览量（多→少）',
       views_low_to_high: '按浏览量（少→多）',
+      likes_high_to_low: '按点赞数（多→少）',
+      likes_low_to_high: '按点赞数（少→多）',
     },
   }
 
@@ -68,6 +72,8 @@
     posts_asc: { order: 'posts', ascending: true },
     views_desc: { order: 'views', ascending: false },
     views_asc: { order: 'views', ascending: true },
+    likes_desc: { order: 'likes', ascending: false },
+    likes_asc: { order: 'likes', ascending: true },
   }
 
   // Update URL parameters and navigate
@@ -126,6 +132,13 @@
     )
     GM_registerMenuCommand(t.views_low_to_high, () =>
       applySort(SORTS.views_asc)
+    )
+
+    GM_registerMenuCommand(t.likes_high_to_low, () =>
+      applySort(SORTS.likes_desc)
+    )
+    GM_registerMenuCommand(t.likes_low_to_high, () =>
+      applySort(SORTS.likes_asc)
     )
   }
 
