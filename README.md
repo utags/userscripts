@@ -58,6 +58,15 @@
 - **适用网站**: [Linux.do](https://linux.do/)、[NodeLoc](https://www.nodeloc.com/)
 - **说明**: 自动将 GIF 和 WebP 动画头像转换为静态 PNG 格式，减少页面动画干扰
 
+### 7. [Discourse Sort Option Quick Switcher](./discourse-sort-option-quick-switcher/)
+
+**Discourse 排序快速切换器**
+
+- **文件**: [`discourse-sort-option-quick-switcher.user.js`](./discourse-sort-option-quick-switcher/discourse-sort-option-quick-switcher.user.js)
+- **功能**: 通过菜单一键切换 Discourse 列表排序，仅更新 `order` 与 `ascending`，支持创建/回复时间、回复数、浏览量的升/降序；自动语言检测，避免重复刷新。
+- **适用网站**: 特定 Discourse 论坛（详见脚本 README 的域名列表）
+- **说明**: 精确 `@match` 限定运行范围；当当前排序已匹配所选项时跳过导航；使用更直观的“新→老 / 老→新”“多→少 / 少→多”文案。
+
 ## 🚀 安装方法
 
 ### 前置要求
@@ -84,6 +93,7 @@
 - [LINUX.DO Load More Topics Manually 说明](./linux.do-manual-load-more/README.md)
 - [LINUX.DO CloudFlare 5秒盾自动跳转说明](./linux.do-auto-challenge/README.md)
 - [No GIF Avatars 说明](./no-gif-avatars/README.md)
+- [Discourse Sort Option Quick Switcher 说明](./discourse-sort-option-quick-switcher/README.md)
 
 ## 🔧 更多实用脚本
 
