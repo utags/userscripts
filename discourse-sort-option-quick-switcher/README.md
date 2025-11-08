@@ -35,6 +35,7 @@ This script runs only on these domains:
 - `https://forum.cursor.com/*`
 - `https://forum.obsidian.md/*`
 - `https://forum-zh.obsidian.md/*`
+- `https://www.uscardforum.com/*`
 
 ## Installation
 

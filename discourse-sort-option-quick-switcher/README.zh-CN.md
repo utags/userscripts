@@ -35,6 +35,7 @@
 - `https://forum.cursor.com/*`
 - `https://forum.obsidian.md/*`
 - `https://forum-zh.obsidian.md/*`
+- `https://www.uscardforum.com/*`
 
 ## 安装
 

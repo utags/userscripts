@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.1
+// @version              0.1.2
 // @description          Quickly switch Discourse list sorting (created, activity, replies, views, likes) via menu by updating URL params.
 // @description:zh-CN    通过菜单快速切换 Discourse 列表排序（创建/回复时间、回复数、浏览量、点赞数，升/降序），通过修改 URL 参数实现。
 // @author               Pipecraft
@@ -21,6 +21,7 @@
 // @match                https://forum.cursor.com/*
 // @match                https://forum.obsidian.md/*
 // @match                https://forum-zh.obsidian.md/*
+// @match                https://www.uscardforum.com/*
 // @noframes
 // @run-at               document-idle
 // @grant                GM_registerMenuCommand
