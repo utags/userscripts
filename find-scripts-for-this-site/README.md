@@ -29,6 +29,7 @@ Ensure your browser has one of the following user script managers installed:
 
 1. [Click here to install the script from GitHub](https://github.com/utags/userscripts/raw/main/find-scripts-for-this-site/find-scripts-for-this-site.user.js)
 2. [Click here to install the script from Greasy Fork](https://greasyfork.org/scripts/550659-find-scripts-for-this-site)
+3. [Click here to install the script from ScriptCat](https://scriptcat.org/script-show-page/4276)
 
 ## Usage
 

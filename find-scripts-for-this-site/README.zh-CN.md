@@ -29,6 +29,7 @@
 
 1. 点击 [这里](https://github.com/utags/userscripts/raw/main/find-scripts-for-this-site/find-scripts-for-this-site.user.js) 从 GitHub 安装脚本
 2. 点击 [这里](https://greasyfork.org/scripts/550659-find-scripts-for-this-site) 从 Greasy Fork 安装脚本
+3. 点击 [这里](https://scriptcat.org/script-show-page/4276) 从 ScriptCat 安装脚本
 
 ## 使用说明
 

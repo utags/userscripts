@@ -45,6 +45,7 @@ This script runs only on these domains:
 2. Install the script:
    - From GitHub: https://github.com/utags/userscripts/raw/main/discourse-sort-option-quick-switcher/discourse-sort-option-quick-switcher.user.js
    - From Greasy Fork: https://greasyfork.org/scripts/554927-discourse-sort-option-quick-switcher
+   - From ScriptCat: https://scriptcat.org/script-show-page/4555
 
 ## Usage
 

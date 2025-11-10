@@ -60,7 +60,10 @@ These limitations are design choices made to maintain the script's lightweight n
 ## Installation
 
 1. Install a user script manager like [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/)
-2. [Click here to install this script](https://github.com/utags/userscripts/raw/main/discourse-topic-quick-switcher/discourse-topic-quick-switcher.user.js)
+2. Install the script:
+   - From GitHub: https://github.com/utags/userscripts/raw/main/discourse-topic-quick-switcher/discourse-topic-quick-switcher.user.js
+   - From Greasy Fork: https://greasyfork.org/scripts/550982-discourse-topic-quick-switcher
+   - From ScriptCat: https://scriptcat.org/script-show-page/4310
 3. Visit any Discourse forum and enjoy the enhanced navigation experience!
 
 ## Usage

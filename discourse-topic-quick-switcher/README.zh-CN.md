@@ -59,7 +59,10 @@
 ## 安装
 
 1. 安装用户脚本管理器，如 [Tampermonkey](https://www.tampermonkey.net/) 或 [Violentmonkey](https://violentmonkey.github.io/)
-2. [点击此处安装此脚本](https://github.com/utags/userscripts/raw/main/discourse-topic-quick-switcher/discourse-topic-quick-switcher.user.js)
+2. 安装脚本：
+   - GitHub 安装: https://github.com/utags/userscripts/raw/main/discourse-topic-quick-switcher/discourse-topic-quick-switcher.user.js
+   - Greasy Fork 安装: https://greasyfork.org/scripts/550982-discourse-topic-quick-switcher
+   - ScriptCat 安装: https://scriptcat.org/script-show-page/4310
 3. 访问任何 Discourse 论坛，享受增强的导航体验！
 
 ## 使用方法

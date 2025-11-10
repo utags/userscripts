@@ -45,6 +45,7 @@
 2. 安装脚本：
    - GitHub 原始链接：https://github.com/utags/userscripts/raw/main/discourse-sort-option-quick-switcher/discourse-sort-option-quick-switcher.user.js
    - Greasy Fork 安装页：https://greasyfork.org/zh-CN/scripts/554927-discourse-sort-option-quick-switcher
+   - ScriptCat 安装页：https://scriptcat.org/script-show-page/4555
 
 ## 使用方法
 
