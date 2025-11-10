@@ -23,7 +23,6 @@
 
 1. 安装浏览器扩展管理器（选择其一）：
    - [Tampermonkey](https://www.tampermonkey.net/) （推荐）
-   - [Greasemonkey](https://www.greasespot.net/)
    - [Violentmonkey](https://violentmonkey.github.io/)
 
 ### 安装脚本
@@ -164,7 +163,6 @@ A: 尝试：
 - [项目主页](https://github.com/utags/userscripts)
 - [问题反馈](https://github.com/utags/userscripts/issues)
 - [Tampermonkey 官网](https://www.tampermonkey.net/)
-- [Greasemonkey 文档](https://wiki.greasespot.net/)
 
 ---
 

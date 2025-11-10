@@ -20,7 +20,6 @@
 首先需要安装用户脚本管理器，推荐以下任一款：
 
 - [Tampermonkey](https://www.tampermonkey.net/) (推荐)
-- [Greasemonkey](https://www.greasespot.net/)
 - [Violentmonkey](https://violentmonkey.github.io/)
 
 ### 安装脚本
@@ -114,7 +113,6 @@ const CONFIG = {
 ### 用户脚本管理器
 
 - ✅ Tampermonkey
-- ✅ Greasemonkey
 - ✅ Violentmonkey
 
 ## 常见问题

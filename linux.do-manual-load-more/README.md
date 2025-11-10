@@ -20,7 +20,6 @@
 确保你的浏览器已安装以下油猴脚本管理器之一：
 
 - [Tampermonkey](https://www.tampermonkey.net/)
-- [Greasemonkey](https://www.greasespot.net/)
 - [Violentmonkey](https://violentmonkey.github.io/)
 
 ### 安装步骤

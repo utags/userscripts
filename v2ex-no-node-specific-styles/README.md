@@ -27,6 +27,8 @@
    - [Violentmonkey](https://violentmonkey.github.io/)
 2. 安装脚本：
    - GitHub 原始链接：`https://github.com/utags/userscripts/raw/main/v2ex-no-node-specific-styles/v2ex-no-node-specific-styles.user.js`
+   - Greasy Fork 安装页：`https://greasyfork.org/zh-CN/scripts/555374-v2ex-no-node-specific-styles`
+   - ScriptCat 安装页：`https://scriptcat.org/zh-CN/script-show-page/4591`
 
 ## 使用方法
 
