@@ -4,9 +4,9 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.3
-// @description          Remove node-specific styles on V2EX by deleting all style tags under #Rightbar after page load.
-// @description:zh-CN    页面加载后删除 #Rightbar 下的所有 style 标签，去除 V2EX 节点特性化样式。
+// @version              0.1.4
+// @description          Remove node-specific styles on V2EX to keep a unified, clean look.
+// @description:zh-CN    去除 V2EX 每个节点的特性化样式，保持页面样式统一、简洁。
 // @author               Pipecraft
 // @license              MIT
 // @icon                 https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Fwww.v2ex.com%26size%3D64

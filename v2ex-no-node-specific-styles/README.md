@@ -1,6 +1,6 @@
 # V2EX 去除节点特性化样式
 
-在 V2EX 网站上移除右侧栏 `#Rightbar` 下的所有内联样式（`<style>` 标签），以避免节点特性化样式导致的页面视觉不一致。脚本尽早执行并持续监控，即使页面后续动态注入样式也会自动清理。
+在 V2EX 去除每个节点的特性化样式，保持所有页面样式统一、简洁。
 
 ![icon](https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Fwww.v2ex.com%26size%3D64)
 
