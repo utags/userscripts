@@ -21,6 +21,7 @@
 2. 安装此脚本：
    - 点击 [这里](https://github.com/utags/userscripts/raw/main/linux.do-auto-challenge/linux.do-auto-challenge.user.js) 从 GitHub 安装脚本
    - 点击 [这里](https://greasyfork.org/zh-CN/scripts/552218-linux-do-cloudflare-challenge-bypass) 从 Greasy Fork 安装脚本
+   - 点击 [这里](https://scriptcat.org/zh-CN/script-show-page/4373) 从 ScriptCat 安装脚本
 
 ## 工作原理
 

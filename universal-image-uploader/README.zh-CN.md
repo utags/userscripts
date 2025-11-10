@@ -38,6 +38,7 @@
 
 1. 点击 [这里](https://github.com/utags/userscripts/raw/main/universal-image-uploader/universal-image-uploader.user.js) 从 GitHub 安装脚本
 2. 点击 [这里](https://greasyfork.org/zh-CN/scripts/553341-universal-image-uploader) 从 Greasy Fork 安装脚本
+3. 点击 [这里](https://scriptcat.org/script-show-page/4467) 从 ScriptCat 安装脚本
 
 ## 使用方法
 

@@ -38,6 +38,7 @@ Install one of the following user script managers:
 
 1. [Click here to install the script from GitHub](https://github.com/utags/userscripts/raw/main/universal-image-uploader/universal-image-uploader.user.js)
 2. [Click here to install the script from Greasy Fork](https://greasyfork.org/scripts/553341-universal-image-uploader)
+3. [Click here to install the script from ScriptCat](https://scriptcat.org/script-show-page/4467)
 
 ## Usage
 
