@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.2.1
+// @version            0.2.2
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -675,14 +675,48 @@
     return uploadToImgur(file)
   }
 
+  // Track last visited editable element to support insertion after focus is lost
+  let lastEditableEl = null
+  function isTextInput(el) {
+    if (!(el instanceof HTMLInputElement)) return false
+    const type = (el.type || '').toLowerCase()
+    return (
+      type === 'text' ||
+      type === 'search' ||
+      type === 'url' ||
+      type === 'email' ||
+      type === 'tel'
+    )
+  }
+  function isEditable(el) {
+    return (
+      el instanceof HTMLTextAreaElement ||
+      isTextInput(el) ||
+      (el instanceof HTMLElement && el.isContentEditable)
+    )
+  }
+  document.addEventListener(
+    'focusin',
+    (e) => {
+      const target = e.target
+      if (isEditable(target)) {
+        lastEditableEl = target
+      }
+    },
+    true
+  )
+
   function insertIntoFocused(text) {
-    const el = document.activeElement
-    if (!el) return false
+    let el = document.activeElement
+    if (!isEditable(el)) {
+      el = lastEditableEl
+      try {
+        if (el && typeof el.focus === 'function') el.focus()
+      } catch {}
+    }
+    if (!isEditable(el)) return false
     try {
-      if (
-        el instanceof HTMLTextAreaElement ||
-        (el instanceof HTMLInputElement && el.type === 'text')
-      ) {
+      if (el instanceof HTMLTextAreaElement || isTextInput(el)) {
         const start = el.selectionStart ?? el.value.length
         const end = el.selectionEnd ?? el.value.length
         const v = el.value
@@ -691,6 +725,17 @@
         return true
       }
       if (el instanceof HTMLElement && el.isContentEditable) {
+        // Ensure caret is inside the element, fallback to end
+        try {
+          const sel = window.getSelection()
+          if (sel) {
+            const range = document.createRange()
+            range.selectNodeContents(el)
+            range.collapse(false)
+            sel.removeAllRanges()
+            sel.addRange(range)
+          }
+        } catch {}
         document.execCommand('insertText', false, text)
         return true
       }
@@ -702,7 +747,7 @@
     try {
       GM_setClipboard(text)
     } catch {}
-    insertIntoFocused(text)
+    insertIntoFocused(`\n${text}\n`)
   }
 
   function createPanel() {
