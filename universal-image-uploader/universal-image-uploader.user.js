@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.2.2
+// @version            0.3.0
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -19,10 +19,11 @@
 // @match              https://www.nodeseek.com/*
 // @match              https://www.deepflood.com/*
 // @match              https://2libra.com/*
-// @match              *://*/*remove-this-to-apply-to-all-sites
+// @match              *://*/*
 // @grant              GM_setValue
 // @grant              GM_getValue
 // @grant              GM_addStyle
+// @grant              GM_deleteValue
 // @grant              GM_registerMenuCommand
 // @grant              GM_setClipboard
 // @grant              GM_addValueChangeListener
@@ -35,15 +36,24 @@
 ;(function () {
   'use strict'
 
-  // CONFIG: Preset site configuration (host without port; strip leading 'www.')
+  // CONFIG: Preset site configuration
+  // - Key: site hostname without port; strip leading 'www.'
+  // - format: default text format for insertion
+  // - host: default image provider ('imgur' | 'tikolu')
+  // - proxy: default proxy for non-Imgur links ('none' | 'wsrv.nl')
+  // - buttons: site-specific button injection rules
   const CONFIG = {
     // Examples: local preview page and common sites; add/remove as needed
     localhost: {
       format: 'markdown',
+      host: 'imgur',
+      proxy: 'none',
       buttons: [{ selector: 'textarea', position: 'after', text: '插入图片' }],
     },
     'v2ex.com': {
-      format: 'markdown',
+      format: 'link',
+      host: 'imgur',
+      proxy: 'none',
       buttons: [
         {
           selector: '#reply-box > div.cell.flex-one-row > div:nth-child(1)',
@@ -64,6 +74,8 @@
     },
     'greasyfork.org': {
       format: 'markdown',
+      host: 'tikolu',
+      proxy: 'wsrv.nl',
       buttons: [
         {
           selector: '.comment-screenshot-control',
@@ -73,6 +85,8 @@
     },
     'nodeseek.com': {
       format: 'markdown',
+      host: 'tikolu',
+      proxy: 'wsrv.nl',
       buttons: [
         {
           selector:
@@ -84,6 +98,8 @@
     },
     'deepflood.com': {
       format: 'markdown',
+      host: 'tikolu',
+      proxy: 'wsrv.nl',
       buttons: [
         {
           selector:
@@ -95,6 +111,8 @@
     },
     '2libra.com': {
       format: 'markdown',
+      host: 'tikolu',
+      proxy: 'wsrv.nl',
       buttons: [
         {
           selector:
@@ -104,7 +122,7 @@
         },
       ],
     },
-    'github.com': { format: 'markdown' },
+    'github.com': { format: 'markdown', host: 'tikolu', proxy: 'wsrv.nl' },
   }
 
   // I18N: language detection and translations
@@ -295,13 +313,20 @@
   ]
 
   const HISTORY_KEY = 'uiu_history'
-  const FORMAT_MAP_KEY = 'uiu_format_map'
-  const BTN_SETTINGS_MAP_KEY = 'uiu_site_btn_settings_map'
-  const HOST_MAP_KEY = 'uiu_host_map'
-  const PROXY_MAP_KEY = 'uiu_proxy_map'
+  const FORMAT_MAP_KEY = 'uiu_format_map' // legacy
+  const BTN_SETTINGS_MAP_KEY = 'uiu_site_btn_settings_map' // legacy
+  const HOST_MAP_KEY = 'uiu_host_map' // legacy
+  const PROXY_MAP_KEY = 'uiu_proxy_map' // legacy
+  const SITE_SETTINGS_MAP_KEY = 'uiu_site_settings_map'
   const DEFAULT_FORMAT = 'markdown'
-  const DEFAULT_HOST = 'imgur'
-  const DEFAULT_PROXY = 'none'
+  const DEFAULT_HOST = 'tikolu'
+  const DEFAULT_PROXY = 'wsrv.nl'
+  // Global allowed value lists
+  const ALLOWED_FORMATS = ['markdown', 'html', 'bbcode', 'link']
+  const ALLOWED_HOSTS = ['imgur', 'tikolu']
+  const ALLOWED_PROXIES = ['none', 'wsrv.nl']
+  const ALLOWED_BUTTON_POSITIONS = ['before', 'inside', 'after']
+  const DEFAULT_BUTTON_POSITION = 'after'
 
   // Migrate legacy storage keys from older versions (iu_*) to new (uiu_*) - v0.1 to v0.2
   function migrateLegacyStorage() {
@@ -326,57 +351,172 @@
   // Run migration early before any reads/writes
   migrateLegacyStorage()
 
-  // Apply preset config to storage (only if the site has no saved settings)
-  function applyPresetConfig() {
+  // Utility: normalize a host string consistently (trim and strip leading 'www.')
+  function normalizeHost(h) {
     try {
-      const normalize = (h) => {
-        try {
-          h = String(h || '')
-            .trim()
-            .toLowerCase()
-          return h.startsWith('www.') ? h.slice(4) : h
-        } catch {
-          return h
+      h = String(h || '').trim()
+      return h.startsWith('www.') ? h.slice(4) : h
+    } catch {
+      return h
+    }
+  }
+
+  /**
+   * ensureAllowedValue
+   * Returns `value` if it is contained in `allowedValues`,
+   * otherwise returns `defaultValue` (or `undefined` when omitted).
+   *
+   * - `allowedValues` may be any array; non-array or empty lists yield `defaultValue`/`undefined`.
+   * - Optimizes lookups for larger lists via `Set`.
+   * - Does not coerce types; comparison is strict equality against items in `allowedValues`.
+   */
+  function ensureAllowedValue(value, allowedValues, defaultValue) {
+    if (!Array.isArray(allowedValues) || allowedValues.length === 0) {
+      return defaultValue
+    }
+    if (allowedValues.length < 8) {
+      return allowedValues.includes(value) ? value : defaultValue
+    }
+    const set = new Set(allowedValues)
+    return set.has(value) ? value : defaultValue
+  }
+
+  // Migrate existing separate maps (format/host/proxy/buttons) into unified per-domain map - v0.2 to v0.3 and later
+  function migrateToUnifiedSiteMap() {
+    try {
+      const existing = GM_getValue(SITE_SETTINGS_MAP_KEY, undefined)
+      const siteMap = existing && typeof existing === 'object' ? existing : {}
+      const isEmpty = !siteMap || Object.keys(siteMap).length === 0
+      // Only migrate if the unified map is empty to avoid overwriting user settings
+      if (!isEmpty) return
+
+      const formatMap = GM_getValue(FORMAT_MAP_KEY, {}) || {}
+      const hostMap = GM_getValue(HOST_MAP_KEY, {}) || {}
+      const proxyMap = GM_getValue(PROXY_MAP_KEY, {}) || {}
+      const btnMap = GM_getValue(BTN_SETTINGS_MAP_KEY, {}) || {}
+
+      const rawKeys = new Set([
+        ...Object.keys(formatMap),
+        ...Object.keys(hostMap),
+        ...Object.keys(proxyMap),
+        ...Object.keys(btnMap),
+        ...Object.keys(CONFIG || {}),
+      ])
+      const keys = new Set()
+      rawKeys.forEach((k) => keys.add(normalizeHost(k)))
+
+      keys.forEach((key) => {
+        if (!key) return
+        const preset = CONFIG?.[key] || {}
+        const s = siteMap[key] || {}
+        // Format
+        if (s.format === undefined) {
+          const fmt = formatMap[key] ?? preset.format
+          const normalizedFormat = ensureAllowedValue(fmt, ALLOWED_FORMATS)
+          if (normalizedFormat) s.format = normalizedFormat
         }
-      }
-      const formatMap = GM_getValue(FORMAT_MAP_KEY, {})
-      const btnMap = GM_getValue(BTN_SETTINGS_MAP_KEY, {})
-      const hostMap = GM_getValue(HOST_MAP_KEY, {})
-      let changedFmt = false
-      let changedBtn = false
-      let changedHost = false
-      Object.entries(CONFIG || {}).forEach(([host, preset]) => {
-        const key = normalize(host)
-        if (!key || typeof preset !== 'object') return
-        // Preset format
-        if (preset.format && !(key in formatMap)) {
-          const allowed = ['markdown', 'html', 'bbcode', 'link']
-          const fmt = allowed.includes(preset.format)
-            ? preset.format
-            : DEFAULT_FORMAT
-          formatMap[key] = fmt
-          changedFmt = true
+        // Host
+        if (s.host === undefined) {
+          const h = hostMap[key] ?? preset.host
+          const normalizedHost = ensureAllowedValue(h, ALLOWED_HOSTS)
+          if (normalizedHost) s.host = normalizedHost
         }
-        // Preset host
-        if (preset.host && !(key in hostMap)) {
-          const allowedHosts = ['imgur', 'tikolu']
-          const h = allowedHosts.includes(preset.host)
-            ? preset.host
-            : DEFAULT_HOST
-          hostMap[key] = h
-          changedHost = true
+        // Proxy (Due to legacy logic, do not persist 'none', convert 'none' to undefined)
+        if (s.proxy === undefined) {
+          const px = proxyMap[key] ?? preset.proxy
+          const resolved = ensureAllowedValue(px, ALLOWED_PROXIES)
+          if (resolved && resolved !== 'none') s.proxy = resolved
         }
-        // Preset buttons (single or array)
-        const raw = preset.buttons || preset.button || []
-        const arr = Array.isArray(raw) ? raw : raw ? [raw] : []
-        if (arr.length && !(key in btnMap)) {
+        // Buttons
+        if (s.buttons === undefined) {
+          const raw = btnMap[key] ?? preset.buttons ?? preset.button ?? []
+          const arr = Array.isArray(raw) ? raw : raw ? [raw] : []
           const list = arr
             .map((c) => {
               const selector = String(c?.selector || '').trim()
               if (!selector) return null
               const p = String(c?.position || '').trim()
-              const pos =
-                p === 'before' ? 'before' : p === 'inside' ? 'inside' : 'after'
+              const pos = ensureAllowedValue(
+                p,
+                ALLOWED_BUTTON_POSITIONS,
+                DEFAULT_BUTTON_POSITION
+              )
+              const text = String(
+                c?.text || t('insert_image_button_default')
+              ).trim()
+              return { selector, position: pos, text }
+            })
+            .filter(Boolean)
+          if (list.length) s.buttons = list
+        }
+        if (Object.keys(s).length > 0) siteMap[key] = s
+      })
+
+      GM_setValue(SITE_SETTINGS_MAP_KEY, siteMap)
+      // Optionally clear legacy keys to avoid duplication
+      try {
+        if (typeof GM_deleteValue === 'function') {
+          GM_deleteValue(FORMAT_MAP_KEY)
+          GM_deleteValue(HOST_MAP_KEY)
+          GM_deleteValue(PROXY_MAP_KEY)
+          GM_deleteValue(BTN_SETTINGS_MAP_KEY)
+        }
+      } catch {}
+    } catch {}
+  }
+
+  migrateToUnifiedSiteMap()
+
+  // Apply preset config to unified storage (only set missing fields)
+  function applyPresetConfig() {
+    try {
+      const siteMap = GM_getValue(SITE_SETTINGS_MAP_KEY, {}) || {}
+      let changed = false
+      Object.entries(CONFIG || {}).forEach(([host, preset]) => {
+        const key = normalizeHost(host)
+        if (!key || typeof preset !== 'object') return
+        const s = siteMap[key] || {}
+        // format
+        if (s.format === undefined && preset.format) {
+          const normalizedFormat = ensureAllowedValue(
+            preset.format,
+            ALLOWED_FORMATS
+          )
+          if (normalizedFormat) {
+            s.format = normalizedFormat
+            changed = true
+          }
+        }
+        // host
+        if (s.host === undefined && preset.host) {
+          const normalizedHost = ensureAllowedValue(preset.host, ALLOWED_HOSTS)
+          if (normalizedHost) {
+            s.host = normalizedHost
+            changed = true
+          }
+        }
+        // proxy
+        if (s.proxy === undefined && preset.proxy) {
+          const resolved = ensureAllowedValue(preset.proxy, ALLOWED_PROXIES)
+          if (resolved) {
+            s.proxy = resolved
+            changed = true
+          }
+        }
+        // buttons
+        if (s.buttons === undefined) {
+          const raw = preset.buttons || preset.button || []
+          const arr = Array.isArray(raw) ? raw : raw ? [raw] : []
+          const list = arr
+            .map((c) => {
+              const selector = String(c?.selector || '').trim()
+              if (!selector) return null
+              const p = String(c?.position || '').trim()
+              const pos = ensureAllowedValue(
+                p,
+                ALLOWED_BUTTON_POSITIONS,
+                DEFAULT_BUTTON_POSITION
+              )
               const text = String(
                 c?.text || t('insert_image_button_default')
               ).trim()
@@ -384,73 +524,107 @@
             })
             .filter(Boolean)
           if (list.length) {
-            btnMap[key] = list
-            changedBtn = true
+            s.buttons = list
+            changed = true
           }
         }
+        if (changed) siteMap[key] = s
       })
-      if (changedFmt) GM_setValue(FORMAT_MAP_KEY, formatMap)
-      if (changedBtn) GM_setValue(BTN_SETTINGS_MAP_KEY, btnMap)
-      if (changedHost) GM_setValue(HOST_MAP_KEY, hostMap)
+      if (changed) GM_setValue(SITE_SETTINGS_MAP_KEY, siteMap)
     } catch {}
   }
 
   // Initialize once at runtime
   applyPresetConfig()
 
-  const siteKey = () => {
-    let h = location.hostname || ''
-    return h.startsWith('www.') ? h.slice(4) : h
+  const SITE_KEY = normalizeHost(location.hostname || '')
+  const getSiteSettingsMap = () => GM_getValue(SITE_SETTINGS_MAP_KEY, {})
+  const setSiteSettingsMap = (map) => GM_setValue(SITE_SETTINGS_MAP_KEY, map)
+  const getCurrentSiteSettings = () => {
+    const map = getSiteSettingsMap()
+    return map[SITE_KEY] || {}
+  }
+  const updateCurrentSiteSettings = (updater) => {
+    const map = getSiteSettingsMap()
+    const key = SITE_KEY
+    const current = map[key] || {}
+    const partial =
+      typeof updater === 'function'
+        ? updater({ ...current })
+        : { ...(updater || {}) }
+    const next = { ...current, ...partial }
+    // sanitize format
+    if (Object.prototype.hasOwnProperty.call(next, 'format')) {
+      const resolvedFormat = ensureAllowedValue(next.format, ALLOWED_FORMATS)
+      if (resolvedFormat) next.format = resolvedFormat
+      else delete next.format
+    }
+    // sanitize host
+    if (Object.prototype.hasOwnProperty.call(next, 'host')) {
+      const resolvedHost = ensureAllowedValue(next.host, ALLOWED_HOSTS)
+      if (resolvedHost) next.host = resolvedHost
+      else delete next.host
+    }
+    // sanitize proxy
+    if (Object.prototype.hasOwnProperty.call(next, 'proxy')) {
+      const resolved = ensureAllowedValue(next.proxy, ALLOWED_PROXIES)
+      if (resolved) next.proxy = resolved
+      else delete next.proxy
+    }
+    // sanitize buttons (empty or falsy removes the field)
+    if (Object.prototype.hasOwnProperty.call(next, 'buttons')) {
+      const list = next.buttons
+      if (!list || !Array.isArray(list) || list.length === 0) {
+        delete next.buttons
+      }
+    }
+    // persist
+    if (!next || Object.keys(next).length === 0) {
+      if (map[key]) delete map[key]
+    } else {
+      map[key] = next
+    }
+    setSiteSettingsMap(map)
   }
   const getFormat = () => {
-    const map = GM_getValue(FORMAT_MAP_KEY, {})
-    return map[siteKey()] || DEFAULT_FORMAT
+    const s = getCurrentSiteSettings()
+    return s.format || DEFAULT_FORMAT
   }
-  const setFormat = (fmt) => {
-    const map = GM_getValue(FORMAT_MAP_KEY, {})
-    map[siteKey()] = fmt
-    GM_setValue(FORMAT_MAP_KEY, map)
+  const setFormat = (format) => {
+    updateCurrentSiteSettings({ format })
   }
   const getHost = () => {
-    const map = GM_getValue(HOST_MAP_KEY, {})
-    return map[siteKey()] || DEFAULT_HOST
+    const s = getCurrentSiteSettings()
+    return s.host || DEFAULT_HOST
   }
   const setHost = (host) => {
-    const map = GM_getValue(HOST_MAP_KEY, {})
-    map[siteKey()] = host
-    GM_setValue(HOST_MAP_KEY, map)
+    updateCurrentSiteSettings({ host })
   }
   const getProxy = () => {
-    const map = GM_getValue(PROXY_MAP_KEY, {})
-    return map[siteKey()] || DEFAULT_PROXY
+    const s = getCurrentSiteSettings()
+    return s.proxy || DEFAULT_PROXY
   }
-  const setProxy = (px) => {
-    const map = GM_getValue(PROXY_MAP_KEY, {})
-    map[siteKey()] = px
-    GM_setValue(PROXY_MAP_KEY, map)
+  const setProxy = (proxy) => {
+    updateCurrentSiteSettings({ proxy })
   }
   // Support multiple site button configurations
   const getSiteBtnSettingsList = () => {
-    const map = GM_getValue(BTN_SETTINGS_MAP_KEY, {})
-    const val = map[siteKey()]
-    if (!val) return []
+    const s = getCurrentSiteSettings()
+    const val = s.buttons || []
     return Array.isArray(val) ? val : val?.selector ? [val] : []
   }
   const setSiteBtnSettingsList = (list) => {
-    const map = GM_getValue(BTN_SETTINGS_MAP_KEY, {})
-    const key = siteKey()
-    if (!list || !list.length) {
-      delete map[key]
-    } else {
-      map[key] = list
-    }
-    GM_setValue(BTN_SETTINGS_MAP_KEY, map)
+    updateCurrentSiteSettings({ buttons: list })
   }
   const addSiteBtnSetting = (cfg) => {
     const selector = (cfg?.selector || '').trim()
     if (!selector) return
     const p = (cfg?.position || '').trim()
-    const pos = p === 'before' ? 'before' : p === 'inside' ? 'inside' : 'after'
+    const pos = ensureAllowedValue(
+      p,
+      ALLOWED_BUTTON_POSITIONS,
+      DEFAULT_BUTTON_POSITION
+    )
     const text = (cfg?.text || t('insert_image_button_default')).trim()
     const list = getSiteBtnSettingsList()
     list.push({ selector, position: pos, text })
@@ -469,7 +643,11 @@
     const selector = (cfg?.selector || '').trim()
     if (!selector) return
     const p = (cfg?.position || '').trim()
-    const pos = p === 'before' ? 'before' : p === 'inside' ? 'inside' : 'after'
+    const pos = ensureAllowedValue(
+      p,
+      ALLOWED_BUTTON_POSITIONS,
+      DEFAULT_BUTTON_POSITION
+    )
     const text = (cfg?.text || t('insert_image_button_default')).trim()
     list[index] = { selector, position: pos, text }
     setSiteBtnSettingsList(list)
@@ -485,6 +663,72 @@
     })
     children.forEach((c) => el.appendChild(c))
     return el
+  }
+
+  // Helper: build button position options for a select element
+  // selectedValue is optional; defaults to DEFAULT_BUTTON_POSITION when absent/invalid
+  const buildPositionOptions = (selectEl, selectedValue) => {
+    if (!selectEl) return
+    selectEl.innerHTML = ''
+    const selected = selectedValue
+      ? ensureAllowedValue(
+          selectedValue,
+          ALLOWED_BUTTON_POSITIONS,
+          DEFAULT_BUTTON_POSITION
+        )
+      : DEFAULT_BUTTON_POSITION
+    ALLOWED_BUTTON_POSITIONS.forEach((value) => {
+      const opt = createEl('option', { value, text: t('pos_' + value) })
+      if (value === selected) opt.selected = true
+      selectEl.appendChild(opt)
+    })
+  }
+
+  // Helper: build format options
+  const buildFormatOptions = (selectEl, selectedValue) => {
+    if (!selectEl) return
+    selectEl.innerHTML = ''
+    const selected = selectedValue
+      ? ensureAllowedValue(selectedValue, ALLOWED_FORMATS, DEFAULT_FORMAT)
+      : DEFAULT_FORMAT
+    ALLOWED_FORMATS.forEach((val) => {
+      const opt = createEl('option', { value: val, text: t('format_' + val) })
+      if (val === selected) opt.selected = true
+      selectEl.appendChild(opt)
+    })
+  }
+
+  // Helper: build host options
+  const buildHostOptions = (selectEl, selectedValue) => {
+    if (!selectEl) return
+    selectEl.innerHTML = ''
+    const selected = selectedValue
+      ? ensureAllowedValue(selectedValue, ALLOWED_HOSTS, DEFAULT_HOST)
+      : DEFAULT_HOST
+    ALLOWED_HOSTS.forEach((val) => {
+      const opt = createEl('option', { value: val, text: t('host_' + val) })
+      if (val === selected) opt.selected = true
+      selectEl.appendChild(opt)
+    })
+  }
+
+  // Helper: build proxy options
+  const buildProxyOptions = (selectEl, selectedValue) => {
+    if (!selectEl) return
+    selectEl.innerHTML = ''
+    const selected = selectedValue
+      ? ensureAllowedValue(selectedValue, ALLOWED_PROXIES, DEFAULT_PROXY)
+      : DEFAULT_PROXY
+    const proxyLabelKey = (val) =>
+      val === 'wsrv.nl' ? 'proxy_wsrv_nl' : 'proxy_none'
+    ALLOWED_PROXIES.forEach((val) => {
+      const opt = createEl('option', {
+        value: val,
+        text: t(proxyLabelKey(val)),
+      })
+      if (val === selected) opt.selected = true
+      selectEl.appendChild(opt)
+    })
   }
 
   const css = `
@@ -781,28 +1025,12 @@
 
     const format = getFormat()
     const formatSel = createEl('select')
-    ;[
-      ['markdown', t('format_markdown')],
-      ['html', t('format_html')],
-      ['bbcode', t('format_bbcode')],
-      ['link', t('format_link')],
-    ].forEach(([val, label]) => {
-      const opt = createEl('option', { value: val, text: label })
-      if (val === format) opt.selected = true
-      formatSel.appendChild(opt)
-    })
+    buildFormatOptions(formatSel, format)
     formatSel.addEventListener('change', () => setFormat(formatSel.value))
 
     const host = getHost()
     const hostSel = createEl('select')
-    ;[
-      ['imgur', t('host_imgur')],
-      ['tikolu', t('host_tikolu')],
-    ].forEach(([val, label]) => {
-      const optH = createEl('option', { value: val, text: label })
-      if (val === host) optH.selected = true
-      hostSel.appendChild(optH)
-    })
+    buildHostOptions(hostSel, host)
     hostSel.addEventListener('change', () => {
       setHost(hostSel.value)
       updateProxyState()
@@ -810,14 +1038,7 @@
 
     const proxy = getProxy()
     const proxySel = createEl('select')
-    ;[
-      ['none', t('proxy_none')],
-      ['wsrv.nl', t('proxy_wsrv_nl')],
-    ].forEach(([val, label]) => {
-      const optP = createEl('option', { value: val, text: label })
-      if (val === proxy) optP.selected = true
-      proxySel.appendChild(optP)
-    })
+    buildProxyOptions(proxySel, proxy)
     function updateProxyState() {
       const currentHost = hostSel.value
       if (currentHost === 'imgur') {
@@ -894,15 +1115,7 @@
       placeholder: t('placeholder_css_selector'),
     })
     const posSel = createEl('select')
-    ;[
-      { value: 'before', text: t('pos_before') },
-      { value: 'after', text: t('pos_after') },
-      { value: 'inside', text: t('pos_inside') },
-    ].forEach(({ value, text }) => {
-      const opt = createEl('option', { value, text })
-      if (value === 'after') opt.selected = true
-      posSel.appendChild(opt)
-    })
+    buildPositionOptions(posSel)
     const textInput = createEl('input', {
       type: 'text',
       placeholder: t('placeholder_button_content'),
@@ -917,9 +1130,7 @@
       })
 
       selInput.value = ''
-      Array.from(posSel.options).forEach((opt) => {
-        opt.selected = opt.value === 'after'
-      })
+      buildPositionOptions(posSel)
       textInput.value = t('insert_image_button_default')
       renderSettingsList()
 
@@ -963,7 +1174,7 @@
         const row = createEl('div', { class: 'uiu-settings-row' })
         const info = createEl('span', {
           class: 'uiu-settings-item',
-          text: `${cfg.selector} [${cfg.position || 'after'}] - ${cfg.text || t('insert_image_button_default')}`,
+          text: `${cfg.selector} [${cfg.position || DEFAULT_BUTTON_POSITION}] - ${cfg.text || t('insert_image_button_default')}`,
         })
         const editBtn = createEl('button', { text: t('btn_edit') })
         editBtn.addEventListener('click', () => {
@@ -973,15 +1184,7 @@
           const eSel = createEl('input', { type: 'text' })
           eSel.value = cfg.selector || ''
           const ePos = createEl('select')
-          ;[
-            { value: 'before', text: t('pos_before') },
-            { value: 'after', text: t('pos_after') },
-            { value: 'inside', text: t('pos_inside') },
-          ].forEach(({ value, text }) => {
-            const opt = createEl('option', { value, text })
-            if (value === (cfg.position || 'after')) opt.selected = true
-            ePos.appendChild(opt)
-          })
+          buildPositionOptions(ePos, cfg.position)
           const eText = createEl('input', { type: 'text' })
           eText.value = cfg.text || t('insert_image_button_default')
           fields.appendChild(eSel)
@@ -1036,9 +1239,7 @@
 
     function refreshSettingsUI() {
       selInput.value = ''
-      Array.from(posSel.options).forEach((opt) => {
-        opt.selected = opt.value === 'after'
-      })
+      buildPositionOptions(posSel)
       textInput.value = t('insert_image_button_default')
       renderSettingsList()
     }
