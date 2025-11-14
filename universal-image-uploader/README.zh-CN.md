@@ -90,6 +90,8 @@
 - 设置存储迁移为统一的“站点映射”，将原先分散的多个键合并为单一结构，示例：`{ format?, host?, proxy?, btns?: [...] }`。
 - 面板改为使用 Shadow DOM 渲染，实现与站点样式的隔离。内部样式使用 `:host`；拖拽覆盖层（`#uiu-drop`）与站点注入按钮（`.uiu-insert-btn`）仍保留在页面 DOM。
 - 为“历史”和“设置”切换按钮新增高亮（打开态）与无障碍状态（`aria-pressed`），更易识别当前展开状态。
+- 焦点跟踪支持 Shadow DOM：深入开放 Shadow DOM 与同源 iframe，正确识别可编辑目标；同时排除脚本面板本身，避免被记录为目标。
+- Trusted Types 兼容：不再使用 `innerHTML` 清空（改用 `textContent = ''`）；自定义按钮 HTML 采用 `Range.createContextualFragment` 解析，避免在启用 TT 的站点报错。
 - 兼容性：旧设置会自动迁移，无需手动操作。
 
 ### v0.2.x

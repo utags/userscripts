@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.3.0
+// @version            0.3.1
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -669,7 +669,8 @@
   // selectedValue is optional; defaults to DEFAULT_BUTTON_POSITION when absent/invalid
   const buildPositionOptions = (selectEl, selectedValue) => {
     if (!selectEl) return
-    selectEl.innerHTML = ''
+    // Avoid Trusted Types violation: clear without using innerHTML
+    selectEl.textContent = ''
     const selected = selectedValue
       ? ensureAllowedValue(
           selectedValue,
@@ -687,7 +688,8 @@
   // Helper: build format options
   const buildFormatOptions = (selectEl, selectedValue) => {
     if (!selectEl) return
-    selectEl.innerHTML = ''
+    // Avoid Trusted Types violation: clear without using innerHTML
+    selectEl.textContent = ''
     const selected = selectedValue
       ? ensureAllowedValue(selectedValue, ALLOWED_FORMATS, DEFAULT_FORMAT)
       : DEFAULT_FORMAT
@@ -701,7 +703,8 @@
   // Helper: build host options
   const buildHostOptions = (selectEl, selectedValue) => {
     if (!selectEl) return
-    selectEl.innerHTML = ''
+    // Avoid Trusted Types violation: clear without using innerHTML
+    selectEl.textContent = ''
     const selected = selectedValue
       ? ensureAllowedValue(selectedValue, ALLOWED_HOSTS, DEFAULT_HOST)
       : DEFAULT_HOST
@@ -715,7 +718,8 @@
   // Helper: build proxy options
   const buildProxyOptions = (selectEl, selectedValue) => {
     if (!selectEl) return
-    selectEl.innerHTML = ''
+    // Avoid Trusted Types violation: clear without using innerHTML
+    selectEl.textContent = ''
     const selected = selectedValue
       ? ensureAllowedValue(selectedValue, ALLOWED_PROXIES, DEFAULT_PROXY)
       : DEFAULT_PROXY
@@ -924,6 +928,38 @@
 
   // Track last visited editable element to support insertion after focus is lost
   let lastEditableEl = null
+  // Helper: get deepest active element across Shadow DOM and same-origin iframes
+  function getDeepActiveElement() {
+    let el = document.activeElement
+    try {
+      // Traverse into open shadow roots
+      while (el && el.shadowRoot && el.shadowRoot.activeElement) {
+        el = el.shadowRoot.activeElement
+      }
+      // Traverse into same-origin iframes
+      while (
+        el &&
+        el.tagName === 'IFRAME' &&
+        el.contentDocument &&
+        el.contentDocument.activeElement
+      ) {
+        el = el.contentDocument.activeElement
+      }
+    } catch {}
+    return el
+  }
+  // Helper: check if node is inside our UI panel (including its Shadow DOM)
+  function isInsideUIPanel(node) {
+    try {
+      const host = document.getElementById('uiu-panel')
+      if (!host || !node) return false
+      if (host === node) return true
+      if (host.contains(node)) return true
+      const root = host.shadowRoot
+      return root ? root.contains(node) : false
+    } catch {}
+    return false
+  }
   function isTextInput(el) {
     if (!(el instanceof HTMLInputElement)) return false
     const type = (el.type || '').toLowerCase()
@@ -945,23 +981,31 @@
   document.addEventListener(
     'focusin',
     (e) => {
-      const target = e.target
-      if (isEditable(target)) {
-        lastEditableEl = target
+      // Use deep active element to handle Shadow DOM editors
+      const deepTarget =
+        getDeepActiveElement() ||
+        (typeof e.composedPath === 'function' ? e.composedPath()[0] : e.target)
+      if (
+        deepTarget &&
+        isEditable(deepTarget) &&
+        !isInsideUIPanel(deepTarget)
+      ) {
+        lastEditableEl = deepTarget
       }
     },
     true
   )
 
   function insertIntoFocused(text) {
-    let el = document.activeElement
-    if (!isEditable(el)) {
+    let el = getDeepActiveElement()
+    // Fallback to last editable target if current focus is not usable (or inside our panel)
+    if (!isEditable(el) || isInsideUIPanel(el)) {
       el = lastEditableEl
       try {
         if (el && typeof el.focus === 'function') el.focus()
       } catch {}
     }
-    if (!isEditable(el)) return false
+    if (!isEditable(el) || isInsideUIPanel(el)) return false
     try {
       if (el instanceof HTMLTextAreaElement || isTextInput(el)) {
         const start = el.selectionStart ?? el.value.length
@@ -1196,7 +1240,8 @@
     body.appendChild(settings)
 
     function renderSettingsList() {
-      settingsList.innerHTML = ''
+      // Avoid Trusted Types violation: clear without using innerHTML
+      settingsList.textContent = ''
       const listData = getSiteBtnSettingsList()
       listData.forEach((cfg, idx) => {
         const row = createEl('div', { class: 'uiu-settings-row' })
@@ -1206,7 +1251,8 @@
         })
         const editBtn = createEl('button', { text: t('btn_edit') })
         editBtn.addEventListener('click', () => {
-          row.innerHTML = ''
+          // Avoid Trusted Types violation: clear without using innerHTML
+          row.textContent = ''
           row.classList.add('uiu-editing')
           const fields = createEl('span', { class: 'uiu-settings-item' })
           const eSel = createEl('input', { type: 'text' })
@@ -1322,10 +1368,13 @@
         if (exists) return
         let btn
         try {
-          const tEl = document.createElement('template')
-          tEl.innerHTML = content
-          if (tEl.content && tEl.content.childElementCount === 1) {
-            btn = tEl.content.firstElementChild
+          // Parse HTML without using innerHTML to comply with Trusted Types
+          const range = document.createRange()
+          const ctx = document.createElement('div')
+          range.selectNodeContents(ctx)
+          const frag = range.createContextualFragment(content)
+          if (frag && frag.childElementCount === 1) {
+            btn = frag.firstElementChild
           }
         } catch {}
         if (!btn) {
@@ -1484,7 +1533,8 @@
     })
 
     function renderHistory() {
-      history.innerHTML = ''
+      // Avoid Trusted Types violation: clear without using innerHTML
+      history.textContent = ''
       const header = createEl('div', { class: 'uiu-controls' })
       header.appendChild(
         createEl('span', {
