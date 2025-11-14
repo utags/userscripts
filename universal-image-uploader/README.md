@@ -85,6 +85,13 @@ Install one of the following user script managers:
 
 ## Changelog
 
+### v0.3.x
+
+- Settings storage migrated to a unified per-site map, consolidating previously separate keys into a single structure. Example shape: `{ format?, host?, proxy?, btns?: [...] }`.
+- Panel UI is now rendered inside a Shadow DOM for style isolation from host sites. Internal styles use `:host`; the drop overlay (`#uiu-drop`) and site-injected buttons (`.uiu-insert-btn`) remain in the page DOM.
+- Added clear “open” visuals and accessibility states (`aria-pressed`) for History and Settings toggles.
+- Backward compatibility: existing settings are migrated automatically; no manual action required.
+
 ### v0.2.x
 
 - Added proxy option: `None` / `wsrv.nl`; Imgur not supported; when `wsrv.nl` is selected, outputs and history copy/open use `https://wsrv.nl/?url=${encodeURIComponent(url)}`
