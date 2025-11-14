@@ -736,6 +736,9 @@
   #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; background-color: unset; box-shadow: unset; transition: unset; }
   #uiu-panel header .uiu-actions { display:flex; gap:8px; }
   #uiu-panel header .uiu-actions button { font-size: 12px; }
+  /* Active styles for toggles when sections are open */
+  #uiu-panel header.uiu-show-history .uiu-actions .uiu-toggle-history { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }
+  #uiu-panel header.uiu-show-settings .uiu-actions .uiu-toggle-settings { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }
   #uiu-panel .uiu-body { padding: 8px 12px; }
   #uiu-panel .uiu-controls { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }
   #uiu-panel select, #uiu-panel button { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; }
@@ -743,7 +746,7 @@
   #uiu-panel .uiu-list { margin-top:8px; max-height: 140px; overflow-y:auto; overflow-x:hidden; font-size: 12px; }
   #uiu-panel .uiu-list .uiu-item { padding:6px 0; border-bottom: 1px dashed #334155; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
   #uiu-panel .uiu-history { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }
-  #uiu-panel.uiu-show-history .uiu-history { display:block; }
+  #uiu-panel header.uiu-show-history + .uiu-body .uiu-history { display:block; }
   #uiu-panel .uiu-history .uiu-controls > span { font-size: 16px; font-weight: 600;}
   #uiu-panel .uiu-history .uiu-list { max-height: 240px; }
   #uiu-panel .uiu-history .uiu-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }
@@ -751,7 +754,7 @@
   #uiu-panel .uiu-history .uiu-row .uiu-name { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #uiu-panel .uiu-hint { font-size: 11px; opacity:.85; margin-top:6px; }
   #uiu-panel .uiu-settings { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }
-  #uiu-panel.uiu-show-settings .uiu-settings { display:block; }
+  #uiu-panel header.uiu-show-settings + .uiu-body .uiu-settings { display:block; }
   #uiu-panel .uiu-settings .uiu-controls > span { font-size: 16px; font-weight: 600;}
   #uiu-panel .uiu-settings .uiu-settings-list { margin-top:6px; max-height: 240px; overflow-y:auto; overflow-x:hidden; }
   #uiu-panel .uiu-settings .uiu-settings-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; font-size: 12px; flex-wrap: nowrap; }
@@ -996,19 +999,44 @@
 
   function createPanel() {
     const panel = createEl('div', { id: 'uiu-panel' })
+    // Attach Shadow DOM and inject scoped styles (convert '#uiu-panel' selectors to ':host')
+    const root = panel.attachShadow({ mode: 'open' })
+    try {
+      const styleEl = document.createElement('style')
+      styleEl.textContent = css.replace(/#uiu-panel\b/g, ':host')
+      root.appendChild(styleEl)
+    } catch {}
     const header = createEl('header')
     header.appendChild(createEl('span', { text: t('header_title') }))
     const actions = createEl('div', { class: 'uiu-actions' })
-    const toggleHistoryBtn = createEl('button', { text: t('btn_history') })
-    toggleHistoryBtn.addEventListener('click', () => {
-      panel.classList.toggle('uiu-show-history')
-      renderHistory()
+    const toggleHistoryBtn = createEl('button', {
+      text: t('btn_history'),
+      class: 'uiu-toggle-history',
     })
-    const settingsBtn = createEl('button', { text: t('btn_settings') })
+    toggleHistoryBtn.addEventListener('click', () => {
+      header.classList.toggle('uiu-show-history')
+      renderHistory()
+      try {
+        toggleHistoryBtn.setAttribute(
+          'aria-pressed',
+          header.classList.contains('uiu-show-history') ? 'true' : 'false'
+        )
+      } catch {}
+    })
+    const settingsBtn = createEl('button', {
+      text: t('btn_settings'),
+      class: 'uiu-toggle-settings',
+    })
     settingsBtn.addEventListener('click', () => {
-      panel.classList.toggle('uiu-show-settings')
+      header.classList.toggle('uiu-show-settings')
       try {
         refreshSettingsUI()
+      } catch {}
+      try {
+        settingsBtn.setAttribute(
+          'aria-pressed',
+          header.classList.contains('uiu-show-settings') ? 'true' : 'false'
+        )
       } catch {}
     })
     const closeBtn = createEl('button', { text: t('btn_close') })
@@ -1244,9 +1272,16 @@
       renderSettingsList()
     }
 
-    panel.appendChild(header)
-    panel.appendChild(body)
+    // Render into Shadow DOM root
+    root.appendChild(header)
+    root.appendChild(body)
     document.body.appendChild(panel)
+
+    // initialize pressed state
+    try {
+      toggleHistoryBtn.setAttribute('aria-pressed', 'false')
+      settingsBtn.setAttribute('aria-pressed', 'false')
+    } catch {}
 
     panel.style.display = 'none'
 
@@ -1561,6 +1596,16 @@
 
     GM_registerMenuCommand(t('menu_open_panel'), () => {
       panel.style.display = 'block'
+      try {
+        toggleHistoryBtn.setAttribute(
+          'aria-pressed',
+          header.classList.contains('uiu-show-history') ? 'true' : 'false'
+        )
+        settingsBtn.setAttribute(
+          'aria-pressed',
+          header.classList.contains('uiu-show-settings') ? 'true' : 'false'
+        )
+      } catch {}
     })
     GM_registerMenuCommand(t('menu_select_images'), () => {
       panel.style.display = 'block'
@@ -1568,9 +1613,16 @@
     })
     GM_registerMenuCommand(t('menu_settings'), () => {
       panel.style.display = 'block'
-      panel.classList.add('uiu-show-settings')
+      header.classList.add('uiu-show-settings')
       try {
         refreshSettingsUI()
+      } catch {}
+      try {
+        settingsBtn.setAttribute('aria-pressed', 'true')
+        toggleHistoryBtn.setAttribute(
+          'aria-pressed',
+          header.classList.contains('uiu-show-history') ? 'true' : 'false'
+        )
       } catch {}
     })
 

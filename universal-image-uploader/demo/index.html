@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Universal Image Uploader Demo</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+          Arial, sans-serif;
+        min-height: 100vh;
+      }
+      .site-content {
+        padding: 24px;
+        max-width: 720px;
+        margin: 0 auto;
+      }
+      .site-content h1 {
+        margin-bottom: 16px;
+      }
+      .site-content p {
+        color: #444;
+      }
+      button {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+      }
+      select {
+        width: 200px !important;
+      }
+      :host select {
+        width: 100% !important;
+      }
+    </style>
+    <script>
+      // Basic GM_* stubs for local preview
+      ;(function () {
+        function ns(k) {
+          return `GM_${k}`
+        }
+        window.GM_getValue = function (key, def) {
+          try {
+            const v = localStorage.getItem(ns(key))
+            return v !== null ? JSON.parse(v) : def
+          } catch (e) {
+            return def
+          }
+        }
+        window.GM_setValue = function (key, val) {
+          try {
+            localStorage.setItem(ns(key), JSON.stringify(val))
+          } catch (e) {}
+        }
+        window.GM_deleteValue = function (key) {
+          try {
+            localStorage.removeItem(ns(key))
+          } catch (e) {}
+        }
+        window.GM_addStyle = function (css) {
+          const s = document.createElement('style')
+          s.textContent = css
+          document.head.appendChild(s)
+        }
+        window.GM_setClipboard = function (text) {
+          try {
+            navigator.clipboard && navigator.clipboard.writeText(text)
+          } catch (e) {}
+        }
+        window.GM_addValueChangeListener = function () {
+          /* no-op for demo */
+        }
+        window.GM_registerMenuCommand = function (label, fn) {
+          const btn = document.createElement('button')
+          btn.textContent = label
+          btn.style.position = 'fixed'
+          btn.style.left = '16px'
+          btn.style.bottom = `${24 + document.querySelectorAll('.gm-demo-btn').length * 40}px`
+          btn.className = 'gm-demo-btn'
+          btn.style.zIndex = '999999'
+          btn.style.padding = '8px 12px'
+          btn.style.border = '1px solid #ddd'
+          btn.style.borderRadius = '6px'
+          btn.addEventListener('click', fn)
+          document.body.appendChild(btn)
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <script src="../universal-image-uploader.user.js"></script>
+    <div class="site-content">
+      <h1>Demo Page</h1>
+      <p>
+        这是一个模拟站点，用于预览用户脚本的
+        UI。页面样式刻意对常见标签设置样式，以验证 Shadow DOM 隔离效果。
+      </p>
+      <style>
+        /* Simulate hostile site CSS */
+        div {
+          color: #b91c1c;
+          background: #fee2e2;
+        }
+        button {
+          background: #111827 !important;
+          color: #fef3c7 !important;
+          border-radius: 0 !important;
+          padding: 2px 4px !important;
+        }
+        #uiu-panel {
+          position: static !important;
+          transform: none !important;
+        }
+      </style>
+      <p>点左下角菜单按钮以打开面板。</p>
+    </div>
+  </body>
+</html>
