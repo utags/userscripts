@@ -85,6 +85,10 @@ Install one of the following user script managers:
 
 ## Changelog
 
+### v0.4.x
+
+- Support custom format templates.
+
 ### v0.3.x
 
 - Settings storage migrated to a unified per-site map, consolidating previously separate keys into a single structure. Example shape: `{ format?, host?, proxy?, btns?: [...] }`.

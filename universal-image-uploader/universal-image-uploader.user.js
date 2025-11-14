@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.3.1
+// @version            0.4.0
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -166,6 +166,14 @@
       menu_open_panel: 'Open upload panel',
       menu_select_images: 'Select images',
       menu_settings: 'Settings',
+      formats_section_title: 'Custom Formats',
+      placeholder_format_name: 'Format name',
+      placeholder_format_template: 'Format template',
+      example_format_template: 'Example: {name} - {link}',
+      btn_add_format: 'Add format',
+      formats_col_name: 'Name',
+      formats_col_template: 'Format',
+      formats_col_ops: 'Actions',
       history_upload_page_prefix: 'Upload page: ',
       history_upload_page: 'Upload page: {host}',
       btn_history_count: 'History ({count})',
@@ -214,6 +222,14 @@
       menu_open_panel: '打开图片上传面板',
       menu_select_images: '选择图片',
       menu_settings: '设置',
+      formats_section_title: '自定义格式',
+      placeholder_format_name: '格式名称',
+      placeholder_format_template: '格式内容',
+      example_format_template: '示例：{name} - {link}',
+      btn_add_format: '添加格式',
+      formats_col_name: '名字',
+      formats_col_template: '格式',
+      formats_col_ops: '操作',
       history_upload_page_prefix: '上传页面：',
       history_upload_page: '上传页面：{host}',
       btn_history_count: '历史（{count}）',
@@ -262,6 +278,14 @@
       menu_open_panel: '打開圖片上傳面板',
       menu_select_images: '選擇圖片',
       menu_settings: '設定',
+      formats_section_title: '自訂格式',
+      placeholder_format_name: '格式名稱',
+      placeholder_format_template: '格式內容',
+      example_format_template: '範例：{name} - {link}',
+      btn_add_format: '新增格式',
+      formats_col_name: '名稱',
+      formats_col_template: '格式',
+      formats_col_ops: '操作',
       history_upload_page_prefix: '上傳頁面：',
       history_upload_page: '上傳頁面：{host}',
       btn_history_count: '歷史（{count}）',
@@ -318,6 +342,7 @@
   const HOST_MAP_KEY = 'uiu_host_map' // legacy
   const PROXY_MAP_KEY = 'uiu_proxy_map' // legacy
   const SITE_SETTINGS_MAP_KEY = 'uiu_site_settings_map'
+  const CUSTOM_FORMATS_KEY = 'uiu_custom_formats'
   const DEFAULT_FORMAT = 'markdown'
   const DEFAULT_HOST = 'tikolu'
   const DEFAULT_PROXY = 'wsrv.nl'
@@ -381,6 +406,71 @@
     return set.has(value) ? value : defaultValue
   }
 
+  // Global custom formats: [{ name: string, template: string }]
+  function getCustomFormats() {
+    try {
+      const list = GM_getValue(CUSTOM_FORMATS_KEY, []) || []
+      if (!Array.isArray(list)) return []
+      return list
+        .map((it) => ({
+          name: String(it?.name || '').trim(),
+          template: String(it?.template || ''),
+        }))
+        .filter((it) => it.name && it.template)
+    } catch {
+      return []
+    }
+  }
+  function setCustomFormats(list) {
+    try {
+      const arr = Array.isArray(list) ? list : []
+      const normalized = arr
+        .map((it) => ({
+          name: String(it?.name || '').trim(),
+          template: String(it?.template || ''),
+        }))
+        .filter((it) => it.name && it.template)
+      // de-duplicate by name (last wins)
+      const map = new Map()
+      normalized.forEach((it) => map.set(it.name, it.template))
+      const out = Array.from(map.entries()).map(([name, template]) => ({
+        name,
+        template,
+      }))
+      GM_setValue(CUSTOM_FORMATS_KEY, out)
+    } catch {}
+  }
+  function upsertCustomFormat(name, template) {
+    try {
+      name = String(name || '').trim()
+      template = String(template || '')
+      if (!name || !template) return
+      const list = getCustomFormats()
+      const idx = list.findIndex((it) => it.name === name)
+      if (idx >= 0) list[idx] = { name, template }
+      else list.push({ name, template })
+      setCustomFormats(list)
+    } catch {}
+  }
+  function removeCustomFormat(name) {
+    try {
+      name = String(name || '').trim()
+      if (!name) return
+      const list = getCustomFormats().filter((it) => it.name !== name)
+      setCustomFormats(list)
+    } catch {}
+  }
+  function getAllowedFormats() {
+    try {
+      return [...ALLOWED_FORMATS, ...getCustomFormats().map((f) => f.name)]
+    } catch {
+      return [...ALLOWED_FORMATS]
+    }
+  }
+  function ensureAllowedFormat(fmt) {
+    return ensureAllowedValue(fmt, getAllowedFormats(), DEFAULT_FORMAT)
+  }
+
   // Migrate existing separate maps (format/host/proxy/buttons) into unified per-domain map - v0.2 to v0.3 and later
   function migrateToUnifiedSiteMap() {
     try {
@@ -412,7 +502,7 @@
         // Format
         if (s.format === undefined) {
           const fmt = formatMap[key] ?? preset.format
-          const normalizedFormat = ensureAllowedValue(fmt, ALLOWED_FORMATS)
+          const normalizedFormat = ensureAllowedFormat(fmt)
           if (normalizedFormat) s.format = normalizedFormat
         }
         // Host
@@ -553,9 +643,9 @@
         ? updater({ ...current })
         : { ...(updater || {}) }
     const next = { ...current, ...partial }
-    // sanitize format
+    // sanitize format (allow built-ins and user custom formats)
     if (Object.prototype.hasOwnProperty.call(next, 'format')) {
-      const resolvedFormat = ensureAllowedValue(next.format, ALLOWED_FORMATS)
+      const resolvedFormat = ensureAllowedFormat(next.format)
       if (resolvedFormat) next.format = resolvedFormat
       else delete next.format
     }
@@ -691,11 +781,18 @@
     // Avoid Trusted Types violation: clear without using innerHTML
     selectEl.textContent = ''
     const selected = selectedValue
-      ? ensureAllowedValue(selectedValue, ALLOWED_FORMATS, DEFAULT_FORMAT)
+      ? ensureAllowedFormat(selectedValue)
       : DEFAULT_FORMAT
-    ALLOWED_FORMATS.forEach((val) => {
+    const builtins = ALLOWED_FORMATS
+    const customs = getCustomFormats()
+    builtins.forEach((val) => {
       const opt = createEl('option', { value: val, text: t('format_' + val) })
       if (val === selected) opt.selected = true
+      selectEl.appendChild(opt)
+    })
+    customs.forEach((cf) => {
+      const opt = createEl('option', { value: cf.name, text: cf.name })
+      if (cf.name === selected) opt.selected = true
       selectEl.appendChild(opt)
     })
   }
@@ -736,7 +833,7 @@
   }
 
   const css = `
-  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 999999; width: 440px; background: #111827cc; color: #fff; backdrop-filter: blur(6px); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }
+  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 999999; width: 440px; max-height: calc(100vh - 32px); overflow: auto; background: #111827cc; color: #fff; backdrop-filter: blur(6px); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }
   #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; background-color: unset; box-shadow: unset; transition: unset; }
   #uiu-panel header .uiu-actions { display:flex; gap:8px; }
   #uiu-panel header .uiu-actions button { font-size: 12px; }
@@ -757,8 +854,9 @@
   #uiu-panel .uiu-history .uiu-row .uiu-ops { display:flex; gap:6px; }
   #uiu-panel .uiu-history .uiu-row .uiu-name { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #uiu-panel .uiu-hint { font-size: 11px; opacity:.85; margin-top:6px; }
-  #uiu-panel .uiu-settings { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }
-  #uiu-panel header.uiu-show-settings + .uiu-body .uiu-settings { display:block; }
+  /* Settings container toggling */
+  #uiu-panel .uiu-settings-container { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }
+  #uiu-panel header.uiu-show-settings + .uiu-body .uiu-settings-container { display:block; }
   #uiu-panel .uiu-settings .uiu-controls > span { font-size: 16px; font-weight: 600;}
   #uiu-panel .uiu-settings .uiu-settings-list { margin-top:6px; max-height: 240px; overflow-y:auto; overflow-x:hidden; }
   #uiu-panel .uiu-settings .uiu-settings-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; font-size: 12px; flex-wrap: nowrap; }
@@ -777,6 +875,22 @@
   #uiu-panel button:active { transform: translateY(0); }
   /* Disabled style for proxy selector */
   #uiu-panel select:disabled { opacity:.55; cursor:not-allowed; filter: grayscale(80%); background:#111827; color:#9ca3af; border-color:#475569; }
+  /* Custom Formats layout */
+  #uiu-panel .uiu-formats { margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }
+  #uiu-panel .uiu-formats .uiu-controls > span { font-size: 16px; font-weight: 600; }
+  #uiu-panel .uiu-formats .uiu-formats-list { margin-top:6px; max-height: 200px; overflow-y:auto; overflow-x:hidden; }
+  #uiu-panel .uiu-formats .uiu-formats-row { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }
+  #uiu-panel .uiu-formats .uiu-formats-row .uiu-ops { display:flex; gap:6px; justify-content:flex-end; }
+  #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-template { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-template { overflow: visible; text-overflow: clip; white-space: normal; }
+  #uiu-panel .uiu-formats .uiu-form-add { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; }
+  #uiu-panel .uiu-formats .uiu-formats-row input[type="text"] { width:100%; }
+  #uiu-panel .uiu-formats .uiu-form-add input[type="text"] { width:100%; }
+  #uiu-panel .uiu-formats .uiu-form-add button { justify-self: end; }
+  #uiu-panel .uiu-formats .uiu-formats-header { font-weight: 600; color:#e5e7eb; }
+  #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-template { display:block; min-width:0; }
+  #uiu-panel .uiu-formats .uiu-format-example-row { padding-top:4px; border-bottom: none; }
+  #uiu-panel .uiu-formats .uiu-format-example-row .uiu-fmt-template { font-size:12px; color:#cbd5e1; white-space: normal; overflow: visible; text-overflow: clip; }
   `
   GM_addStyle(css)
 
@@ -801,6 +915,13 @@
 
   function formatText(link, name, fmt) {
     const alt = basename(name)
+    // Custom format support: if fmt matches a user-defined template name
+    try {
+      const custom = getCustomFormats().find((cf) => cf.name === fmt)
+      if (custom) {
+        return tpl(custom.template, { link, name: alt })
+      }
+    } catch {}
     switch (fmt) {
       case 'html':
         return `<img src="${link}" alt="${alt}" />`
@@ -1175,6 +1296,12 @@
     const history = createEl('div', { class: 'uiu-history' })
     body.appendChild(history)
 
+    // Parent container that groups Site Button Settings and Custom Formats
+    const settingsContainer = createEl('div', {
+      class: 'uiu-settings-container',
+    })
+    body.appendChild(settingsContainer)
+
     const settings = createEl('div', { class: 'uiu-settings' })
     const settingsHeader = createEl('div', { class: 'uiu-controls' })
     settingsHeader.appendChild(
@@ -1237,7 +1364,161 @@
     settingsForm.appendChild(removeBtn)
     settingsForm.appendChild(clearBtn)
     settings.appendChild(settingsForm)
-    body.appendChild(settings)
+    settingsContainer.appendChild(settings)
+
+    // Custom Formats section (below Site Button Settings)
+    const formats = createEl('div', { class: 'uiu-formats' })
+    const formatsHeader = createEl('div', { class: 'uiu-controls' })
+    formatsHeader.appendChild(
+      createEl('span', { text: t('formats_section_title') })
+    )
+    formats.appendChild(formatsHeader)
+    // Column headers: Name | Format | Actions
+    const formatsColsHeader = createEl('div', {
+      class: 'uiu-formats-row uiu-formats-header',
+    })
+    formatsColsHeader.appendChild(
+      createEl('span', { class: 'uiu-fmt-name', text: t('formats_col_name') })
+    )
+    formatsColsHeader.appendChild(
+      createEl('span', {
+        class: 'uiu-fmt-template',
+        text: t('formats_col_template'),
+      })
+    )
+    formatsColsHeader.appendChild(
+      createEl('span', { class: 'uiu-ops', text: t('formats_col_ops') })
+    )
+    formats.appendChild(formatsColsHeader)
+    const formatsForm = createEl('div', { class: 'uiu-controls uiu-form-add' })
+    const fnameInput = createEl('input', {
+      type: 'text',
+      placeholder: t('placeholder_format_name'),
+    })
+    const ftemplateInput = createEl('input', {
+      type: 'text',
+      placeholder: t('placeholder_format_template'),
+    })
+    const addFmtBtn = createEl('button', { text: t('btn_add_format') })
+    addFmtBtn.addEventListener('click', () => {
+      const name = (fnameInput.value || '').trim()
+      const tplStr = String(ftemplateInput.value || '')
+      if (!name || !tplStr) return
+      upsertCustomFormat(name, tplStr)
+      fnameInput.value = ''
+      ftemplateInput.value = ''
+      renderFormatsList()
+      try {
+        buildFormatOptions(formatSel, getFormat())
+      } catch {}
+    })
+    // Wrap inputs with the same column containers as list rows for alignment
+    const addNameCol = createEl('span', { class: 'uiu-fmt-name' })
+    addNameCol.appendChild(fnameInput)
+    const addTplCol = createEl('span', { class: 'uiu-fmt-template' })
+    addTplCol.appendChild(ftemplateInput)
+    formatsForm.appendChild(addNameCol)
+    formatsForm.appendChild(addTplCol)
+    formatsForm.appendChild(addFmtBtn)
+    const formatsList = createEl('div', { class: 'uiu-formats-list' })
+    formats.appendChild(formatsList)
+    formats.appendChild(formatsForm)
+    // Example row: align under Format column using same grid
+    const formatsExampleRow = createEl('div', {
+      class: 'uiu-formats-row uiu-format-example-row',
+    })
+    formatsExampleRow.appendChild(
+      createEl('span', { class: 'uiu-fmt-name', text: '' })
+    )
+    formatsExampleRow.appendChild(
+      createEl('span', {
+        class: 'uiu-fmt-template',
+        text: t('example_format_template'),
+      })
+    )
+    formatsExampleRow.appendChild(
+      createEl('span', { class: 'uiu-ops', text: '' })
+    )
+    formats.appendChild(formatsExampleRow)
+    settingsContainer.appendChild(formats)
+
+    function renderFormatsList() {
+      formatsList.textContent = ''
+      const list = getCustomFormats()
+      list.forEach((cf) => {
+        const row = createEl('div', { class: 'uiu-formats-row' })
+        const nameEl = createEl('span', {
+          class: 'uiu-fmt-name',
+          text: cf.name,
+        })
+        const tplEl = createEl('span', {
+          class: 'uiu-fmt-template',
+          text: cf.template,
+        })
+        const editBtn = createEl('button', { text: t('btn_edit') })
+        editBtn.addEventListener('click', () => {
+          row.textContent = ''
+          row.classList.add('uiu-editing')
+          const colName = createEl('span', {
+            class: 'uiu-settings-item uiu-fmt-name',
+          })
+          const eName = createEl('input', { type: 'text' })
+          eName.value = cf.name
+          const colTpl = createEl('span', {
+            class: 'uiu-settings-item uiu-fmt-template',
+          })
+          const eTpl = createEl('input', { type: 'text' })
+          eTpl.value = cf.template
+          colName.appendChild(eName)
+          colTpl.appendChild(eTpl)
+          const ops = createEl('span', { class: 'uiu-ops' })
+          const updateBtn = createEl('button', { text: t('btn_update') })
+          updateBtn.addEventListener('click', () => {
+            const newName = (eName.value || '').trim()
+            const newTpl = String(eTpl.value || '')
+            if (!newName || !newTpl) return
+            if (newName !== cf.name) removeCustomFormat(cf.name)
+            upsertCustomFormat(newName, newTpl)
+            // Update current format selection if renamed
+            try {
+              if (getFormat() === cf.name) setFormat(newName)
+            } catch {}
+            renderFormatsList()
+            try {
+              buildFormatOptions(formatSel, getFormat())
+            } catch {}
+          })
+          const cancelBtn = createEl('button', { text: t('btn_cancel') })
+          cancelBtn.addEventListener('click', () => {
+            renderFormatsList()
+          })
+          ops.appendChild(updateBtn)
+          ops.appendChild(cancelBtn)
+          row.appendChild(colName)
+          row.appendChild(colTpl)
+          row.appendChild(ops)
+        })
+        const delBtn = createEl('button', { text: t('btn_delete') })
+        delBtn.addEventListener('click', () => {
+          removeCustomFormat(cf.name)
+          // Reset site format if current selection removed
+          try {
+            if (getFormat() === cf.name) setFormat(DEFAULT_FORMAT)
+          } catch {}
+          renderFormatsList()
+          try {
+            buildFormatOptions(formatSel, getFormat())
+          } catch {}
+        })
+        const ops = createEl('span', { class: 'uiu-ops' })
+        ops.appendChild(editBtn)
+        ops.appendChild(delBtn)
+        row.appendChild(nameEl)
+        row.appendChild(tplEl)
+        row.appendChild(ops)
+        formatsList.appendChild(row)
+      })
+    }
 
     function renderSettingsList() {
       // Avoid Trusted Types violation: clear without using innerHTML
@@ -1316,6 +1597,11 @@
       buildPositionOptions(posSel)
       textInput.value = t('insert_image_button_default')
       renderSettingsList()
+      try {
+        fnameInput.value = ''
+        ftemplateInput.value = ''
+        renderFormatsList()
+      } catch {}
     }
 
     // Render into Shadow DOM root
