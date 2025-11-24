@@ -85,6 +85,10 @@ Install one of the following user script managers:
 
 ## Changelog
 
+### v0.5.x
+
+- Add MJJ.Today upload provider.
+
 ### v0.4.x
 
 - Support custom format templates.

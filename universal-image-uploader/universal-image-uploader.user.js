@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.4.1
+// @version            0.5.0
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -31,6 +31,7 @@
 // @grant              GM_xmlhttpRequest
 // @connect            api.imgur.com
 // @connect            tikolu.net
+// @connect            mjj.today
 // ==/UserScript==
 
 ;(function () {
@@ -138,6 +139,7 @@
       format_link: 'Link',
       host_imgur: 'Imgur',
       host_tikolu: 'Tikolu',
+      host_mjj: 'MJJ.Today',
       btn_select_images: 'Select Images',
       progress_initial: 'Done 0/0',
       progress_done: 'Done {done}/{total}',
@@ -195,6 +197,7 @@
       format_link: '链接',
       host_imgur: 'Imgur',
       host_tikolu: 'Tikolu',
+      host_mjj: 'MJJ.Today',
       btn_select_images: '选择图片',
       progress_initial: '完成 0/0',
       progress_done: '完成 {done}/{total}',
@@ -251,6 +254,7 @@
       format_link: '連結',
       host_imgur: 'Imgur',
       host_tikolu: 'Tikolu',
+      host_mjj: 'MJJ.Today',
       btn_select_images: '選擇圖片',
       progress_initial: '完成 0/0',
       progress_done: '完成 {done}/{total}',
@@ -348,7 +352,7 @@
   const DEFAULT_PROXY = 'wsrv.nl'
   // Global allowed value lists
   const ALLOWED_FORMATS = ['markdown', 'html', 'bbcode', 'link']
-  const ALLOWED_HOSTS = ['imgur', 'tikolu']
+  const ALLOWED_HOSTS = ['imgur', 'tikolu', 'mjj']
   const ALLOWED_PROXIES = ['none', 'wsrv.nl']
   const ALLOWED_BUTTON_POSITIONS = ['before', 'inside', 'after']
   const DEFAULT_BUTTON_POSITION = 'after'
@@ -995,6 +999,43 @@
     })
   }
 
+  async function getMjjAuthToken() {
+    const html = await gmRequest({ url: 'https://mjj.today/upload' })
+    const m = String(html || '').match(
+      /PF\.obj\.config\.auth_token\s*=\s*["']([A-Za-z0-9]+)["']/
+    )
+    if (!m || !m[1]) throw new Error(t('error_network'))
+    return m[1]
+  }
+
+  async function uploadToMjj(file) {
+    if (Math.floor(file.size / 1000) > 10000) {
+      throw new Error('10mb limit')
+    }
+    const token = await getMjjAuthToken()
+    const formData = new FormData()
+    formData.append('source', file)
+    formData.append('type', 'file')
+    formData.append('action', 'upload')
+    formData.append('timestamp', String(Date.now()))
+    formData.append('auth_token', token)
+    formData.append('expiration', '')
+    formData.append('nsfw', '0')
+    const data = await gmRequest({
+      method: 'POST',
+      url: 'https://mjj.today/json',
+      data: formData,
+      responseType: 'json',
+    })
+    if (data?.status_code === 200 && data?.image?.url) {
+      const url = String(data.image.url)
+      return url.includes('i.mji.rip')
+        ? url.replace('i.mji.rip', 'i.mij.rip')
+        : url
+    }
+    throw new Error(t('error_upload_failed'))
+  }
+
   async function uploadToImgur(file) {
     // Shuffle Client-ID list to ensure a different ID on each retry
     const ids = [...IMGUR_CLIENT_IDS]
@@ -1050,6 +1091,7 @@
   async function uploadImage(file) {
     const host = getHost()
     if (host === 'tikolu') return uploadToTikolu(file)
+    if (host === 'mjj') return uploadToMjj(file)
     // Default
     return uploadToImgur(file)
   }
