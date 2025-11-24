@@ -88,6 +88,8 @@ Install one of the following user script managers:
 ### v0.4.x
 
 - Support custom format templates.
+- Switch Imgur upload from `fetch` to `GM_xmlhttpRequest` to avoid CORS.
+- Extract shared `gmRequest` helper to unify upload provider requests.
 
 ### v0.3.x
 

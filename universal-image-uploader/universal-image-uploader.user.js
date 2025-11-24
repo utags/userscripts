@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.4.0
+// @version            0.4.1
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -959,6 +959,42 @@
     }
   }
 
+  function gmRequest(opts) {
+    const req =
+      typeof GM !== 'undefined' && GM?.xmlHttpRequest
+        ? GM.xmlHttpRequest
+        : typeof GM_xmlhttpRequest !== 'undefined'
+          ? GM_xmlhttpRequest
+          : null
+    if (!req) throw new Error('GM.xmlHttpRequest unavailable')
+    return new Promise((resolve, reject) => {
+      try {
+        req({
+          method: opts.method || 'GET',
+          url: opts.url,
+          headers: opts.headers,
+          data: opts.data,
+          responseType: opts.responseType || 'text',
+          onload: (res) => {
+            try {
+              if ((opts.responseType || 'text') === 'json') {
+                resolve(res.response ?? JSON.parse(res.responseText || '{}'))
+              } else {
+                resolve(res.responseText)
+              }
+            } catch (e) {
+              reject(e)
+            }
+          },
+          onerror: () => reject(new Error(t('error_network'))),
+          ontimeout: () => reject(new Error(t('error_network'))),
+        })
+      } catch (e) {
+        reject(e)
+      }
+    })
+  }
+
   async function uploadToImgur(file) {
     // Shuffle Client-ID list to ensure a different ID on each retry
     const ids = [...IMGUR_CLIENT_IDS]
@@ -972,16 +1008,13 @@
       const formData = new FormData()
       formData.append('image', file)
       try {
-        const res = await fetch('https://api.imgur.com/3/upload', {
+        const data = await gmRequest({
           method: 'POST',
+          url: 'https://api.imgur.com/3/upload',
           headers: { Authorization: `Client-ID ${id}` },
-          body: formData,
+          data: formData,
+          responseType: 'json',
         })
-        if (!res.ok) {
-          lastError = new Error(t('error_network'))
-          continue
-        }
-        const data = await res.json()
         if (data?.success && data?.data?.link) {
           return data.data.link
         }
@@ -1002,42 +1035,16 @@
     const formData = new FormData()
     formData.append('upload', true)
     formData.append('file', file)
-    return new Promise((resolve, reject) => {
-      const req =
-        typeof GM !== 'undefined' && GM?.xmlHttpRequest
-          ? GM.xmlHttpRequest
-          : typeof GM_xmlhttpRequest !== 'undefined'
-            ? GM_xmlhttpRequest
-            : null
-      if (!req) {
-        reject(new Error('GM.xmlHttpRequest unavailable'))
-        return
-      }
-      try {
-        req({
-          method: 'POST',
-          url: 'https://tikolu.net/i/',
-          data: formData,
-          responseType: 'json',
-          onload: (res) => {
-            try {
-              const data = res.response ?? JSON.parse(res.responseText || '{}')
-              if (data?.status === 'uploaded' && data?.id) {
-                resolve(`https://tikolu.net/i/${data.id}`)
-              } else {
-                reject(new Error(t('error_upload_failed')))
-              }
-            } catch (e) {
-              reject(e)
-            }
-          },
-          onerror: () => reject(new Error(t('error_network'))),
-          ontimeout: () => reject(new Error(t('error_network'))),
-        })
-      } catch (e) {
-        reject(e)
-      }
+    const data = await gmRequest({
+      method: 'POST',
+      url: 'https://tikolu.net/i/',
+      data: formData,
+      responseType: 'json',
     })
+    if (data?.status === 'uploaded' && data?.id) {
+      return `https://tikolu.net/i/${data.id}`
+    }
+    throw new Error(t('error_upload_failed'))
   }
 
   async function uploadImage(file) {
