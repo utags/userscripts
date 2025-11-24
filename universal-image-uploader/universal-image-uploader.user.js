@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.5.0
+// @version            0.5.1
 // @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -32,6 +32,7 @@
 // @connect            api.imgur.com
 // @connect            tikolu.net
 // @connect            mjj.today
+// @connect            h1.appinn.me
 // ==/UserScript==
 
 ;(function () {
@@ -123,6 +124,20 @@
         },
       ],
     },
+    'meta.appinn.net': {
+      format: 'markdown',
+      host: 'appinn',
+      proxy: 'none',
+      buttons: [
+        {
+          selector: '.toolbar__button.upload',
+          position: 'after',
+          text: `<button class="btn no-text btn-icon toolbar__button upload-extended" tabindex="-1" title="上传" type="button" style="display: inline-flex; color: orangered;">
+<svg class="fa d-icon d-icon-far-image svg-icon svg-string" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><use href="#far-image"></use></svg>      <span aria-hidden="true"></span>
+    </button>`,
+        },
+      ],
+    },
     'github.com': { format: 'markdown', host: 'tikolu', proxy: 'wsrv.nl' },
   }
 
@@ -140,6 +155,7 @@
       host_imgur: 'Imgur',
       host_tikolu: 'Tikolu',
       host_mjj: 'MJJ.Today',
+      host_appinn: 'Appinn',
       btn_select_images: 'Select Images',
       progress_initial: 'Done 0/0',
       progress_done: 'Done {done}/{total}',
@@ -198,6 +214,7 @@
       host_imgur: 'Imgur',
       host_tikolu: 'Tikolu',
       host_mjj: 'MJJ.Today',
+      host_appinn: 'Appinn',
       btn_select_images: '选择图片',
       progress_initial: '完成 0/0',
       progress_done: '完成 {done}/{total}',
@@ -255,6 +272,7 @@
       host_imgur: 'Imgur',
       host_tikolu: 'Tikolu',
       host_mjj: 'MJJ.Today',
+      host_appinn: 'Appinn',
       btn_select_images: '選擇圖片',
       progress_initial: '完成 0/0',
       progress_done: '完成 {done}/{total}',
@@ -352,10 +370,19 @@
   const DEFAULT_PROXY = 'wsrv.nl'
   // Global allowed value lists
   const ALLOWED_FORMATS = ['markdown', 'html', 'bbcode', 'link']
-  const ALLOWED_HOSTS = ['imgur', 'tikolu', 'mjj']
+  const ALLOWED_HOSTS = ['imgur', 'tikolu', 'mjj', 'appinn']
   const ALLOWED_PROXIES = ['none', 'wsrv.nl']
   const ALLOWED_BUTTON_POSITIONS = ['before', 'inside', 'after']
   const DEFAULT_BUTTON_POSITION = 'after'
+
+  const APPINN_UPLOAD_ENDPOINT = 'https://h1.appinn.me/upload'
+  const APPINN_UPLOAD_PARAMS = {
+    authCode: 'appinn2',
+    serverCompress: false,
+    uploadChannel: 'telegram',
+    uploadNameType: 'default',
+    autoRetry: true,
+  }
 
   // Migrate legacy storage keys from older versions (iu_*) to new (uiu_*) - v0.1 to v0.2
   function migrateLegacyStorage() {
@@ -1036,6 +1063,36 @@
     throw new Error(t('error_upload_failed'))
   }
 
+  async function uploadToAppinn(file) {
+    if (Math.floor(file.size / 1000) > 20000) {
+      throw new Error('20mb limit')
+    }
+    const filename = file?.name || `file_${Date.now()}`
+    const formData = new FormData()
+    formData.append('filename', filename)
+    formData.append('file', file)
+    const qs = new URLSearchParams()
+    Object.entries(APPINN_UPLOAD_PARAMS).forEach(([k, v]) =>
+      qs.append(k, String(v))
+    )
+    const uploadUrl = `${APPINN_UPLOAD_ENDPOINT}?${qs.toString()}`
+    const data = await gmRequest({
+      method: 'POST',
+      url: uploadUrl,
+      data: formData,
+      responseType: 'json',
+    })
+    if (Array.isArray(data) && data[0]?.src) {
+      const src = String(data[0].src)
+      const abs = /^https?:\/\//i.test(src)
+        ? src
+        : new URL(src, APPINN_UPLOAD_ENDPOINT).href
+      return abs
+    }
+
+    throw new Error(t('error_upload_failed'))
+  }
+
   async function uploadToImgur(file) {
     // Shuffle Client-ID list to ensure a different ID on each retry
     const ids = [...IMGUR_CLIENT_IDS]
@@ -1092,6 +1149,7 @@
     const host = getHost()
     if (host === 'tikolu') return uploadToTikolu(file)
     if (host === 'mjj') return uploadToMjj(file)
+    if (host === 'appinn') return uploadToAppinn(file)
     // Default
     return uploadToImgur(file)
   }

@@ -88,6 +88,7 @@ Install one of the following user script managers:
 ### v0.5.x
 
 - Add MJJ.Today upload provider.
+- Add Appinn upload provider.
 
 ### v0.4.x
 
