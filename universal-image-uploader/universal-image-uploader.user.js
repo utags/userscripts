@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.6.0
+// @version            0.6.1
 // @description        Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -1513,9 +1513,8 @@
     } catch {}
     pasteChk.addEventListener('change', () => {
       setPasteEnabled(!!pasteChk.checked)
-      try {
-        location.reload()
-      } catch {}
+      if (pasteChk.checked) enablePaste()
+      else disablePaste()
     })
     pasteLabel.appendChild(pasteChk)
     pasteLabel.appendChild(
@@ -1531,9 +1530,8 @@
     } catch {}
     dragChk.addEventListener('change', () => {
       setDragAndDropEnabled(!!dragChk.checked)
-      try {
-        location.reload()
-      } catch {}
+      if (dragChk.checked) enableDrag()
+      else disableDrag()
     })
     dragLabel.appendChild(dragChk)
     dragLabel.appendChild(
@@ -1974,11 +1972,85 @@
     }
     restartSiteButtonObserver()
 
-    const dragEnabled = getDragAndDropEnabled()
     let drop = null
-    if (dragEnabled) {
-      drop = createEl('div', { id: 'uiu-drop', text: t('drop_overlay') })
-      document.body.appendChild(drop)
+    let pasteHandler = null
+    let dragoverHandler = null
+    let dragleaveHandler = null
+    let dropHandler = null
+    function enablePaste() {
+      if (pasteHandler) return
+      pasteHandler = (event) => {
+        const items = event.clipboardData?.items
+        if (!items) return
+        const imageItem = Array.from(items).find((i) =>
+          i.type.includes('image')
+        )
+        const file = imageItem?.getAsFile()
+        if (file) handleFiles([file])
+      }
+      document.addEventListener('paste', pasteHandler, true)
+    }
+    function disablePaste() {
+      if (!pasteHandler) return
+      document.removeEventListener('paste', pasteHandler, true)
+      pasteHandler = null
+    }
+    function enableDrag() {
+      if (!drop) {
+        drop = createEl('div', { id: 'uiu-drop', text: t('drop_overlay') })
+        document.body.appendChild(drop)
+      }
+      if (!dragoverHandler) {
+        dragoverHandler = (e) => {
+          const dt = e.dataTransfer
+          const types = dt?.types ? Array.from(dt.types) : []
+          const hasFileType =
+            types.includes('Files') || dt?.types?.contains?.('Files')
+          const hasFileItem = dt?.items
+            ? Array.from(dt.items).some((it) => it.kind === 'file')
+            : false
+          if (hasFileType || hasFileItem) {
+            drop && drop.classList.add('show')
+            e.preventDefault()
+          } else {
+            drop && drop.classList.remove('show')
+          }
+        }
+        document.addEventListener('dragover', dragoverHandler)
+      }
+      if (!dragleaveHandler) {
+        dragleaveHandler = () => drop && drop.classList.remove('show')
+        document.addEventListener('dragleave', dragleaveHandler)
+      }
+      if (!dropHandler) {
+        dropHandler = (event) => {
+          drop && drop.classList.remove('show')
+          event.preventDefault()
+          const files = event.dataTransfer?.files
+          if (files?.length) handleFiles(Array.from(files))
+        }
+        document.addEventListener('drop', dropHandler)
+      }
+    }
+    function disableDrag() {
+      if (dragoverHandler) {
+        document.removeEventListener('dragover', dragoverHandler)
+        dragoverHandler = null
+      }
+      if (dragleaveHandler) {
+        document.removeEventListener('dragleave', dragleaveHandler)
+        dragleaveHandler = null
+      }
+      if (dropHandler) {
+        document.removeEventListener('drop', dropHandler)
+        dropHandler = null
+      }
+      if (drop) {
+        try {
+          drop.remove()
+        } catch {}
+        drop = null
+      }
     }
 
     const queue = []
@@ -2037,50 +2109,10 @@
     }
 
     const pasteEnabled = getPasteEnabled()
-    if (pasteEnabled) {
-      document.addEventListener(
-        'paste',
-        (event) => {
-          const items = event.clipboardData?.items
-          if (!items) return
-          const imageItem = Array.from(items).find((i) =>
-            i.type.includes('image')
-          )
-          const file = imageItem?.getAsFile()
-          if (file) handleFiles([file])
-        },
-        true
-      )
-    }
+    if (pasteEnabled) enablePaste()
 
-    if (dragEnabled)
-      document.addEventListener('dragover', (e) => {
-        const dt = e.dataTransfer
-        const types = dt?.types ? Array.from(dt.types) : []
-        const hasFileType =
-          types.includes('Files') || dt?.types?.contains?.('Files')
-        const hasFileItem = dt?.items
-          ? Array.from(dt.items).some((it) => it.kind === 'file')
-          : false
-        if (hasFileType || hasFileItem) {
-          drop && drop.classList.add('show')
-          e.preventDefault()
-        } else {
-          drop && drop.classList.remove('show')
-        }
-      })
-    if (dragEnabled)
-      document.addEventListener(
-        'dragleave',
-        () => drop && drop.classList.remove('show')
-      )
-    if (dragEnabled)
-      document.addEventListener('drop', (event) => {
-        drop && drop.classList.remove('show')
-        event.preventDefault()
-        const files = event.dataTransfer?.files
-        if (files?.length) handleFiles(Array.from(files))
-      })
+    const dragEnabled = getDragAndDropEnabled()
+    if (dragEnabled) enableDrag()
 
     function renderHistory() {
       // Avoid Trusted Types violation: clear without using innerHTML
