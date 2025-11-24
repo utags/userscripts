@@ -1,6 +1,6 @@
 # 通用图片上传助手（Universal Image Uploader）
 
-一个用户脚本：在任意网站上粘贴、拖拽或选择图片，批量上传到 Imgur 或 Tikolu（可选择图床），并按需自动复制为 Markdown/HTML/BBCode/纯链接。支持可配置的站点按钮（兼容单页应用），提供本地上传历史便于快速复用。
+一个用户脚本：在任意网站上粘贴、拖拽或选择图片，批量上传到 Imgur 或 Tikolu 或 MJJ.Today 或 Appinn（可选择图床），并按需自动复制为 Markdown/HTML/BBCode/纯链接。支持可配置的站点按钮（兼容单页应用），提供本地上传历史便于快速复用。
 
 [English](https://github.com/utags/userscripts/blob/main/universal-image-uploader/README.md)
 
@@ -19,7 +19,7 @@
 ## 功能（MVP）
 
 - 📥 支持粘贴、拖拽、文件选择收集图片
-- 📤 批量上传到 Imgur/Tikolu，实时显示进度
+- 📤 批量上传到 Imgur/Tikolu/MJJ.Today/Appinn，实时显示进度
 - 📋 自动复制输出：`Markdown` / `HTML` / `BBCode` / `Link`
 - 🕘 本地历史记录，便于再次复制与复用
 - 🔘 可选站点按钮注入，兼容 SPA（按站点配置）
@@ -44,7 +44,7 @@
 
 - 在页面中粘贴/拖拽图片，或使用面板选择文件
 - 队列中可查看上传进度
-- 在面板的图床选择器中选择上传平台（Imgur/Tikolu）
+- 在面板的图床选择器中选择上传平台（Imgur/Tikolu/MJJ.Today/Appinn）
 - 在面板的代理选择器中选择是否使用代理（默认“无”；Imgur 不支持）
 - 完成后按所选格式自动复制
 - 历史记录中可快速再次复制
@@ -84,6 +84,11 @@
 - 🗂 历史增强：按时间/平台/标签过滤，批量复制，更快复用
 
 ## 更新记录
+
+### v0.6.x
+
+- 新增每站点启用开关（命令菜单），切换后刷新页面生效。
+- 新增每站点“粘贴上传/拖拽上传”开关（设置页）；预置站点默认启用。
 
 ### v0.5.x
 

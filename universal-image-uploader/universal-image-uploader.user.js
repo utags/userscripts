@@ -5,10 +5,10 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.5.1
-// @description        Paste/drag/select images, batch upload to Imgur; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
-// @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
-// @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
+// @version            0.6.0
+// @description        Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
+// @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
+// @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
 // @author             Pipecraft
 // @license            MIT
 // @icon               data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+PHJlY3QgeD0iOCIgeT0iOCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTAiIHN0cm9rZT0iIzFmMjkzNyIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHBhdGggZD0iTTMyIDIwbC0xMiAxMmg3djE4aDEwVjMyaDdsLTEyLTEyeiIgZmlsbD0iIzFmMjkzNyIvPjwvc3ZnPg==
@@ -47,12 +47,18 @@
   const CONFIG = {
     // Examples: local preview page and common sites; add/remove as needed
     localhost: {
+      enabled: true,
+      pasteEnabled: true,
+      dragAndDropEnabled: true,
       format: 'markdown',
       host: 'imgur',
       proxy: 'none',
       buttons: [{ selector: 'textarea', position: 'after', text: '插入图片' }],
     },
     'v2ex.com': {
+      enabled: true,
+      pasteEnabled: true,
+      dragAndDropEnabled: true,
       format: 'link',
       host: 'imgur',
       proxy: 'none',
@@ -75,6 +81,9 @@
       ],
     },
     'greasyfork.org': {
+      enabled: true,
+      pasteEnabled: true,
+      dragAndDropEnabled: true,
       format: 'markdown',
       host: 'tikolu',
       proxy: 'wsrv.nl',
@@ -86,6 +95,9 @@
       ],
     },
     'nodeseek.com': {
+      enabled: true,
+      pasteEnabled: true,
+      dragAndDropEnabled: true,
       format: 'markdown',
       host: 'tikolu',
       proxy: 'wsrv.nl',
@@ -99,6 +111,9 @@
       ],
     },
     'deepflood.com': {
+      enabled: true,
+      pasteEnabled: true,
+      dragAndDropEnabled: true,
       format: 'markdown',
       host: 'tikolu',
       proxy: 'wsrv.nl',
@@ -112,6 +127,9 @@
       ],
     },
     '2libra.com': {
+      enabled: true,
+      pasteEnabled: true,
+      dragAndDropEnabled: true,
       format: 'markdown',
       host: 'tikolu',
       proxy: 'wsrv.nl',
@@ -125,6 +143,9 @@
       ],
     },
     'meta.appinn.net': {
+      enabled: true,
+      pasteEnabled: false,
+      dragAndDropEnabled: false,
       format: 'markdown',
       host: 'appinn',
       proxy: 'none',
@@ -138,7 +159,14 @@
         },
       ],
     },
-    'github.com': { format: 'markdown', host: 'tikolu', proxy: 'wsrv.nl' },
+    'github.com': {
+      enabled: true,
+      pasteEnabled: false,
+      dragAndDropEnabled: false,
+      format: 'markdown',
+      host: 'tikolu',
+      proxy: 'wsrv.nl',
+    },
   }
 
   // I18N: language detection and translations
@@ -161,7 +189,8 @@
       progress_done: 'Done {done}/{total}',
       hint_text:
         'Paste or drag images onto the page, or click Select to batch upload',
-      settings_section_title: 'Site Button Settings',
+      settings_section_title: 'Settings',
+      settings_site_buttons: 'Site Button Settings',
       placeholder_css_selector: 'CSS Selector',
       pos_before: 'Before',
       pos_after: 'After',
@@ -184,6 +213,10 @@
       menu_open_panel: 'Open upload panel',
       menu_select_images: 'Select images',
       menu_settings: 'Settings',
+      menu_enable_site: 'Enable uploader for this site',
+      menu_disable_site: 'Disable uploader for this site',
+      toggle_paste_enabled: 'Enable paste upload',
+      toggle_drag_enabled: 'Enable drag-and-drop upload',
       formats_section_title: 'Custom Formats',
       placeholder_format_name: 'Format name',
       placeholder_format_template: 'Format template',
@@ -219,7 +252,8 @@
       progress_initial: '完成 0/0',
       progress_done: '完成 {done}/{total}',
       hint_text: '支持粘贴图片、拖拽图片到页面或点击选择图片进行批量上传',
-      settings_section_title: '站点按钮设置',
+      settings_section_title: '设置',
+      settings_site_buttons: '站点按钮设置',
       placeholder_css_selector: 'CSS 选择器',
       pos_before: '之前',
       pos_after: '之后',
@@ -242,6 +276,10 @@
       menu_open_panel: '打开图片上传面板',
       menu_select_images: '选择图片',
       menu_settings: '设置',
+      menu_enable_site: '为此站点启用上传',
+      menu_disable_site: '为此站点禁用上传',
+      toggle_paste_enabled: '启用粘贴上传',
+      toggle_drag_enabled: '启用拖拽上传',
       formats_section_title: '自定义格式',
       placeholder_format_name: '格式名称',
       placeholder_format_template: '格式内容',
@@ -277,7 +315,8 @@
       progress_initial: '完成 0/0',
       progress_done: '完成 {done}/{total}',
       hint_text: '支援貼上、拖曳圖片到頁面或點擊選擇檔案進行批次上傳',
-      settings_section_title: '站點按鈕設定',
+      settings_section_title: '設定',
+      settings_site_buttons: '站點按鈕設定',
       placeholder_css_selector: 'CSS 選擇器',
       pos_before: '之前',
       pos_after: '之後',
@@ -300,6 +339,10 @@
       menu_open_panel: '打開圖片上傳面板',
       menu_select_images: '選擇圖片',
       menu_settings: '設定',
+      menu_enable_site: '為此站點啟用上傳',
+      menu_disable_site: '為此站點停用上傳',
+      toggle_paste_enabled: '啟用貼上上傳',
+      toggle_drag_enabled: '啟用拖曳上傳',
       formats_section_title: '自訂格式',
       placeholder_format_name: '格式名稱',
       placeholder_format_template: '格式內容',
@@ -649,6 +692,27 @@
             changed = true
           }
         }
+        // enabled
+        if (s.enabled === undefined && typeof preset.enabled === 'boolean') {
+          s.enabled = preset.enabled
+          changed = true
+        }
+        // pasteEnabled
+        if (
+          s.pasteEnabled === undefined &&
+          typeof preset.pasteEnabled === 'boolean'
+        ) {
+          s.pasteEnabled = preset.pasteEnabled
+          changed = true
+        }
+        // dragAndDropEnabled
+        if (
+          s.dragAndDropEnabled === undefined &&
+          typeof preset.dragAndDropEnabled === 'boolean'
+        ) {
+          s.dragAndDropEnabled = preset.dragAndDropEnabled
+          changed = true
+        }
         if (changed) siteMap[key] = s
       })
       if (changed) GM_setValue(SITE_SETTINGS_MAP_KEY, siteMap)
@@ -727,6 +791,27 @@
   }
   const setProxy = (proxy) => {
     updateCurrentSiteSettings({ proxy })
+  }
+  const getEnabled = () => {
+    const s = getCurrentSiteSettings()
+    return s.enabled === true
+  }
+  const setEnabled = (val) => {
+    updateCurrentSiteSettings({ enabled: !!val })
+  }
+  const getPasteEnabled = () => {
+    const s = getCurrentSiteSettings()
+    return s.pasteEnabled === true
+  }
+  const setPasteEnabled = (val) => {
+    updateCurrentSiteSettings({ pasteEnabled: !!val })
+  }
+  const getDragAndDropEnabled = () => {
+    const s = getCurrentSiteSettings()
+    return s.dragAndDropEnabled === true
+  }
+  const setDragAndDropEnabled = (val) => {
+    updateCurrentSiteSettings({ dragAndDropEnabled: !!val })
   }
   // Support multiple site button configurations
   const getSiteBtnSettingsList = () => {
@@ -889,6 +974,7 @@
   #uiu-panel .uiu-settings-container { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }
   #uiu-panel header.uiu-show-settings + .uiu-body .uiu-settings-container { display:block; }
   #uiu-panel .uiu-settings .uiu-controls > span { font-size: 16px; font-weight: 600;}
+  #uiu-panel .uiu-settings .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }
   #uiu-panel .uiu-settings .uiu-settings-list { margin-top:6px; max-height: 240px; overflow-y:auto; overflow-x:hidden; }
   #uiu-panel .uiu-settings .uiu-settings-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; font-size: 12px; flex-wrap: nowrap; }
   #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item { flex:1; display:flex; align-items:center; gap:6px; min-width:0; }
@@ -909,6 +995,7 @@
   /* Custom Formats layout */
   #uiu-panel .uiu-formats { margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }
   #uiu-panel .uiu-formats .uiu-controls > span { font-size: 16px; font-weight: 600; }
+  #uiu-panel .uiu-formats .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }
   #uiu-panel .uiu-formats .uiu-formats-list { margin-top:6px; max-height: 200px; overflow-y:auto; overflow-x:hidden; }
   #uiu-panel .uiu-formats .uiu-formats-row { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }
   #uiu-panel .uiu-formats .uiu-formats-row .uiu-ops { display:flex; gap:6px; justify-content:flex-end; }
@@ -1410,11 +1497,65 @@
     body.appendChild(settingsContainer)
 
     const settings = createEl('div', { class: 'uiu-settings' })
-    const settingsHeader = createEl('div', { class: 'uiu-controls' })
+    const settingsHeader = createEl('div', {
+      class: 'uiu-controls',
+      style: 'margin-bottom:8px;',
+    })
     settingsHeader.appendChild(
       createEl('span', { text: t('settings_section_title') })
     )
     settings.appendChild(settingsHeader)
+    const togglesRow = createEl('div', { class: 'uiu-controls' })
+    const pasteLabel = createEl('label')
+    const pasteChk = createEl('input', { type: 'checkbox' })
+    try {
+      pasteChk.checked = getPasteEnabled()
+    } catch {}
+    pasteChk.addEventListener('change', () => {
+      setPasteEnabled(!!pasteChk.checked)
+      try {
+        location.reload()
+      } catch {}
+    })
+    pasteLabel.appendChild(pasteChk)
+    pasteLabel.appendChild(
+      createEl('span', {
+        text: t('toggle_paste_enabled'),
+        style: 'margin-left:6px;',
+      })
+    )
+    const dragLabel = createEl('label', { style: 'margin-left:12px;' })
+    const dragChk = createEl('input', { type: 'checkbox' })
+    try {
+      dragChk.checked = getDragAndDropEnabled()
+    } catch {}
+    dragChk.addEventListener('change', () => {
+      setDragAndDropEnabled(!!dragChk.checked)
+      try {
+        location.reload()
+      } catch {}
+    })
+    dragLabel.appendChild(dragChk)
+    dragLabel.appendChild(
+      createEl('span', {
+        text: t('toggle_drag_enabled'),
+        style: 'margin-left:6px;',
+      })
+    )
+    togglesRow.appendChild(pasteLabel)
+    togglesRow.appendChild(dragLabel)
+    settings.appendChild(togglesRow)
+    const btnsSubHeader = createEl('div', {
+      class: 'uiu-controls',
+      style: 'margin-top:12px;border-top:2px solid #475569;padding-top:8px;',
+    })
+    btnsSubHeader.appendChild(
+      createEl('span', {
+        class: 'uiu-subtitle',
+        text: t('settings_site_buttons'),
+      })
+    )
+    settings.appendChild(btnsSubHeader)
     const settingsForm = createEl('div', { class: 'uiu-controls' })
     const selInput = createEl('input', {
       type: 'text',
@@ -1477,7 +1618,10 @@
     const formats = createEl('div', { class: 'uiu-formats' })
     const formatsHeader = createEl('div', { class: 'uiu-controls' })
     formatsHeader.appendChild(
-      createEl('span', { text: t('formats_section_title') })
+      createEl('span', {
+        class: 'uiu-subtitle',
+        text: t('formats_section_title'),
+      })
     )
     formats.appendChild(formatsHeader)
     // Column headers: Name | Format | Actions
@@ -1830,8 +1974,12 @@
     }
     restartSiteButtonObserver()
 
-    const drop = createEl('div', { id: 'uiu-drop', text: t('drop_overlay') })
-    document.body.appendChild(drop)
+    const dragEnabled = getDragAndDropEnabled()
+    let drop = null
+    if (dragEnabled) {
+      drop = createEl('div', { id: 'uiu-drop', text: t('drop_overlay') })
+      document.body.appendChild(drop)
+    }
 
     const queue = []
     let running = 0
@@ -1888,42 +2036,51 @@
       processQueue()
     }
 
-    document.addEventListener(
-      'paste',
-      (event) => {
-        const items = event.clipboardData?.items
-        if (!items) return
-        const imageItem = Array.from(items).find((i) =>
-          i.type.includes('image')
-        )
-        const file = imageItem?.getAsFile()
-        if (file) handleFiles([file])
-      },
-      true
-    )
+    const pasteEnabled = getPasteEnabled()
+    if (pasteEnabled) {
+      document.addEventListener(
+        'paste',
+        (event) => {
+          const items = event.clipboardData?.items
+          if (!items) return
+          const imageItem = Array.from(items).find((i) =>
+            i.type.includes('image')
+          )
+          const file = imageItem?.getAsFile()
+          if (file) handleFiles([file])
+        },
+        true
+      )
+    }
 
-    document.addEventListener('dragover', (e) => {
-      const dt = e.dataTransfer
-      const types = dt?.types ? Array.from(dt.types) : []
-      const hasFileType =
-        types.includes('Files') || dt?.types?.contains?.('Files')
-      const hasFileItem = dt?.items
-        ? Array.from(dt.items).some((it) => it.kind === 'file')
-        : false
-      if (hasFileType || hasFileItem) {
-        drop.classList.add('show')
-        e.preventDefault()
-      } else {
-        drop.classList.remove('show')
-      }
-    })
-    document.addEventListener('dragleave', () => drop.classList.remove('show'))
-    document.addEventListener('drop', (event) => {
-      drop.classList.remove('show')
-      event.preventDefault()
-      const files = event.dataTransfer?.files
-      if (files?.length) handleFiles(Array.from(files))
-    })
+    if (dragEnabled)
+      document.addEventListener('dragover', (e) => {
+        const dt = e.dataTransfer
+        const types = dt?.types ? Array.from(dt.types) : []
+        const hasFileType =
+          types.includes('Files') || dt?.types?.contains?.('Files')
+        const hasFileItem = dt?.items
+          ? Array.from(dt.items).some((it) => it.kind === 'file')
+          : false
+        if (hasFileType || hasFileItem) {
+          drop && drop.classList.add('show')
+          e.preventDefault()
+        } else {
+          drop && drop.classList.remove('show')
+        }
+      })
+    if (dragEnabled)
+      document.addEventListener(
+        'dragleave',
+        () => drop && drop.classList.remove('show')
+      )
+    if (dragEnabled)
+      document.addEventListener('drop', (event) => {
+        drop && drop.classList.remove('show')
+        event.preventDefault()
+        const files = event.dataTransfer?.files
+        if (files?.length) handleFiles(Array.from(files))
+      })
 
     function renderHistory() {
       // Avoid Trusted Types violation: clear without using innerHTML
@@ -2072,12 +2229,25 @@
     return { handleFiles }
   }
 
-  if (!document.getElementById('uiu-panel')) {
-    const { handleFiles } = createPanel()
-
-    window.addEventListener('iu:uploadFiles', (e) => {
-      const files = e.detail?.files
-      if (files?.length) handleFiles(files)
-    })
-  }
+  try {
+    const enabled = getEnabled()
+    if (enabled && !document.getElementById('uiu-panel')) {
+      const { handleFiles } = createPanel()
+      window.addEventListener('iu:uploadFiles', (e) => {
+        const files = e.detail?.files
+        if (files?.length) handleFiles(files)
+      })
+    }
+    if (typeof GM_registerMenuCommand === 'function') {
+      GM_registerMenuCommand(
+        enabled ? t('menu_disable_site') : t('menu_enable_site'),
+        () => {
+          setEnabled(!enabled)
+          try {
+            location.reload()
+          } catch {}
+        }
+      )
+    }
+  } catch {}
 })()
