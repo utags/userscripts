@@ -4,5 +4,7 @@
 # dependencies
 /node_modules
 
+.DS_Store
+
 discourse-topic-quick-switcher/*.html
 universal-image-uploader/*.html
