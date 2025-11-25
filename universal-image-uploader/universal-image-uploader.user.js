@@ -5,7 +5,7 @@
 // @namespace          https://github.com/utags
 // @homepageURL        https://github.com/utags/userscripts#readme
 // @supportURL         https://github.com/utags/userscripts/issues
-// @version            0.6.1
+// @version            0.6.2
 // @description        Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN  通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW  通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -234,6 +234,8 @@
       proxy_wsrv_nl: 'wsrv.nl',
       error_network: 'Network error',
       error_upload_failed: 'Upload failed',
+      placeholder_uploading: 'Uploading "{name}"...',
+      placeholder_upload_failed: 'Upload failed: {name}',
     },
     'zh-CN': {
       header_title: '通用图片上传助手',
@@ -297,6 +299,8 @@
       proxy_wsrv_nl: 'wsrv.nl',
       error_network: '网络错误',
       error_upload_failed: '上传失败',
+      placeholder_uploading: '正在上传「{name}」...',
+      placeholder_upload_failed: '上传失败：{name}',
     },
     'zh-TW': {
       header_title: '通用圖片上傳助手',
@@ -360,6 +364,8 @@
       proxy_wsrv_nl: 'wsrv.nl',
       error_network: '網路錯誤',
       error_upload_failed: '上傳失敗',
+      placeholder_uploading: '正在上傳「{name}」...',
+      placeholder_upload_failed: '上傳失敗：{name}',
     },
   }
 
@@ -1356,6 +1362,45 @@
     insertIntoFocused(`\n${text}\n`)
   }
 
+  function getActiveEditableTarget() {
+    let el = getDeepActiveElement()
+    if (!isEditable(el) || isInsideUIPanel(el)) el = lastEditableEl
+    return isEditable(el) && !isInsideUIPanel(el) ? el : null
+  }
+  function createUploadPlaceholder(name) {
+    const safe = String(name || t('default_image_name'))
+    return `<!-- ${tpl(t('placeholder_uploading'), { name: safe })} -->`
+  }
+  function replacePlaceholder(el, placeholder, replacement) {
+    if (!el || !placeholder) return false
+    try {
+      if (el instanceof HTMLTextAreaElement || isTextInput(el)) {
+        const v = el.value
+        const idx = v.indexOf(placeholder)
+        if (idx >= 0) {
+          el.value =
+            v.slice(0, idx) + replacement + v.slice(idx + placeholder.length)
+          el.dispatchEvent(new Event('input', { bubbles: true }))
+          return true
+        }
+        return false
+      }
+      if (el instanceof HTMLElement && el.isContentEditable) {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+        let node
+        while ((node = walker.nextNode())) {
+          const pos = node.data.indexOf(placeholder)
+          if (pos >= 0) {
+            node.replaceData(pos, placeholder.length, replacement)
+            return true
+          }
+        }
+        return false
+      }
+    } catch {}
+    return false
+  }
+
   function createPanel() {
     const panel = createEl('div', { id: 'uiu-panel' })
     // Attach Shadow DOM and inject scoped styles (convert '#uiu-panel' selectors to ':host')
@@ -2100,7 +2145,16 @@
             item.file.name,
             fmt
           )
-          copyAndInsert(out)
+          if (item.placeholder && item.targetEl) {
+            const ok = replacePlaceholder(
+              item.targetEl,
+              item.placeholder,
+              `${out}`
+            )
+            if (!ok) copyAndInsert(out)
+          } else {
+            copyAndInsert(out)
+          }
           addToHistory({
             link,
             name: item.file.name,
@@ -2110,6 +2164,12 @@
           })
           addLog(`${t('log_success')}${item.file.name} → ${link}`)
         } catch (e) {
+          if (item.placeholder && item.targetEl) {
+            const failNote = `<!-- ${tpl(t('placeholder_upload_failed'), { name: item.file.name })} -->`
+            try {
+              replacePlaceholder(item.targetEl, item.placeholder, failNote)
+            } catch {}
+          }
           addLog(`${t('log_failed')}${item.file.name}（${e?.message || e}）`)
         } finally {
           running--
@@ -2124,7 +2184,18 @@
       if (!imgs.length) return
       total += imgs.length
       updateProgress()
-      imgs.forEach((file) => queue.push({ file }))
+      const targetEl = getActiveEditableTarget()
+      imgs.forEach((file) => {
+        let placeholder
+        if (targetEl) {
+          try {
+            targetEl.focus()
+          } catch {}
+          placeholder = createUploadPlaceholder(file.name)
+          insertIntoFocused(`\n${placeholder}\n`)
+        }
+        queue.push({ file, placeholder, targetEl })
+      })
       processQueue()
     }
 
