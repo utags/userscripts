@@ -1980,13 +1980,33 @@
     function enablePaste() {
       if (pasteHandler) return
       pasteHandler = (event) => {
-        const items = event.clipboardData?.items
-        if (!items) return
-        const imageItem = Array.from(items).find((i) =>
-          i.type.includes('image')
-        )
-        const file = imageItem?.getAsFile()
-        if (file) handleFiles([file])
+        const cd = event.clipboardData
+        if (!cd) return
+        const list = []
+        const seen = new Set()
+        const addIfNew = (f) => {
+          const sig = `${f.name}|${f.size}|${f.type}|${f.lastModified || 0}`
+          if (!seen.has(sig)) {
+            seen.add(sig)
+            list.push(f)
+          }
+        }
+        const items = cd.items ? Array.from(cd.items) : []
+        items.forEach((i) => {
+          if (i && i.type && i.type.includes('image')) {
+            const f = i.getAsFile?.()
+            if (f) addIfNew(f)
+          }
+        })
+        const files = cd.files ? Array.from(cd.files) : []
+        files.forEach((f) => {
+          if (f && f.type && f.type.includes('image')) addIfNew(f)
+        })
+        if (list.length) {
+          event.preventDefault()
+          event.stopPropagation()
+          handleFiles(list)
+        }
       }
       document.addEventListener('paste', pasteHandler, true)
     }

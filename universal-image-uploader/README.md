@@ -89,6 +89,7 @@ Install one of the following user script managers:
 
 - Per-site enable toggle via command menu; refresh page to apply.
 - Per-site paste and drag-and-drop toggles in Settings; preset sites default to enabled.
+- Support pasting multiple images at once.
 
 ### v0.5.x
 
