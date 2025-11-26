@@ -1,0 +1,18 @@
+/* ==UserStyle==
+@name           Discourse - 自动去模糊剧透
+@namespace      https://github.com/utags
+@version        1.0.1
+@description    自动去模糊剧透。
+@author         Pipecraft
+@license        MIT
+@icon           https://www.google.com/s2/favicons?sz=64&domain=meta.discourse.org
+==/UserStyle== */
+
+@-moz-document domain("meta.discourse.org"), domain("linux.do"), domain("idcflare.com"), domain("www.nodeloc.com"), domain("meta.appinn.net"), domain("community.openai.com"), domain("community.cloudflare.com"), domain("community.wanikani.com"), domain("forum.cursor.com"), domain("forum.obsidian.md"), domain("forum-zh.obsidian.md"), domain("www.uscardforum.com") {
+  .spoiler-blurred {
+    filter: none !important;
+  }
+  .spoiler-blurred img {
+    filter: none !important;
+  }
+}
