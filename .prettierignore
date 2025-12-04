@@ -1,2 +1,5 @@
 node_modules/**
 LICENSE
+pnpm-lock.yaml
+tsconfig.json
+tsconfig.tsbuildinfo

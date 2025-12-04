@@ -5,12 +5,41 @@
   "main": "index.js",
   "scripts": {
     "format": "prettier --write .",
+    "server": "http-server ./ -o",
+    "staging": "node scripts/userscript/build-all.mjs --staging && pnpm prettier --log-level warn --write .",
+    "build": "node scripts/userscript/build-all.mjs && pnpm prettier --log-level warn --write .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "Pipecraft",
   "license": "MIT",
+  "namespace": "https://github.com/utags",
+  "bugs": {
+    "url": "https://github.com/utags/userscripts/issues"
+  },
+  "homepage": "https://github.com/utags/userscripts#readme",
   "dependencies": {
-    "prettier": "^3.6.2"
+    "browser-extension-i18n": "^0.1.3",
+    "browser-extension-settings": "^0.7.1",
+    "browser-extension-storage": "^0.1.2",
+    "browser-extension-utils": "^0.2.2",
+    "tailwindcss": "^4.1.17"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.6.2",
+    "@tailwindcss/postcss": "^4.1.17",
+    "@types/chrome": "^0.1.31",
+    "@types/node": "^24.10.1",
+    "autoprefixer": "^10.4.20",
+    "cssnano": "^7.1.2",
+    "esbuild": "^0.27.1",
+    "http-server": "^14.1.1",
+    "postcss": "^8.4.49",
+    "prettier": "^3.7.4",
+    "prettier-plugin-tailwindcss": "^0.7.1",
+    "sass": "^1.94.2",
+    "typescript": "^5.2.2",
+    "vitest": "^4.0.14",
+    "xo": "^1.2.3"
   }
 }

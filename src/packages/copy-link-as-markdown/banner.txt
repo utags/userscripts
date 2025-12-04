@@ -1,0 +1,17 @@
+// ==UserScript==
+// @name                 Copy Selected Link as Markdown
+// @name:zh-CN           复制选中链接为 Markdown
+// @namespace            {namespace}
+// @homepageURL          {homepage}
+// @supportURL           {bugs.url}
+// @version              0.1.0
+// @description          Copy selected link(s) on any page as Markdown: [text](url).
+// @description:zh-CN    在任意页面将选中的链接复制为 Markdown 格式：[文本](链接)。
+// @icon                 https://www.google.com/s2/favicons?sz=64&domain=greasyfork.org
+// @author               {author}
+// @license              {license}
+// @match                *://*/*
+// @noframes
+// @run-at               document-idle
+// ==/UserScript==
+//

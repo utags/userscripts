@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name                 Discourse Prevent Jump on Reply
-// @name:zh-CN           Discourse 回复时防止跳转
+// @name                 Discourse Prevent Jump on Reply - staging
+// @name:zh-CN           Discourse 回复时防止跳转 - staging
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues

@@ -1,0 +1,137 @@
+import fs from 'node:fs'
+import tailwind from '@tailwindcss/postcss'
+import autoprefixer from 'autoprefixer'
+import cssnano from 'cssnano'
+import * as esbuild from 'esbuild'
+import postcss from 'postcss'
+import * as sass from 'sass'
+
+import twPropsUnconditional from '../postcss/plugins/tw-properties-unconditional.mjs'
+
+const EMOJI_LIST = [
+  //
+  '⚽️',
+  '🏀',
+  '🏈',
+  '⚾️',
+  '🥎',
+  '🎾',
+  '🏐',
+  '🏉',
+  '🥏',
+  '🎱',
+]
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max)
+}
+
+export const logger = (target, emoji) => {
+  emoji = emoji || EMOJI_LIST[getRandomInt(EMOJI_LIST.length)]
+  return (message) => {
+    console.log(`${emoji} [target: ${target}]`, message)
+  }
+}
+
+const schemeImportPlugin = ({ compressCss }) => ({
+  name: 'schemeImport',
+  setup(build) {
+    build.onResolve({ filter: /^[\w-]+:/ }, async (args) => {
+      const result = await build.resolve(args.path.split(':')[1], {
+        kind: 'import-statement',
+        resolveDir: args.resolveDir,
+      })
+      if (result.errors.length > 0) {
+        return { errors: result.errors }
+      }
+
+      return { path: result.path, namespace: 'schemeImport-ns' }
+    })
+    build.onLoad(
+      { filter: /\.(s[ac]ss|css)$/, namespace: 'schemeImport-ns' },
+      async (args) => {
+        let cssText = ''
+        if (/\.s[ac]ss$/i.test(args.path)) {
+          const result = (await sass.compileAsync(args.path, {
+            style: compressCss ? 'compressed' : 'expanded',
+          })) || { css: '' }
+          cssText = result.css
+        } else {
+          cssText = await fs.promises.readFile(args.path, 'utf8')
+        }
+
+        const plugins = [tailwind(), twPropsUnconditional(), autoprefixer()]
+        if (compressCss) {
+          plugins.push(cssnano())
+        }
+
+        const postcssResult = await postcss(plugins).process(cssText, {
+          from: args.path,
+        })
+
+        return {
+          contents: postcssResult.css,
+          loader: 'text',
+        }
+      }
+    )
+    build.onLoad(
+      { filter: /.*/, namespace: 'schemeImport-ns' },
+      async (args) => ({
+        contents: await fs.promises.readFile(args.path),
+        loader: 'text',
+      })
+    )
+  },
+})
+
+export const getBuildOptions = (target, tag, fileName = 'content') => ({
+  entryPoints: [`src/${fileName}.ts`],
+  bundle: true,
+  plugins: [
+    schemeImportPlugin({ compressCss: tag === 'prod' || tag === 'staging' }),
+  ],
+  define: {
+    'process.env.PLASMO_TARGET': `"${target}"`,
+    'process.env.PLASMO_TAG': `"${tag}"`,
+  },
+  target: ['chrome58', 'firefox57', 'safari11', 'edge18'],
+  outfile: `build/${target}-${tag}/${fileName}.js`,
+})
+
+const waitUntilFileExists = async (path, timeout = 10_000) =>
+  new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error('File does not exits. ' + path))
+    }, timeout)
+
+    const check = () => {
+      if (fs.existsSync(path)) {
+        clearTimeout(timeoutId)
+        resolve()
+        return
+      }
+
+      setTimeout(check, 100)
+    }
+
+    check()
+  })
+
+export const runDevServer = async (buildOptions, target, tag) => {
+  const log = logger(target)
+  const ctx = await esbuild.context(buildOptions)
+
+  await ctx.watch()
+  log('watching...')
+
+  await waitUntilFileExists(buildOptions.outfile)
+
+  const { host, port } = await ctx.serve({
+    servedir: `build/${target}-${tag}`,
+  })
+  log(`Server is running at http://localhost:${port}/`)
+  log('Hit CTRL-C to stop the server')
+
+  return { host, port }
+}
