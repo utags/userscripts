@@ -23,9 +23,9 @@ Copy selected link(s) on any page to the clipboard as Markdown in the form `[tex
    - [Tampermonkey](https://www.tampermonkey.net/)
    - [Violentmonkey](https://violentmonkey.github.io/)
 2. Install the script:
-   - GitHub Raw: https://github.com/utags/userscripts/raw/main/copy-link-as-markdown/copy-link-as-markdown.user.js
-   - Greasy Fork: https://greasyfork.org/scripts/557913-copy-selected-links-as-markdown
-   - ScriptCat: https://scriptcat.org/zh-CN/script-show-page/4802
+   - [GitHub Raw](https://github.com/utags/userscripts/raw/main/copy-link-as-markdown/copy-link-as-markdown.user.js)
+   - [Greasy Fork](https://greasyfork.org/scripts/557913-copy-selected-links-as-markdown)
+   - [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/4802)
 
 ## Usage
 
@@ -61,6 +61,8 @@ Works on modern browsers with Tampermonkey/Violentmonkey.
   - [Greasy Fork](https://greasyfork.org/scripts/464541-links-helper)
 - 🔍 Find Scripts For This Site
   - [Greasy Fork](https://greasyfork.org/scripts/550659-find-scripts-for-this-site)
+- 🖼️ Universal Image Uploader
+  - [Greasy Fork](https://greasyfork.org/scripts/553341-universal-image-uploader)
 
 ## License
 

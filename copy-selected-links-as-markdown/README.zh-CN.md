@@ -23,9 +23,9 @@
    - [Tampermonkey](https://www.tampermonkey.net/)
    - [Violentmonkey](https://violentmonkey.github.io/)
 2. 安装脚本：
-   - GitHub Raw：https://github.com/utags/userscripts/raw/main/copy-link-as-markdown/copy-link-as-markdown.user.js
-   - Greasy Fork：https://greasyfork.org/scripts/557913-copy-selected-links-as-markdown
-   - ScriptCat：https://scriptcat.org/zh-CN/script-show-page/4802
+   - [GitHub Raw](https://github.com/utags/userscripts/raw/main/copy-link-as-markdown/copy-link-as-markdown.user.js)
+   - [Greasy Fork](https://greasyfork.org/scripts/557913-copy-selected-links-as-markdown)
+   - [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/4802)
 
 ## 使用方法
 
@@ -61,6 +61,8 @@
   - [Greasy Fork](https://greasyfork.org/scripts/464541-links-helper)
 - 🔍 Find Scripts For This Site — 查找当前网站脚本
   - [Greasy Fork](https://greasyfork.org/scripts/550659-find-scripts-for-this-site)
+- 🖼️ 通用图片上传助手（Universal Image Uploader）
+  - [Greasy Fork](https://greasyfork.org/scripts/553341-universal-image-uploader)
 
 ## 许可证
 

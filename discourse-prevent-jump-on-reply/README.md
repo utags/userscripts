@@ -28,9 +28,9 @@ Runs on these Discourse forums:
    - [Tampermonkey](https://www.tampermonkey.net/)
    - [Violentmonkey](https://violentmonkey.github.io/)
 2. Install the script:
-   - GitHub Raw: https://github.com/utags/userscripts/raw/main/discourse-prevent-jump-on-reply/discourse-prevent-jump-on-reply.user.js
-   - Greasy Fork: https://greasyfork.org/scripts/557755-discourse-prevent-jump-on-reply
-   - ScriptCat: https://scriptcat.org/script-show-page/4789
+   - [GitHub Raw](https://github.com/utags/userscripts/raw/main/discourse-prevent-jump-on-reply/discourse-prevent-jump-on-reply.user.js)
+   - [Greasy Fork](https://greasyfork.org/scripts/557755-discourse-prevent-jump-on-reply)
+   - [ScriptCat](https://scriptcat.org/script-show-page/4789)
 
 ## Usage
 
@@ -61,6 +61,12 @@ Tested on modern browsers with Tampermonkey/Violentmonkey and Discourse‑based 
   - [Greasy Fork](https://greasyfork.org/scripts/464541-links-helper)
 - 🔍 Find Scripts For This Site
   - [Greasy Fork](https://greasyfork.org/scripts/550659-find-scripts-for-this-site)
+- 🖼️ Universal Image Uploader
+  - [Greasy Fork](https://greasyfork.org/scripts/553341-universal-image-uploader)
+- 🔗 Copy Selected Links as Markdown
+  - [Greasy Fork](https://greasyfork.org/scripts/557913-copy-selected-links-as-markdown)
+- 🔄 Discourse Sort Option Quick Switcher
+  - [Greasy Fork](https://greasyfork.org/scripts/554927-discourse-sort-option-quick-switcher)
 
 ## License
 
