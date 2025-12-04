@@ -11,7 +11,6 @@
 // @author               Pipecraft
 // @license              MIT
 // @match                *://*/*
-// @noframes
 // @run-at               document-idle
 // @grant                GM_registerMenuCommand
 // ==/UserScript==
@@ -20,10 +19,13 @@
   'use strict'
   function escapeMD(s) {
     s = String(s || '')
-    return s.replace(/\|/g, '\\|').replace(/\[/g, '\\[').replace(/\]/g, '\\]')
+    return s
+      .replaceAll('|', '\\|')
+      .replaceAll('[', '\\[')
+      .replaceAll(']', '\\]')
   }
   function getSelectionAnchors() {
-    const sel = window.getSelection()
+    const sel = globalThis.getSelection()
     if (!sel || sel.rangeCount === 0) return []
     const set = /* @__PURE__ */ new Set()
     for (let i = 0; i < sel.rangeCount; i++) {
@@ -32,11 +34,11 @@
       if (root && root.nodeType === Node.TEXT_NODE) root = root.parentElement
       if (root && root.querySelectorAll) {
         const as = root.querySelectorAll('a[href]')
-        as.forEach((a) => {
+        for (const a of as) {
           try {
             if (range.intersectsNode(a)) set.add(a)
           } catch (e) {}
-        })
+        }
       }
       let node = range.startContainer
       if (node && node.nodeType === Node.TEXT_NODE) node = node.parentElement
@@ -51,7 +53,7 @@
     return Array.from(set)
   }
   function buildMarkdown() {
-    const sel = window.getSelection()
+    const sel = globalThis.getSelection()
     const textSel = sel ? sel.toString().trim() : ''
     const anchors = getSelectionAnchors()
     const origin = location.origin
@@ -71,7 +73,7 @@
         .join('\n')
     }
     if (textSel) {
-      const m = textSel.match(/https?:\/\/[^\s)]+/)
+      const m = /https?:\/\/[^\s)]+/.exec(textSel)
       if (m) {
         const url = m[0]
         const name = textSel.length > url.length ? textSel : url
@@ -92,7 +94,7 @@
       ta.style.position = 'fixed'
       ta.style.opacity = '0'
       ta.value = s
-      document.body.appendChild(ta)
+      document.body.append(ta)
       ta.focus()
       ta.select()
       document.execCommand('copy')
@@ -101,17 +103,18 @@
   }
   function run() {
     const md = buildMarkdown()
-    copyText(md)
+    void copyText(md)
   }
   try {
-    if (typeof GM_registerMenuCommand === 'function') {
-      GM_registerMenuCommand(
+    const gmRegisterMenuCommand = globalThis.GM_registerMenuCommand
+    if (typeof gmRegisterMenuCommand === 'function') {
+      gmRegisterMenuCommand(
         '\u590D\u5236\u9009\u4E2D\u94FE\u63A5\u4E3A Markdown',
         run
       )
     }
   } catch (e) {}
-  window.addEventListener('keydown', (e) => {
+  globalThis.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === 'KeyM') {
       e.preventDefault()
       run()

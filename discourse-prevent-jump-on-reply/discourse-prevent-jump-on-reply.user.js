@@ -39,7 +39,7 @@
         (document.body && document.body.getAttribute('lang')) || ''
       if (bodyLang) return bodyLang.toLowerCase()
       const classes = (document.documentElement.className || '').toLowerCase()
-      const m = classes.match(/\blocale-([a-z-]+)/)
+      const m = /\blocale-([a-z-]+)/.exec(classes)
       if (m && m[1]) return m[1]
       const meta =
         document.querySelector('meta[name="language"]') ||
@@ -61,7 +61,7 @@
     ensureToggle(button)
     button.addEventListener(
       'click',
-      function (originalEvent) {
+      (originalEvent) => {
         if (!getEnabled() || originalEvent.shiftKey) return
         originalEvent.stopImmediatePropagation()
         originalEvent.preventDefault()
@@ -84,11 +84,13 @@
   }
   function scan() {
     const list = document.querySelectorAll(SELECTOR_REPLY_BUTTON)
-    list.forEach((b) => register(b))
+    for (const b of list) register(b)
   }
   function getActiveReplyButton() {
     const list = document.querySelectorAll(SELECTOR_REPLY_BUTTON)
-    return Array.from(list).find((b) => !!b.offsetParent) || list[0] || null
+    return (
+      Array.from(list).find((b) => Boolean(b.offsetParent)) || list[0] || null
+    )
   }
   document.addEventListener(
     'keydown',
@@ -116,7 +118,7 @@
   var KEY = 'dpjor_enabled:' + (location.hostname || '')
   var enabledFlag = false
   function getEnabled() {
-    return !!enabledFlag
+    return Boolean(enabledFlag)
   }
   async function loadEnabled() {
     try {
@@ -128,16 +130,17 @@
     }
   }
   function setEnabled(v) {
-    enabledFlag = !!v
+    enabledFlag = Boolean(v)
     try {
       GM.setValue(KEY, v ? '1' : '0')
     } catch (e) {}
   }
   function updateToggleUI() {
     try {
-      document
-        .querySelectorAll('.dpjor-toggle input[type="checkbox"]')
-        .forEach((cb) => (cb.checked = getEnabled()))
+      for (const cb of document.querySelectorAll(
+        '.dpjor-toggle input[type="checkbox"]'
+      ))
+        cb.checked = getEnabled()
     } catch (e) {}
   }
   function ensureToggle(button) {
@@ -154,14 +157,18 @@
     cb.checked = getEnabled()
     const span = document.createElement('span')
     span.textContent = I18N_LABEL[getLang()] || I18N_LABEL.en
-    cb.addEventListener('change', () => setEnabled(cb.checked))
-    label.appendChild(cb)
-    label.appendChild(span)
-    container.appendChild(label)
+    cb.addEventListener('change', () => {
+      setEnabled(cb.checked)
+    })
+    label.append(cb)
+    label.append(span)
+    container.append(label)
   }
-  loadEnabled()
+  void loadEnabled()
   scan()
-  var mo = new MutationObserver(() => scan())
+  var mo = new MutationObserver(() => {
+    scan()
+  })
   mo.observe(document.documentElement || document.body, {
     childList: true,
     subtree: true,

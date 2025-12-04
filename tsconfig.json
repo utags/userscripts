@@ -1,0 +1,18 @@
+{
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    "./**/*.ts",
+  ],
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "paths": {
+      "~*": [
+        "./src/*"
+      ]
+    },
+    "strictNullChecks": true,
+    "baseUrl": "."
+  }
+}

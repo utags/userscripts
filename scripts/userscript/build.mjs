@@ -27,9 +27,9 @@ const buildOptions = {
   },
   legalComments: 'none',
   outfile:
-    tag !== 'prod'
-      ? `${packageName}/${packageName}-${tag}.user.js`
-      : `${packageName}/${packageName}.user.js`,
+    tag === 'prod'
+      ? `${packageName}/${packageName}.user.js`
+      : `${packageName}/${packageName}-${tag}.user.js`,
 }
 buildOptions.alias = {
   ...buildOptions.alias,

@@ -13,7 +13,7 @@ function getDiscourseLocale() {
     const bodyLang = (document.body && document.body.getAttribute('lang')) || ''
     if (bodyLang) return bodyLang.toLowerCase()
     const classes = (document.documentElement.className || '').toLowerCase()
-    const m = classes.match(/\blocale-([a-z-]+)/)
+    const m = /\blocale-([a-z-]+)/.exec(classes)
     if (m && m[1]) return m[1]
     const meta =
       document.querySelector('meta[name="language"]') ||
@@ -21,8 +21,10 @@ function getDiscourseLocale() {
     const metaLang = meta && meta.content ? meta.content.toLowerCase() : ''
     if (metaLang) return metaLang
   } catch {}
+
   return ''
 }
+
 function getLang() {
   const l =
     getDiscourseLocale() || String(navigator.language || '').toLowerCase()
@@ -37,7 +39,7 @@ function register(button) {
 
   button.addEventListener(
     'click',
-    function (originalEvent) {
+    (originalEvent) => {
       if (!getEnabled() || originalEvent.shiftKey) return
       originalEvent.stopImmediatePropagation()
       originalEvent.preventDefault()
@@ -61,12 +63,14 @@ function register(button) {
 
 function scan() {
   const list = document.querySelectorAll(SELECTOR_REPLY_BUTTON)
-  list.forEach((b) => register(b))
+  for (const b of list) register(b)
 }
 
 function getActiveReplyButton() {
   const list = document.querySelectorAll(SELECTOR_REPLY_BUTTON)
-  return Array.from(list).find((b) => !!b.offsetParent) || list[0] || null
+  return (
+    Array.from(list).find((b) => Boolean(b.offsetParent)) || list[0] || null
+  )
 }
 
 document.addEventListener(
@@ -96,8 +100,9 @@ document.addEventListener(
 const KEY = 'dpjor_enabled:' + (location.hostname || '')
 let enabledFlag = false
 function getEnabled() {
-  return !!enabledFlag
+  return Boolean(enabledFlag)
 }
+
 async function loadEnabled() {
   try {
     const val = await GM.getValue(KEY, '0')
@@ -107,19 +112,23 @@ async function loadEnabled() {
     enabledFlag = false
   }
 }
+
 function setEnabled(v) {
-  enabledFlag = !!v
+  enabledFlag = Boolean(v)
   try {
     GM.setValue(KEY, v ? '1' : '0')
   } catch {}
 }
+
 function updateToggleUI() {
   try {
-    document
-      .querySelectorAll('.dpjor-toggle input[type="checkbox"]')
-      .forEach((cb) => (cb.checked = getEnabled()))
+    for (const cb of document.querySelectorAll(
+      '.dpjor-toggle input[type="checkbox"]'
+    ))
+      cb.checked = getEnabled()
   } catch {}
 }
+
 function ensureToggle(button) {
   const container = button.closest('.save-or-cancel') || button.parentElement
   if (!container || container.querySelector('.dpjor-toggle')) return
@@ -134,15 +143,20 @@ function ensureToggle(button) {
   cb.checked = getEnabled()
   const span = document.createElement('span')
   span.textContent = I18N_LABEL[getLang()] || I18N_LABEL.en
-  cb.addEventListener('change', () => setEnabled(cb.checked))
-  label.appendChild(cb)
-  label.appendChild(span)
-  container.appendChild(label)
+  cb.addEventListener('change', () => {
+    setEnabled(cb.checked)
+  })
+  label.append(cb)
+  label.append(span)
+  container.append(label)
 }
 
-loadEnabled()
+// eslint-disable-next-line unicorn/prefer-top-level-await
+void loadEnabled()
 scan()
-const mo = new MutationObserver(() => scan())
+const mo = new MutationObserver(() => {
+  scan()
+})
 mo.observe(document.documentElement || document.body, {
   childList: true,
   subtree: true,

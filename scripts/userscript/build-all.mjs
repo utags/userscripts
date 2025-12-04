@@ -29,6 +29,7 @@ for (const packageName of packages) {
     log(`Skip ${packageName}: missing index.ts`)
     continue
   }
+
   if (!fs.existsSync(bannerPath)) {
     log(`Skip ${packageName}: missing banner.txt`)
     continue
@@ -44,9 +45,9 @@ for (const packageName of packages) {
     banner: { js: banner },
     legalComments: 'none',
     outfile:
-      tag !== 'prod'
-        ? `${packageName}/${packageName}-${tag}.user.js`
-        : `${packageName}/${packageName}.user.js`,
+      tag === 'prod'
+        ? `${packageName}/${packageName}.user.js`
+        : `${packageName}/${packageName}-${tag}.user.js`,
   }
   buildOptions.alias = {
     ...buildOptions.alias,
@@ -55,6 +56,7 @@ for (const packageName of packages) {
   }
 
   log(`Building ${packageName}...`)
+  // eslint-disable-next-line no-await-in-loop
   await esbuild.build(buildOptions)
 
   let text = fs.readFileSync(buildOptions.outfile, 'utf8')
