@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name                 Copy Selected Link as Markdown
-// @name:zh-CN           复制选中链接为 Markdown
+// @name                 Copy Selected Links as Markdown - staging
+// @name:zh-CN           复制选中链接为 Markdown - staging
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
