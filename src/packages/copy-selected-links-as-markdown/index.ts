@@ -52,7 +52,7 @@ function buildMarkdown() {
       .map((a) => {
         const name = a.textContent.trim() || a.href
         const url = new URL(a.getAttribute('href'), origin).href
-        return `[${escapeMD(name)}](${escapeMD(url)})`
+        return `- [${escapeMD(name)}](${escapeMD(url)})`
       })
       .join('\n')
   }

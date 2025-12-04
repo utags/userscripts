@@ -7,7 +7,7 @@ Copy selected link(s) on any page to the clipboard as Markdown in the form `[tex
 ## Features
 
 - Copies selected link(s) as Markdown `[text](url)`
-- Single or multiple anchors; outputs one line per link
+- Single or multiple anchors; for multiple links outputs a Markdown bullet list
 - Detects URL in selected text when no anchor is present
 - Fallback to `[document.title](location.href)` when nothing is selected
 - Keyboard shortcut: `Cmd/Ctrl + Shift + M`
@@ -33,7 +33,7 @@ Copy selected link(s) on any page to the clipboard as Markdown in the form `[tex
 - Trigger one of the following:
   - Press `Cmd/Ctrl + Shift + M`
   - Use the menu command “复制选中链接为 Markdown”
-- Clipboard will contain Markdown; multiple links produce a multi‑line list
+- Clipboard will contain Markdown; multiple links produce a Markdown bullet list
 
 ## Technical Details
 
