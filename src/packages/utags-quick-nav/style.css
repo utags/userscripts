@@ -1,0 +1,349 @@
+@import 'tailwindcss';
+
+:host {
+  all: initial;
+}
+
+.utqn {
+  @apply fixed z-[2147483647] font-sans text-[13px] text-gray-900;
+}
+
+.utqn.dark {
+  @apply text-gray-100;
+}
+
+.panel {
+  @apply bg-white/85 border border-gray-200 rounded-xl backdrop-saturate-[1.2] backdrop-blur-sm shadow-xl p-3 flex flex-col gap-3 max-w-[360px];
+}
+
+.utqn.dark .panel {
+  @apply bg-gray-900/80 border-gray-700 shadow-2xl;
+}
+
+@keyframes utqn-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes utqn-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes utqn-slide-out-left {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+}
+@keyframes utqn-slide-out-right {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
+
+.anim-in-left {
+  animation: utqn-slide-in-left 200ms ease-out;
+}
+.anim-in-right {
+  animation: utqn-slide-in-right 200ms ease-out;
+}
+.anim-out-left {
+  animation: utqn-slide-out-left 180ms ease-in forwards;
+}
+.anim-out-right {
+  animation: utqn-slide-out-right 180ms ease-in forwards;
+}
+
+.header {
+  @apply flex items-center justify-between gap-2;
+}
+
+.header-actions {
+  @apply flex items-center gap-1.5 opacity-0 transition-opacity duration-150;
+}
+.section:hover .header-actions {
+  @apply opacity-100;
+}
+
+.icon-btn {
+  @apply p-1 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150;
+}
+.utqn.dark .icon-btn {
+  @apply text-gray-300 hover:bg-gray-800 hover:text-white;
+}
+.icon-btn.active {
+  @apply bg-gray-200 text-gray-900 ring-1 ring-gray-300;
+}
+.utqn.dark .icon-btn.active {
+  @apply bg-gray-700 text-white ring-1 ring-gray-600;
+}
+
+.title {
+  @apply flex items-center gap-1.5 font-semibold text-gray-800;
+}
+
+.utqn.dark .title {
+  @apply text-gray-100;
+}
+
+.btn {
+  @apply appearance-none border border-gray-300 bg-white text-gray-700 rounded-lg px-2 py-1 cursor-pointer hover:bg-gray-50 transition-colors duration-150 active:scale-[0.99] shadow-sm;
+}
+
+.utqn.dark .btn {
+  @apply border-gray-700 bg-gray-800 text-gray-200 hover:bg-gray-700;
+}
+
+.items {
+  @apply grid gap-1.5;
+  grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
+}
+
+.item {
+  @apply inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md text-gray-900 no-underline transition-colors duration-150;
+}
+
+.item {
+  width: 100%;
+}
+
+.item:hover {
+  @apply bg-gray-100;
+}
+
+.utqn.dark .item {
+  @apply text-gray-100;
+}
+.utqn.dark .item:hover {
+  @apply bg-gray-800;
+}
+
+.utqn.dark .item {
+  @apply border-gray-700 bg-gray-800 text-gray-100 hover:bg-gray-700;
+}
+
+.icon {
+  @apply inline-flex items-center justify-center w-4 h-4;
+}
+
+.collapsed-tab {
+  @apply fixed z-[2147483647] w-[22px] h-[48px] bg-gray-900 text-white rounded-xl flex items-center justify-center opacity-50;
+}
+
+.modal-mask {
+  @apply fixed inset-0 bg-black/40 flex items-center justify-center;
+}
+
+.modal {
+  @apply bg-white rounded-2xl shadow-2xl w-[720px] max-w-[92vw] p-3;
+}
+
+.modal h2 {
+  @apply text-[16px] m-0 mb-2.5;
+}
+
+.row {
+  @apply flex gap-2 my-1.5;
+}
+
+.row label {
+  @apply w-[120px] text-gray-500;
+}
+
+input,
+select,
+textarea {
+  @apply flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-[13px];
+}
+
+textarea {
+  @apply min-h-[80px];
+}
+
+.grid {
+  @apply grid grid-cols-2 gap-2;
+}
+
+.group-list {
+  @apply flex gap-1.5 flex-wrap mt-1.5;
+}
+
+.group-pill {
+  @apply px-2 py-1 border border-gray-200 rounded-full cursor-pointer hover:bg-gray-100 transition-colors duration-150;
+}
+
+.group-pill.active {
+  @apply bg-gray-900 text-white border-gray-900;
+}
+
+.utqn.dark .group-pill {
+  @apply border-gray-700 text-gray-200 hover:bg-gray-700;
+}
+
+.utqn.dark .group-pill.active {
+  @apply bg-gray-100 text-gray-900 border-gray-100;
+}
+
+.mini {
+  @apply px-1.5 py-0.5 rounded-md text-xs;
+}
+
+.section {
+  @apply mt-2 pt-2 border-t border-gray-200;
+}
+
+.utqn.dark .section {
+  @apply border-gray-700;
+}
+
+.section-title {
+  @apply text-xs uppercase tracking-wider text-gray-500 mb-1;
+}
+
+.utqn.dark .section-title {
+  @apply text-gray-400;
+}
+
+.modal {
+  @apply bg-white rounded-2xl shadow-2xl w-[720px] max-w-[92vw] p-3;
+}
+
+.utqn.dark .modal {
+  @apply bg-gray-900 text-gray-100;
+}
+
+.editor {
+  @apply p-4 rounded-2xl max-h-[72vh] overflow-y-auto;
+}
+
+.editor .grid {
+  @apply gap-2;
+}
+.editor .row {
+  @apply items-center gap-2;
+}
+.editor .row label {
+  @apply w-[120px] text-gray-500;
+}
+.utqn.dark .editor .row label {
+  @apply text-gray-400;
+}
+
+.editor input,
+.editor select,
+.editor textarea {
+  @apply border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-gray-300;
+}
+.utqn.dark .editor input,
+.utqn.dark .editor select,
+.utqn.dark .editor textarea {
+  @apply border-gray-700 bg-gray-800 focus:ring-gray-700;
+}
+
+.editor .item-row {
+  @apply bg-gray-50 rounded-md px-2 py-1.5;
+}
+.editor .item-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.1fr 0.9fr 2fr 1fr 0.9fr 1.3fr auto auto;
+  align-items: center;
+  gap: 8px;
+}
+.editor .item-row:hover {
+  @apply bg-gray-100;
+}
+.utqn.dark .editor .item-row {
+  @apply bg-gray-800;
+}
+.utqn.dark .editor .item-row:hover {
+  @apply bg-gray-700;
+}
+
+.editor .btn {
+  @apply px-2 py-1 rounded-md text-xs;
+}
+
+.row label {
+  @apply w-[120px] text-gray-500;
+}
+
+.utqn.dark .row label {
+  @apply text-gray-400;
+}
+.panel-actions {
+  @apply flex items-center gap-2;
+}
+.panel-actions-left {
+  @apply flex items-center gap-2;
+}
+
+.theme-switch {
+  @apply inline-flex items-center gap-1 bg-gray-100 rounded-full px-1 py-[2px] border border-gray-200 shadow-sm;
+}
+.utqn.dark .theme-switch {
+  @apply bg-gray-800;
+}
+.theme-btn {
+  @apply w-6 h-6 p-0 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors duration-150;
+}
+.utqn.dark .theme-btn {
+  @apply text-gray-300 hover:bg-gray-700 hover:text-white;
+}
+.theme-btn.active {
+  @apply bg-white ring-1 ring-gray-300;
+}
+.utqn.dark .theme-btn.active {
+  @apply bg-gray-700 ring-1 ring-gray-600;
+}
+
+.collapse-btn {
+  @apply p-1 rounded-md text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors duration-150;
+}
+.utqn.dark .collapse-btn {
+  @apply text-gray-300 hover:bg-gray-700 hover:text-white;
+}
+.item + .icon-btn {
+  @apply justify-self-end;
+}
+.items {
+  align-items: center;
+}
+.item-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.item-wrap .item {
+  flex: 1;
+}
+.item-wrap .icon-btn {
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+}
+.item-wrap:hover .icon-btn {
+  opacity: 1;
+}
+.item-wrap:focus-within .icon-btn {
+  opacity: 1;
+}
