@@ -6,6 +6,8 @@
     "./**/*.ts",
   ],
   "compilerOptions": {
+    "target": "ES2021",
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
     "paths": {
       "~*": [

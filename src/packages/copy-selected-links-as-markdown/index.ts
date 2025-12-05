@@ -1,34 +1,42 @@
-function escapeMD(s) {
+function escapeMD(s: string) {
   s = String(s || '')
   return s.replaceAll('|', '\\|').replaceAll('[', '\\[').replaceAll(']', '\\]')
 }
 
-function getSelectionAnchors() {
+function getSelectionAnchors(): HTMLAnchorElement[] {
   const sel = globalThis.getSelection()
   if (!sel || sel.rangeCount === 0) return []
-  const set = new Set()
+  const set = new Set<HTMLAnchorElement>()
   for (let i = 0; i < sel.rangeCount; i++) {
     const range = sel.getRangeAt(i)
-    let root = range.commonAncestorContainer
-    if (root && root.nodeType === Node.TEXT_NODE) root = root.parentElement
-    if (root && root.querySelectorAll) {
-      const as = root.querySelectorAll('a[href]')
-      for (const a of as) {
-        try {
-          if (range.intersectsNode(a)) set.add(a)
-        } catch {}
+    const common = range.commonAncestorContainer
+    const rootEl: Element | undefined =
+      common.nodeType === Node.TEXT_NODE
+        ? ((common as Text).parentElement as HTMLElement | undefined)
+        : (common as Element | undefined)
+    if (rootEl) {
+      const as = rootEl.querySelectorAll('a[href]')
+      for (const a of Array.from(as)) {
+        if (a instanceof HTMLAnchorElement) {
+          try {
+            if (range.intersectsNode(a)) set.add(a)
+          } catch {}
+        }
       }
     }
 
-    let node = range.startContainer
-    if (node && node.nodeType === Node.TEXT_NODE) node = node.parentElement
-    while (node && node instanceof HTMLElement) {
-      if (node.tagName === 'A' && node.href) {
-        set.add(node)
+    let startNode: Node | undefined = range.startContainer
+    if (startNode && startNode.nodeType === Node.TEXT_NODE)
+      startNode = (startNode as Text).parentElement as HTMLElement | undefined
+    let cur: HTMLElement | undefined =
+      startNode instanceof HTMLElement ? startNode : undefined
+    while (cur) {
+      if (cur instanceof HTMLAnchorElement && cur.getAttribute('href')) {
+        set.add(cur)
         break
       }
 
-      node = node.parentElement
+      cur = cur.parentElement as HTMLElement | undefined
     }
   }
 
@@ -42,16 +50,16 @@ function buildMarkdown() {
   const origin = location.origin
   if (anchors.length === 1) {
     const a = anchors[0]
-    const name = textSel || a.textContent.trim() || a.href
-    const url = new URL(a.getAttribute('href'), origin).href
+    const name = textSel || (a.textContent || '').trim() || a.href
+    const url = new URL(a.getAttribute('href') || a.href, origin).href
     return `[${escapeMD(name)}](${escapeMD(url)})`
   }
 
   if (anchors.length > 1) {
     return anchors
       .map((a) => {
-        const name = a.textContent.trim() || a.href
-        const url = new URL(a.getAttribute('href'), origin).href
+        const name = (a.textContent || '').trim() || a.href
+        const url = new URL(a.getAttribute('href') || a.href, origin).href
         return `- [${escapeMD(name)}](${escapeMD(url)})`
       })
       .join('\n')
@@ -69,7 +77,7 @@ function buildMarkdown() {
   return `[${escapeMD(document.title)}](${escapeMD(location.href)})`
 }
 
-async function copyText(s) {
+async function copyText(s: string) {
   try {
     await navigator.clipboard.writeText(s)
     return

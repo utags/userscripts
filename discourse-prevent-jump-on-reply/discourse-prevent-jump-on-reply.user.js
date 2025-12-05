@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.2
+// @version              0.1.3
 // @description          Prevent Discourse from jumping after posting a reply by intercepting the reply button click and forcing shiftKey, keeping scroll position and context.
 // @description:zh-CN    拦截回复按钮点击并强制 shiftKey，避免发帖后页面跳转，保持当前位置与上下文。
 // @icon                 https://www.google.com/s2/favicons?sz=64&domain=meta.discourse.org
@@ -44,7 +44,10 @@
       const meta =
         document.querySelector('meta[name="language"]') ||
         document.querySelector('meta[http-equiv="content-language"]')
-      const metaLang = meta && meta.content ? meta.content.toLowerCase() : ''
+      const metaLang =
+        meta && meta.getAttribute('content')
+          ? meta.getAttribute('content').toLowerCase()
+          : ''
       if (metaLang) return metaLang
     } catch (e) {}
     return ''
@@ -62,7 +65,8 @@
     button.addEventListener(
       'click',
       (originalEvent) => {
-        if (!getEnabled() || originalEvent.shiftKey) return
+        if (!getEnabled() || originalEvent.shiftKey || !originalEvent.target)
+          return
         originalEvent.stopImmediatePropagation()
         originalEvent.preventDefault()
         const newEvent = new MouseEvent('click', {
@@ -123,24 +127,24 @@
   async function loadEnabled() {
     try {
       const val = await GM.getValue(KEY, '0')
-      enabledFlag = val === '1' || val === true
+      enabledFlag = val === '1'
       updateToggleUI()
     } catch (e) {
       enabledFlag = false
     }
   }
-  function setEnabled(v) {
+  async function setEnabled(v) {
     enabledFlag = Boolean(v)
     try {
-      GM.setValue(KEY, v ? '1' : '0')
+      await GM.setValue(KEY, v ? '1' : '0')
     } catch (e) {}
   }
   function updateToggleUI() {
     try {
-      for (const cb of document.querySelectorAll(
+      const cbs = document.querySelectorAll(
         '.dpjor-toggle input[type="checkbox"]'
-      ))
-        cb.checked = getEnabled()
+      )
+      for (const cb of Array.from(cbs)) cb.checked = getEnabled()
     } catch (e) {}
   }
   function ensureToggle(button) {
@@ -158,7 +162,7 @@
     const span = document.createElement('span')
     span.textContent = I18N_LABEL[getLang()] || I18N_LABEL.en
     cb.addEventListener('change', () => {
-      setEnabled(cb.checked)
+      void setEnabled(cb.checked)
     })
     label.append(cb)
     label.append(span)

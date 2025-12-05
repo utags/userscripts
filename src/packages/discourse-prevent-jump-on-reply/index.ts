@@ -18,7 +18,10 @@ function getDiscourseLocale() {
     const meta =
       document.querySelector('meta[name="language"]') ||
       document.querySelector('meta[http-equiv="content-language"]')
-    const metaLang = meta && meta.content ? meta.content.toLowerCase() : ''
+    const metaLang =
+      meta && meta.getAttribute('content')
+        ? meta.getAttribute('content')!.toLowerCase()
+        : ''
     if (metaLang) return metaLang
   } catch {}
 
@@ -32,7 +35,7 @@ function getLang() {
 }
 
 const inited = new WeakSet()
-function register(button) {
+function register(button: HTMLElement | undefined) {
   if (!button || inited.has(button)) return
   inited.add(button)
   ensureToggle(button)
@@ -40,7 +43,8 @@ function register(button) {
   button.addEventListener(
     'click',
     (originalEvent) => {
-      if (!getEnabled() || originalEvent.shiftKey) return
+      if (!getEnabled() || originalEvent.shiftKey || !originalEvent.target)
+        return
       originalEvent.stopImmediatePropagation()
       originalEvent.preventDefault()
       const newEvent = new MouseEvent('click', {
@@ -63,13 +67,15 @@ function register(button) {
 
 function scan() {
   const list = document.querySelectorAll(SELECTOR_REPLY_BUTTON)
-  for (const b of list) register(b)
+  for (const b of list) register(b as HTMLElement)
 }
 
 function getActiveReplyButton() {
   const list = document.querySelectorAll(SELECTOR_REPLY_BUTTON)
   return (
-    Array.from(list).find((b) => Boolean(b.offsetParent)) || list[0] || null
+    Array.from(list).find((b) => Boolean((b as HTMLElement).offsetParent)) ||
+    list[0] ||
+    null
   )
 }
 
@@ -105,27 +111,27 @@ function getEnabled() {
 
 async function loadEnabled() {
   try {
-    const val = await GM.getValue(KEY, '0')
-    enabledFlag = val === '1' || val === true
+    const val = await GM.getValue<string>(KEY, '0')
+    enabledFlag = val === '1'
     updateToggleUI()
   } catch {
     enabledFlag = false
   }
 }
 
-function setEnabled(v) {
+async function setEnabled(v: boolean) {
   enabledFlag = Boolean(v)
   try {
-    GM.setValue(KEY, v ? '1' : '0')
+    await GM.setValue(KEY, v ? '1' : '0')
   } catch {}
 }
 
 function updateToggleUI() {
   try {
-    for (const cb of document.querySelectorAll(
+    const cbs = document.querySelectorAll<HTMLInputElement>(
       '.dpjor-toggle input[type="checkbox"]'
-    ))
-      cb.checked = getEnabled()
+    )
+    for (const cb of Array.from(cbs)) cb.checked = getEnabled()
   } catch {}
 }
 
@@ -144,7 +150,7 @@ function ensureToggle(button) {
   const span = document.createElement('span')
   span.textContent = I18N_LABEL[getLang()] || I18N_LABEL.en
   cb.addEventListener('change', () => {
-    setEnabled(cb.checked)
+    void setEnabled(cb.checked)
   })
   label.append(cb)
   label.append(span)
