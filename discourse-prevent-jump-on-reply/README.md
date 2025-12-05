@@ -4,6 +4,8 @@ Prevent Discourse from jumping to the latest post after you submit a reply. The 
 
 [中文版](https://github.com/utags/userscripts/blob/main/discourse-prevent-jump-on-reply/README.zh-CN.md)
 
+![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-05-22-30-28.png)
+
 ## Features
 
 - Prevents post‑submission jump; keeps current position
