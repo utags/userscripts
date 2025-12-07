@@ -18,3 +18,18 @@ declare const GM: {
   getValue<T = unknown>(key: string, defaultValue: T): Promise<T>
   setValue(key: string, value: unknown): Promise<void>
 }
+
+declare function GM_xmlhttpRequest(options: {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  url: string
+  headers?: Record<string, string>
+  data?: string | FormData | ArrayBuffer
+  responseType?: 'text' | 'json' | 'blob'
+  onload?: (response: {
+    status: number
+    responseText?: string
+    response?: any
+    responseHeaders?: string
+  }) => void
+  onerror?: (error: any) => void
+}): void

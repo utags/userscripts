@@ -42,6 +42,7 @@ const xoConfig = [
           format: ['PascalCase'],
         },
       ],
+      'new-cap': 0,
       'logical-assignment-operators': 0,
       'prefer-destructuring': 0,
       'unicorn/prefer-spread': 0,

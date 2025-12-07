@@ -4,8 +4,12 @@
   all: initial;
 }
 
+div {
+  line-height: normal;
+}
+
 .utqn {
-  @apply fixed z-[2147483647] font-sans text-[13px] text-gray-900;
+  @apply fixed z-[21474836] font-sans text-[13px] text-gray-900;
 }
 
 .utqn.dark {
@@ -13,7 +17,7 @@
 }
 
 .panel {
-  @apply bg-white/85 border border-gray-200 rounded-xl backdrop-saturate-[1.2] backdrop-blur-sm shadow-xl p-3 flex flex-col gap-3 max-w-[360px];
+  @apply bg-white/85 border border-gray-200 rounded-xl backdrop-saturate-[1.2] backdrop-blur-sm shadow-xl p-3 flex flex-col gap-3 max-w-[360px] max-h-[100vh] overflow-y-auto;
 }
 
 .utqn.dark .panel {
@@ -40,6 +44,26 @@
     transform: translateX(0);
   }
 }
+@keyframes utqn-slide-in-top {
+  from {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes utqn-slide-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 @keyframes utqn-slide-out-left {
   from {
     opacity: 1;
@@ -60,6 +84,26 @@
     transform: translateX(12px);
   }
 }
+@keyframes utqn-slide-out-top {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(0);
+  }
+}
+@keyframes utqn-slide-out-bottom {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(0);
+  }
+}
 
 .anim-in-left {
   animation: utqn-slide-in-left 200ms ease-out;
@@ -67,11 +111,23 @@
 .anim-in-right {
   animation: utqn-slide-in-right 200ms ease-out;
 }
+.anim-in-top {
+  animation: utqn-slide-in-top 200ms ease-out;
+}
+.anim-in-bottom {
+  animation: utqn-slide-in-bottom 200ms ease-out;
+}
 .anim-out-left {
   animation: utqn-slide-out-left 180ms ease-in forwards;
 }
 .anim-out-right {
   animation: utqn-slide-out-right 180ms ease-in forwards;
+}
+.anim-out-top {
+  animation: utqn-slide-out-top 180ms ease-in forwards;
+}
+.anim-out-bottom {
+  animation: utqn-slide-out-bottom 180ms ease-in forwards;
 }
 
 .header {
@@ -81,15 +137,21 @@
 .header-actions {
   @apply flex items-center gap-1.5 opacity-0 transition-opacity duration-150;
 }
-.section:hover .header-actions {
+.section .header:hover .header-actions {
   @apply opacity-100;
+}
+.section .header {
+  @apply mb-0;
 }
 
 .icon-btn {
-  @apply p-1 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150;
+  @apply w-6 h-6 p-0 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150;
 }
 .utqn.dark .icon-btn {
   @apply text-gray-300 hover:bg-gray-800 hover:text-white;
+}
+.utqn.dark .icon img.lucide-icon {
+  filter: invert(1) brightness(1.15) saturate(1.1);
 }
 .icon-btn.active {
   @apply bg-gray-200 text-gray-900 ring-1 ring-gray-300;
@@ -107,20 +169,36 @@
 }
 
 .btn {
-  @apply appearance-none border border-gray-300 bg-white text-gray-700 rounded-lg px-2 py-1 cursor-pointer hover:bg-gray-50 transition-colors duration-150 active:scale-[0.99] shadow-sm;
+  @apply appearance-none inline-flex items-center justify-center gap-1.5 border border-gray-300 bg-white text-gray-800 rounded-lg px-2.5 py-1.5 cursor-pointer hover:bg-gray-100 transition-all duration-150 active:scale-[0.99] shadow-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-300;
 }
 
 .utqn.dark .btn {
-  @apply border-gray-700 bg-gray-800 text-gray-200 hover:bg-gray-700;
+  @apply border-gray-700 bg-gray-800 text-gray-200 hover:bg-gray-700 focus:ring-gray-700;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:border-blue-700 shadow-md;
+}
+.utqn.dark .btn-primary,
+.modal.dark .btn-primary {
+  @apply bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600 text-white;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-200;
+}
+.utqn.dark .btn-secondary,
+.modal.dark .btn-secondary {
+  @apply bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700;
 }
 
 .items {
-  @apply grid gap-1.5;
+  @apply grid gap-1;
   grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
 }
 
 .item {
-  @apply inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md text-gray-900 no-underline transition-colors duration-150;
+  @apply inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md text-gray-900 no-underline transition-colors duration-150 truncate min-w-0;
 }
 
 .item {
@@ -143,19 +221,25 @@
 }
 
 .icon {
-  @apply inline-flex items-center justify-center w-4 h-4;
+  @apply inline-flex items-center justify-center w-4 h-4 overflow-hidden whitespace-nowrap leading-none;
 }
 
 .collapsed-tab {
-  @apply fixed z-[2147483647] w-[22px] h-[48px] bg-gray-900 text-white rounded-xl flex items-center justify-center opacity-50;
+  @apply fixed z-[21474836] w-[3px] h-[60px] bg-gray-700 opacity-40 rounded-none;
+}
+.utqn.dark .collapsed-tab {
+  @apply bg-gray-400 opacity-40;
+}
+.collapsed-tab:hover {
+  @apply opacity-80;
 }
 
 .modal-mask {
-  @apply fixed inset-0 bg-black/40 flex items-center justify-center;
+  @apply fixed inset-0 z-[2147483647] bg-black/40 flex items-center justify-center;
 }
 
 .modal {
-  @apply bg-white rounded-2xl shadow-2xl w-[720px] max-w-[92vw] p-3;
+  @apply bg-white rounded-2xl shadow-2xl w-[720px] max-w-[92vw] p-3 font-sans text-[13px] text-gray-900;
 }
 
 .modal h2 {
@@ -164,6 +248,39 @@
 
 .row {
   @apply flex gap-2 my-1.5;
+}
+
+.modal .row {
+  @apply items-center;
+}
+
+.segmented {
+  @apply inline-flex items-center gap-1 px-1 py-0.5 rounded-full border border-gray-200 bg-gray-100 shadow-sm;
+}
+.utqn.dark .segmented {
+  @apply border-gray-700 bg-gray-800;
+}
+.seg-item {
+  @apply inline-flex items-center rounded-full cursor-pointer select-none;
+}
+.seg-radio {
+  @apply sr-only;
+}
+.seg-text {
+  @apply px-2 py-1 rounded-full text-gray-700 w-full;
+  text-align: center;
+}
+.utqn.dark .seg-text {
+  @apply text-gray-300;
+}
+.seg-item .seg-radio:checked + .seg-text {
+  @apply bg-white text-gray-900 ring-1 ring-gray-300;
+}
+.utqn.dark .seg-item .seg-radio:checked + .seg-text {
+  @apply bg-gray-700 text-gray-100 ring-1 ring-gray-600;
+}
+.seg-item .seg-radio:focus + .seg-text {
+  @apply ring-1 ring-blue-500;
 }
 
 .row label {
@@ -208,12 +325,14 @@ textarea {
   @apply px-1.5 py-0.5 rounded-md text-xs;
 }
 
-.section {
-  @apply mt-2 pt-2 border-t border-gray-200;
+.utqn.dark .section {
 }
 
-.utqn.dark .section {
-  @apply border-gray-700;
+.divider {
+  @apply h-px bg-gray-200;
+}
+.utqn.dark .divider {
+  @apply bg-gray-700;
 }
 
 .section-title {
@@ -230,6 +349,46 @@ textarea {
 
 .utqn.dark .modal {
   @apply bg-gray-900 text-gray-100;
+}
+
+.modal.dark {
+  @apply bg-gray-900 text-gray-100;
+}
+
+.utqn.dark .modal input,
+.utqn.dark .modal select,
+.utqn.dark .modal textarea {
+  @apply border-gray-700 bg-gray-800 text-gray-100;
+}
+
+.modal.dark input,
+.modal.dark select,
+.modal.dark textarea {
+  @apply border-gray-700 bg-gray-800 text-gray-100;
+}
+
+.utqn.dark .modal input::placeholder,
+.utqn.dark .modal textarea::placeholder {
+  color: #9ca3af;
+}
+
+.modal.dark input::placeholder,
+.modal.dark textarea::placeholder {
+  color: #9ca3af;
+}
+
+.modal.dark .row label {
+  @apply text-gray-400;
+}
+
+.modal.dark .segmented {
+  @apply border-gray-700 bg-gray-800;
+}
+.modal.dark .seg-item .seg-radio:checked + .seg-text {
+  @apply bg-gray-700 text-gray-100 ring-1 ring-gray-600;
+}
+.modal.dark .seg-text {
+  @apply text-gray-300;
 }
 
 .editor {
@@ -291,10 +450,10 @@ textarea {
   @apply text-gray-400;
 }
 .panel-actions {
-  @apply flex items-center gap-2;
+  @apply flex items-center gap-1.5;
 }
 .panel-actions-left {
-  @apply flex items-center gap-2;
+  @apply flex items-center gap-1.5;
 }
 
 .theme-switch {
@@ -317,7 +476,7 @@ textarea {
 }
 
 .collapse-btn {
-  @apply p-1 rounded-md text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors duration-150;
+  @apply w-6 h-6 p-0 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors duration-150;
 }
 .utqn.dark .collapse-btn {
   @apply text-gray-300 hover:bg-gray-700 hover:text-white;
@@ -326,6 +485,7 @@ textarea {
   @apply justify-self-end;
 }
 .items {
+  @apply mt-1.5;
   align-items: center;
 }
 .item-wrap {
@@ -346,4 +506,54 @@ textarea {
 }
 .item-wrap:focus-within .icon-btn {
   opacity: 1;
+}
+.quick-add-menu {
+  @apply fixed z-[2147483647] bg-white border border-gray-200 rounded-lg shadow-xl p-1.5 min-w-[160px] font-sans text-[13px];
+}
+.utqn.dark ~ .quick-add-menu,
+.utqn.dark .quick-add-menu {
+  @apply bg-gray-900 border-gray-700 text-gray-100 shadow-black/40;
+}
+.quick-add-item {
+  @apply w-full flex items-center gap-1.5 px-2 py-1.5 rounded-md text-left hover:bg-gray-100 transition-colors duration-150 text-gray-900;
+}
+.utqn.dark ~ .quick-add-menu .quick-add-item,
+.utqn.dark .quick-add-menu .quick-add-item {
+  @apply text-gray-100 hover:bg-gray-800;
+}
+.utqn.dark ~ .quick-add-menu .icon img.lucide-icon,
+.utqn.dark .quick-add-menu .icon img.lucide-icon {
+  filter: invert(1) brightness(1.15) saturate(1.1);
+}
+.picker-highlight {
+  outline: 2px dashed #ef4444 !important;
+  outline-offset: 2px !important;
+  cursor: pointer !important;
+}
+.picker-tip {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 2147483647;
+  background: #fff;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 6px 10px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  font:
+    13px/1.4 system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    'Apple Color Emoji',
+    'Segoe UI Emoji';
+}
+.utqn.dark ~ .picker-tip,
+.utqn.dark .picker-tip {
+  background: #111827;
+  color: #f9fafb;
+  border-color: #374151;
 }
