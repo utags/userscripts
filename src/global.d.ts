@@ -14,6 +14,8 @@ declare function GM_registerMenuCommand(
   accessKey?: string
 ): number
 
+declare function GM_unregisterMenuCommand(menuId: number): void
+
 declare const GM: {
   getValue<T = unknown>(key: string, defaultValue: T): Promise<T>
   setValue(key: string, value: unknown): Promise<void>

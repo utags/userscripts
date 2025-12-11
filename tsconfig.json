@@ -9,6 +9,9 @@
     "target": "ES2021",
     "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["vitest"],
     "paths": {
       "~*": [
         "./src/*"

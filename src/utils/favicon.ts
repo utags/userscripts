@@ -25,6 +25,21 @@ export function getFaviconUrl(href: string, size: 16 | 32 | 64 = 64) {
   }
 }
 
+export function getWrappedIconUrl(href: string, size: 16 | 32 | 64 = 64) {
+  try {
+    const url = new URL(href, location.origin).toString()
+    if (url.startsWith('https://wsrv.nl/')) {
+      return url
+    }
+
+    const wrapUrl = `https://wsrv.nl/?w=${size}&h=${size}&url=${encodeURIComponent(url)}&default=${defaultFavicons[size]}`
+    return wrapUrl
+  } catch (error) {
+    console.error('Error generating favicon URL:', error)
+    return decodeURIComponent(defaultFavicons[size])
+  }
+}
+
 export const defaultFavicon16 = encodeURIComponent(
   'https://wsrv.nl/?w=16&h=16&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
 )

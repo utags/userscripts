@@ -11,7 +11,13 @@
 // @author               {author}
 // @license              {license}
 // @match                *://*/*
+// To load icons
+// @connect              cdn.jsdelivr.net
+// @connect              fastly.jsdelivr.net
+// @connect              unpkg.com
+// To load favicons
+// @connect              wsrv.nl
 // @noframes
-// @run-at               document-idle
+// @run-at               document-body
 // ==/UserScript==
 //

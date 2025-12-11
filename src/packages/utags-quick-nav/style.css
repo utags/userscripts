@@ -17,11 +17,11 @@ div {
 }
 
 .panel {
-  @apply bg-white/85 border border-gray-200 rounded-xl backdrop-saturate-[1.2] backdrop-blur-sm shadow-xl p-3 flex flex-col gap-3 max-w-[360px] max-h-[100vh] overflow-y-auto;
+  @apply bg-white border border-gray-200 rounded-xl shadow-xl p-3 flex flex-col gap-3 max-w-[360px] max-h-[100vh] overflow-y-auto;
 }
 
 .utqn.dark .panel {
-  @apply bg-gray-900/80 border-gray-700 shadow-2xl;
+  @apply bg-gray-900 border-gray-700 shadow-2xl;
 }
 
 @keyframes utqn-slide-in-left {
@@ -135,9 +135,15 @@ div {
 }
 
 .header-actions {
-  @apply flex items-center gap-1.5 opacity-0 transition-opacity duration-150;
+  @apply flex items-center gap-1.5;
 }
-.section .header:hover .header-actions {
+.header-actions .icon-btn {
+  @apply opacity-0 transition-opacity duration-150;
+}
+.header-actions .icon-btn.toggle {
+  @apply opacity-100;
+}
+.section .header:hover .header-actions .icon-btn:not(.toggle) {
   @apply opacity-100;
 }
 .section .header {
@@ -197,6 +203,10 @@ div {
   grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
 }
 
+.items input[type='checkbox'] {
+  @apply flex-none w-[14px] h-[14px];
+}
+
 .item {
   @apply inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md text-gray-900 no-underline transition-colors duration-150 truncate min-w-0;
 }
@@ -221,7 +231,7 @@ div {
 }
 
 .icon {
-  @apply inline-flex items-center justify-center w-4 h-4 overflow-hidden whitespace-nowrap leading-none;
+  @apply inline-flex items-center justify-center w-4 h-4 overflow-hidden whitespace-nowrap leading-none flex-none;
 }
 
 .collapsed-tab {
@@ -242,20 +252,35 @@ div {
   @apply bg-white rounded-2xl shadow-2xl w-[720px] max-w-[92vw] p-3 font-sans text-[13px] text-gray-900;
 }
 
-.modal h2 {
+.modal h2:not(.section-title) {
   @apply text-[16px] m-0 mb-2.5;
 }
 
 .row {
-  @apply flex gap-2 my-1.5;
+  @apply flex gap-2 my-1.5 flex-wrap;
 }
 
 .modal .row {
   @apply items-center;
 }
 
+.modal .actions {
+  @apply justify-end;
+}
+
+.modal .check {
+  @apply inline-flex items-center gap-2 h-[32px];
+  width: unset;
+}
+.modal .check input[type='checkbox'] {
+  @apply w-[14px] h-[14px];
+}
+
 .segmented {
   @apply inline-flex items-center gap-1 px-1 py-0.5 rounded-full border border-gray-200 bg-gray-100 shadow-sm;
+}
+.modal .segmented {
+  @apply mb-3;
 }
 .utqn.dark .segmented {
   @apply border-gray-700 bg-gray-800;
@@ -285,6 +310,24 @@ div {
 
 .row label {
   @apply w-[120px] text-gray-500;
+}
+
+.field-help {
+  @apply block w-full basis-full ml-[130px] text-[12px] leading-snug text-gray-700 bg-gray-100 px-2 py-1 rounded-md;
+}
+.utqn.dark .field-help,
+.modal.dark .field-help {
+  @apply text-gray-300 bg-gray-800;
+}
+.field-help-title {
+  @apply font-semibold mb-1 flex items-center gap-1;
+}
+.field-help a {
+  @apply text-blue-600 underline;
+}
+.utqn.dark .field-help a,
+.modal.dark .field-help a {
+  @apply text-blue-400 underline;
 }
 
 input,
@@ -325,6 +368,10 @@ textarea {
   @apply px-1.5 py-0.5 rounded-md text-xs;
 }
 
+.btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
 .utqn.dark .section {
 }
 
@@ -336,11 +383,14 @@ textarea {
 }
 
 .section-title {
-  @apply text-xs uppercase tracking-wider text-gray-500 mb-1;
+  @apply text-xs uppercase tracking-wider text-gray-600 mt-3 mb-1 px-2 py-1 rounded-md bg-gray-100;
+}
+.utqn.dark .section-title {
+  @apply text-gray-300 bg-gray-800;
 }
 
-.utqn.dark .section-title {
-  @apply text-gray-400;
+.row label.mini {
+  @apply inline-flex items-center gap-2;
 }
 
 .modal {
@@ -417,6 +467,17 @@ textarea {
 .utqn.dark .editor select,
 .utqn.dark .editor textarea {
   @apply border-gray-700 bg-gray-800 focus:ring-gray-700;
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  @apply opacity-60 cursor-not-allowed bg-gray-100;
+}
+.dark input:disabled,
+.dark select:disabled,
+.dark textarea:disabled {
+  @apply opacity-60 cursor-not-allowed bg-gray-700;
 }
 
 .editor .item-row {
@@ -556,4 +617,87 @@ textarea {
   background: #111827;
   color: #f9fafb;
   border-color: #374151;
+}
+.panel.all-mode {
+  @apply w-[100vw] max-w-[100vw] h-[100vh] overflow-hidden;
+}
+.panel-scroll {
+  height: calc(100% - 36px);
+  width: 100%;
+  overflow-x: auto;
+}
+.panel.all-mode .header {
+  position: sticky;
+  top: 0;
+  z-index: 21474836;
+  background-color: #ffffff;
+}
+.utqn.dark .panel.all-mode .header {
+  background-color: #111827;
+}
+.panel-columns {
+  column-width: 360px;
+  column-gap: 12px;
+  height: 100%;
+}
+
+.section,
+.divider {
+  break-inside: avoid;
+}
+.check {
+  @apply inline-flex items-center gap-2 h-[32px];
+}
+.check input[type='checkbox'] {
+  @apply w-[14px] h-[14px];
+}
+
+.section,
+.item-wrap {
+  transition: opacity 0.15s ease;
+}
+
+@keyframes utqn-fade-in {
+  from {
+    opacity: 0.01;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.section.fade-in,
+.item-wrap.fade-in {
+  animation: utqn-fade-in 0.15s ease both;
+}
+
+.section.is-hidden .header {
+  @apply opacity-60;
+}
+.section.is-hidden {
+  @apply outline outline-1 outline-dashed outline-gray-300 rounded-lg bg-gray-50;
+}
+.utqn.dark .section.is-hidden {
+  @apply outline-gray-600 bg-gray-800;
+}
+.item-wrap.is-hidden .item {
+  @apply opacity-60;
+}
+.item-wrap.is-hidden {
+  @apply outline outline-1 outline-dashed outline-gray-300 rounded-md;
+}
+.utqn.dark .item-wrap.is-hidden {
+  @apply outline-gray-600;
+}
+
+.empty-msg {
+  @apply text-xs text-gray-500 px-2 py-1;
+}
+.utqn.dark .empty-msg {
+  @apply text-gray-400;
+}
+
+.segmented label.seg-item {
+  width: unset;
+  min-width: 50px;
 }

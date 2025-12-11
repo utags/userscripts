@@ -52,17 +52,11 @@ const xoConfig = [
       'capitalized-comments': 0,
       '@stylistic/indent': 0,
       '@stylistic/indent-binary-ops': 0,
-      //   '@stylistic/semi': 0,
-      //   indent: 0,
       // temp
       '@typescript-eslint/no-unsafe-assignment': 0,
       '@typescript-eslint/no-unsafe-call': 0,
       '@typescript-eslint/no-unsafe-return': 0,
       '@typescript-eslint/no-unsafe-argument': 0,
-      'max-params': 0,
-      'max-depth': 0,
-      'max-lines': 0,
-      complexity: 0,
     },
   },
   {
