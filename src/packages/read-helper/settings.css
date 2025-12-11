@@ -1,0 +1,51 @@
+@import 'tailwindcss';
+
+:host {
+  all: initial;
+}
+
+.rh {
+  @apply fixed top-3 right-3 z-[2147483649];
+}
+.rh .panel {
+  @apply bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-[360px] max-h-[90vh] overflow-y-auto font-sans text-[13px] text-gray-900;
+}
+.rh .btn {
+  @apply px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50;
+}
+.rh .btn-ghost {
+  @apply px-2 py-1 rounded-md text-gray-500 hover:bg-gray-100;
+}
+.rh .grid {
+  @apply flex flex-col gap-3;
+}
+.rh .row {
+  @apply flex items-center justify-between gap-3;
+}
+.rh label {
+  @apply text-gray-600;
+}
+.rh .seg {
+  @apply flex items-center gap-2;
+}
+.rh .seg-btn {
+  @apply px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50;
+}
+.rh .seg-btn.active {
+  @apply bg-gray-900 text-white border-gray-900;
+}
+.rh .color-row {
+  @apply flex items-center gap-2;
+}
+.rh .color-swatch {
+  @apply w-6 h-6 rounded-md border border-gray-300;
+}
+.rh .color-swatch.active {
+  @apply ring-2 ring-offset-2 ring-gray-900;
+}
+.rh .switch .switch-btn {
+  @apply px-3 py-1 rounded-md border border-gray-300 text-gray-700;
+}
+.rh .switch .switch-btn.on {
+  @apply bg-gray-900 text-white border-gray-900;
+}
