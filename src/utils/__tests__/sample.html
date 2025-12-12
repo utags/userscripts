@@ -1,0 +1,3815 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard" lang="zh-CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="generator" content="Movable Type  5.2.2" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--link rel="stylesheet" href="http://www.ruanyifeng.com/blog/styles.css" type="text/css" /-->
+    <link rel="start" href="https://www.ruanyifeng.com/blog/" title="Home" />
+    <link
+      rel="alternate"
+      type="application/atom+xml"
+      title="Recent Entries"
+      href="https://feeds.feedburner.com/ruanyifeng" />
+    <script
+      type="text/javascript"
+      src="https://www.ruanyifeng.com/blog/mt.js"></script>
+    <script type="text/javascript" src="/blog/advertisements.js"></script>
+    <!--
+<rdf:RDF xmlns="http://web.resource.org/cc/"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<Work rdf:about="http://www.ruanyifeng.com/blog/2022/09/weekly-issue-222.html">
+<dc:title>科技爱好者周刊（第 222 期）：四十年编程感想</dc:title>
+<dc:description>这里记录每周值得分享的科技内容，周五发布。...</dc:description>
+<dc:creator>阮一峰</dc:creator>
+<dc:date>2022-09-09T08:11:00+08:00</dc:date>
+<license rdf:resource="http://creativecommons.org/licenses/by-nc-nd/3.0/" />
+</Work>
+<License rdf:about="http://creativecommons.org/licenses/by-nc-nd/3.0/">
+</License>
+</rdf:RDF>
+-->
+
+    <style>
+      body {
+        background-color: #f5f5d5;
+      }
+
+      #container::before {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.1);
+        text-align: center;
+        content: '本站显示不正常，可能因为您使用了广告拦截器。';
+      }
+    </style>
+    <script>
+      function loadjscssfile(filename, filetype) {
+        if (filetype == 'js') {
+          //if filename is a external JavaScript file
+          var fileref = document.createElement('script')
+          fileref.setAttribute('type', 'text/javascript')
+          fileref.setAttribute('src', filename)
+        } else if (filetype == 'css') {
+          //if filename is an external CSS file
+          var fileref = document.createElement('link')
+          fileref.setAttribute('rel', 'stylesheet')
+          fileref.setAttribute('type', 'text/css')
+          fileref.setAttribute('href', filename)
+        }
+        if (typeof fileref != 'undefined')
+          document.getElementsByTagName('head')[0].appendChild(fileref)
+      }
+      //loadjscssfile("http://www.ruanyifeng.com/blog/styles.css", "css");
+      loadjscssfile(
+        '/static/themes/theme_scrapbook/theme_scrapbook.min.css',
+        'css'
+      )
+
+      function checker() {
+        if (/mobile|android/i.test(navigator.userAgent)) return
+        window.comments && window.comments.setAttribute('style', '!important')
+        // var img = document.querySelector('img[src^="http://www.ruanyifeng.com/blog/images"]');
+        var img = document.querySelector(
+          'a > img[src*="wangbase.com/blogimg/asset/"]'
+        )
+        var isAdblocker = typeof adblock === 'undefined'
+        if (
+          /*isAdblocker || */
+          (img && window.getComputedStyle(img).display === 'none') ||
+          (img && window.getComputedStyle(img.parentElement).display === 'none')
+        ) {
+          var sponsor = document.querySelector('#main-content')
+          var prompt = document.createElement('div')
+          prompt.style =
+            'border: 1px solid #c6c6c6;border-radius: 4px;background-color: #f5f2f0;padding: 15px; font-size: 14px;'
+          prompt.innerHTML =
+            '<p>您使用了广告拦截器，导致本站内容无法显示。</p><p>请将 www.ruanyifeng.com 加入白名单，解除广告屏蔽后，刷新页面。谢谢。</p>'
+          sponsor.parentNode.replaceChild(prompt, sponsor)
+          // document.querySelector('#main-content').innerHTML = '';
+        }
+      }
+
+      setTimeout(checker, 1000)
+    </script>
+
+    <link
+      rel="prev"
+      href="https://www.ruanyifeng.com/blog/2025/11/weekly-issue-375.html"
+      title="科技爱好者周刊（第 375 期）：一扇门的 Bug" />
+
+    <title>
+      科技爱好者周刊（第 376 期）：太空数据中心的争议 - 阮一峰的网络日志
+    </title>
+  </head>
+  <body id="scrapbook" class="mt-entry-archive one-column">
+    <script>
+      if (
+        /mobile/i.test(navigator.userAgent) ||
+        /android/i.test(navigator.userAgent)
+      )
+        document.body.classList.add('mobile')
+
+      /*
+window.addEventListener('load', function(event) {
+  setTimeout(function () {
+    hab('#sup-post-2');
+    hab('#cre-inner');
+  }, 1000);
+});
+*/
+    </script>
+    <div id="container">
+      <div id="container-inner">
+        <div id="header">
+          <div id="header-inner">
+            <div id="header-content">
+              <div id="header-name">
+                阮一峰的网络日志
+                <span id="site_location">
+                  »
+                  <a href="https://www.ruanyifeng.com/blog/" accesskey="1"
+                    >首页</a
+                  ></span
+                ><span id="site_archive">
+                  »
+                  <a href="https://www.ruanyifeng.com/blog/archives.html"
+                    >档案</a
+                  ></span
+                >
+              </div>
+
+              <div id="google_search">
+                <!-- SiteSearch Google -->
+                <form
+                  action="https://www.baidu.com/s"
+                  target="_blank"
+                  method="get"
+                  id="cse-search-box">
+                  <div>
+                    <input
+                      type="text"
+                      size="20"
+                      name="origin"
+                      class="searchbox"
+                      id="sbi"
+                      value="" />
+                    <input type="hidden" name="wd" value="" />
+                    <!--input type="image" src="/static/themes/theme_scrapbook/images/top_search_submit.gif" class="searchbox_submit" value="" alt="搜索" name="sa" onclick="this.form.wd.value = this.form.origin.value + ' inurl:www.ruanyifeng.com/blog'" /-->
+                    <input
+                      type="image"
+                      src="/static/themes/theme_scrapbook/images/top_search_submit.gif"
+                      class="searchbox_submit"
+                      value=""
+                      alt="搜索"
+                      name="sa"
+                      onclick="
+                        this.form.wd.value = this.form.origin.value + ' 阮一峰'
+                      " />
+                  </div>
+                </form>
+
+                <!-- SiteSearch Google -->
+              </div>
+              <div id="feed_icon">
+                <a href="/feed.html?utm_source=" title="订阅Feed">
+                  <!--img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAUzSURBVHjavFdbbFRVFF3nPjoz7dTWTittaW0jUDRAUqaNojyqREnEQKgfUj9MqqAmhqRt/OCD4CuY+Kckoh+aiGKC+gMJbdHoRysJ8dkhhmJLNdDKtJU+6GMK87j3Hs85d2Z6HzNtMYWb3Dn3NWftvfba+5xNYDl+e6Fkj6yqb/oDRbWq14vlPBLRKCITkxf0ROLt+hNjp1PPSRK4kA3vF1dXNRcWlyA2OQU9eos9opAkAiKxD+XkKO6t15aRWO7J/MgmAZU8MEgexgZHMX518Dh72sYMmVKShnxWuWHdHtxKIDIYTgMuDzgfmSOIQkYMpdUF8OY92Hytt4/jvkg47czzU16iQovM3QFwmNck+Yyduu7D6NA0Z6JR4THntFs9V4tWQg6Ui3s6MwKDncsFTnXKLJhDSeUK3AgPtyhccDzmVs999buRt/1Vm4i0od+hX7+MRG87jPGB/w1u8FPj9xEw7McVrnYuOCvtpjTth3J/nTg99c8LRhKhr6D3dTB5R24bXFwbMXBsyZzeoXaycEpJ95TB09AGX/NpqLVNtw8urnVzLvHjFNxiFqRy2OOHuqUVnue+ACkoWzo4O6lGzTmuHq6nPvY2m9rVqjrIK2rMEKxqyG5NPAKt+wjo0LklgfNxJkZMA3KJvqRUk3z5UFY3QH14P0h+WUY79HPvgv7VuSg4ZRGY1YgZgqXmORccF17sy2ehnf9AeO085K2HQFbtXBScj0LcpgF2cN+WV+DZ/LJQu6gD4R7oV7pBJwbSgtMvfiPoVp56DySwxm7EtkMs1WdAB7qzggsDJKQYsHucSkOudrkiCPWR/fA2nYCn8SNIK4NptSMyAu3sAdDRkIsJdfth0LzSrODUoPNZ4KI9SxJI5UHk7D4GdQfz2us31c7CoHMjRkKuDPHseCMrONVhNcDJwMJpKFVvg9L4OaTiNWm1x789KCqkrXhVBiEz0WYCT2nAzQAD1/vaETv1GrRfP4Vx5cfMNcDPwvP0h0DhanPym7OIf/+O67vcJ1/PCJ4KgdzaUP6Wz+dU+5yIL6fV+PsHGAOdwlPpvvUOyeeAVGyCdqkDNB6DPjsBSrnndfOGevOh3RhGItxvA+fX1CtbGFhgYUFkFMZPR6F1HnClHq8HyubWtJexX06CRmdt33hrd7nA7SFY4qoGpnYuOKcRykPPgDCBcsHx9Iv+fNL2PueBehCWUfYQIIMGLOCcOmXDXsh1+yCt35tUPfvzGFuSvzvoinXOxqa02qOhM6733nVP2MAdaej2XN11DPKjLZCD+yBvahGCo7JfTKAN9UD7s8Oe9zUNIhz8fWI8DG2k38WCFdxugANcXrvTVd1IEbuv3Jour7Hzn7jLMBNfKs7R3i67gRVrbeCOEDhinmWhAatsqdquM2XzHZINhK2cqTjHr/XZdVJUbgN3MWAVXKbSyg9jesRW2xP9di+lwrL5ojM3m2H/kG9hwcIA37c71W6wJdW2J2S5nrjYbq/t1AHAhJsKQeyfPvf6IMJgghPJhFZ4x0KlfLFvt22du45Au/A1SOlGc0P672XXwhLtOcM0kTTEMMd0qkVmMNXxMd/tsedUjInr4SQDgOfeXMSiN0FCL5WHah4L1qqYXPJOJlttd+a5M+YpcG5poLYKQ5f+6JJ4r8bbJYP47hq4r7QAs9PjYNhHJd4o8l5taiwuOpa7AS4XKqI/5NjJbTnaWK92nLdLuhQAJayRNMiygXPBeQN+Qbvu0zDc3y+aUzhbkGR73sI7ljvUnndx2q3t+X8CDAD66FtrIL864AAAAABJRU5ErkJggg==" alt="" style="border: 0pt none;" /-->
+                  <img
+                    src="https://cdn.beekka.com/blogimg/asset/202107/bg2021072117.png"
+                    alt=""
+                    style="border: 0pt none" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="content">
+          <div id="content-inner">
+            <div id="alpha">
+              <div id="alpha-inner">
+                <div id="entry-2512" class="entry-asset asset hentry">
+                  <div class="asset-header">
+                    <div class="asset-nav entry-nav">
+                      <div class="entry-location">
+                        <ul>
+                          <li>
+                            上一篇：<a
+                              href="https://www.ruanyifeng.com/blog/2025/11/weekly-issue-375.html"
+                              title="科技爱好者周刊（第 375 期）：一扇门的 Bug"
+                              >科技爱好者周刊（第&nbsp;3</a
+                            >
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div class="entry-categories">
+                        <p>分类<span class="delimiter">：</span></p>
+                        <ul>
+                          <li>
+                            <a
+                              href="https://www.ruanyifeng.com/blog/weekly/"
+                              rel="tag"
+                              >周刊</a
+                            >
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div class="entry-location-mobile" style="float: right">
+                        <ul>
+                          <li>
+                            <a
+                              href="https://www.ruanyifeng.com/blog/2025/11/weekly-issue-375.html"
+                              title="科技爱好者周刊（第 375 期）：一扇门的 Bug"
+                              >⇐&nbsp;</a
+                            >
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <article class="hentry">
+                    <h1 id="page-title" class="asset-name entry-title">
+                      科技爱好者周刊（第 376 期）：太空数据中心的争议
+                    </h1>
+
+                    <div class="asset-meta">
+                      <p class="vcard author">
+                        作者：
+                        <a class="fn url" href="https://www.ruanyifeng.com"
+                          >阮一峰</a
+                        >
+                      </p>
+                      <p>
+                        日期：
+                        <a href="https://www.ruanyifeng.com/blog/2025/12/"
+                          ><abbr
+                            class="published"
+                            title="2025-12-05T08:09:01+08:00"
+                            >2025年12月 5日</abbr
+                          ></a
+                        >
+                      </p>
+                    </div>
+
+                    <div class="asset-content entry-content" id="main-content">
+                      <!-- div class="asset-body" -->
+                      <p>这里记录每周值得分享的科技内容，周五发布。</p>
+
+                      <!-- /div -->
+
+                      <!-- div id="more" class="asset-more" -->
+                      <p>
+                        本杂志<a href="https://github.com/ruanyf/weekly">开源</a
+                        >，欢迎<a href="https://github.com/ruanyf/weekly/issues"
+                          >投稿</a
+                        >。另有<a
+                          href="https://github.com/ruanyf/weekly/issues/8332"
+                          >《谁在招人》</a
+                        >服务，发布程序员招聘信息。合作请<a
+                          href="/cdn-cgi/l/email-protection#5920303f3c373e772b2c3837193e34383035773a3634"
+                          >邮件联系</a
+                        >（<a
+                          href="/cdn-cgi/l/email-protection"
+                          class="__cf_email__"
+                          data-cfemail="7d04141b18131a530f081c133d1a101c1411531e1210"
+                          >[email&#160;protected]</a
+                        >）。
+                      </p>
+
+                      <h2>封面图</h2>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120304.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        杭州大运河门户桥是一座步行桥，位于大运河与钱塘江交汇处，即将开放。它的三段拱形设计象征杭州刺绣和钱塘江浪潮。（<a
+                          href="https://www.163.com/dy/article/KDAJVKT50514ETGI.html"
+                          >via</a
+                        >）
+                      </p>
+
+                      <h2>太空数据中心的争议</h2>
+
+                      <p>AI 大发展，数据中心不够用了，建造和运营成本飞涨。</p>
+
+                      <p>越来越多的人提出，数据中心可以建在太空。</p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025113006.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        先是<a
+                          href="https://news.cctv.com/2025/11/11/ARTI6f0b2Jz9Q1WnTzbvH00W251111.shtml"
+                          >马斯克说</a
+                        >，SpaceX 公司考虑在地球轨道上，建造数据中心。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025113007.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        然后本周，北京市科委、中关村科学城管委会发布了<a
+                          href="https://finance.sina.com.cn/tech/roll/2025-11-28/doc-infywkcw9025829.shtml"
+                          >《太空数据中心建设规划方案》</a
+                        >。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025113008.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        目标是"在距地面700公里的轨道上，建设可容纳百万卡集群的数据中心，开展天基数据中继传输和计算服务"。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025113009.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        根据报道，专家认为太空数据中心"<a
+                          href="https://finance.sina.cn/7x24/2025-11-29/detail-infyzkhk9168276.d.html"
+                          >势在必行</a
+                        >"（上图）。
+                      </p>
+
+                      <blockquote>
+                        <p>
+                          （1）高轨太空数据中心可 7×24
+                          小时使用高强度太阳能，且不受大气影响，发电效率可达95%。
+                        </p>
+
+                        <p>
+                          （2）深空温度约为-270度，只需部署导热材料即可完成散热，无需部署大量液冷结构，成本优势显著。
+                        </p>
+                      </blockquote>
+
+                      <p>
+                        我觉得，这是两个很大的优势，太空数据中心确实应该尽快建设。
+                      </p>
+
+                      <p>
+                        但是，我紧接着又看到了<a
+                          href="https://taranis.ie/datacenters-in-space-are-a-terrible-horrible-no-good-idea/"
+                          >一篇文章</a
+                        >。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025113010.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>作者是美国宇航局的资深工程师，曾经参与设计卫星。</p>
+
+                      <p>
+                        他根据国际空间站的经验，认为现阶段技术制约太大，太空数据中心很难实现。真要建设的话，花费巨大，收益有限。
+                      </p>
+
+                      <p>
+                        这可是我第一次看到，有人认真地质疑这件事。我不具备这方面的专业知识，不知道他的计算对不对，再说国际空间站完成于25年前，现在的技术早就超越了那时。
+                      </p>
+
+                      <p>
+                        我把他的几点质疑分享出来，大家看看太空数据中心有没有前景。
+                      </p>
+
+                      <p><strong>（1）能源问题</strong></p>
+
+                      <p>
+                        太空能源主要来自太阳能。迄今为止最大的太空太阳能板就在国际空间站，峰值功率200​​千瓦以上，但是面积巨大，约为2500平方米，超过半个美式橄榄球场。
+                      </p>
+
+                      <p>
+                        英伟达的 H200 显卡功耗约为 0.7kW，实际运行可能需要 1kW
+                        的电源。国际空间站的太阳能板只够供电200个 H200。
+                      </p>
+
+                      <p>
+                        作为比较，OpenAI 即将在挪威建设的数据中心计划容纳10万个
+                        GPU，每个的功耗可能都比 H200 更高。
+                      </p>
+
+                      <p><strong>（2）散热问题</strong></p>
+
+                      <p>
+                        太空很冷，接近绝对零度，初看上去散热应该很容易。但是事实是，散热只有两种方式：要么通过介质散热，要么通过辐射散热。
+                      </p>
+
+                      <p>
+                        太空没有空气，接近真空，根本没有介质，无法使用空气对流来散热，所以
+                        GPU 的散热片和风扇不起作用。
+                      </p>
+
+                      <p>
+                        唯一可用的是液冷，通过液体将热量传递到散热板，再辐射到太空（散热板必须放置在远离太阳的一面）。
+                      </p>
+
+                      <p>
+                        国际空间站就采用辐射散热。它的散热系统非常复杂，散热上限为
+                        16kW，大约相当于16个
+                        H200，略多于一个地面服务器机架的四分之一。
+                      </p>
+
+                      <p>
+                        国际空间站的散热板尺寸为13.6米×3.12米，即大约42.5平方米。如果要为200个
+                        H200
+                        散热，面积需要扩大12.5倍，即大约531平方米。这个面积是同样功率太阳能板的2.6倍。
+                      </p>
+
+                      <p>
+                        这样一来，太空数据中心将变得非常庞大，远超国际空间站，而容量只相当于地面的三个标准机架。
+                      </p>
+
+                      <p><strong>（3）粒子射线问题</strong></p>
+
+                      <p>
+                        太空有各种高速粒子，由于没有大气层保护，它们可以直接撞击芯片材料造成损伤。最常见的后果是单粒子翻转（SEU），即粒子直接撞击晶体管，导致某个比特翻转。
+                      </p>
+
+                      <p>
+                        太空数据中心必须长期运行，还存在总剂量效应，即反复的粒子撞击导致晶体管开关速度变慢，进而停止工作。
+                      </p>
+
+                      <p>
+                        所以需要有一个屏蔽层，但是最强的宇宙射线可以穿透惊人厚度的铅层。而且受限于飞船的运送能力，太空中不可能部署很厚的屏蔽层。
+                      </p>
+
+                      <p>
+                        为了增加 GPU
+                        和内存的抗辐射能力，有必要为太空环境重新设计芯片，增加容错性能。但是，这样的芯片性能将远不及目前地球上的
+                        GPU。
+                      </p>
+
+                      <p><strong>（4）通讯问题</strong></p>
+
+                      <p>
+                        大多数卫星通过无线电与地面通信，速率超过 1Gbps
+                        都很困难。虽然有一些激光方案可以提高带宽，但需要良好的大气条件才能实现。
+                      </p>
+
+                      <p>
+                        相比之下，地球上的数据中心之间的通讯，最低速率也能达到
+                        100Gbps。
+                      </p>
+
+                      <h2>[本周软件] 七牛云的大模型接入服务</h2>
+
+                      <p>
+                        几周前，我在周刊<a
+                          href="https://www.ruanyifeng.com/blog/2025/10/weekly-issue-370.html"
+                          >推荐</a
+                        >了<a href="https://s.qiniu.com/JrUbmm">七牛云</a
+                        >，<strong>一个平台调用国内外各大 AI 模型</strong
+                        >，堪称中国的 OpenRouter。
+                      </p>
+
+                      <p>
+                        但是，我没说清楚两点，导致很多网友遇到问题，我一直想找机会补充。
+                      </p>
+
+                      <p>
+                        本周一，DeepSeek 发布 V3.2 的 Speciale
+                        版和普通版，当天晚上我就看到七牛云上架了（下图）。他们更新这么快，我还是说一下吧，大家就不会遇到问题了。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120202.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        <strong>（1）国外模型</strong
+                        >。七牛云目前提供国内外70多个模型，但由于种种原因，国外模型在官网查不到，实际上是支持的。
+                      </p>
+
+                      <p>
+                        具体的模型清单，可以去<a
+                          href="https://sufy.com/zh-CN/services/ai-inference/models"
+                          >这个网站</a
+                        >查询，主流模型都有（下图）。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120201.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        查到模型 ID
+                        后（比如<code>claude-4.5-opus</code>），用它作为模型名参数，就可以在七牛云调用这个模型。
+                      </p>
+
+                      <p>
+                        <strong>（2）请求频率</strong
+                        >。普通开发者"1分钟5次，1小时60次"足够使用了，如果超出这个速率，就会遇到报错（状态码429）。
+                      </p>
+
+                      <p>
+                        大家不要觉得这个限制太严，作为对比，Claude 官方的 Pro
+                        套餐是5小时45次。
+                      </p>
+
+                      <p>
+                        我推荐七牛云，主要考虑他们是上市公司，服务有保障。另外，他们同时支持
+                        OpenAI 和 Anthropic 两种调用格式，调用 API
+                        很方便（下图）。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120203.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        <strong>新用户有免费的 300万 Token</strong
+                        >，如果再邀请一位好友来使用，你会再得到 500万
+                        Token，好友则得到 1000万
+                        Token。注意，这些免费额度是通用的，可用于任何他们提供的模型。欢迎使用我的<a
+                          href="https://s.qiniu.com/JrUbmm"
+                          >推广链接</a
+                        >去注册。
+                      </p>
+
+                      <h2>科技动态</h2>
+
+                      <p>
+                        1、<a
+                          href="https://www.dagens.com/news/iceland-declares-ocean-current-instability-a-national-security-risk"
+                          >冰岛的洋流危机</a
+                        >
+                      </p>
+
+                      <p>
+                        冰岛政府宣布，大西洋的洋流变化是国家安全问题，威胁到冰岛的生存。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025113005.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        根据观测数据，随着全球变暖，大西洋环流正在减弱。这个环流是一条巨大的传送带，将温暖的海水从赤道向北输送，为大西洋北部带来温暖的气候。
+                      </p>
+
+                      <p>
+                        一旦这个洋流消失，冰岛的气温将大幅下降，最坏的情况下可能会被冰川包围，真的变成"冰的岛"，也就没法住人了。
+                      </p>
+
+                      <p>
+                        2、<a
+                          href="https://gizmodo.com/weve-detected-lightning-on-mars-for-the-first-time-2000691996"
+                          >火星声音</a
+                        >
+                      </p>
+
+                      <p>火星上有什么声音？</p>
+
+                      <p>
+                        科学家也想知道。美国的"毅力号"火星车于2021年2月登陆火星时，就配备了一个麦克风，专门监听火星声音。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120104.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>上图是火星车顶部跟摄像头配套的麦克风。</p>
+
+                      <p>
+                        最近，一个研究团队分析了这个麦克风录制的28小时音频。
+                      </p>
+
+                      <p>
+                        他们听到了有东西撞击地表的声音，同时还观测到了电信号，因此推测这是闪电的声音。
+                      </p>
+
+                      <p>
+                        这是人们第一次知道，火星还有闪电，因为那里空气稀薄，没有水也就没有云，所以不存在云的放电。科学家判断，火星闪电应该是龙卷风导致的沙石摩擦的放电。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120105.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        3、<a
+                          href="https://newscenter.lbl.gov/2025/04/24/scientists-develop-artificial-leaf-that-uses-sunlight-to-produce-valuable-chemicals/"
+                          >人造树叶</a
+                        >
+                      </p>
+
+                      <p>一个美国研究团队，将太阳能板做成了叶片形状。</p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202504/bg2025042813.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        这种叶片的底部，连接着化学催化剂，有了太阳能，就可以将二氧化碳和水转化为燃料。
+                      </p>
+
+                      <p>
+                        如果把许多这样的叶片组装成一棵树，就是一个燃料生产装置。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202504/bg2025042814.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        这启示我们，太阳能装置的形式，远不止太阳能板一种，完全可以做成树的形状。
+                      </p>
+
+                      <h2>文章</h2>
+
+                      <p>
+                        1、<a
+                          href="https://mp.weixin.qq.com/s/E8YQLWZFM2J7r5DZNSl47w"
+                          >关于近期安全报告的情况说明</a
+                        >（中文）
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120403.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        一个国外安全团队近日<a
+                          href="https://programnotes.cn/browser-security-ShadyPanda/index.html"
+                          >报告</a
+                        >，某些浏览器插件（如 Clean
+                        Master、WeTab）是恶意软件。本文是这些插件的中国开发团队的回应。
+                      </p>
+
+                      <p>
+                        他们表示，Clean Master
+                        去年已经卖掉了，现在跟他们无关，至于其他插件属于误报。建议先读<a
+                          href="https://programnotes.cn/browser-security-ShadyPanda/index.html"
+                          >安全报告</a
+                        >，再读这篇回应。（<a
+                          href="https://github.com/ruanyf/weekly/issues/8349"
+                          >@yiGmMk</a
+                        >
+                        投稿）
+                      </p>
+
+                      <p>
+                        2、<a
+                          href="https://www.dolthub.com/blog/2025-11-13-electron-vs-tauri/"
+                          >Electron vs Tauri</a
+                        >（英文）
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025112801.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        Electron 和 Tauri
+                        是目前跨平台桌面应用的两种主流开发方案。本文是它们的详细对比，各自的优缺点。
+                      </p>
+
+                      <p>
+                        3、<a
+                          href="https://dillo-browser.org/news/migration-from-github/"
+                          >我为什么要从 GitHub 迁移</a
+                        >（英文）
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120103.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        作者感到 GitHub
+                        不符合需要，太重了，就做了一个自己的代码仓库托管方案。如果你也想自己架设代码服务器，可以参考。
+                      </p>
+
+                      <p>
+                        4、<a
+                          href="https://aloisdeniel.com/blog/better-than-json"
+                          >Protobuf 好于 JSON</a
+                        >（英文）
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120215.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        本文呼吁使用 Protobuf 格式代替 JSON。作者认为，JSON
+                        唯一的优点就是人类可以识读。
+                      </p>
+
+                      <p>
+                        5、<a
+                          href="https://www.humanlayer.dev/blog/writing-a-good-claude-md"
+                          >如何写一份好的 CLAUDE.md 文件</a
+                        >（英文）
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120102.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        很多 AI
+                        编程工具，使用一份文本文件，作为每次查询的上下文。本文以
+                        CLAUDE.md 为例，介绍怎么用好这个文件。
+                      </p>
+
+                      <p>
+                        6、<a
+                          href="https://www.xda-developers.com/how-zfs-is-superior-to-btrfs/"
+                          >ZFS 文件系统好于 Btrfs</a
+                        >（英文）
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202502/bg2025022202.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        ZFS 和 Btrfs
+                        是两种流行的现代文件系统，本文介绍它们的特点，提出前者更可靠。
+                      </p>
+
+                      <h2>工具</h2>
+
+                      <p>
+                        1、<a href="https://github.com/basecamp/fizzy">Fizzy</a>
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120401.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>37Signals 公司开源了他们内部使用的看板应用。</p>
+
+                      <p>
+                        2、<a href="https://github.com/sinelaw/fresh">Fresh</a>
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120402.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>一个基于终端的文本编辑器。</p>
+
+                      <p>
+                        3、<a href="https://github.com/antonmedv/gitmal"
+                          >Gitmal</a
+                        >
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120216.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        这个工具将 Git
+                        仓库变成一个静态网站，网页内容就是文件、提交、代码高亮等。
+                      </p>
+
+                      <p>4、<a href="https://githubcard.com">GitHub Card</a></p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025112802.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        该网站可以生成 GitHub 用户和仓库的分享卡片。（<a
+                          href="https://github.com/ruanyf/weekly/issues/8303"
+                          >@Cactusinhand</a
+                        >
+                        投稿）
+                      </p>
+
+                      <p>
+                        5、<a href="https://github.com/shencangsheng/easydb_app"
+                          >EasyDB</a
+                        >
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025112804.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        跨平台的桌面应用，使用 SQL
+                        查询数据文件，包括数据库、CSV、Excel、JSON 等。（<a
+                          href="https://github.com/ruanyf/weekly/issues/8313"
+                          >@shencangsheng</a
+                        >
+                        投稿）
+                      </p>
+
+                      <p>
+                        6、<a href="https://github.com/TokenRollAI/webhooker"
+                          >Webhooker</a
+                        >
+                      </p>
+
+                      <p>
+                        一个 Webhook 的转发网关，比如把 Slack
+                        消息转发到飞书和钉钉。（<a
+                          href="https://github.com/ruanyf/weekly/issues/8318"
+                          >@Disdjj</a
+                        >
+                        投稿）
+                      </p>
+
+                      <p>
+                        7、<a href="https://github.com/EasyCam/Pysinfo"
+                          >PySInfo</a
+                        >
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120101.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        一个 Python 脚本，用来在命令行显示系统信息，类似于
+                        <a href="https://github.com/fastfetch-cli/fastfetch"
+                          >fastfetch</a
+                        >。（<a
+                          href="https://github.com/ruanyf/weekly/issues/8333"
+                          >@cycleuser</a
+                        >
+                        投稿）
+                      </p>
+
+                      <p>
+                        8、<a
+                          href="https://github.com/tianchangNorth/pocket-mocker"
+                          >PocketMocker</a
+                        >
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120204.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        一个网页前端的 Mock 库，通过网页中拦截 fetch 和
+                        XMLHttpRequest 来 Mock 数据，带有可视化控制台。（<a
+                          href="https://github.com/ruanyf/weekly/issues/8345"
+                          >@tianchangNorth</a
+                        >
+                        投稿）
+                      </p>
+
+                      <p>
+                        9、<a href="https://github.com/hellodigua/code996"
+                          >code996</a
+                        >
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120302.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        一个命令行工具，通过分析 Git
+                        仓库的提交时间，判断项目的编码工作强度和加班情况。（<a
+                          href="https://github.com/ruanyf/weekly/issues/8361"
+                          >@hellodigua</a
+                        >
+                        投稿）
+                      </p>
+
+                      <p>
+                        10、<a href="https://github.com/nicejade/markdown2png"
+                          >玉桃文飨轩</a
+                        >
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120305.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        一款开源网页应用，将 Markdown 文本转成图片。（<a
+                          href="https://github.com/ruanyf/weekly/issues/8363"
+                          >@nicejade</a
+                        >
+                        投稿）
+                      </p>
+
+                      <h2>AI 相关</h2>
+
+                      <p>
+                        1、<a href="https://github.com/RanFeng/clipsketch-ai"
+                          >ClipSketch AI</a
+                        >
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120217.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        一个开源的 Web 应用，通过 Gemini 模型，将小红书和 B
+                        站视频转成手绘故事。（<a
+                          href="https://github.com/ruanyf/weekly/issues/8353"
+                          >@RanFeng</a
+                        >
+                        投稿）
+                      </p>
+
+                      <p>
+                        2、<a
+                          href="https://github.com/glidea/banana-prompt-quicker"
+                          >Banana Prompt Quicker</a
+                        >
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120306.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        一个开源的浏览器插件，收集 Nano Banana
+                        模型的热门提示词，方便复用。（<a
+                          href="https://github.com/ruanyf/weekly/issues/8364"
+                          >@glidea</a
+                        >
+                        投稿）
+                      </p>
+
+                      <p>
+                        3、<a href="https://github.com/f/git-rewrite-commits"
+                          >git-rewrite-commits</a
+                        >
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025111205.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        这个工具使用 AI 改写以前的 git
+                        提交信息，让其变得更准确详细。
+                      </p>
+
+                      <h2>资源</h2>
+
+                      <p>
+                        1、<a
+                          href="https://time.com/7336112/top-100-photos-2025/"
+                          >百大年度照片</a
+                        >
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025112901.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        《时代》杂志评选的2025年100张照片，另有<a
+                          href="https://www.reuters.com/investigates/special-report/year-end-2025-photos-best/"
+                          >路透社的年度照片</a
+                        >。
+                      </p>
+
+                      <p>
+                        2、<a
+                          href="https://wikimediafoundation.org/news/2025/12/02/announcing-wikipedias-most-read-articles-of-2025/"
+                          >维基百科2025年阅读量最高的文章</a
+                        >
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202512/bg2025120303.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        维基百科公布，2025年它的英文版阅读量最高的20篇文章，主要集中于政治、流行文化和逝者。
+                      </p>
+
+                      <p>
+                        3、<a
+                          href="https://hummingbirdspot.com/all-hummingbird-species/"
+                          >HummingbirdSpot</a
+                        >
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025112707.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        这是一个美国退休女教师的网站，她立志要拍摄所有种类的蜂鸟。全世界共有366种蜂鸟，她已经拍到了277种。
+                      </p>
+
+                      <h2>图片</h2>
+
+                      <p>
+                        1、<a
+                          href="https://www.lepetitprince.com/en/events-around-the-world/a-new-little-prince-museum-has-opened-its-doors-in-switzerland/"
+                          >小王子博物馆</a
+                        >
+                      </p>
+
+                      <p>经典童话《小王子》出版于1943年，畅销全世界。</p>
+
+                      <p>
+                        为了纪念这本童话和作者圣埃克苏佩里，瑞士最近新开了一家小王子博物馆。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025113001.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>这个博物馆收藏了这本童话的各种版本和纪念品。</p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025113002.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        《小王子》的情节是，从前有一个 B612
+                        小行星，上面有一个小王子。这个小行星面积不大，有两座活火山、一座死火山和一朵玫瑰。
+                      </p>
+
+                      <p>
+                        小王子离开 B612
+                        后，拜访了其他六颗小行星，分别住着国王、爱慕虚荣的人、酗酒的人、生意人、守时的人和地理学家。最后，小王子来到地球，访问后又回到了自己的行星。
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025113003.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <p>
+                        <img
+                          src="https://cdn.beekka.com/blogimg/asset/202511/bg2025113004.webp"
+                          alt=""
+                          title="" />
+                      </p>
+
+                      <h2>文摘</h2>
+
+                      <p>
+                        1、<a
+                          href="https://www.seangoedecke.com/bad-code-at-big-companies/"
+                          >为什么大公司的代码质量不佳？</a
+                        >
+                      </p>
+
+                      <p>跟大家想的不一样，大公司的代码质量其实不高。</p>
+
+                      <p>
+                        这看上去违反常理，大型科技公司薪酬优厚，足以吸引众多优秀工程师。而且，大公司的工作环境、配套工具、开发节奏都很好，非常适合从容不迫地完成高质量的工作。
+                      </p>
+
+                      <p>但是，事实就是他们的代码质量完全谈不上优秀。</p>
+
+                      <p>
+                        原因很简单，大公司的大多数代码都是由相对的初学者完成的。
+                      </p>
+
+                      <p>
+                        那些工程师并不是不优秀，而是被迫去开发非本领域的项目，属于相对的初学者。
+                      </p>
+
+                      <p>
+                        现实生活中，大型科技公司的工程师，很少会一直干下去。事实上，大公司的薪酬方案通常都设定了工程师的四年任期，四年后初始授予的股份全部归属，工程师的收入可能就会大幅下降。这时，如果你没有得到晋升，显然可以考虑离开了。
+                      </p>
+
+                      <p>
+                        如果算上内部流动，情况就更糟了。我自己在同一个团队或同一个代码库，停留的时间最长也只有三年，那还是我刚入职的时期。后来，我每年都至少经历一次重组，更换团队或项目。
+                      </p>
+
+                      <p>
+                        当然，大公司的代码库寿命没有这么短，很多内部代码库都有十年甚至更久的历史。问题是，这么多年来，这些库经历了许多不同的所有者，不同的工程师都在不断地"摸索"，相当高比例的代码变更是由"新手"完成的。这些人可能是在过去六个月内才加入公司、接触代码库。
+                      </p>
+
+                      <p>
+                        你肯定会问，大公司的那些"老手"程序员难道不写代码吗？总有一些工程师在特定领域工作了足够长的时间，积累了真正的专业知识，会进行深入的代码审查，并能可靠地发现问题，这些人在干什么呢？
+                      </p>
+
+                      <p>
+                        首先，大公司不在乎"老手"程序员。公司很少致力于培养特定专业的长期人才，而且似乎也根本不在乎留住这些人才。通常情况下，这些人迟早会被调到其他部门，成为一个全新系统的相对新手。
+                      </p>
+
+                      <p>
+                        其次，"老手"工程师总是工作量巨大。作为少数精通特定服务的工程师之一，他们的工作非常繁忙。他没有足够的时间亲自审查每一次软件变更，或者积极参与每一个决策过程，他有自己的工作要做。
+                      </p>
+
+                      <p>
+                        总之，大公司的现实就是，你总是被分配到新项目，几乎每天都在赶工，要赶上多个项目的截止日期。换句话说，工程师是在一个不利于编写高质量代码的环境中尽力而为。
+                      </p>
+
+                      <p>
+                        这样情况下，就很难保证优秀的代码质量了。更常见的情况是，一位初级工程师接手了一个他几乎不熟悉的代码库中一个恼人
+                        bug
+                        的工单。他花了几天时间研究，最终想出了一个蹩脚的解决方案。如果幸运的话，一位"老手"在空闲的半小时里匆匆浏览了一下，否决了这个方案，并提出了一个稍微好一点、至少能用的方案。初级工程师尽力实现了这个方案，测试了它是否有效，经过简单的审查后发布，所有相关人员立即转而处理下一个高优先级的工作。
+                      </p>
+
+                      <h2>言论</h2>
+
+                      <p>1、</p>
+
+                      <p>
+                        亚洲人民处在从艰苦的农业生活过渡到城市工厂生活，这种转变似乎带来了一种热情，一种愿意为在今天的欧洲被认为微不足道的东西而努力工作的意愿。
+                      </p>
+
+                      <p>
+                        这对他们来说是好事。但在欧洲，我们已经经历过这种转变，变得无所事事，毫无士气。我们生活所需的一切都由他人制造时，这种情况是不可持续的。
+                      </p>
+
+                      <p>
+                        --
+                        <a href="https://news.ycombinator.com/item?id=46072570"
+                          >一个德国的 Hacker News 读者</a
+                        >
+                      </p>
+
+                      <p>2、</p>
+
+                      <p>
+                        汽车的电子屏幕，夜间使用非常有害，尤其对于40岁以上的人。他们的视力开始下降，聚焦和光线平衡的反应速度都会减慢，使用电子屏幕会改变他们的夜视能力，不容易看清前方的道路。
+                      </p>
+
+                      <p>
+                        --
+                        <a href="https://news.ycombinator.com/item?id=46092397"
+                          >Hacker News 读者</a
+                        >
+                      </p>
+
+                      <p>3、</p>
+
+                      <p>
+                        普通人看不懂数学论文，但是圈外人不知道的是，数学家也看不懂很多数学论文。
+                      </p>
+
+                      <p>
+                        --
+                        <a
+                          href="https://www.science.org/doi/10.1126/science.aec9014"
+                          >《科学》杂志</a
+                        >
+                      </p>
+
+                      <p>4、</p>
+
+                      <p>
+                        大模型时代，我们正在失去一些珍贵的东西：自己独特的声音。
+                      </p>
+
+                      <p>
+                        所有大模型生成的文章，看上去都像是同一个公共经理发布的。
+                      </p>
+
+                      <p>
+                        如果你让大模型帮你写所有文章，你就放弃自己的声音了。你的声音是一种财富，是你一生的生活经历塑造而成，没有人的声音会和你完全一样。
+                      </p>
+
+                      <p>
+                        --
+                        <a
+                          href="https://tonyalicea.dev/blog/were-losing-our-voice-to-llms/"
+                          >《大模型让我们失去声音》</a
+                        >
+                      </p>
+
+                      <h2>往年回顾</h2>
+
+                      <p>
+                        <a
+                          href="https://www.ruanyifeng.com/blog/2024/12/weekly-issue-329.html"
+                          >示意图利器 D2</a
+                        >（#329）
+                      </p>
+
+                      <p>
+                        <a
+                          href="https://www.ruanyifeng.com/blog/2023/11/weekly-issue-279.html"
+                          >网络社区的悲剧</a
+                        >（#279）
+                      </p>
+
+                      <p>
+                        <a
+                          href="https://www.ruanyifeng.com/blog/2022/11/weekly-issue-229.html"
+                          >手机充电问题的解决</a
+                        >（#229）
+                      </p>
+
+                      <p>
+                        <a
+                          href="https://www.ruanyifeng.com/blog/2021/10/weekly-issue-179.html"
+                          >AR 技术的打开方式</a
+                        >（#179）
+                      </p>
+
+                      <p>（完）</p>
+
+                      <!-- /div -->
+                    </div>
+                    <script
+                      data-cfasync="false"
+                      src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+                    <script type="text/javascript" src="/newwindow.js"></script>
+                    <div class="asset-footer">
+                      <h3>文档信息</h3>
+                      <ul>
+                        <li>
+                          版权声明：自由转载-非商用-非衍生-保持署名（<a
+                            href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh"
+                            >创意共享3.0许可证</a
+                          >）
+                        </li>
+                        <li>
+                          发表日期：
+                          <abbr
+                            class="published"
+                            title="2025-12-05T08:09:01+08:00"
+                            >2025年12月 5日</abbr
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </article>
+                </div>
+
+                <div style="display: inline-block !important; width: 100%">
+                  <p style="text-align: center; font-size: 16px">
+                    <a
+                      title="netnut"
+                      target="_blank"
+                      href="https://netnut.cn/?utm_medium=partner&utm_source=ruanyifeng2"
+                      >netnut 数据抓取 IP 池</a
+                    >
+                    <br />
+                    <a
+                      title="netnut"
+                      href="https://netnut.cn/?utm_medium=partner&utm_source=ruanyifeng2"
+                      target="_blank">
+                      <img
+                        alt="netnut"
+                        src="https://cdn.beekka.com/blogimg/asset/202508/bg2025081817.webp"
+                        style="
+                          border: 1px solid #666;
+                          display: block !important;
+                          width: 100%;
+                          max-width: 100%;
+                        " />
+                    </a>
+                  </p>
+                </div>
+
+                <div id="related_entries">
+                  <h2>相关文章</h2>
+                  <ul>
+                    <li>
+                      <strong
+                        >2025.11.28:
+                        <a
+                          href="https://www.ruanyifeng.com/blog/2025/11/weekly-issue-375.html"
+                          >科技爱好者周刊（第 375 期）：一扇门的 Bug</a
+                        ></strong
+                      >
+
+                      <div class="entry-body">
+                        这里记录每周值得分享的科技内容，周五发布。
+                      </div>
+                    </li>
+
+                    <li>
+                      <strong
+                        >2025.11.21:
+                        <a
+                          href="https://www.ruanyifeng.com/blog/2025/11/weekly-issue-374.html"
+                          >科技爱好者周刊（第 374 期）：6GHz 的问题</a
+                        ></strong
+                      >
+
+                      <div class="entry-body">
+                        这里记录每周值得分享的科技内容，周五发布。
+                      </div>
+                    </li>
+
+                    <li>
+                      <strong
+                        >2025.11.14:
+                        <a
+                          href="https://www.ruanyifeng.com/blog/2025/11/weekly-issue-373.html"
+                          >科技爱好者周刊（第 373
+                          期）：数据模型是新产品的核心</a
+                        ></strong
+                      >
+
+                      <div class="entry-body">
+                        这里记录每周值得分享的科技内容，周五发布。
+                      </div>
+                    </li>
+
+                    <li>
+                      <strong
+                        >2025.11.07:
+                        <a
+                          href="https://www.ruanyifeng.com/blog/2025/11/weekly-issue-372.html"
+                          >科技爱好者周刊（第 372 期）：软件界面如何设计</a
+                        ></strong
+                      >
+
+                      <div class="entry-body">
+                        这里记录每周值得分享的科技内容，周五发布。
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+
+                <div id="comments" class="comments">
+                  <h2 class="comments-header">留言（39条）</h2>
+
+                  <div
+                    id="comments-content"
+                    class="comments-content"
+                    style="clear: left">
+                    <div id="comment-448984" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">sylolol</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448984">
+                          <p>
+                            环流减弱，会不会冰河时期再来一遍？小的时候没有穿那么多衣服也没感觉这么冷，现在穿的很多，但是依旧很冷，当然衣服质量不如原来也有一部分原因。
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  9:08 AM"
+                                >2025年12月 5日 09:08</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448984"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用sylolol的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448984',
+                                    'sylolol'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448986" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">jay</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448986">
+                          <p>
+                            关于太空数据中心，散热的确是致命瓶颈。虽然深空背景温度是
+                            2.7K（约-270℃），但在太空中，热量传递的三种方式（传导、对流、辐射）中，没有空气对流，没有物质接触传导，只能靠辐射。
+                            热量必须通过红外辐射散发出去。根据斯特藩-玻尔兹曼定律（Stefan-Boltzmann
+                            Law），辐射功率与温度的四次方成正比，一万张 H200
+                            散热，散热板的面积将大到难以通过现有的火箭发射，
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  9:29 AM"
+                                >2025年12月 5日 09:29</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448986"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用jay的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448986',
+                                    'jay'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448987" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">tianchang</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448987">
+                          <p>
+                            我是本期推荐项目 Pocket Mocker
+                            的作者。做这个工具的初衷是因为厌倦了在代码里硬编码假数据。
+                          </p>
+
+                          <p>
+                            它就像是一个嵌入浏览器的轻量级
+                            Postman，希望能帮大家在后端接口没好，或者需要模拟弱网/报错时，少加一点班。
+                          </p>
+
+                          <p>
+                            目前项目还在快速迭代中，欢迎各位大佬试用并提 Issue
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  9:29 AM"
+                                >2025年12月 5日 09:29</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448987"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用tianchang的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448987',
+                                    'tianchang'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448988" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">昔日之</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448988">
+                          <blockquote>
+                            <pre>引用sylolol的发言：</pre>
+
+                            <p>
+                              环流减弱，会不会冰河时期再来一遍？小的时候没有穿那么多衣服也没感觉这么冷，现在穿的很多，但是依旧很冷，当然衣服质量不如原来也有一部分原因。
+                            </p>
+                          </blockquote>
+
+                          <p>
+                            啥年代了，现在想买到还不如小时候质量的衣服反而比较困难吧。
+                          </p>
+
+                          <p>
+                            可能是你老了，“火力”相比于小时候下降了太多，所以体感冷了。
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  9:50 AM"
+                                >2025年12月 5日 09:50</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448988"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用昔日之的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448988',
+                                    '昔日之'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448989" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author"
+                                  >F^<a
+                                    href="/cdn-cgi/l/email-protection"
+                                    class="__cf_email__"
+                                    data-cfemail="c1a2aa81a0a8efa2aeac"
+                                    >[email&#160;protected]</a
+                                  ></span
+                                >
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448989">
+                          <p>
+                            这个太空散热保温的，让我想到，最后搞来搞去，还是要学习地球，给太空数据中心搞一个大气层，这样就能均匀转换能量了。
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  9:56 AM"
+                                >2025年12月 5日 09:56</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448989"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用F^ck@ai.com的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448989',
+                                    'F^ck@ai.com'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448990" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">buytip</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448990">
+                          <p>
+                            如果你让大模型帮你写所有文章，你就放弃自己的声音了。
+                          </p>
+
+                          <p>大模型润色也是的！都失去了！</p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025 10:00 AM"
+                                >2025年12月 5日 10:00</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448990"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用buytip的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448990',
+                                    'buytip'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448991" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">kaul</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448991">
+                          <p>
+                            北京市科委、中关村科学城管委会这个完全是一堆外行领导内行的领导，看到马斯克的发言后盲目的对标，而且通过这种方式给自己找活干，类似过去盲目基建，根本不考虑可行性。
+                          </p>
+
+                          <p>
+                            单从现在的技术手段，能源和散热都是大问题，特别是散热，单面每平米500－700瓦散热功率（和发电差不多），相当于发电加散热，2平米空间就勉强够一块卡，理想情况下算双面都能发电和散热（虽然实际上不行，因为一面向阳一面背阳），一块卡也要一平米／这样算一个数据中心需要多大的展开面积？那么对应的发射阶段需要多么复杂的折叠方案＋多次发射拼装？
+                          </p>
+
+                          <p>
+                            而且发电板、散热板、发射前的折叠，这都需要复杂的机械结构和后续控制系统，更复杂了，体积利用率还会进一步降低的同时，失效可能增加。根本得不偿失。
+                          </p>
+
+                          <p>
+                            也就管理层领导看到那两个优点，脑门一拍就说要搞。光看优点，喝农药还能解渴呢
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025 10:06 AM"
+                                >2025年12月 5日 10:06</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448991"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用kaul的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448991',
+                                    'kaul'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448992" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">Orange</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448992">
+                          <p>
+                            大公司还有很多代码都是外包同学写的
+                            这部分人水平并不高 对大公司来说 业务比代码更重要
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025 10:26 AM"
+                                >2025年12月 5日 10:26</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448992"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用Orange的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448992',
+                                    'Orange'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448993" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">crstudio</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448993">
+                          <blockquote>
+                            <pre>引用sylolol的发言：</pre>
+
+                            <p>
+                              环流减弱，会不会冰河时期再来一遍？小的时候没有穿那么多衣服也没感觉这么冷，现在穿的很多，但是依旧很冷，当然衣服质量不如原来也有一部分原因。
+                            </p>
+                          </blockquote>
+
+                          <p>
+                            小时候不觉得冷，你可以问问现在的小孩儿觉得冷不冷。小时候运动量大，代谢快，热量高，不是衣服不好了，是你老了。
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025 10:28 AM"
+                                >2025年12月 5日 10:28</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448993"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用crstudio的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448993',
+                                    'crstudio'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448994" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">网友</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448994">
+                          <p>
+                            拿按token付费的API速率去对比订阅制的速率？？？<br />
+                            阮一峰现在这么不专业了？？？？？？
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025 10:56 AM"
+                                >2025年12月 5日 10:56</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448994"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用网友的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448994',
+                                    '网友'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448995" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">sanfen</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448995">
+                          <p>太空数据中心那个：</p>
+                          <pre>
+（2）深空温度约为-270度，只需部署导热材料即可完成散热，无需部署大量液冷结构，成本优势显著。
+</pre
+                          >
+
+                          <p>
+                            这个感觉好业余呀。太空是低温，温度确实会由高向低传导，但是太空是真空的，也没介质来传导温度呀。太空里散热是门专门的技术呀。成本并不低。
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025 11:26 AM"
+                                >2025年12月 5日 11:26</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448995"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用sanfen的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448995',
+                                    'sanfen'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448996" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author"
+                                  >DO NOT USE QINIU</span
+                                >
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448996">
+                          <p>
+                            不推荐使用七牛云的AI，消耗速度特别快，一个 CLAUDE 的
+                            init 可能就消耗几百万TOKEN。
+                          </p>
+
+                          <p>
+                            如果你想试试七牛云，一定要关闭针对新人的一个账单功能（允许你欠费），随随便便就会欠费，即使不用之后，过了几天又提示欠费增加了。
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025 11:33 AM"
+                                >2025年12月 5日 11:33</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448996"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用DO NOT USE QINIU的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448996',
+                                    'DO NOT USE QINIU'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448997" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">Hoyt</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448997">
+                          <p>会不会有人去低太空捕获计算集群????，哈哈哈哈</p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025 12:06 PM"
+                                >2025年12月 5日 12:06</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448997"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用Hoyt的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448997',
+                                    'Hoyt'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448998" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">gagaga</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448998">
+                          <p>
+                            大公司代码质量不佳这点我深有体会，在头部的互联网最大的感受就是代码质量完全由项目的紧急程度来决定，当项目很急的时候，一切都可以妥协，而互联网大厂最大的特点就是急，就导致一个项目在成立初期还算看的过去，但是一旦经过了几年的迭代，那就是纯纯的屎山了，臃肿低效
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025 12:57 PM"
+                                >2025年12月 5日 12:57</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448998"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用gagaga的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448998',
+                                    'gagaga'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-448999" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">谢什么</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-448999">
+                          <p>
+                            那个太空的事情，让我想起了“上帝之杖”的武器创意。
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  1:05 PM"
+                                >2025年12月 5日 13:05</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-448999"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用谢什么的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-448999',
+                                    '谢什么'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449000" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">shenzhongwei</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449000">
+                          <p>
+                            大公司的代码质量不好是事实。哪种类型的公司适合程序员长期呆下去呢？
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  2:16 PM"
+                                >2025年12月 5日 14:16</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449000"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用shenzhongwei的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449000',
+                                    'shenzhongwei'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449001" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">sss</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449001">
+                          <p>
+                            让员工心寒的公司就是：一人做N个人的事、不在乎人才流失、强抓考勤、以前福利缩水或直接消失、年会及团建不开、过节福利全取消。
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  2:52 PM"
+                                >2025年12月 5日 14:52</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449001"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用sss的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449001',
+                                    'sss'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449002" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">Gorvey</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449002">
+                          <p>
+                            七牛云的API速率限制和claude
+                            code的订阅制根本就不是一回事<br />
+                            claude是每5小时能使用45次左右的prompt,每一次会调用十几次的工具tool,每一次的工具使用都是一次API调用<br />
+                            如果在claude
+                            code里面使用七牛云的api,一次prompt内部调用工具就会触发多次的429,体验非常差!!!!
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  2:56 PM"
+                                >2025年12月 5日 14:56</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449002"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用Gorvey的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449002',
+                                    'Gorvey'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449004" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">Martin</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449004">
+                          <p>
+                            700到800公里的高度不一定是合适的，因为这个高度典型的卫星寿命就10年，前期实验没问题，但大规模使用也没必要。轨道高度越高，辐射散热的效率也越高。真没有必要选那么低的，寿命不行散热也不行。
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  3:11 PM"
+                                >2025年12月 5日 15:11</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449004"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用Martin的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449004',
+                                    'Martin'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449005" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">yuyu</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449005">
+                          <p>
+                            七牛云那个赠送额度用国内大模型还挺好，DeepSeek-V3.1输入token为系数1，输出按3倍token计算。<br />
+                            如果用海外的模型，就要考虑性价比了，比如gemini-3.0-pro
+                            输出文字折算的系数大概是32倍，输出图片216倍，不是很够用，免费尝鲜可以，常用很难。
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  3:16 PM"
+                                >2025年12月 5日 15:16</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449005"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用yuyu的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449005',
+                                    'yuyu'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449007" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">gengchen.cao</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449007">
+                          <p>
+                            深有体会，刚入职新公司，新项目，老员工都处理棘手问题，新员工在十几个代码仓摸索
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  4:58 PM"
+                                >2025年12月 5日 16:58</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449007"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用gengchen.cao的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449007',
+                                    'gengchen.cao'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449009" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">Jack Cooper</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449009">
+                          <blockquote>
+                            <pre>引用buytip的发言：</pre>
+
+                            <p>
+                              如果你让大模型帮你写所有文章，你就放弃自己的声音了。
+                            </p>
+
+                            <p>大模型润色也是的！都失去了！</p>
+                          </blockquote>
+
+                          <p>在企业我也许会这样, 但是自己的博客一般很少用</p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  6:12 PM"
+                                >2025年12月 5日 18:12</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449009"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用Jack Cooper的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449009',
+                                    'Jack Cooper'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449010" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">独元殇</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449010">
+                          <p>这一期的质量不错！</p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025  9:54 PM"
+                                >2025年12月 5日 21:54</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449010"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用独元殇的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449010',
+                                    '独元殇'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449011" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">XZY</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449011">
+                          <p>
+                            数据中心与其在近地轨道建，不如直接建到月球上。马斯克这么说因为他现在有最大的太空运力，吹这个他的身价又能上一上台阶。
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  5, 2025 11:18 PM"
+                                >2025年12月 5日 23:18</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449011"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用XZY的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449011',
+                                    'XZY'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449012" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">Mio</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449012">
+                          <p>
+                            七牛云那里的对比有点搞笑了。拿api速率横向对比，Claude最低的Tier
+                            1也是50 rpm，一小时就是3000次
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  6, 2025  4:22 AM"
+                                >2025年12月 6日 04:22</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449012"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用Mio的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449012',
+                                    'Mio'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449013" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">Luke</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449013">
+                          <p>
+                            坏代码在大公司里比比皆是，小公司更好不到哪里去，好像只有开源世界才存在好代码。
+                          </p>
+
+                          <p>但是好代码不挣钱啊。</p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  6, 2025  8:09 AM"
+                                >2025年12月 6日 08:09</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449013"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用Luke的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449013',
+                                    'Luke'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449014" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">featherland</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449014">
+                          <p>
+                            我都怀疑公司里根本没有什么质量高的代码，软件工程在所有公司里都是大难题，项目一大，人员一多，时间一长，都是屎山
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  6, 2025  2:13 PM"
+                                >2025年12月 6日 14:13</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449014"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用featherland的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449014',
+                                    'featherland'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449015" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">jin</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449015">
+                          <blockquote>
+                            <pre>引用DO NOT USE QINIU的发言：</pre>
+
+                            <p>
+                              不推荐使用七牛云的AI，消耗速度特别快，一个 CLAUDE
+                              的 init 可能就消耗几百万TOKEN。
+                            </p>
+
+                            <p>
+                              如果你想试试七牛云，一定要关闭针对新人的一个账单功能（允许你欠费），随随便便就会欠费，即使不用之后，过了几天又提示欠费增加了。
+                            </p>
+                          </blockquote>
+
+                          <p>
+                            我也是看了这篇文章去七牛开通了帐号，充了300元，用141买600w
+                            token的claude资源包，结果在cluade
+                            code上只问了两个问题，就提示我欠费，并且还倒欠它68元，一问才知道是后付费的；整个过程没有一处写着后付费；提了工单，一天了，都没人联系我说明情况；
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  6, 2025  2:41 PM"
+                                >2025年12月 6日 14:41</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449015"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用jin的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449015',
+                                    'jin'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449017" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">Tom Du</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449017">
+                          <p>大公司重视的是业务，代码只是实现业务的工具。</p>
+
+                          <p>
+                            在大外企干了十年感觉现在代码水平也还可以了，但主要的代码工作被要求尽量用AI完成。很合理也有点无奈。Copilot写出来的东西有时候可以但有时候就不是很受控制，我的角色变成一遍遍talk，优化prompt。很多时候还是觉得自己上更快。现在自己的价值更多还是去解决疑难杂症，以及on-call...
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  6, 2025  5:33 PM"
+                                >2025年12月 6日 17:33</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449017"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用Tom Du的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449017',
+                                    'Tom Du'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449018" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">eric</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449018">
+                          <p>
+                            API速率那个对比改改吧，误导性太强了，不知道阮老师是真不知道还是怎么样
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  6, 2025  5:41 PM"
+                                >2025年12月 6日 17:41</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449018"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用eric的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449018',
+                                    'eric'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449022" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">ev</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449022">
+                          <p>
+                            别占那个几百万token的便宜，想薅七牛云的羊毛，你可别被反薅了。看太多人反馈七牛云账单问题了
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  6, 2025 10:41 PM"
+                                >2025年12月 6日 22:41</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449022"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用ev的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449022',
+                                    'ev'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449025" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">solitas</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449025">
+                          <p>
+                            最后一次看各大通讯社网站的年度最佳图片还是11年前，之前每年会下载和整理，2015年开始就不能直接访问了，于是只好作罢，这也许就是所谓的宏大叙事下的文明进步和遥遥领先吧。
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  7, 2025  1:48 PM"
+                                >2025年12月 7日 13:48</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449025"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用solitas的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449025',
+                                    'solitas'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449026" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">Alex</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449026">
+                          <p>
+                            1. 太空散熱那個太搞笑了<br />
+                            2.
+                            不只是大公司，所有企業的代碼質量可能永遠好不了，我自己感覺真正優秀的代碼庫基本上都是one-man-army,
+                            還得是沒有時間壓力的那種，要是自己新創公司，受限於時程表壓力還是會寫出屎山
+                            :(
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  7, 2025  2:02 PM"
+                                >2025年12月 7日 14:02</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449026"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用Alex的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449026',
+                                    'Alex'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449027" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">Alex</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449027">
+                          <p>
+                            提個建議
+                            不知道這個blog能不能像markdown類的網頁一樣(例如github
+                            repo readme)
+                            在大或中標題上可以右鍵複製直接跳轉到它的鏈接，方便看到不錯的段落時簡單分享給朋友?
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  7, 2025  2:14 PM"
+                                >2025年12月 7日 14:14</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449027"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用Alex的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449027',
+                                    'Alex'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449029" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">黄花非鱼</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449029">
+                          <blockquote>
+                            <pre>引用sylolol的发言：</pre>
+
+                            <p>
+                              环流减弱，会不会冰河时期再来一遍？小的时候没有穿那么多衣服也没感觉这么冷，现在穿的很多，但是依旧很冷，当然衣服质量不如原来也有一部分原因。
+                            </p>
+                          </blockquote>
+
+                          <p>衣服质量不如原来？你是搞笑呢么</p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  8, 2025  8:20 AM"
+                                >2025年12月 8日 08:20</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449029"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用黄花非鱼的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449029',
+                                    '黄花非鱼'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449030" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">井花</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449030">
+                          <blockquote>
+                            <pre>引用Alex的发言：</pre>
+
+                            <p>
+                              提個建議
+                              不知道這個blog能不能像markdown類的網頁一樣(例如github
+                              repo readme)
+                              在大或中標題上可以右鍵複製直接跳轉到它的鏈接，方便看到不錯的段落時簡單分享給朋友?
+                            </p>
+                          </blockquote>
+
+                          <p>
+                            浏览器选中文本右键可以“复制指向突出显示的链接”，试试这个！
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  8, 2025  8:52 AM"
+                                >2025年12月 8日 08:52</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449030"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用井花的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449030',
+                                    '井花'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449031" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">lionad</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449031">
+                          <p>
+                            失去自己的声音也分场景呀，SEO
+                            文章用大模型做完全没有问题，你能精准控制他的生成内容和方向
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  8, 2025  9:34 AM"
+                                >2025年12月 8日 09:34</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449031"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用lionad的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449031',
+                                    'lionad'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449035" class="comment">
+                      <div class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">z</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449035">
+                          <p>
+                            七牛云 claude 模型28倍费率，几个问题欠了100多块钱
+                          </p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  8, 2025  2:28 PM"
+                                >2025年12月 8日 14:28</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449035"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用z的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449035',
+                                    'z'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="comment-449036" class="comment">
+                      <div id="comment-last" class="inner">
+                        <div class="comment-header">
+                          <div class="asset-meta">
+                            <p>
+                              <span class="byline">
+                                <span class="vcard author">Alex</span>
+
+                                说：
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="comment-content" id="comment-quote-449036">
+                          <blockquote>
+                            <pre>引用井花的发言：</pre>
+
+                            <p>
+                              浏览器选中文本右键可以“复制指向突出显示的链接”，试试这个！
+                            </p>
+                          </blockquote>
+
+                          <p>昨天剛剛學會這招 真的好用 謝謝!<br /></p>
+                        </div>
+                        <div class="comment-footer">
+                          <div class="comment-footer-inner">
+                            <p>
+                              <abbr
+                                class="published"
+                                title="December  8, 2025  3:17 PM"
+                                >2025年12月 8日 15:17</abbr
+                              >
+                              |
+                              <a
+                                href="https://www.ruanyifeng.com/blog/2025/12/weekly-issue-376.html#comment-449036"
+                                >#</a
+                              >
+                              |
+                              <a
+                                href="#comment-text"
+                                title="引用Alex的这条留言"
+                                onclick="
+                                  return CommentQuote(
+                                    'comment-quote-449036',
+                                    'Alex'
+                                  )
+                                "
+                                >引用</a
+                              >
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="comments-open" id="comments-open">
+                    <h2 class="comments-open-header">我要发表看法</h2>
+                    <div class="comments-open-content">
+                      <div id="comment-greeting"></div>
+
+                      <form
+                        method="post"
+                        action="https://www.ruanyifeng.com/cgi-bin/mtos/mt-comments.cgi"
+                        name="comments_form"
+                        id="comments-form"
+                        onsubmit="return pleaseWait()">
+                        <input type="hidden" name="static" value="1" />
+                        <input type="hidden" name="entry_id" value="2512" />
+                        <input type="hidden" name="__lang" value="en" />
+                        <input
+                          type="hidden"
+                          name="parent_id"
+                          value=""
+                          id="comment-parent-id" />
+                        <input type="hidden" name="armor" value="1" />
+                        <input type="hidden" name="preview" value="" />
+                        <input type="hidden" name="sid" value="" />
+                        <div id="comments-open-data">
+                          <div id="comments-open-text">
+                            <p>
+                              <label for="comment-text"
+                                >您的留言 （HTML标签部分可用）</label
+                              >
+                            </p>
+                            <p>
+                              <textarea
+                                id="comment-text"
+                                name="text"
+                                rows="10"
+                                cols="50"></textarea>
+                            </p>
+                          </div>
+                          <div id="comment-form-name">
+                            <p>
+                              <label for="comment-author">您的大名：</label>
+                            </p>
+                            <p>
+                              <input
+                                id="comment-author"
+                                name="author"
+                                size="30"
+                                value="" />
+                              <span class="hint"> &laquo;-必填</span>
+                            </p>
+                          </div>
+                          <div id="comment-form-email">
+                            <p><label for="comment-email">电子邮件：</label></p>
+                            <p>
+                              <input
+                                id="comment-email"
+                                name="email"
+                                size="30"
+                                value="" />
+                              <span class="hint"> &laquo;-必填，不公开</span>
+                            </p>
+                          </div>
+                          <div id="comment-form-url">
+                            <p><label for="comment-url">个人网址：</label></p>
+                            <p>
+                              <input
+                                id="comment-url"
+                                name="url"
+                                size="30"
+                                value="" />
+                              <span class="hint">
+                                &laquo;-我信任你，不会填写广告链接</span
+                              >
+                            </p>
+                          </div>
+                          <div id="comment-form-remember-me">
+                            <p>
+                              <label for="comment-bake-cookie"
+                                >记住个人信息？</label
+                              ><input
+                                type="checkbox"
+                                id="comment-bake-cookie"
+                                name="bakecookie"
+                                onclick="
+                                  !this.checked
+                                    ? forgetMe(document.comments_form)
+                                    : rememberMe(document.comments_form)
+                                "
+                                value="1"
+                                accesskey="r" />
+                            </p>
+                          </div>
+                        </div>
+                        <div id="comment-form-reply" style="display: none">
+                          <input
+                            type="checkbox"
+                            id="comment-reply"
+                            name="comment_reply"
+                            value=""
+                            onclick="mtSetCommentParentID()" />
+                          <label
+                            for="comment-reply"
+                            id="comment-reply-label"></label>
+                        </div>
+                        <div id="comments-open-captcha"></div>
+                        <div id="comments-open-footer">
+                          <div id="wait" style="display: none">
+                            <p><strong>正在发表您的评论，请稍候</strong></p>
+                            <p>
+                              <input
+                                type="text"
+                                name="percent"
+                                size="3"
+                                style="
+                                  font-family: Arial;
+                                  color: black;
+                                  text-align: center;
+                                  border-width: medium;
+                                  border-style: none;
+                                " />
+                              <input
+                                type="text"
+                                name="chart"
+                                size="46"
+                                style="
+                                  font-family: Arial;
+                                  font-weight: bolder;
+                                  color: black;
+                                  padding: 0px;
+                                  border-style: none;
+                                " />
+                            </p>
+                          </div>
+
+                          <p>
+                            <input
+                              type="submit"
+                              accesskey="s"
+                              name="post"
+                              id="comment-submit"
+                              value="发表" />
+                            <span class="hint"> &laquo;- 点击按钮</span>
+                          </p>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script
+          data-cfasync="false"
+          src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+        <script
+          type="text/javascript"
+          src="https://www.ruanyifeng.com/blog/js/prism.js"></script>
+        <script type="text/javascript" src="/blog/checker.js"></script>
+        <div id="footer">
+          <div id="footer-inner">
+            <div id="footer-content">
+              <!--
+      <section> 
+     </section>
+  <p><a title="Instagram" target="_blank" href="http://instagram.com/ruanyf">Instagram</a></p>
+       <p><a title="订阅" href="https://app.feedblitz.com/f/f.fbz?Sub=348868" target="_blank">邮件订阅</a></p>
+  
+       <h2>Feed</h2>
+       <p><a title="FeedBurner" href="http://feeds.feedburner.com/ruanyifeng" target="_blank">FeedBurner</a></p>
+       <p><a title="atom.xml" href="http://www.ruanyifeng.com/blog/atom.xml" target="_blank">atom.xml</a></p>
+     
+      <p>支付宝：<a title="支付宝" href="alipays://platformapi/startapp?appId=20000067&url=http%3A%2F%2Fwww.ruanyifeng.com%2Fblog" target="_blank">yifeng.ruan@gmail.com</a></p>
+-->
+
+              <section>
+                <!--
+       <h2>授权方式</h2>
+       <p><a title="许可证" href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh" target="_blank">自由转载-非商用-非衍生-保持署名</a></p>
+       <h2>微信公号</h2>
+       <h2>社交帐号</h2>
+       <h2>联系方式</h2>
+     -->
+                <p>
+                  <img
+                    src="https://cdn.beekka.com/blogimg/asset/202001/bg2020013101.jpg"
+                    alt="微信扫描" />
+                </p>
+                <p>
+                  <a title="微博" href="http://weibo.com/ruanyf" target="_blank"
+                    >Weibo</a
+                  >
+                  |
+                  <a
+                    title="Twitter"
+                    target="_blank"
+                    href="https://twitter.com/ruanyf"
+                    >Twitter</a
+                  >
+                  |
+                  <a
+                    title="GitHub"
+                    target="_blank"
+                    href="https://github.com/ruanyf"
+                    >GitHub</a
+                  >
+                </p>
+
+                <p>
+                  Email:
+                  <a
+                    title="电子邮件"
+                    href="/cdn-cgi/l/email-protection#71081817141f165f0304101f31161c10181d5f121e1c"
+                    target="_blank"
+                    ><span
+                      class="__cf_email__"
+                      data-cfemail="f0899996959e97de8285919eb0979d91999cde939f9d"
+                      >[email&#160;protected]</span
+                    ></a
+                  >
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
+        <script
+          data-cfasync="false"
+          src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+        <script>
+          function insertLine(e, t) {
+            for (var n = 0; n < t; n++)
+              e.parentNode.insertBefore(document.createElement('p'), e)
+          }
+          function getImg() {
+            if (!window['main-content']) return !1
+            for (
+              var e,
+                t = Array.prototype.slice.call(
+                  window['main-content'].getElementsByTagName('img')
+                ),
+                n = 0;
+              n < t.length;
+              n++
+            ) {
+              if (
+                'display: none !important;' === (e = t[n]).getAttribute('style')
+              )
+                return e
+              if (n === t.length - 1) return !1
+            }
+          }
+          function toObjectUrl(e, t) {
+            return fetch(e)
+              .then((e) => e.blob())
+              .then((e) => {
+                t(URL.createObjectURL(e))
+              })
+          }
+          function toDataURL(e, t) {
+            var n = new XMLHttpRequest()
+            ;(n.open('get', e),
+              (n.responseType = 'blob'),
+              (n.onload = function () {
+                var e = new FileReader()
+                ;((e.onload = function () {
+                  t(this.result)
+                }),
+                  e.readAsDataURL(n.response))
+              }),
+              n.send())
+          }
+          setTimeout(function () {
+            var e = getImg()
+            e &&
+              (insertLine(e.parentNode, 2),
+              toObjectUrl(e.src, function (t) {
+                var n = document.createElement('p'),
+                  r = document.createElement('img')
+                ;((r.src = t),
+                  n.appendChild(r),
+                  e.parentNode.parentNode.insertBefore(n, e.parentNode))
+              }))
+          }, 3e3)
+        </script>
+
+        <script type="text/javascript" src="/blog/stats.js"></script>
+        <script>
+          var supportImg = document.querySelector('#support-img')
+
+          if (supportImg && _hmt) {
+            _hmt.push(['_trackEvent', 'banner', 'load'])
+            supportImg.addEventListener(
+              'click',
+              function () {
+                _hmt.push(['_trackEvent', 'banner', 'click'])
+              },
+              false
+            )
+          }
+
+          var homepageImg = document.querySelector('#homepage_sponsor')
+          if (homepageImg && _hmt) {
+            _hmt.push(['_trackEvent', 'homepage-banner', 'load'])
+            homepageImg.addEventListener(
+              'click',
+              function () {
+                _hmt.push(['_trackEvent', 'homepage-banner', 'click'])
+              },
+              false
+            )
+          }
+        </script>
+      </div>
+    </div>
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015"
+      integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ=="
+      data-cf-beacon='{"version":"2024.11.0","token":"9d597acca856497f9d2e99af87452aa4","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}'
+      crossorigin="anonymous"></script>
+  </body>
+</html>

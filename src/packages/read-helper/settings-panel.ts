@@ -5,6 +5,7 @@ const STYLE_KEY = 'read_helper_style'
 const COLOR_KEY = 'read_helper_color'
 const ENABLED_KEY = 'read_helper_enabled'
 const SCROLL_HIDE_KEY = 'read_helper_scroll_hide'
+const SKIP_BUTTONS_KEY = 'read_helper_skip_buttons'
 
 declare const GM: any
 
@@ -182,6 +183,29 @@ export function openSettingsPanel(): void {
   grid.append(colorRow)
   grid.append(arrowsRow)
   grid.append(scrollRow)
+
+  const skipButtonsRow = document.createElement('div')
+  skipButtonsRow.className = 'row switch'
+  const skipButtonsLabel = document.createElement('label')
+  skipButtonsLabel.textContent = '跳过按钮'
+  const skipButtonsSeg = document.createElement('div')
+  skipButtonsSeg.className = 'seg'
+  const skipButtonsOn = document.createElement('button')
+  skipButtonsOn.className = 'switch-btn'
+  ;(skipButtonsOn.dataset as any).group = 'skip_buttons'
+  ;(skipButtonsOn.dataset as any).value = 'on'
+  skipButtonsOn.textContent = '开'
+  const skipButtonsOff = document.createElement('button')
+  skipButtonsOff.className = 'switch-btn'
+  ;(skipButtonsOff.dataset as any).group = 'skip_buttons'
+  ;(skipButtonsOff.dataset as any).value = 'off'
+  skipButtonsOff.textContent = '关'
+  skipButtonsSeg.append(skipButtonsOn)
+  skipButtonsSeg.append(skipButtonsOff)
+  skipButtonsRow.append(skipButtonsLabel)
+  skipButtonsRow.append(skipButtonsSeg)
+
+  grid.append(skipButtonsRow)
   panel.append(grid)
   mask.append(panel)
   root.append(mask)
@@ -199,7 +223,7 @@ export function openSettingsPanel(): void {
 
   async function updateStyleUI() {
     try {
-      const sv = await GM.getValue(STYLE_KEY, 'box')
+      const sv = await GM.getValue(STYLE_KEY, 'underline')
       for (const b of Array.from(styleSeg.querySelectorAll('.seg-btn'))) {
         const val = (b as any).dataset.value || ''
         if (val === String(sv)) b.classList.add('active')
@@ -247,7 +271,7 @@ export function openSettingsPanel(): void {
 
   async function updateScrollUI() {
     try {
-      const sh = await GM.getValue(SCROLL_HIDE_KEY, true)
+      const sh = await GM.getValue(SCROLL_HIDE_KEY, false)
       const flag = Boolean(sh)
       for (const b of Array.from(scrollSeg.querySelectorAll('.switch-btn'))) {
         const val = (b as any).dataset.value || ''
@@ -271,6 +295,21 @@ export function openSettingsPanel(): void {
     } catch {}
   }
 
+  async function updateSkipButtonsUI() {
+    try {
+      const mv = await GM.getValue(SKIP_BUTTONS_KEY, '1')
+      const flag = typeof mv === 'string' ? mv === '1' : Boolean(mv)
+      for (const b of Array.from(
+        skipButtonsSeg.querySelectorAll('.switch-btn')
+      )) {
+        const val = (b as any).dataset.value || ''
+        const on = val === 'on'
+        if ((on && flag) || (!on && !flag)) b.classList.add('on')
+        else b.classList.remove('on')
+      }
+    } catch {}
+  }
+
   void (async () => {
     await updateModeUI()
     await updateStyleUI()
@@ -278,6 +317,7 @@ export function openSettingsPanel(): void {
     await updateEnabledUI()
     await updateScrollUI()
     await updateArrowsUI()
+    await updateSkipButtonsUI()
   })()
 
   function handleSeg(el: HTMLElement): boolean {
@@ -360,6 +400,22 @@ export function openSettingsPanel(): void {
       const flag = v === 'on'
       GM.setValue('read_helper_move_by_arrows', flag)
       for (const b of Array.from(arrowsSeg.querySelectorAll('.switch-btn'))) {
+        const h = b as any
+        const on = (h.dataset.value || '') === 'on'
+        if ((on && flag) || (!on && !flag))
+          (h as HTMLElement).classList.add('on')
+        else (h as HTMLElement).classList.remove('on')
+      }
+
+      return true
+    }
+
+    if (g === 'skip_buttons') {
+      const flag = v === 'on'
+      GM.setValue(SKIP_BUTTONS_KEY, flag ? '1' : '0')
+      for (const b of Array.from(
+        skipButtonsSeg.querySelectorAll('.switch-btn')
+      )) {
         const h = b as any
         const on = (h.dataset.value || '') === 'on'
         if ((on && flag) || (!on && !flag))

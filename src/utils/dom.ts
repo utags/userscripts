@@ -193,3 +193,113 @@ function injectImageAsData(container: HTMLElement, url: string) {
     })
   } catch {}
 }
+
+export function isElementVisible(el: Element | undefined): boolean {
+  if (!el) return true
+  try {
+    const anyEl = el as any
+    if (
+      typeof anyEl.checkVisibility === 'function' &&
+      anyEl.checkVisibility() === false
+    )
+      return false
+  } catch {}
+
+  let cur: Element | undefined = el
+  while (cur) {
+    const he = cur as any
+    if (typeof he.hidden === 'boolean' && he.hidden) return false
+    const cs = globalThis.getComputedStyle(cur)
+    if (cs.display === 'none') return false
+    if (cs.visibility === 'hidden') return false
+    if (he !== document.body && he.parentElement && he.offsetParent === null)
+      return false
+
+    cur = (cur.parentElement || undefined) as Element | undefined
+  }
+
+  return true
+}
+
+export function isInteractive(el: Element | undefined): boolean {
+  if (!el) return false
+  const tag = el.tagName.toLowerCase()
+  if (['input', 'textarea', 'select', 'button'].includes(tag)) return true
+  if (el.hasAttribute('contenteditable')) return true
+  return false
+}
+
+export function isBlockElement(el: Element): boolean {
+  const cs = globalThis.getComputedStyle(el)
+  const d = cs.display
+  const tag = el.tagName.toLowerCase()
+  if (
+    d === 'block' ||
+    d === 'list-item' ||
+    d === 'table' ||
+    d === 'table-cell' ||
+    d === 'flex' ||
+    d === 'grid' ||
+    d === 'flow-root'
+  )
+    return true
+
+  if (
+    tag === 'td' ||
+    tag === 'th' ||
+    tag === 'li' ||
+    tag === 'section' ||
+    tag === 'article'
+  )
+    return true
+
+  return false
+}
+
+export function closestBlockElement(node: Node): Element {
+  let el =
+    node.nodeType === Node.ELEMENT_NODE
+      ? (node as Element)
+      : node.parentElement || document.body
+  while (el && el !== document.body) {
+    if (isBlockElement(el)) return el
+    el = el.parentElement || document.body
+  }
+
+  return document.body
+}
+
+export function hasNestedBlock(root: Element, t: Text): boolean {
+  let el: Element | undefined = t.parentElement || undefined
+  while (el && el !== root) {
+    if (isBlockElement(el)) return true
+    el = (el.parentElement || undefined) as Element | undefined
+  }
+
+  return false
+}
+
+export function caretRangeFromPoint(x: number, y: number): Range | undefined {
+  const anyDoc = document as any
+  if (typeof anyDoc.caretRangeFromPoint === 'function') {
+    const r = anyDoc.caretRangeFromPoint(x, y)
+    if (r) return r as Range
+  }
+
+  if (typeof anyDoc.caretPositionFromPoint === 'function') {
+    const pos = anyDoc.caretPositionFromPoint(x, y)
+    if (pos && pos.offsetNode !== undefined && pos.offsetNode !== null) {
+      const r = document.createRange()
+      r.setStart(pos.offsetNode, pos.offset)
+      r.collapse(true)
+      return r
+    }
+  }
+
+  const sel = globalThis.getSelection()
+  if (!sel) return undefined
+  const r = sel.rangeCount
+    ? sel.getRangeAt(0).cloneRange()
+    : document.createRange()
+  return r
+}

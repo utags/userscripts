@@ -1,4 +1,24 @@
-import { openSettingsPanel } from './settings-panel'
+import {
+  isElementVisible,
+  isInteractive,
+  isBlockElement,
+  closestBlockElement,
+  caretRangeFromPoint,
+  hasNestedBlock,
+} from '../../utils/dom'
+import {
+  type TextIndex,
+  getTextIndex,
+  mapIndexToPosition,
+  mapPositionToIndex,
+  adjustIndexToNode,
+  findPrevBoundary,
+  findNextBoundary,
+  rangeForParagraph,
+  rangeForLine,
+  rangeForText,
+  isPunctuationRect,
+} from '../../utils/text'
 
 type Mode = 'sentence' | 'clause' | 'line' | 'paragraph'
 type Style = 'box' | 'underline'
@@ -9,13 +29,15 @@ const COLOR_KEY = 'read_helper_color'
 const ENABLED_KEY = 'read_helper_enabled'
 const SCROLL_HIDE_KEY = 'read_helper_scroll_hide'
 const MOVE_BY_ARROWS_KEY = 'read_helper_move_by_arrows'
+const SKIP_BUTTONS_KEY = 'read_helper_skip_buttons'
 
 let mode: Mode = 'sentence'
-let style: Style = 'box'
+let style: Style = 'underline'
 let color = '#ff4d4f'
 let enabled = true
-let hideOnScroll = true
+let hideOnScroll = false
 let moveByArrows = false
+let skipButtons = true
 
 let overlay: HTMLDivElement | undefined
 let clickHandlerInstalled = false
@@ -67,83 +89,11 @@ function clearOverlay(): void {
   }
 }
 
-function isInteractive(el: Element | undefined): boolean {
-  if (!el) return false
-  const tag = el.tagName.toLowerCase()
-  if (['input', 'textarea', 'select', 'button'].includes(tag)) return true
-  if (el.hasAttribute('contenteditable')) return true
-  return false
-}
-
-function caretRangeFromPoint(x: number, y: number): Range | undefined {
-  const anyDoc = document as any
-  if (typeof anyDoc.caretRangeFromPoint === 'function') {
-    const r = anyDoc.caretRangeFromPoint(x, y)
-    if (r) return r as Range
-  }
-
-  if (typeof anyDoc.caretPositionFromPoint === 'function') {
-    const pos = anyDoc.caretPositionFromPoint(x, y)
-    if (pos && pos.offsetNode !== undefined && pos.offsetNode !== null) {
-      const r = document.createRange()
-      r.setStart(pos.offsetNode, pos.offset)
-      r.collapse(true)
-      return r
-    }
-  }
-
-  const sel = globalThis.getSelection()
-  if (!sel) return undefined
-  const r = sel.rangeCount
-    ? sel.getRangeAt(0).cloneRange()
-    : document.createRange()
-  return r
-}
-
-function isBlockElement(el: Element): boolean {
-  const cs = globalThis.getComputedStyle(el)
-  const d = cs.display
-  const tag = el.tagName.toLowerCase()
-  if (
-    d === 'block' ||
-    d === 'list-item' ||
-    d === 'table' ||
-    d === 'table-cell' ||
-    d === 'flex' ||
-    d === 'grid' ||
-    d === 'flow-root'
-  )
-    return true
-
-  if (
-    tag === 'td' ||
-    tag === 'th' ||
-    tag === 'li' ||
-    tag === 'section' ||
-    tag === 'article'
-  )
-    return true
-
-  return false
-}
-
-function closestBlockElement(node: Node): Element {
-  let el =
-    node.nodeType === Node.ELEMENT_NODE
-      ? (node as Element)
-      : node.parentElement || document.body
-  while (el && el !== document.body) {
-    if (isBlockElement(el)) return el
-    el = el.parentElement || document.body
-  }
-
-  return document.body
-}
-
 function caretAtBlockEdge(
   block: Element,
   edge: 'start' | 'end'
 ): Range | undefined {
+  if (!isElementVisible(block)) return undefined
   const idx = getTextIndex(block)
   if (idx.nodes.length === 0) return undefined
   const r = document.createRange()
@@ -171,6 +121,7 @@ function findAdjacentBlock(
     if (!n) break
     const el = n as Element
     if (isBlockElement(el)) {
+      if (!isElementVisible(el)) continue
       const idx = getTextIndex(el)
       if (idx.nodes.length > 0) blocks.push(el)
     }
@@ -204,7 +155,10 @@ function findTextRangeFromAdjacentBlock(
     if (!adj) return undefined
     const caret = caretAtBlockEdge(adj, dir === 'prev' ? 'end' : 'start')
     if (!caret) return undefined
-    const r = m === 'line' ? rangeForLine(caret) : rangeForText(caret, m)
+    const r =
+      m === 'line'
+        ? rangeForLine(caret)
+        : rangeForText(caret, m === 'sentence' ? 'sentence' : 'clause')
     if (r && hasVisibleRects(r)) return r
     cur = adj
     loops++
@@ -213,256 +167,27 @@ function findTextRangeFromAdjacentBlock(
   return undefined
 }
 
-type TextIndex = {
-  nodes: Text[]
-  starts: number[]
-  ends: number[]
-  text: string
-}
+// text index moved to utils/text
 
-function buildTextIndex(root: Element): TextIndex {
-  const nodes: Text[] = []
-  const texts: string[] = []
-  const it = document.createNodeIterator(root, NodeFilter.SHOW_TEXT)
-  while (true) {
-    const n = it.nextNode()
-    if (!n) break
-    const t = n as Text
-    nodes.push(t)
-    texts.push(t.data)
-  }
+// helpers moved to utils/text
 
-  const starts: number[] = []
-  const ends: number[] = []
-  let acc = 0
-  for (let i = 0; i < nodes.length; i++) {
-    starts.push(acc)
-    acc += texts[i].length
-    ends.push(acc)
-    if (i < nodes.length - 1) acc += 1
-  }
+// helpers moved to utils/text
 
-  return { nodes, starts, ends, text: texts.join(' ') }
-}
+// helpers moved to utils/text
 
-function getTextIndex(root: Element): TextIndex {
-  const tl = (root.textContent || '').length
-  const cached = textIndexCache.get(root)
-  if (cached && cached.textLength === tl) return cached.index
-  const idx = buildTextIndex(root)
-  textIndexCache.set(root, { index: idx, textLength: tl })
-  return idx
-}
+// terminators moved to utils/text
 
-function mapIndexToPosition(
-  idx: number,
-  index: TextIndex
-): { node: Text; offset: number } | undefined {
-  for (const [i, node] of index.nodes.entries()) {
-    if (idx >= index.starts[i] && idx <= index.ends[i]) {
-      return { node, offset: idx - index.starts[i] }
-    }
-  }
+// boundaries moved to utils/text
 
-  return undefined
-}
+// boundaries moved to utils/text
 
-function adjustIndexToNode(
-  idx: number,
-  index: TextIndex,
-  dir: 'forward' | 'backward'
-): number {
-  const starts = index.starts
-  const ends = index.ends
-  let lo = 0
-  let hi = starts.length - 1
-  while (lo <= hi) {
-    const mid = Math.floor((lo + hi) / 2)
-    if (idx < starts[mid]) hi = mid - 1
-    else if (idx > ends[mid]) lo = mid + 1
-    else return idx
-  }
+// isPunctuationRect moved to utils/text
 
-  if (dir === 'forward') {
-    const j = Math.min(starts.length - 1, Math.max(0, lo))
-    return starts[j]
-  }
+// rangeForParagraph moved to utils/text
 
-  const j = Math.max(0, Math.min(ends.length - 1, hi))
-  return ends[j]
-}
+// rangeForLine moved to utils/text
 
-function mapPositionToIndex(
-  node: Node,
-  offset: number,
-  index: TextIndex
-): number | undefined {
-  const i = index.nodes.indexOf(node as Text)
-  if (i !== -1) return index.starts[i] + offset
-
-  return undefined
-}
-
-function isSentenceTerminator(ch: string): boolean {
-  return /[。．｡.!?！？…]/.test(ch)
-}
-
-function isClauseTerminator(ch: string): boolean {
-  return /[，,、；;：:.。！？!?]/.test(ch)
-}
-
-function findPrevBoundary(text: string, pos: number, m: Mode): number {
-  for (let i = pos - 1; i >= 0; i--) {
-    const ch = text[i]
-    const hit =
-      m === 'sentence' ? isSentenceTerminator(ch) : isClauseTerminator(ch)
-    if (hit) {
-      if (
-        ch === '.' &&
-        /[A-Za-z\d]/.test(text[i + 1] || '') &&
-        /[A-Za-z\d]/.test(text[i - 1] || '')
-      )
-        continue
-      return i
-    }
-  }
-
-  return -1
-}
-
-function findNextBoundary(text: string, pos: number, m: Mode): number {
-  for (let i = pos; i < text.length; i++) {
-    const ch = text[i]
-    const hit =
-      m === 'sentence' ? isSentenceTerminator(ch) : isClauseTerminator(ch)
-    if (hit) {
-      if (
-        ch === '.' &&
-        /[A-Za-z\d]/.test(text[i + 1] || '') &&
-        /[A-Za-z\d]/.test(text[i - 1] || '')
-      )
-        continue
-      return i
-    }
-  }
-
-  return text.length
-}
-
-function isPunctuationRect(rect: DOMRect): boolean {
-  if (rect.width > 8) return false
-  const x = rect.left + Math.max(1, Math.min(rect.width - 1, rect.width * 0.5))
-  const y = rect.top + rect.height / 2
-  const cr = caretRangeFromPoint(x, y)
-  if (!cr) return false
-  const n = cr.startContainer
-  const o = cr.startOffset
-  if (n.nodeType === Node.TEXT_NODE) {
-    const t = n as Text
-    const s = t.data
-    const i = Math.max(0, Math.min(o - 1, s.length - 1))
-    const ch = s[i] || ''
-    return /[，,、；;：:.。！？!?\s\u00A0]/.test(ch)
-  }
-
-  return false
-}
-
-function rangeForParagraph(caret: Range): Range {
-  const block = closestBlockElement(caret.startContainer)
-  const r = document.createRange()
-  r.selectNodeContents(block)
-
-  return r
-}
-
-function rangeForLine(caret: Range): Range | undefined {
-  const block = closestBlockElement(caret.startContainer)
-  const caretRect = caret.getBoundingClientRect()
-  const r = document.createRange()
-  r.selectNodeContents(block)
-  const rects = Array.from(r.getClientRects())
-  let pick: DOMRect | undefined
-  for (const rect of rects) {
-    if (caretRect.top >= rect.top && caretRect.top <= rect.bottom) {
-      pick = rect
-      break
-    }
-  }
-
-  if (!pick) return undefined
-  if (pick.width <= 2) return undefined
-  const out = document.createRange()
-  out.setStart(block, 0)
-  out.setEnd(block, block.childNodes.length)
-  ;(out as any).__singleLineRect = pick
-
-  return out
-}
-
-function rangeForText(caret: Range, m: Mode): Range | undefined {
-  const block = closestBlockElement(caret.startContainer)
-  const idx = getTextIndex(block)
-  if (idx.nodes.length === 0) return undefined
-  const startNode = caret.startContainer
-  const startOffset = caret.startOffset
-  const caretGlobal = mapPositionToIndex(startNode, startOffset, idx)
-  if (caretGlobal === undefined) return undefined
-
-  const text = idx.text
-  let s = caretGlobal
-  let e = caretGlobal
-  for (let i = caretGlobal - 1; i >= 0; i--) {
-    const ch = text[i]
-    const hit =
-      m === 'sentence' ? isSentenceTerminator(ch) : isClauseTerminator(ch)
-    if (hit) {
-      if (
-        ch === '.' &&
-        /[A-Za-z\d]/.test(text[i + 1] || '') &&
-        /[A-Za-z\d]/.test(text[i - 1] || '')
-      )
-        continue
-      s = i + 1
-      break
-    }
-
-    s = i
-  }
-
-  while (s < text.length && /[，,、；;：:.。！？!?…\s\u00A0]/.test(text[s])) s++
-
-  for (let i = caretGlobal; i < text.length; i++) {
-    const ch = text[i]
-    const hit =
-      m === 'sentence' ? isSentenceTerminator(ch) : isClauseTerminator(ch)
-    if (hit) {
-      if (
-        ch === '.' &&
-        /[A-Za-z\d]/.test(text[i + 1] || '') &&
-        /[A-Za-z\d]/.test(text[i - 1] || '')
-      )
-        continue
-      e = i
-      break
-    }
-
-    e = i + 1
-  }
-
-  //
-
-  const sAdj = adjustIndexToNode(s, idx, 'forward')
-  const eAdj = adjustIndexToNode(e, idx, 'backward')
-  const startPos = mapIndexToPosition(sAdj, idx)
-  const endPos = mapIndexToPosition(eAdj, idx)
-  if (!startPos || !endPos) return undefined
-  const r = document.createRange()
-  r.setStart(startPos.node, startPos.offset)
-  r.setEnd(endPos.node, endPos.offset)
-
-  return r
-}
+// rangeForText moved to utils/text
 
 function rangeForNeighbor(
   ref: Range,
@@ -470,6 +195,7 @@ function rangeForNeighbor(
   m: Mode
 ): Range | undefined {
   const block = closestBlockElement(ref.startContainer)
+  if (!isElementVisible(block)) return undefined
   const idx = getTextIndex(block)
   if (idx.nodes.length === 0) return undefined
   const sIdx = mapPositionToIndex(ref.startContainer, ref.startOffset, idx)
@@ -478,9 +204,10 @@ function rangeForNeighbor(
   const text = idx.text
   let left = sIdx
   let right = eIdx
+  const mm = m === 'sentence' ? 'sentence' : 'clause'
   if (dir === 'prev') {
-    const lb = findPrevBoundary(text, left, m)
-    const plb = findPrevBoundary(text, Math.max(0, lb), m)
+    const lb = findPrevBoundary(text, left, mm)
+    const plb = findPrevBoundary(text, Math.max(0, lb), mm)
     if (lb === -1) {
       const cross = findTextRangeFromAdjacentBlock(block, 'prev', m)
       if (cross) return cross
@@ -491,8 +218,8 @@ function rangeForNeighbor(
       right = lb
     }
   } else {
-    const rb = findNextBoundary(text, right, m)
-    const nrb = findNextBoundary(text, Math.min(text.length, rb + 1), m)
+    const rb = findNextBoundary(text, right, mm)
+    const nrb = findNextBoundary(text, Math.min(text.length, rb + 1), mm)
     if (rb === text.length) {
       const cross = findTextRangeFromAdjacentBlock(block, 'next', m)
       if (cross) return cross
@@ -539,8 +266,15 @@ function findNeighborByGeometry(
     for (let i = 0; i < 48; i++) {
       const cr = caretRangeFromPoint(x, y)
       if (cr) {
-        const r = findSegmentRange(cr, m)
-        if (r && hasVisibleRects(r)) return r
+        const sc = cr.startContainer
+        const owner =
+          sc.nodeType === Node.ELEMENT_NODE ? (sc as Element) : sc.parentElement
+        if (owner && !isElementVisible(owner)) {
+          // Skip invisible targets
+        } else {
+          const r = findSegmentRange(cr, m)
+          if (r && hasVisibleRects(r)) return r
+        }
       }
 
       y = dir === 'prev' ? y - step : y + step
@@ -554,9 +288,13 @@ function findNeighborByGeometry(
 }
 
 function findSegmentRange(caret: Range, m: Mode): Range | undefined {
+  const sc = caret.startContainer
+  const owner =
+    sc.nodeType === Node.ELEMENT_NODE ? (sc as Element) : sc.parentElement
+  if (owner && !isElementVisible(owner)) return undefined
   if (m === 'paragraph') return rangeForParagraph(caret)
   if (m === 'line') return rangeForLine(caret)
-  return rangeForText(caret, m)
+  return rangeForText(caret, m === 'sentence' ? 'sentence' : 'clause')
 }
 
 function hasVisibleRects(r: Range): boolean {
@@ -568,14 +306,25 @@ function hasVisibleRects(r: Range): boolean {
     for (const rect of Array.from(list)) rects.push(rect)
   }
 
-  const filtered: DOMRect[] = []
+  const block = closestBlockElement(r.startContainer)
+  if (!isElementVisible(block)) return false
+  const clip = block.getBoundingClientRect()
+  let count = 0
   for (const r0 of rects) {
-    if (r0.width <= 2) continue
-    if (isPunctuationRect(r0)) continue
-    filtered.push(r0)
+    const left = Math.max(r0.left, clip.left)
+    const right = Math.min(r0.right, clip.right)
+    const top = Math.max(r0.top, clip.top)
+    const bottom = Math.min(r0.bottom, clip.bottom)
+    const w = right - left
+    const h = bottom - top
+    if (w <= 2 || h <= 0) continue
+    const test = new DOMRect(left, top, w, h)
+    if (isPunctuationRect(test)) continue
+    count++
+    if (count > 0) break
   }
 
-  return filtered.length > 0
+  return count > 0
 }
 
 function visibleRects(r: Range): DOMRect[] {
@@ -587,17 +336,80 @@ function visibleRects(r: Range): DOMRect[] {
     for (const rect of Array.from(list)) rects.push(rect)
   }
 
+  const block = closestBlockElement(r.startContainer)
+  if (!isElementVisible(block)) return []
+  const clip = block.getBoundingClientRect()
   const out: DOMRect[] = []
   for (const r0 of rects) {
-    if (r0.width <= 2) continue
-    if (isPunctuationRect(r0)) continue
-    out.push(r0)
+    const left = Math.max(r0.left, clip.left)
+    const right = Math.min(r0.right, clip.right)
+    const top = Math.max(r0.top, clip.top)
+    const bottom = Math.min(r0.bottom, clip.bottom)
+    const w = right - left
+    const h = bottom - top
+    if (w <= 2 || h <= 0) continue
+    const rr = new DOMRect(left, top, w, h)
+    if (isPunctuationRect(rr)) continue
+    out.push(rr)
   }
 
   return out
 }
 
-function scrollRangeIntoView(r: Range): void {
+function isButtonLikeElement(el: Element | undefined): boolean {
+  if (!el) return false
+  const tag = (el.tagName || '').toLowerCase()
+  if (tag === 'button') return true
+  const tokens: string[] = Array.from(el.classList || [])
+  for (const c of tokens) {
+    if (
+      c === 'btn' ||
+      c.startsWith('btn') ||
+      c === 'button' ||
+      c.startsWith('button')
+    )
+      return true
+  }
+
+  return false
+}
+
+function isButtonLikeRange(r: Range): boolean {
+  const sc = r.startContainer
+  const owner =
+    sc.nodeType === Node.ELEMENT_NODE
+      ? (sc as Element)
+      : (sc as any).parentElement
+  return isButtonLikeElement(owner)
+}
+
+function rangeVerticalBounds(
+  r: Range
+): { top: number; bottom: number } | undefined {
+  const rects = visibleRects(r)
+  let top = Infinity
+  let bottom = -Infinity
+  for (const rr of rects) {
+    if (rr.width <= 2) continue
+    if (isPunctuationRect(rr)) continue
+    top = Math.min(top, rr.top)
+    bottom = Math.max(bottom, rr.bottom)
+  }
+
+  if (!Number.isFinite(top) || !Number.isFinite(bottom)) return undefined
+  return { top, bottom }
+}
+
+function isSameVisualLine(a: Range, b: Range): boolean {
+  const va = rangeVerticalBounds(a)
+  const vb = rangeVerticalBounds(b)
+  if (!va || !vb) return false
+  const overlap = Math.min(va.bottom, vb.bottom) - Math.max(va.top, vb.top)
+  const minH = Math.min(va.bottom - va.top, vb.bottom - vb.top)
+  return overlap >= Math.max(0, minH * MERGE_MIN_OVERLAP_RATIO - MERGE_EPS)
+}
+
+function scrollRangeIntoView(r: Range, dir?: 'prev' | 'next'): void {
   const rects: DOMRect[] = []
   const anyR = r as any
   if (anyR.__singleLineRect) rects.push(anyR.__singleLineRect as DOMRect)
@@ -618,29 +430,44 @@ function scrollRangeIntoView(r: Range): void {
   if (!Number.isFinite(top) || !Number.isFinite(bottom)) return
   const vh = globalThis.innerHeight || 0
   const margin = 80
+  const center = (top + bottom) / 2
+  const desired = vh * 0.5
+  const tolerance = Math.max(120, Math.floor(vh * 0.18))
+  const fullyVisible = top >= 0 && bottom <= vh
+  const nearCenter = Math.abs(center - desired) <= tolerance
   let targetY: number | undefined
-  if (top < 0) targetY = globalThis.scrollY + top - margin
-  else if (bottom > vh) targetY = globalThis.scrollY + (bottom - vh) + margin
+  if (!fullyVisible) {
+    if (top < 0) targetY = globalThis.scrollY + top - margin
+    else if (bottom > vh) targetY = globalThis.scrollY + (bottom - vh) + margin
+  } else if (!nearCenter) {
+    const h = bottom - top
+    targetY =
+      h >= vh * 0.8
+        ? globalThis.scrollY + top - margin
+        : globalThis.scrollY + (center - desired)
+  }
+
   if (targetY === undefined) return
   const se = document.scrollingElement
   const maxY = (se?.scrollHeight || 0) - vh
-  const y = Math.max(0, Math.min(maxY, targetY))
-  if (se && typeof (se as any).scrollTo === 'function')
-    (se as any).scrollTo({ top: y })
-  else globalThis.scrollTo(0, y)
+  const curY = se
+    ? Number((se as any).scrollTop || 0)
+    : Number(globalThis.scrollY || 0)
+  let y = Math.max(0, Math.min(maxY, targetY))
+
+  if (dir === 'next' && y < curY) y = curY
+  else if (dir === 'prev' && y > curY) y = curY
+  if (se && typeof (se as any).scrollTo === 'function') {
+    ;(se as any).scrollTo({ top: y, behavior: 'smooth' })
+  } else {
+    globalThis.scrollTo({ top: y, behavior: 'smooth' } as any)
+  }
 }
 
 function drawRange(r: Range): void {
   const host = ensureOverlay()
   host.replaceChildren()
-  const rects: DOMRect[] = []
-  const anyR = r as any
-  if (anyR.__singleLineRect) {
-    rects.push(anyR.__singleLineRect as DOMRect)
-  } else {
-    const list = r.getClientRects()
-    for (const rect of Array.from(list)) rects.push(rect)
-  }
+  const rects = visibleRects(r)
 
   const BOX_PAD_X = 6
   const DESIRED_PAD_Y = 2
@@ -654,13 +481,7 @@ function drawRange(r: Range): void {
   }
 
   if (style === 'box') {
-    const filtered: DOMRect[] = []
-    for (const r0 of rects) {
-      if (r0.width <= 2) continue
-      if (isPunctuationRect(r0)) continue
-      filtered.push(r0)
-    }
-
+    const filtered: DOMRect[] = rects
     const groups: Array<{
       top: number
       bottom: number
@@ -716,12 +537,7 @@ function drawRange(r: Range): void {
 
     host.append(frag)
   } else {
-    const filtered: DOMRect[] = []
-    for (const r0 of rects) {
-      if (r0.width <= 2) continue
-      if (isPunctuationRect(r0)) continue
-      filtered.push(r0)
-    }
+    const filtered: DOMRect[] = rects
 
     const groups: Array<{
       top: number
@@ -877,6 +693,30 @@ function onKeyDown(e: KeyboardEvent): void {
   lastRange = next
   const rectsOk = hasVisibleRects(next)
   if (!rectsOk) return
+  let sameLine = isSameVisualLine(r, next)
+  if (skipButtons && isButtonLikeRange(next)) {
+    let hop = 0
+    let alt: Range | undefined = next
+    while (alt && hop < 32) {
+      const nn = rangeForNeighbor(alt, dir, mode)
+      alt = nn
+      hop++
+      if (!alt || !hasVisibleRects(alt)) {
+        const gg = findNeighborByGeometry(next, dir, mode)
+        alt = gg
+      }
+
+      if (alt && hasVisibleRects(alt) && !isButtonLikeRange(alt)) break
+    }
+
+    if (alt && hasVisibleRects(alt) && !isButtonLikeRange(alt)) {
+      next = alt
+      drawRange(next)
+      lastRange = next
+      sameLine = isSameVisualLine(r, next)
+    }
+  }
+
   const anyR = next as any
   const list = anyR.__singleLineRect
     ? [anyR.__singleLineRect as DOMRect]
@@ -891,13 +731,31 @@ function onKeyDown(e: KeyboardEvent): void {
     }
   }
 
-  if (!fullyVisible) {
-    scrollRangeIntoView(next)
-    if (hideOnScroll) {
-      globalThis.setTimeout(() => {
-        if (lastRange) drawRange(lastRange)
-      }, 50)
+  const vh2 = globalThis.innerHeight
+  const center2 = globalThis.innerHeight ? globalThis.innerHeight / 2 : 0
+  let nearCenter2 = false
+  if (vh2) {
+    const list2 = anyR.__singleLineRect
+      ? [anyR.__singleLineRect as DOMRect]
+      : Array.from(next.getClientRects())
+    let t2 = Infinity
+    let b2 = -Infinity
+    for (const rr of list2) {
+      if (rr.width <= 2) continue
+      if (isPunctuationRect(rr)) continue
+      t2 = Math.min(t2, rr.top)
+      b2 = Math.max(b2, rr.bottom)
     }
+
+    if (Number.isFinite(t2) && Number.isFinite(b2)) {
+      const c2 = (t2 + b2) / 2
+      const tol2 = Math.max(120, Math.floor(vh2 * 0.18))
+      nearCenter2 = Math.abs(c2 - center2) <= tol2
+    }
+  }
+
+  if (!sameLine && (!fullyVisible || !nearCenter2)) {
+    scrollRangeIntoView(next, dir)
   }
 }
 
@@ -1006,7 +864,12 @@ function registerMenus(): void {
 
   if (typeof GM_registerMenuCommand !== 'function') return
   const id = GM_registerMenuCommand('设置', () => {
-    openSettingsPanel()
+    ;(async () => {
+      try {
+        const m: any = await import('./settings-panel.js')
+        if (typeof m.openSettingsPanel === 'function') m.openSettingsPanel()
+      } catch {}
+    })()
   })
   try {
     menuIds.push(id as any)
@@ -1055,6 +918,9 @@ function listenSettings(): void {
   GM_addValueChangeListener(MOVE_BY_ARROWS_KEY, (_, __, nv) => {
     moveByArrows = Boolean(nv)
   })
+  GM_addValueChangeListener(SKIP_BUTTONS_KEY, (_, __, nv) => {
+    skipButtons = nv === '1' ? true : Boolean(nv)
+  })
 }
 
 function bootstrap(): void {
@@ -1097,7 +963,17 @@ function bootstrap(): void {
       const ma = await (GM as any).getValue(MOVE_BY_ARROWS_KEY, moveByArrows)
       moveByArrows = Boolean(ma)
     } catch {}
+
+    try {
+      const sb = await (GM as any).getValue(
+        SKIP_BUTTONS_KEY,
+        skipButtons ? '1' : '0'
+      )
+      skipButtons = typeof sb === 'string' ? sb === '1' : Boolean(sb)
+    } catch {}
   })()
 }
 
 bootstrap()
+export type { Mode }
+export { findNeighborByGeometry }
