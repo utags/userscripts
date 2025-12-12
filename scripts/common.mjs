@@ -60,7 +60,17 @@ const schemeImportPlugin = ({ compressCss }) => ({
           cssText = await fs.promises.readFile(args.path, 'utf8')
         }
 
-        const plugins = [tailwind(), twPropsUnconditional(), autoprefixer()]
+        let pkgDir
+        const m = /(.+\/src\/packages\/[^/]+)/.exec(args.path)
+        if (m) pkgDir = m[1]
+
+        const plugins = [
+          tailwind({
+            base: pkgDir,
+          }),
+          twPropsUnconditional(),
+          autoprefixer(),
+        ]
         if (compressCss) {
           plugins.push(cssnano())
         }
