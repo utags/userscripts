@@ -1,4 +1,4 @@
-import { createSettingsPanel } from './settings-panel'
+import { openSettingsPanel as openUtqnSettingsPanel } from './settings-panel'
 import { createGroupManagerPanel } from './group-manager-panel'
 import { createSegmentedRadios } from './segmented-radios'
 
@@ -49,13 +49,17 @@ export function openEditorModal(
 
   const settingsWrap = document.createElement('div')
   const groupsWrap = document.createElement('div')
-  const settingsPanel = createSettingsPanel(root, cfg, helpers)
+  try {
+    openUtqnSettingsPanel()
+  } catch {}
+
   const groupsPanel = createGroupManagerPanel(root, cfg, {
     saveConfig: helpers.saveConfig,
     rerender: helpers.rerender,
     sitePref: helpers.sitePref,
   })
-  settingsWrap.append(settingsPanel)
+
+  // 设置由通用面板承担，此处留空
   groupsWrap.append(groupsPanel)
 
   const actions = document.createElement('div')
@@ -71,6 +75,11 @@ export function openEditorModal(
   const syncUi = () => {
     settingsWrap.style.display = tab === 'settings' ? '' : 'none'
     groupsWrap.style.display = tab === 'groups' ? '' : 'none'
+    if (tab === 'settings') {
+      try {
+        openUtqnSettingsPanel()
+      } catch {}
+    }
   }
 
   syncUi()

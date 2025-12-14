@@ -6,6 +6,7 @@ import {
   caretRangeFromPoint,
   hasNestedBlock,
 } from '../../utils/dom'
+import { c } from '../../utils/c'
 import {
   type TextIndex,
   getTextIndex,
@@ -19,59 +20,63 @@ import {
   rangeForText,
   isPunctuationRect,
 } from '../../utils/text'
+import {
+  type Mode,
+  type Style,
+  DEFAULT_READ_HELPER_SETTINGS,
+  READ_HELPER_SETTINGS_KEY,
+} from './config'
+import {
+  createObjectSettingsStore,
+  openSettingsPanel as openPanel,
+  type Field,
+  type PanelSchema,
+} from '../../common/settings'
 
-type Mode = 'sentence' | 'clause' | 'line' | 'paragraph'
-type Style = 'box' | 'underline'
+let mode: Mode = DEFAULT_READ_HELPER_SETTINGS.mode
+let style: Style = DEFAULT_READ_HELPER_SETTINGS.style
+let color = DEFAULT_READ_HELPER_SETTINGS.color
+let enabled = DEFAULT_READ_HELPER_SETTINGS.enabled
+let hideOnScroll = DEFAULT_READ_HELPER_SETTINGS.hideOnScroll
+let moveByArrows = DEFAULT_READ_HELPER_SETTINGS.moveByArrows
+let skipButtons = DEFAULT_READ_HELPER_SETTINGS.skipButtons
+let skipLinks = DEFAULT_READ_HELPER_SETTINGS.skipLinks
 
-const MODE_KEY = 'read_helper_mode'
-const STYLE_KEY = 'read_helper_style'
-const COLOR_KEY = 'read_helper_color'
-const ENABLED_KEY = 'read_helper_enabled'
-const SCROLL_HIDE_KEY = 'read_helper_scroll_hide'
-const MOVE_BY_ARROWS_KEY = 'read_helper_move_by_arrows'
-const SKIP_BUTTONS_KEY = 'read_helper_skip_buttons'
-
-let mode: Mode = 'sentence'
-let style: Style = 'underline'
-let color = '#ff4d4f'
-let enabled = true
-let hideOnScroll = false
-let moveByArrows = false
-let skipButtons = true
+const store = createObjectSettingsStore(
+  READ_HELPER_SETTINGS_KEY,
+  DEFAULT_READ_HELPER_SETTINGS
+)
 
 let overlay: HTMLDivElement | undefined
 let clickHandlerInstalled = false
 let selectionHandlerInstalled = false
 let dblClickHandlerInstalled = false
 let keyHandlerInstalled = false
-let menuIds: number[] = []
 let selectStartInstalled = false
 let mouseUpInstalled = false
 let scrollHandlerInstalled = false
 let resizeHandlerInstalled = false
 let lastRange: Range | undefined
-const redrawScheduled = false
 let redrawDebounceTimer: number | undefined
 const redrawDebounceMs = 200
 const MERGE_EPS = 2
 const MERGE_MIN_OVERLAP_RATIO = 0.5
 let scrollingActive = false
-const textIndexCache = new WeakMap<
-  Element,
-  { index: TextIndex; textLength: number }
->()
 
 function ensureOverlay(): HTMLDivElement {
   if (!overlay) {
-    overlay = document.createElement('div')
-    overlay.id = 'read-helper-overlay'
-    overlay.style.position = 'fixed'
-    overlay.style.top = '0'
-    overlay.style.left = '0'
-    overlay.style.width = '0'
-    overlay.style.height = '0'
-    overlay.style.pointerEvents = 'none'
-    overlay.style.zIndex = '2147483647'
+    overlay = c('div', {
+      attrs: { id: 'read-helper-overlay' },
+      style: {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '0',
+        height: '0',
+        pointerEvents: 'none',
+        zIndex: '2147483647',
+      },
+    })
     document.documentElement.append(overlay)
   }
 
@@ -523,15 +528,18 @@ function drawRange(r: Range): void {
     for (const g of groups) {
       const h = Math.min(g.height, lineH)
       const padY = Math.max(0, Math.min(DESIRED_PAD_Y, (lineH - h) / 2))
-      const d = document.createElement('div')
-      d.style.position = 'fixed'
-      d.style.left = `${g.left - BOX_PAD_X}px`
-      d.style.top = `${g.top - padY}px`
-      d.style.width = `${Math.max(0, g.right - g.left + BOX_PAD_X * 2)}px`
-      d.style.height = `${Math.max(0, h + padY * 2)}px`
-      d.style.border = `2px dashed ${color}`
-      d.style.borderRadius = '4px'
-      d.style.boxSizing = 'border-box'
+      const d = c('div', {
+        style: {
+          position: 'fixed',
+          left: `${g.left - BOX_PAD_X}px`,
+          top: `${g.top - padY}px`,
+          width: `${Math.max(0, g.right - g.left + BOX_PAD_X * 2)}px`,
+          height: `${Math.max(0, h + padY * 2)}px`,
+          border: `2px dashed ${color}`,
+          borderRadius: '4px',
+          boxSizing: 'border-box',
+        },
+      })
       frag.append(d)
     }
 
@@ -569,13 +577,16 @@ function drawRange(r: Range): void {
 
     const frag = document.createDocumentFragment()
     for (const g of groups) {
-      const d = document.createElement('div')
-      d.style.position = 'fixed'
-      d.style.left = `${g.left}px`
-      d.style.top = `${g.bottom + UNDERLINE_OFFSET}px`
-      d.style.width = `${Math.max(0, g.right - g.left)}px`
-      d.style.height = `0px`
-      d.style.borderBottom = `2px dashed ${color}`
+      const d = c('div', {
+        style: {
+          position: 'fixed',
+          left: `${g.left}px`,
+          top: `${g.bottom + UNDERLINE_OFFSET}px`,
+          width: `${Math.max(0, g.right - g.left)}px`,
+          height: '0px',
+          borderBottom: `2px dashed ${color}`,
+        },
+      })
       frag.append(d)
     }
 
@@ -587,6 +598,11 @@ function onClick(e: MouseEvent): void {
   if (!enabled) return
   const t = e.target as Element | undefined
   if (isInteractive(t)) {
+    clearOverlay()
+    return
+  }
+
+  if (skipLinks && t && t.closest('a')) {
     clearOverlay()
     return
   }
@@ -849,78 +865,166 @@ function cycle<T>(arr: readonly T[], cur: T): T {
   return arr[n]
 }
 
-function registerMenus(): void {
-  try {
-    if (menuIds.length > 0 && typeof GM_unregisterMenuCommand === 'function') {
-      for (const id of menuIds) {
-        try {
-          GM_unregisterMenuCommand(id)
-        } catch {}
-      }
+function openSettingsPanel(): void {
+  const schema: PanelSchema = {
+    type: 'simple',
+    title: '阅读助手设置',
+    fields: [
+      { type: 'toggle', key: 'enabled', label: '启用' },
+      {
+        type: 'radio',
+        key: 'mode',
+        label: '模式',
+        options: [
+          { value: 'sentence', label: '按句' },
+          { value: 'clause', label: '按段' },
+          { value: 'line', label: '按行' },
+          { value: 'paragraph', label: '整段' },
+        ],
+      },
+      {
+        type: 'radio',
+        key: 'style',
+        label: '样式',
+        options: [
+          { value: 'box', label: '虚线框' },
+          { value: 'underline', label: '下划线' },
+        ],
+      },
+      {
+        type: 'colors',
+        key: 'color',
+        label: '颜色',
+        options: [
+          { value: '#ff4d4f' },
+          { value: '#3b82f6' },
+          { value: '#22c55e' },
+          { value: '#f59e0b' },
+          { value: '#8b5cf6' },
+          { value: '#111827' },
+        ],
+      },
+      { type: 'toggle', key: 'moveByArrows', label: '用方向键移动' },
+      { type: 'toggle', key: 'hideOnScroll', label: '滚动时隐藏' },
+      { type: 'toggle', key: 'skipButtons', label: '跳过按钮' },
+      { type: 'toggle', key: 'skipLinks', label: '跳过链接' },
+    ] as Field[],
+  }
+
+  openPanel(schema, store, {
+    hostDatasetKey: 'rhHost',
+    hostDatasetValue: 'read-helper-settings',
+    theme: {
+      activeBg: '#111827',
+      activeFg: '#ffffff',
+      colorRing: '#111827',
+      toggleOnBg: '#111827',
+    },
+  })
+}
+
+function installUrlWatcher(): void {
+  let lastUrl = globalThis.location.href
+  const onUrlChanged = () => {
+    const cur = globalThis.location.href
+    if (cur === lastUrl) return
+    lastUrl = cur
+    if (!lastRange) return
+    const sc = lastRange.startContainer
+    const ec = lastRange.endContainer
+    const stillConnected =
+      Boolean(sc && (sc as any).isConnected) &&
+      Boolean(ec && (ec as any).isConnected)
+    if (!stillConnected) {
+      clearOverlay()
+      return
     }
 
-    menuIds = []
+    const anc = lastRange.commonAncestorContainer
+    const elem = anc instanceof Element ? anc : anc.parentElement || undefined
+    const block = elem ? closestBlockElement(elem) || elem : undefined
+    if (!block || !isElementVisible(block)) {
+      clearOverlay()
+    }
+  }
+
+  try {
+    const origPush = history.pushState
+    history.pushState = function (...args: any[]) {
+      const ret = origPush.apply(history, args as any)
+      onUrlChanged()
+      return ret
+    } as any
   } catch {}
 
+  try {
+    const origReplace = history.replaceState
+    history.replaceState = function (...args: any[]) {
+      const ret = origReplace.apply(history, args as any)
+      onUrlChanged()
+      return ret
+    } as any
+  } catch {}
+
+  globalThis.addEventListener('popstate', onUrlChanged)
+  globalThis.addEventListener('hashchange', onUrlChanged)
+}
+
+function registerMenus(): void {
   if (typeof GM_registerMenuCommand !== 'function') return
-  const id = GM_registerMenuCommand('设置', () => {
+  GM_registerMenuCommand('设置', () => {
     ;(async () => {
       try {
-        const m: any = await import('./settings-panel.js')
-        if (typeof m.openSettingsPanel === 'function') m.openSettingsPanel()
+        openSettingsPanel()
       } catch {}
     })()
   })
-  try {
-    menuIds.push(id as any)
-  } catch {}
 }
 
 function listenSettings(): void {
-  if (typeof GM_addValueChangeListener !== 'function') return
-  GM_addValueChangeListener(MODE_KEY, (_, __, nv) => {
-    mode = nv as Mode
-    if (lastRange) {
-      const caret = document.createRange()
-      caret.setStart(lastRange.startContainer, lastRange.startOffset)
-      caret.collapse(true)
-      const r = findSegmentRange(caret, mode)
-      if (r) {
-        drawRange(r)
-        lastRange = r
-      } else {
+  try {
+    store.onChange?.(() => {
+      void applySettingsFromStore()
+    })
+  } catch {}
+}
+
+async function applySettingsFromStore(): Promise<void> {
+  try {
+    const prevEnabled = enabled
+    const obj = await store.getAll<{
+      mode: Mode
+      style: Style
+      color: string
+      enabled: boolean
+      hideOnScroll: boolean
+      moveByArrows: boolean
+      skipButtons: boolean
+      skipLinks: boolean
+    }>()
+
+    mode = obj.mode
+    style = obj.style
+    color = String(obj.color || '')
+    enabled = Boolean(obj.enabled)
+    hideOnScroll = Boolean(obj.hideOnScroll)
+    moveByArrows = Boolean(obj.moveByArrows)
+    skipButtons = Boolean(obj.skipButtons)
+    skipLinks = Boolean(obj.skipLinks)
+
+    const changed = prevEnabled !== enabled
+    if (changed) {
+      if (enabled) installEvents()
+      else {
         clearOverlay()
+        removeEvents()
       }
-    }
-  })
-  GM_addValueChangeListener(STYLE_KEY, (_, __, nv) => {
-    style = nv as Style
-    if (lastRange) drawRange(lastRange)
-    else clearOverlay()
-  })
-  GM_addValueChangeListener(COLOR_KEY, (_, __, nv) => {
-    color = nv as string
-    if (lastRange) drawRange(lastRange)
-    else clearOverlay()
-  })
-  GM_addValueChangeListener(ENABLED_KEY, (_, __, nv) => {
-    enabled = typeof nv === 'string' ? nv === '1' : Boolean(nv)
-    if (enabled) installEvents()
-    else {
+    } else if (lastRange) {
+      drawRange(lastRange)
+    } else {
       clearOverlay()
-      removeEvents()
     }
-  })
-  GM_addValueChangeListener(SCROLL_HIDE_KEY, (_, __, nv) => {
-    hideOnScroll = Boolean(nv)
-    if (hideOnScroll) clearOverlay()
-  })
-  GM_addValueChangeListener(MOVE_BY_ARROWS_KEY, (_, __, nv) => {
-    moveByArrows = Boolean(nv)
-  })
-  GM_addValueChangeListener(SKIP_BUTTONS_KEY, (_, __, nv) => {
-    skipButtons = nv === '1' ? true : Boolean(nv)
-  })
+  } catch {}
 }
 
 function bootstrap(): void {
@@ -930,50 +1034,10 @@ function bootstrap(): void {
   if (enabled) installEvents()
   registerMenus()
   listenSettings()
-  void (async () => {
-    try {
-      const mv = await (GM as any).getValue(MODE_KEY, mode)
-      mode = mv as Mode
-    } catch {}
-
-    try {
-      const sv = await (GM as any).getValue(STYLE_KEY, style)
-      style = sv as Style
-    } catch {}
-
-    try {
-      const cv = await (GM as any).getValue(COLOR_KEY, color)
-      color = String(cv || color)
-    } catch {}
-
-    try {
-      const ev = await (GM as any).getValue(ENABLED_KEY, enabled ? '1' : '0')
-      const flag = typeof ev === 'string' ? ev === '1' : Boolean(ev)
-      enabled = flag
-      if (enabled) installEvents()
-      else removeEvents()
-    } catch {}
-
-    try {
-      const sh = await (GM as any).getValue(SCROLL_HIDE_KEY, hideOnScroll)
-      hideOnScroll = Boolean(sh)
-    } catch {}
-
-    try {
-      const ma = await (GM as any).getValue(MOVE_BY_ARROWS_KEY, moveByArrows)
-      moveByArrows = Boolean(ma)
-    } catch {}
-
-    try {
-      const sb = await (GM as any).getValue(
-        SKIP_BUTTONS_KEY,
-        skipButtons ? '1' : '0'
-      )
-      skipButtons = typeof sb === 'string' ? sb === '1' : Boolean(sb)
-    } catch {}
-  })()
+  void applySettingsFromStore()
+  installUrlWatcher()
 }
 
 bootstrap()
-export type { Mode }
+export type { Mode, Style } from './config'
 export { findNeighborByGeometry }

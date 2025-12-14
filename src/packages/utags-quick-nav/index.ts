@@ -76,9 +76,6 @@ type SitePref = {
 
 const KEY = 'utqn_config'
 const SITE_KEY = location.hostname || ''
-let sitePref: SitePref
-let lastSaved = ''
-
 const EDGE_DEFAULT_WIDTH = 3
 const EDGE_DEFAULT_HEIGHT = 60
 const EDGE_DEFAULT_OPACITY = 0.6
@@ -91,6 +88,12 @@ const THEME_DEFAULT: 'light' | 'dark' | 'system' = 'system'
 const PINNED_DEFAULT = false
 const ENABLED_DEFAULT = true
 const HOTKEY_DEFAULT = 'Alt+Shift+K'
+
+let sitePref: SitePref = {
+  position: POSITION_DEFAULT,
+  defaultOpen: OPEN_DEFAULT,
+}
+let lastSaved = ''
 let tempOpen = false
 let tempClosed = false
 let menuIds: any[] = []

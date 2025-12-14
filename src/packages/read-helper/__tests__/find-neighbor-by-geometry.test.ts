@@ -3,7 +3,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { findNeighborByGeometry, type Mode } from '../index'
 import * as domUtils from '../../../utils/dom'
 
-vi.mock('../settings-panel', () => ({ openSettingsPanel: () => undefined }))
 vi.mock('../../../utils/dom', async () => {
   const mod = await vi.importActual<any>('../../../utils/dom')
   return {

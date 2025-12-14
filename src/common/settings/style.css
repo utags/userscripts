@@ -1,0 +1,163 @@
+@import 'tailwindcss';
+
+:host {
+  all: initial;
+}
+
+.user-settings {
+  @apply fixed top-3 right-3 z-[2147483649];
+  /* Tailwind ring color proxy */
+  --tw-ring-color: var(--user-color-ring, #111827);
+}
+
+.user-settings .panel {
+  @apply bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-[380px] max-h-[90vh] overflow-y-auto font-sans text-[13px] text-gray-900;
+}
+
+.user-settings .grid {
+  @apply flex flex-col gap-3;
+}
+
+.user-settings .row {
+  @apply flex items-center justify-between gap-3;
+}
+
+.user-settings label {
+  @apply text-gray-600;
+}
+
+.user-settings .btn {
+  @apply px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50;
+}
+
+.user-settings .btn-danger {
+  @apply border-red-500 text-red-500 hover:bg-red-50;
+}
+
+.user-settings .btn-ghost {
+  @apply px-2 py-1 rounded-md text-gray-500 hover:bg-gray-100;
+}
+
+.user-settings input[type='text'] {
+  @apply px-3 py-2 rounded-md border border-gray-300 text-gray-700 w-[180px];
+}
+
+.user-settings select {
+  @apply px-3 py-2 rounded-md border border-gray-300 text-gray-700 w-[180px];
+}
+
+.user-settings input[type='color'] {
+  @apply rounded-md border border-gray-300 w-[80px] h-8 p-0;
+}
+
+.user-settings textarea {
+  @apply px-3 py-2 rounded-md border border-gray-300 text-gray-700 w-full;
+}
+
+.user-settings .switch {
+  @apply flex items-center gap-2;
+}
+
+.user-settings .toggle-wrap {
+  @apply flex items-center gap-2;
+}
+
+.user-settings .toggle-checkbox {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 1px solid #9ca3af;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.user-settings .toggle-checkbox::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #111827;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+  transform: translateY(-50%);
+}
+
+.user-settings .toggle-checkbox:checked {
+  background: var(--user-toggle-on-bg, #111827);
+  border-color: var(--user-toggle-on-bg, #111827);
+}
+
+.user-settings .panel-title {
+  @apply text-[16px] font-semibold text-gray-700;
+}
+
+.user-settings .btn-ghost.icon {
+  @apply w-7 h-7 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100;
+}
+
+.user-settings .toggle-checkbox:checked::before {
+  transform: translate(20px, -50%);
+  background: #ffffff;
+}
+
+.user-settings .color-row {
+  @apply flex items-center gap-2;
+}
+
+.user-settings .color-swatch {
+  @apply w-6 h-6 rounded-md cursor-pointer;
+}
+
+.user-settings .color-swatch.active {
+  @apply ring-2 ring-offset-2;
+  --tw-ring-color: var(--user-color-ring, #111827);
+}
+
+.user-settings .seg {
+  @apply flex items-center gap-2;
+}
+
+.user-settings .seg-btn {
+  @apply px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50;
+}
+
+.user-settings .seg-btn.active {
+  background: var(--user-active-bg, #111827);
+  color: var(--user-active-fg, #ffffff);
+  border-color: var(--user-active-bg, #111827);
+}
+
+.user-settings .value-wrap {
+  @apply flex flex-col items-end gap-1 text-right;
+}
+
+.user-settings .tabs {
+  @apply flex items-center gap-2 mb-2;
+}
+
+.user-settings .tab-btn {
+  @apply px-3 py-1 rounded-md border border-gray-300 text-gray-700;
+}
+
+.user-settings .tab-btn.active {
+  background: var(--user-active-bg, #111827);
+  color: var(--user-active-fg, #ffffff);
+  border-color: var(--user-active-bg, #111827);
+}
+
+.user-settings .field-help {
+  @apply text-gray-400 text-[12px];
+}

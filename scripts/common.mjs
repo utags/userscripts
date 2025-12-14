@@ -61,7 +61,7 @@ const schemeImportPlugin = ({ compressCss }) => ({
         }
 
         let pkgDir
-        const m = /(.+\/src\/packages\/[^/]+)/.exec(args.path)
+        const m = /(.+\/src\/(packages|common)\/[^/]+)/.exec(args.path)
         if (m) pkgDir = m[1]
 
         const plugins = [

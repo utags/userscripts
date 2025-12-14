@@ -13,453 +13,36 @@
 // @match                *://*/*
 // @noframes
 // @run-at               document-body
+// @grant                GM_addValueChangeListener
 // @grant                GM.getValue
 // @grant                GM.setValue
-// @grant                GM_unregisterMenuCommand
 // @grant                GM_registerMenuCommand
-// @grant                GM_addValueChangeListener
 // ==/UserScript==
 //
 ;(() => {
   'use strict'
   var __defProp = Object.defineProperty
-  var __getOwnPropNames = Object.getOwnPropertyNames
-  var __esm = (fn, res) =>
-    function __init() {
-      return (fn && (res = (0, fn[__getOwnPropNames(fn)[0]])((fn = 0))), res)
-    }
-  var __export = (target, all) => {
-    for (var name in all)
-      __defProp(target, name, { get: all[name], enumerable: true })
+  var __getOwnPropSymbols = Object.getOwnPropertySymbols
+  var __hasOwnProp = Object.prototype.hasOwnProperty
+  var __propIsEnum = Object.prototype.propertyIsEnumerable
+  var __defNormalProp = (obj, key, value) =>
+    key in obj
+      ? __defProp(obj, key, {
+          enumerable: true,
+          configurable: true,
+          writable: true,
+          value,
+        })
+      : (obj[key] = value)
+  var __spreadValues = (a, b) => {
+    for (var prop in b || (b = {}))
+      if (__hasOwnProp.call(b, prop)) __defNormalProp(a, prop, b[prop])
+    if (__getOwnPropSymbols)
+      for (var prop of __getOwnPropSymbols(b)) {
+        if (__propIsEnum.call(b, prop)) __defNormalProp(a, prop, b[prop])
+      }
+    return a
   }
-  var settings_default
-  var init_settings = __esm({
-    'schemeImport-ns:/Volumes/SSD_T5/tmp/Development/workspace_pipes/userscripts/src/packages/read-helper/settings.css'() {
-      settings_default =
-        '/*! tailwindcss v4.1.17 | MIT License | https://tailwindcss.com */@layer properties;@layer theme, base, components, utilities;@layer theme{:host,:root{--font-sans:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--color-gray-50:oklch(98.5% 0.002 247.839);--color-gray-100:oklch(96.7% 0.003 264.542);--color-gray-200:oklch(92.8% 0.006 264.531);--color-gray-300:oklch(87.2% 0.01 258.338);--color-gray-500:oklch(55.1% 0.027 264.364);--color-gray-600:oklch(44.6% 0.03 256.802);--color-gray-700:oklch(37.3% 0.034 259.733);--color-gray-900:oklch(21% 0.034 264.665);--color-white:#fff;--spacing:0.25rem;--radius-md:0.375rem;--radius-xl:0.75rem;--default-font-family:var(--font-sans);--default-mono-font-family:var(--font-mono)}}@layer base{*,::backdrop,::file-selector-button,:after,:before{border:0 solid;box-sizing:border-box;margin:0;padding:0}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;font-family:var(--default-font-family,ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji");font-feature-settings:var(--default-font-feature-settings,normal);font-variation-settings:var(--default-font-variation-settings,normal);-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-tap-highlight-color:transparent}hr{border-top-width:1px;color:inherit;height:0}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:var(--default-mono-font-family,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace);font-feature-settings:var(--default-mono-font-feature-settings,normal);font-size:1em;font-variation-settings:var(--default-mono-font-variation-settings,normal)}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{border-collapse:collapse;border-color:inherit;text-indent:0}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}menu,ol,ul{list-style:none}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{height:auto;max-width:100%}::file-selector-button,button,input,optgroup,select,textarea{background-color:transparent;border-radius:0;color:inherit;font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::-moz-placeholder{opacity:1}::placeholder{opacity:1}@supports (not (-webkit-appearance:-apple-pay-button)) or (contain-intrinsic-size:1px){::-moz-placeholder{color:currentcolor;@supports (color:color-mix(in lab,red,red)){color:color-mix(in oklab,currentcolor 50%,transparent)}}::placeholder{color:currentcolor;@supports (color:color-mix(in lab,red,red)){color:color-mix(in oklab,currentcolor 50%,transparent)}}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-meridiem-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-year-field{padding-block:0}::-webkit-calendar-picker-indicator{line-height:1}:-moz-ui-invalid{box-shadow:none}::file-selector-button,button,input:where([type=button],[type=reset],[type=submit]){-webkit-appearance:button;-moz-appearance:button;appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}}@layer utilities{.invisible{visibility:hidden}.visible{visibility:visible}.fixed{position:fixed}.block{display:block}.grid{display:grid}.hidden{display:none}.resize{resize:both}.border{border-style:var(--tw-border-style);border-width:1px}.underline{text-decoration-line:underline}}:host{all:initial}.rh{position:fixed;right:calc(var(--spacing)*3);top:calc(var(--spacing)*3);z-index:2147483649}.rh .panel{background-color:var(--color-white);border-color:var(--color-gray-200);border-radius:var(--radius-xl);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-900);font-family:var(--font-sans);font-size:13px;max-height:90vh;overflow-y:auto;padding:calc(var(--spacing)*4);width:360px;--tw-shadow:0 20px 25px -5px var(--tw-shadow-color,rgba(0,0,0,.1)),0 8px 10px -6px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.rh .btn{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*3);&:hover{@media (hover:hover){background-color:var(--color-gray-50)}}}.rh .btn-ghost{border-radius:var(--radius-md);color:var(--color-gray-500);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2);&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}}.rh .grid{flex-direction:column}.rh .grid,.rh .row{display:flex;gap:calc(var(--spacing)*3)}.rh .row{align-items:center;justify-content:space-between}.rh label{color:var(--color-gray-600)}.rh .seg{align-items:center;display:flex;gap:calc(var(--spacing)*2)}.rh .seg-btn{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*3);&:hover{@media (hover:hover){background-color:var(--color-gray-50)}}}.rh .seg-btn.active{background-color:var(--color-gray-900);border-color:var(--color-gray-900);color:var(--color-white)}.rh .color-row{align-items:center;display:flex;gap:calc(var(--spacing)*2)}.rh .color-swatch{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;height:calc(var(--spacing)*6);width:calc(var(--spacing)*6)}.rh .color-swatch.active{--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);--tw-ring-color:var(--color-gray-900);--tw-ring-offset-width:2px;--tw-ring-offset-shadow:var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color)}.rh .switch .switch-btn{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*3)}.rh .switch .switch-btn.on{background-color:var(--color-gray-900);border-color:var(--color-gray-900);color:var(--color-white)}@property --tw-border-style{syntax:"*";inherits:false;initial-value:solid}@property --tw-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-shadow-color{syntax:"*";inherits:false}@property --tw-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-shadow-color{syntax:"*";inherits:false}@property --tw-inset-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-ring-color{syntax:"*";inherits:false}@property --tw-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-ring-color{syntax:"*";inherits:false}@property --tw-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-ring-inset{syntax:"*";inherits:false}@property --tw-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0}@property --tw-ring-offset-color{syntax:"*";inherits:false;initial-value:#fff}@property --tw-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@layer properties{*,::backdrop,:after,:before{--tw-border-style:solid;--tw-shadow:0 0 #0000;--tw-shadow-color:initial;--tw-shadow-alpha:100%;--tw-inset-shadow:0 0 #0000;--tw-inset-shadow-color:initial;--tw-inset-shadow-alpha:100%;--tw-ring-color:initial;--tw-ring-shadow:0 0 #0000;--tw-inset-ring-color:initial;--tw-inset-ring-shadow:0 0 #0000;--tw-ring-inset:initial;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-offset-shadow:0 0 #0000}}'
-    },
-  })
-  var settings_panel_exports = {}
-  __export(settings_panel_exports, {
-    openSettingsPanel: () => openSettingsPanel,
-  })
-  function openSettingsPanel() {
-    const existing = document.querySelector(
-      '[data-rh-host="read-helper-settings"]'
-    )
-    let host = existing
-    let root
-    if (host && host.shadowRoot) {
-      root = host.shadowRoot
-      for (const n of Array.from(root.childNodes)) n.remove()
-    } else {
-      host = document.createElement('div')
-      host.dataset.rhHost = 'read-helper-settings'
-      root = host.attachShadow({ mode: 'open' })
-      document.documentElement.append(host)
-    }
-    const styleTag = document.createElement('style')
-    styleTag.textContent = settings_default
-    root.append(styleTag)
-    const mask = document.createElement('div')
-    mask.className = 'rh'
-    const panel = document.createElement('div')
-    panel.className = 'panel'
-    const grid = document.createElement('div')
-    grid.className = 'grid'
-    const headerRow = document.createElement('div')
-    headerRow.className = 'row'
-    const title = document.createElement('label')
-    title.textContent = '\u9605\u8BFB\u52A9\u624B\u8BBE\u7F6E'
-    const closeBtn = document.createElement('button')
-    closeBtn.className = 'btn-ghost'
-    closeBtn.textContent = '\u5173\u95ED'
-    headerRow.append(title)
-    headerRow.append(closeBtn)
-    const modeRow = document.createElement('div')
-    modeRow.className = 'row'
-    const modeLabel = document.createElement('label')
-    modeLabel.textContent = '\u6A21\u5F0F'
-    const modeSeg = document.createElement('div')
-    modeSeg.className = 'seg'
-    for (const m of ['sentence', 'clause', 'line', 'paragraph']) {
-      const b = document.createElement('button')
-      b.className = 'seg-btn'
-      b.dataset.group = 'mode'
-      b.dataset.value = m
-      b.textContent =
-        m === 'sentence'
-          ? '\u6309\u53E5'
-          : m === 'clause'
-            ? '\u6309\u6BB5'
-            : m === 'line'
-              ? '\u6309\u884C'
-              : '\u6574\u6BB5'
-      modeSeg.append(b)
-    }
-    modeRow.append(modeLabel)
-    modeRow.append(modeSeg)
-    const styleRow = document.createElement('div')
-    styleRow.className = 'row'
-    const styleLabel = document.createElement('label')
-    styleLabel.textContent = '\u6837\u5F0F'
-    const styleSeg = document.createElement('div')
-    styleSeg.className = 'seg'
-    for (const s of ['box', 'underline']) {
-      const b = document.createElement('button')
-      b.className = 'seg-btn'
-      b.dataset.group = 'style'
-      b.dataset.value = s
-      b.textContent = s === 'box' ? '\u865A\u7EBF\u6846' : '\u4E0B\u5212\u7EBF'
-      styleSeg.append(b)
-    }
-    styleRow.append(styleLabel)
-    styleRow.append(styleSeg)
-    const colorRow = document.createElement('div')
-    colorRow.className = 'row color-row'
-    const colorLabel = document.createElement('label')
-    colorLabel.textContent = '\u989C\u8272'
-    const colorWrap = document.createElement('div')
-    colorWrap.className = 'seg'
-    for (const c of [
-      '#ff4d4f',
-      '#1A73E8',
-      '#10B981',
-      '#F59E0B',
-      '#8B5CF6',
-      '#111827',
-    ]) {
-      const sw = document.createElement('div')
-      sw.className = 'color-swatch'
-      sw.dataset.value = c
-      sw.style.backgroundColor = c
-      colorWrap.append(sw)
-    }
-    colorRow.append(colorLabel)
-    colorRow.append(colorWrap)
-    const enabledRow = document.createElement('div')
-    enabledRow.className = 'row switch'
-    const enabledLabel = document.createElement('label')
-    enabledLabel.textContent = '\u542F\u7528'
-    const enabledSeg = document.createElement('div')
-    enabledSeg.className = 'seg'
-    const enabledOn = document.createElement('button')
-    enabledOn.className = 'switch-btn'
-    enabledOn.dataset.group = 'enabled'
-    enabledOn.dataset.value = 'on'
-    enabledOn.textContent = '\u5F00'
-    const enabledOff = document.createElement('button')
-    enabledOff.className = 'switch-btn'
-    enabledOff.dataset.group = 'enabled'
-    enabledOff.dataset.value = 'off'
-    enabledOff.textContent = '\u5173'
-    enabledSeg.append(enabledOn)
-    enabledSeg.append(enabledOff)
-    enabledRow.append(enabledLabel)
-    enabledRow.append(enabledSeg)
-    const scrollRow = document.createElement('div')
-    scrollRow.className = 'row switch'
-    const scrollLabel = document.createElement('label')
-    scrollLabel.textContent = '\u6EDA\u52A8\u65F6\u9690\u85CF'
-    const scrollSeg = document.createElement('div')
-    scrollSeg.className = 'seg'
-    const scrollOn = document.createElement('button')
-    scrollOn.className = 'switch-btn'
-    scrollOn.dataset.group = 'scroll'
-    scrollOn.dataset.value = 'on'
-    scrollOn.textContent = '\u5F00'
-    const scrollOff = document.createElement('button')
-    scrollOff.className = 'switch-btn'
-    scrollOff.dataset.group = 'scroll'
-    scrollOff.dataset.value = 'off'
-    scrollOff.textContent = '\u5173'
-    scrollSeg.append(scrollOn)
-    scrollSeg.append(scrollOff)
-    scrollRow.append(scrollLabel)
-    scrollRow.append(scrollSeg)
-    const arrowsRow = document.createElement('div')
-    arrowsRow.className = 'row switch'
-    const arrowsLabel = document.createElement('label')
-    arrowsLabel.textContent = '\u7528\u65B9\u5411\u952E\u79FB\u52A8'
-    const arrowsSeg = document.createElement('div')
-    arrowsSeg.className = 'seg'
-    const arrowsOn = document.createElement('button')
-    arrowsOn.className = 'switch-btn'
-    arrowsOn.dataset.group = 'arrows'
-    arrowsOn.dataset.value = 'on'
-    arrowsOn.textContent = '\u5F00'
-    const arrowsOff = document.createElement('button')
-    arrowsOff.className = 'switch-btn'
-    arrowsOff.dataset.group = 'arrows'
-    arrowsOff.dataset.value = 'off'
-    arrowsOff.textContent = '\u5173'
-    arrowsSeg.append(arrowsOn)
-    arrowsSeg.append(arrowsOff)
-    arrowsRow.append(arrowsLabel)
-    arrowsRow.append(arrowsSeg)
-    grid.append(headerRow)
-    grid.append(enabledRow)
-    grid.append(modeRow)
-    grid.append(styleRow)
-    grid.append(colorRow)
-    grid.append(arrowsRow)
-    grid.append(scrollRow)
-    const skipButtonsRow = document.createElement('div')
-    skipButtonsRow.className = 'row switch'
-    const skipButtonsLabel = document.createElement('label')
-    skipButtonsLabel.textContent = '\u8DF3\u8FC7\u6309\u94AE'
-    const skipButtonsSeg = document.createElement('div')
-    skipButtonsSeg.className = 'seg'
-    const skipButtonsOn = document.createElement('button')
-    skipButtonsOn.className = 'switch-btn'
-    skipButtonsOn.dataset.group = 'skip_buttons'
-    skipButtonsOn.dataset.value = 'on'
-    skipButtonsOn.textContent = '\u5F00'
-    const skipButtonsOff = document.createElement('button')
-    skipButtonsOff.className = 'switch-btn'
-    skipButtonsOff.dataset.group = 'skip_buttons'
-    skipButtonsOff.dataset.value = 'off'
-    skipButtonsOff.textContent = '\u5173'
-    skipButtonsSeg.append(skipButtonsOn)
-    skipButtonsSeg.append(skipButtonsOff)
-    skipButtonsRow.append(skipButtonsLabel)
-    skipButtonsRow.append(skipButtonsSeg)
-    grid.append(skipButtonsRow)
-    panel.append(grid)
-    mask.append(panel)
-    root.append(mask)
-    async function updateModeUI() {
-      try {
-        const mv = await GM.getValue(MODE_KEY, 'sentence')
-        for (const b of Array.from(modeSeg.querySelectorAll('.seg-btn'))) {
-          const val = b.dataset.value || ''
-          if (val === String(mv)) b.classList.add('active')
-          else b.classList.remove('active')
-        }
-      } catch (e) {}
-    }
-    async function updateStyleUI() {
-      try {
-        const sv = await GM.getValue(STYLE_KEY, 'underline')
-        for (const b of Array.from(styleSeg.querySelectorAll('.seg-btn'))) {
-          const val = b.dataset.value || ''
-          if (val === String(sv)) b.classList.add('active')
-          else b.classList.remove('active')
-        }
-      } catch (e) {}
-    }
-    async function updateColorUI() {
-      try {
-        const cv = await GM.getValue(COLOR_KEY, '#ff4d4f')
-        let picked = false
-        for (const sw of Array.from(
-          colorWrap.querySelectorAll('.color-swatch')
-        )) {
-          const val = sw.dataset.value || ''
-          if (val === String(cv)) {
-            sw.classList.add('active')
-            picked = true
-          } else sw.classList.remove('active')
-        }
-        if (!picked && typeof cv === 'string') {
-          const extra = document.createElement('div')
-          extra.className = 'color-swatch active'
-          extra.dataset.value = String(cv)
-          extra.style.backgroundColor = String(cv)
-          colorWrap.append(extra)
-        }
-      } catch (e) {}
-    }
-    async function updateEnabledUI() {
-      try {
-        const ev = await GM.getValue(ENABLED_KEY, '1')
-        const flag = typeof ev === 'string' ? ev === '1' : Boolean(ev)
-        for (const b of Array.from(
-          enabledSeg.querySelectorAll('.switch-btn')
-        )) {
-          const val = b.dataset.value || ''
-          const on = val === 'on'
-          if ((on && flag) || (!on && !flag)) b.classList.add('on')
-          else b.classList.remove('on')
-        }
-      } catch (e) {}
-    }
-    async function updateScrollUI() {
-      try {
-        const sh = await GM.getValue(SCROLL_HIDE_KEY, false)
-        const flag = Boolean(sh)
-        for (const b of Array.from(scrollSeg.querySelectorAll('.switch-btn'))) {
-          const val = b.dataset.value || ''
-          const on = val === 'on'
-          if ((on && flag) || (!on && !flag)) b.classList.add('on')
-          else b.classList.remove('on')
-        }
-      } catch (e) {}
-    }
-    async function updateArrowsUI() {
-      try {
-        const mv = await GM.getValue('read_helper_move_by_arrows', false)
-        const flag = Boolean(mv)
-        for (const b of Array.from(arrowsSeg.querySelectorAll('.switch-btn'))) {
-          const val = b.dataset.value || ''
-          const on = val === 'on'
-          if ((on && flag) || (!on && !flag)) b.classList.add('on')
-          else b.classList.remove('on')
-        }
-      } catch (e) {}
-    }
-    async function updateSkipButtonsUI() {
-      try {
-        const mv = await GM.getValue(SKIP_BUTTONS_KEY, '1')
-        const flag = typeof mv === 'string' ? mv === '1' : Boolean(mv)
-        for (const b of Array.from(
-          skipButtonsSeg.querySelectorAll('.switch-btn')
-        )) {
-          const val = b.dataset.value || ''
-          const on = val === 'on'
-          if ((on && flag) || (!on && !flag)) b.classList.add('on')
-          else b.classList.remove('on')
-        }
-      } catch (e) {}
-    }
-    void (async () => {
-      await updateModeUI()
-      await updateStyleUI()
-      await updateColorUI()
-      await updateEnabledUI()
-      await updateScrollUI()
-      await updateArrowsUI()
-      await updateSkipButtonsUI()
-    })()
-    function handleSeg(el) {
-      const g = el.dataset.group || ''
-      const v = el.dataset.value || ''
-      if (g === 'mode') {
-        GM.setValue(MODE_KEY, v)
-        for (const b of Array.from(modeSeg.querySelectorAll('.seg-btn'))) {
-          const h = b
-          if ((h.dataset.value || '') === v) h.classList.add('active')
-          else h.classList.remove('active')
-        }
-        return true
-      }
-      if (g === 'style') {
-        GM.setValue(STYLE_KEY, v)
-        for (const b of Array.from(styleSeg.querySelectorAll('.seg-btn'))) {
-          const h = b
-          if ((h.dataset.value || '') === v) h.classList.add('active')
-          else h.classList.remove('active')
-        }
-        return true
-      }
-      return false
-    }
-    function handleColor(el) {
-      const v = el.dataset.value || ''
-      if (!v) return false
-      GM.setValue(COLOR_KEY, v)
-      for (const n of Array.from(colorWrap.querySelectorAll('.color-swatch'))) {
-        const h = n
-        if ((h.dataset.value || '') === v) h.classList.add('active')
-        else h.classList.remove('active')
-      }
-      return true
-    }
-    function handleSwitch(el) {
-      const g = el.dataset.group || ''
-      const v = el.dataset.value || ''
-      if (!g) return false
-      if (g === 'enabled') {
-        const flag = v === 'on'
-        GM.setValue(ENABLED_KEY, flag)
-        for (const b of Array.from(
-          enabledSeg.querySelectorAll('.switch-btn')
-        )) {
-          const h = b
-          const on = (h.dataset.value || '') === 'on'
-          if ((on && flag) || (!on && !flag)) h.classList.add('on')
-          else h.classList.remove('on')
-        }
-        return true
-      }
-      if (g === 'scroll') {
-        const flag = v === 'on'
-        GM.setValue(SCROLL_HIDE_KEY, flag)
-        for (const b of Array.from(scrollSeg.querySelectorAll('.switch-btn'))) {
-          const h = b
-          const on = (h.dataset.value || '') === 'on'
-          if ((on && flag) || (!on && !flag)) h.classList.add('on')
-          else h.classList.remove('on')
-        }
-        return true
-      }
-      if (g === 'arrows') {
-        const flag = v === 'on'
-        GM.setValue('read_helper_move_by_arrows', flag)
-        for (const b of Array.from(arrowsSeg.querySelectorAll('.switch-btn'))) {
-          const h = b
-          const on = (h.dataset.value || '') === 'on'
-          if ((on && flag) || (!on && !flag)) h.classList.add('on')
-          else h.classList.remove('on')
-        }
-        return true
-      }
-      if (g === 'skip_buttons') {
-        const flag = v === 'on'
-        GM.setValue(SKIP_BUTTONS_KEY, flag ? '1' : '0')
-        for (const b of Array.from(
-          skipButtonsSeg.querySelectorAll('.switch-btn')
-        )) {
-          const h = b
-          const on = (h.dataset.value || '') === 'on'
-          if ((on && flag) || (!on && !flag)) h.classList.add('on')
-          else h.classList.remove('on')
-        }
-        return true
-      }
-      return false
-    }
-    function onPanelClick(e) {
-      const t = e.target
-      if (t === closeBtn) {
-        host == null ? void 0 : host.remove()
-        globalThis.removeEventListener('keydown', onKeyDown2, true)
-        return
-      }
-      const segEl = t.closest('.seg-btn')
-      if (segEl && segEl instanceof HTMLElement && handleSeg(segEl)) return
-      const swEl = t.closest('.color-swatch')
-      if (swEl && swEl instanceof HTMLElement && handleColor(swEl)) return
-      const switchEl = t.closest('.switch-btn')
-      if (switchEl && switchEl instanceof HTMLElement)
-        void handleSwitch(switchEl)
-    }
-    panel.addEventListener('click', onPanelClick)
-    function onKeyDown2(e) {
-      if (e.key === 'Escape') {
-        host == null ? void 0 : host.remove()
-        globalThis.removeEventListener('keydown', onKeyDown2, true)
-      }
-    }
-    globalThis.addEventListener('keydown', onKeyDown2, true)
-  }
-  var MODE_KEY,
-    STYLE_KEY,
-    COLOR_KEY,
-    ENABLED_KEY,
-    SCROLL_HIDE_KEY,
-    SKIP_BUTTONS_KEY
-  var init_settings_panel = __esm({
-    'src/packages/read-helper/settings-panel.ts'() {
-      init_settings()
-      MODE_KEY = 'read_helper_mode'
-      STYLE_KEY = 'read_helper_style'
-      COLOR_KEY = 'read_helper_color'
-      ENABLED_KEY = 'read_helper_enabled'
-      SCROLL_HIDE_KEY = 'read_helper_scroll_hide'
-      SKIP_BUTTONS_KEY = 'read_helper_skip_buttons'
-    },
-  })
   var defaultFavicon16 = encodeURIComponent(
     'https://wsrv.nl/?w=16&h=16&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
   )
@@ -563,6 +146,33 @@
       ? sel.getRangeAt(0).cloneRange()
       : document.createRange()
     return r
+  }
+  function c(tag, opts) {
+    const el = document.createElement(tag)
+    if (!opts) return el
+    if (opts.className) el.className = opts.className
+    if (opts.classes) for (const cls of opts.classes) el.classList.add(cls)
+    if (opts.dataset)
+      for (const k of Object.keys(opts.dataset)) el.dataset[k] = opts.dataset[k]
+    if (opts.attrs)
+      for (const k of Object.keys(opts.attrs)) el.setAttribute(k, opts.attrs[k])
+    if (opts.style)
+      for (const k of Object.keys(opts.style)) el.style[k] = opts.style[k]
+    if ('text' in opts) el.textContent = opts.text || ''
+    if (opts.type && 'type' in el) el.type = opts.type
+    if ('value' in opts && 'value' in el) el.value = opts.value || ''
+    if (opts.rows && 'rows' in el) el.rows = opts.rows
+    if (opts.placeholder && 'placeholder' in el)
+      el.placeholder = opts.placeholder
+    if (typeof opts.checked === 'boolean' && 'checked' in el)
+      el.checked = opts.checked
+    if (opts.children) {
+      for (const ch of opts.children) {
+        if (typeof ch === 'string') el.append(document.createTextNode(ch))
+        else el.append(ch)
+      }
+    }
+    return el
   }
   function buildTextIndex(root) {
     const nodes = []
@@ -766,26 +376,638 @@
     }
     return false
   }
-  var MODE_KEY2 = 'read_helper_mode'
-  var STYLE_KEY2 = 'read_helper_style'
-  var COLOR_KEY2 = 'read_helper_color'
-  var ENABLED_KEY2 = 'read_helper_enabled'
-  var SCROLL_HIDE_KEY2 = 'read_helper_scroll_hide'
-  var MOVE_BY_ARROWS_KEY = 'read_helper_move_by_arrows'
-  var SKIP_BUTTONS_KEY2 = 'read_helper_skip_buttons'
-  var mode = 'sentence'
-  var style = 'underline'
-  var color = '#ff4d4f'
-  var enabled = true
-  var hideOnScroll = false
-  var moveByArrows = false
-  var skipButtons = true
+  var READ_HELPER_SETTINGS_KEY = 'read_helper_settings'
+  var DEFAULT_READ_HELPER_SETTINGS = {
+    mode: 'sentence',
+    style: 'underline',
+    color: '#ff4d4f',
+    enabled: true,
+    hideOnScroll: false,
+    moveByArrows: false,
+    skipButtons: true,
+    skipLinks: true,
+  }
+  function setOrDelete(obj, key, value, defaultValue) {
+    const normalizeToDefaultType = (val, dv) => {
+      const t = typeof dv
+      if (t === 'number') {
+        const n = Number(val)
+        return Number.isFinite(n) ? n : dv
+      }
+      if (t === 'object') {
+        return val && typeof val === 'object' ? val : dv
+      }
+      return typeof val === t ? val : dv
+    }
+    const normalized = normalizeToDefaultType(value, defaultValue)
+    const isEqual = (a, b) => {
+      if (a === b) return true
+      if (a && b && typeof a === 'object' && typeof b === 'object') {
+        try {
+          return JSON.stringify(a) === JSON.stringify(b)
+        } catch (e) {}
+      }
+      return false
+    }
+    if (isEqual(normalized, defaultValue)) {
+      delete obj[key]
+    } else {
+      obj[key] = normalized
+    }
+  }
+  var style_default =
+    '/*! tailwindcss v4.1.17 | MIT License | https://tailwindcss.com */@layer properties;@layer theme, base, components, utilities;@layer theme{:host,:root{--font-sans:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--color-red-50:oklch(97.1% 0.013 17.38);--color-red-500:oklch(63.7% 0.237 25.331);--color-gray-50:oklch(98.5% 0.002 247.839);--color-gray-100:oklch(96.7% 0.003 264.542);--color-gray-200:oklch(92.8% 0.006 264.531);--color-gray-300:oklch(87.2% 0.01 258.338);--color-gray-400:oklch(70.7% 0.022 261.325);--color-gray-500:oklch(55.1% 0.027 264.364);--color-gray-600:oklch(44.6% 0.03 256.802);--color-gray-700:oklch(37.3% 0.034 259.733);--color-gray-900:oklch(21% 0.034 264.665);--color-white:#fff;--spacing:0.25rem;--font-weight-semibold:600;--radius-md:0.375rem;--radius-xl:0.75rem;--default-font-family:var(--font-sans);--default-mono-font-family:var(--font-mono)}}@layer base{*,::backdrop,::file-selector-button,:after,:before{border:0 solid;box-sizing:border-box;margin:0;padding:0}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;font-family:var(--default-font-family,ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji");font-feature-settings:var(--default-font-feature-settings,normal);font-variation-settings:var(--default-font-variation-settings,normal);-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-tap-highlight-color:transparent}hr{border-top-width:1px;color:inherit;height:0}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:var(--default-mono-font-family,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace);font-feature-settings:var(--default-mono-font-feature-settings,normal);font-size:1em;font-variation-settings:var(--default-mono-font-variation-settings,normal)}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{border-collapse:collapse;border-color:inherit;text-indent:0}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}menu,ol,ul{list-style:none}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{height:auto;max-width:100%}::file-selector-button,button,input,optgroup,select,textarea{background-color:transparent;border-radius:0;color:inherit;font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::-moz-placeholder{opacity:1}::placeholder{opacity:1}@supports (not (-webkit-appearance:-apple-pay-button)) or (contain-intrinsic-size:1px){::-moz-placeholder{color:currentcolor;@supports (color:color-mix(in lab,red,red)){color:color-mix(in oklab,currentcolor 50%,transparent)}}::placeholder{color:currentcolor;@supports (color:color-mix(in lab,red,red)){color:color-mix(in oklab,currentcolor 50%,transparent)}}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-meridiem-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-year-field{padding-block:0}::-webkit-calendar-picker-indicator{line-height:1}:-moz-ui-invalid{box-shadow:none}::file-selector-button,button,input:where([type=button],[type=reset],[type=submit]){-webkit-appearance:button;-moz-appearance:button;appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}}@layer utilities{.container{width:100%;@media (width >= 40rem){max-width:40rem}@media (width >= 48rem){max-width:48rem}@media (width >= 64rem){max-width:64rem}@media (width >= 80rem){max-width:80rem}@media (width >= 96rem){max-width:96rem}}.grid{display:grid}}:host{all:initial}.user-settings{position:fixed;right:calc(var(--spacing)*3);top:calc(var(--spacing)*3);z-index:2147483649;--tw-ring-color:var(--user-color-ring,#111827)}.user-settings .panel{background-color:var(--color-white);border-color:var(--color-gray-200);border-radius:var(--radius-xl);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-900);font-family:var(--font-sans);font-size:13px;max-height:90vh;overflow-y:auto;padding:calc(var(--spacing)*4);width:380px;--tw-shadow:0 20px 25px -5px var(--tw-shadow-color,rgba(0,0,0,.1)),0 8px 10px -6px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.user-settings .grid{display:flex;flex-direction:column;gap:calc(var(--spacing)*3)}.user-settings .row{align-items:center;display:flex;gap:calc(var(--spacing)*3);justify-content:space-between}.user-settings label{color:var(--color-gray-600)}.user-settings .btn{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*3);&:hover{@media (hover:hover){background-color:var(--color-gray-50)}}}.user-settings .btn-danger{border-color:var(--color-red-500);color:var(--color-red-500);&:hover{@media (hover:hover){background-color:var(--color-red-50)}}}.user-settings .btn-ghost{border-radius:var(--radius-md);color:var(--color-gray-500);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2);&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}}.user-settings input[type=text],.user-settings select{color:var(--color-gray-700);padding-block:calc(var(--spacing)*2);padding-inline:calc(var(--spacing)*3);width:180px}.user-settings input[type=color],.user-settings input[type=text],.user-settings select{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px}.user-settings input[type=color]{height:calc(var(--spacing)*8);padding:calc(var(--spacing)*0);width:80px}.user-settings textarea{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*2);padding-inline:calc(var(--spacing)*3);width:100%}.user-settings .switch,.user-settings .toggle-wrap{align-items:center;display:flex;gap:calc(var(--spacing)*2)}.user-settings .toggle-checkbox{-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#fff;border:1px solid #9ca3af;border-radius:9999px;box-shadow:inset 0 1px 1px rgba(0,0,0,.1);cursor:pointer;display:inline-block;height:22px;position:relative;transition:background-color .2s ease,border-color .2s ease;width:42px}.user-settings .toggle-checkbox:before{background:#111827;border-radius:9999px;box-shadow:0 2px 4px rgba(0,0,0,.25);content:"";height:18px;left:2px;position:absolute;top:50%;transform:translateY(-50%);transition:transform .2s ease,background-color .2s ease;width:18px}.user-settings .toggle-checkbox:checked{background:var(--user-toggle-on-bg,#111827);border-color:var(--user-toggle-on-bg,#111827)}.user-settings .panel-title{font-size:16px;--tw-font-weight:var(--font-weight-semibold);color:var(--color-gray-700);font-weight:var(--font-weight-semibold)}.user-settings .btn-ghost.icon{align-items:center;border-radius:calc(infinity*1px);color:var(--color-gray-500);display:flex;height:calc(var(--spacing)*7);justify-content:center;width:calc(var(--spacing)*7);&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}}.user-settings .toggle-checkbox:checked:before{background:#fff;transform:translate(20px,-50%)}.user-settings .color-row{align-items:center;display:flex;gap:calc(var(--spacing)*2)}.user-settings .color-swatch{border-radius:var(--radius-md);cursor:pointer;height:calc(var(--spacing)*6);width:calc(var(--spacing)*6)}.user-settings .color-swatch.active{--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);--tw-ring-offset-width:2px;--tw-ring-offset-shadow:var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-color:var(--user-color-ring,#111827)}.user-settings .seg{align-items:center;display:flex;gap:calc(var(--spacing)*2)}.user-settings .seg-btn{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*3);&:hover{@media (hover:hover){background-color:var(--color-gray-50)}}}.user-settings .seg-btn.active{background:var(--user-active-bg,#111827);border-color:var(--user-active-bg,#111827);color:var(--user-active-fg,#fff)}.user-settings .value-wrap{align-items:flex-end;display:flex;flex-direction:column;gap:calc(var(--spacing)*1);text-align:right}.user-settings .tabs{align-items:center;display:flex;gap:calc(var(--spacing)*2);margin-bottom:calc(var(--spacing)*2)}.user-settings .tab-btn{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*3)}.user-settings .tab-btn.active{background:var(--user-active-bg,#111827);border-color:var(--user-active-bg,#111827);color:var(--user-active-fg,#fff)}.user-settings .field-help{color:var(--color-gray-400);font-size:12px}@property --tw-border-style{syntax:"*";inherits:false;initial-value:solid}@property --tw-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-shadow-color{syntax:"*";inherits:false}@property --tw-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-shadow-color{syntax:"*";inherits:false}@property --tw-inset-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-ring-color{syntax:"*";inherits:false}@property --tw-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-ring-color{syntax:"*";inherits:false}@property --tw-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-ring-inset{syntax:"*";inherits:false}@property --tw-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0}@property --tw-ring-offset-color{syntax:"*";inherits:false;initial-value:#fff}@property --tw-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-font-weight{syntax:"*";inherits:false}@layer properties{*,::backdrop,:after,:before{--tw-border-style:solid;--tw-shadow:0 0 #0000;--tw-shadow-color:initial;--tw-shadow-alpha:100%;--tw-inset-shadow:0 0 #0000;--tw-inset-shadow-color:initial;--tw-inset-shadow-alpha:100%;--tw-ring-color:initial;--tw-ring-shadow:0 0 #0000;--tw-inset-ring-color:initial;--tw-inset-ring-shadow:0 0 #0000;--tw-ring-inset:initial;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-offset-shadow:0 0 #0000;--tw-font-weight:initial}}'
+  function createToggleRow(label, key, help) {
+    const row = c('div', { className: 'row' })
+    const lab = c('label', { text: label })
+    const seg = c('div', { className: 'toggle-wrap' })
+    const chk = c('input', {
+      type: 'checkbox',
+      className: 'toggle-checkbox',
+      dataset: { key },
+    })
+    const val = c('div', { className: 'value-wrap' })
+    seg.append(chk)
+    val.append(seg)
+    if (help) val.append(c('div', { className: 'field-help', text: help }))
+    row.append(lab)
+    row.append(val)
+    return { row, chk }
+  }
+  function createInputRow(label, key, placeholder, help) {
+    const row = c('div', { className: 'row' })
+    const lab = c('label', { text: label })
+    const inp = c('input', {
+      type: 'text',
+      placeholder: placeholder || '',
+      dataset: { key },
+    })
+    const val = c('div', { className: 'value-wrap' })
+    val.append(inp)
+    if (help) val.append(c('div', { className: 'field-help', text: help }))
+    row.append(lab)
+    row.append(val)
+    return { row, inp }
+  }
+  function createTextareaRow(label, key, rows, help) {
+    const row = c('div', { className: 'row' })
+    const lab = c('label', { text: label })
+    const ta = c('textarea', {
+      rows: rows || 4,
+      dataset: { key },
+    })
+    const val = c('div', { className: 'value-wrap' })
+    val.append(ta)
+    if (help) val.append(c('div', { className: 'field-help', text: help }))
+    row.append(lab)
+    row.append(val)
+    return { row, ta }
+  }
+  function createRadioRow(label, key, opts, help) {
+    const row = c('div', { className: 'row' })
+    const lab = c('label', { text: label })
+    const seg = c('div', { className: 'seg' })
+    for (const o of opts) {
+      const b = c('button', {
+        className: 'seg-btn',
+        dataset: { key, value: o.value },
+        text: o.label,
+      })
+      seg.append(b)
+    }
+    const val = c('div', { className: 'value-wrap' })
+    val.append(seg)
+    if (help) val.append(c('div', { className: 'field-help', text: help }))
+    row.append(lab)
+    row.append(val)
+    return { row, seg }
+  }
+  function createColorRow(label, key, opts, help) {
+    const row = c('div', { className: 'row' })
+    const lab = c('label', { text: label })
+    const seg = c('div', { className: 'color-row' })
+    for (const o of opts) {
+      const b = c('button', {
+        className: 'color-swatch',
+        dataset: { key, value: o.value },
+        style: { backgroundColor: o.value },
+      })
+      seg.append(b)
+    }
+    const val = c('div', { className: 'value-wrap' })
+    val.append(seg)
+    if (help) val.append(c('div', { className: 'field-help', text: help }))
+    row.append(lab)
+    row.append(val)
+    return { row, seg }
+  }
+  function createSelectRow(label, key, opts, help) {
+    const row = c('div', { className: 'row' })
+    const lab = c('label', { text: label })
+    const sel = c('select', { dataset: { key } })
+    for (const o of opts) {
+      const opt = c('option', { value: o.value, text: o.label })
+      sel.append(opt)
+    }
+    const val = c('div', { className: 'value-wrap' })
+    val.append(sel)
+    if (help) val.append(c('div', { className: 'field-help', text: help }))
+    row.append(lab)
+    row.append(val)
+    return { row, sel }
+  }
+  function createActionRow(label, key, actions, help) {
+    const row = c('div', { className: 'row' })
+    const lab = c('label', { text: label })
+    const wrap = c('div', { className: 'value-wrap' })
+    const act = c('div', { className: 'seg' })
+    for (const a of actions) {
+      const b = c('button', {
+        className: 'btn action-btn'.concat(
+          a.kind === 'danger' ? ' btn-danger' : ''
+        ),
+        dataset: { key, action: a.id },
+        text: a.text,
+      })
+      act.append(b)
+    }
+    wrap.append(act)
+    if (help) wrap.append(c('div', { className: 'field-help', text: help }))
+    row.append(lab)
+    row.append(wrap)
+    return { row }
+  }
+  function openSettingsPanel(schema, store2, options) {
+    const { host, root } = ensureHostAndRoot(options)
+    let lastValues = {}
+    const styleTag = c('style', {
+      text: style_default.concat(
+        (options == null ? void 0 : options.styleText) || ''
+      ),
+    })
+    root.append(styleTag)
+    const wrap = c('div', { className: 'user-settings' })
+    applyThemeStyles(wrap, options == null ? void 0 : options.theme)
+    const panel = c('div', { className: 'panel' })
+    const grid = c('div', { className: 'grid' })
+    const { row: headerRow, closeBtn } = buildHeader(schema.title)
+    grid.append(headerRow)
+    const fillers = {}
+    const addFiller = (key, fn) => {
+      if (!fillers[key]) fillers[key] = []
+      fillers[key].push(fn)
+    }
+    function appendAndFill(container, row, key, filler) {
+      container.append(row)
+      addFiller(key, filler)
+    }
+    function appendField(container, f) {
+      switch (f.type) {
+        case 'toggle': {
+          const { row, chk } = createToggleRow(f.label, f.key, f.help)
+          appendAndFill(container, row, f.key, () => {
+            fillToggleUI(chk, f.key)
+          })
+          break
+        }
+        case 'input': {
+          const { row, inp } = createInputRow(
+            f.label,
+            f.key,
+            f.placeholder,
+            f.help
+          )
+          appendAndFill(container, row, f.key, () => {
+            fillInput(inp, f.key)
+          })
+          break
+        }
+        case 'textarea': {
+          const { row, ta } = createTextareaRow(f.label, f.key, f.rows, f.help)
+          appendAndFill(container, row, f.key, () => {
+            fillTextarea(ta, f.key)
+          })
+          break
+        }
+        case 'radio': {
+          const { row, seg } = createRadioRow(f.label, f.key, f.options, f.help)
+          appendAndFill(container, row, f.key, () => {
+            fillRadioUI(seg, f.key)
+          })
+          break
+        }
+        case 'select': {
+          const { row, sel } = createSelectRow(
+            f.label,
+            f.key,
+            f.options,
+            f.help
+          )
+          appendAndFill(container, row, f.key, () => {
+            fillSelect(sel, f.key)
+          })
+          break
+        }
+        case 'colors': {
+          const { row, seg } = createColorRow(f.label, f.key, f.options, f.help)
+          appendAndFill(container, row, f.key, () => {
+            fillColorUI(seg, f.key)
+          })
+          break
+        }
+        case 'action': {
+          const { row } = createActionRow(f.label, f.key, f.actions, f.help)
+          container.append(row)
+          break
+        }
+      }
+    }
+    function sanitizeDatasetKey(rawKey) {
+      let out = ''
+      for (const ch of rawKey) {
+        const code = ch.codePointAt(0) || 0
+        out += code >= 65 && code <= 90 ? '-' + ch.toLowerCase() : ch
+      }
+      return out
+    }
+    function ensureHostAndRoot(options2) {
+      const keySan = sanitizeDatasetKey(
+        (options2 == null ? void 0 : options2.hostDatasetKey) || 'usrHost'
+      )
+      const sel = '[data-'
+        .concat(keySan, '="')
+        .concat(
+          (options2 == null ? void 0 : options2.hostDatasetValue) || 'settings',
+          '"]'
+        )
+      const existing = document.querySelector(sel)
+      let root2
+      let hostEl
+      if (existing instanceof HTMLDivElement && existing.shadowRoot) {
+        hostEl = existing
+        root2 = existing.shadowRoot
+        for (const n of Array.from(root2.childNodes)) n.remove()
+      } else {
+        const key =
+          (options2 == null ? void 0 : options2.hostDatasetKey) || 'userHost'
+        const val =
+          (options2 == null ? void 0 : options2.hostDatasetValue) || 'settings'
+        hostEl = c('div', { dataset: { [key]: val } })
+        root2 = hostEl.attachShadow({ mode: 'open' })
+        document.documentElement.append(hostEl)
+      }
+      return { host: hostEl, root: root2 }
+    }
+    function applyThemeStyles(wrap2, theme) {
+      if (!theme) return
+      const properties = []
+      if (theme.activeBg)
+        properties.push('--user-active-bg: '.concat(theme.activeBg, ';'))
+      if (theme.activeFg)
+        properties.push('--user-active-fg: '.concat(theme.activeFg, ';'))
+      if (theme.colorRing)
+        properties.push('--user-color-ring: '.concat(theme.colorRing, ';'))
+      if (theme.toggleOnBg)
+        properties.push('--user-toggle-on-bg: '.concat(theme.toggleOnBg, ';'))
+      if (properties.length > 0) wrap2.style.cssText = properties.join(' ')
+    }
+    function buildHeader(title) {
+      const row = c('div', { className: 'row' })
+      const titleEl = c('label', { className: 'panel-title', text: title })
+      const closeBtn2 = c('button', {
+        className: 'btn-ghost icon',
+        text: '\xD7',
+        attrs: { 'aria-label': '\u5173\u95ED' },
+      })
+      row.append(titleEl)
+      row.append(closeBtn2)
+      return { row, closeBtn: closeBtn2 }
+    }
+    function renderSimplePanel(container, fields) {
+      for (const f of fields) appendField(container, f)
+    }
+    function renderTabsPanel(container, tabs) {
+      var _a
+      const tabsWrap = c('div', { className: 'tabs' })
+      const panels = {}
+      let active = ((_a = tabs[0]) == null ? void 0 : _a.id) || ''
+      for (const t of tabs) {
+        const b = c('button', {
+          className: 'tab-btn',
+          dataset: { tabId: t.id },
+          text: t.title,
+        })
+        tabsWrap.append(b)
+        const p = c('div', { className: 'grid' })
+        panels[t.id] = p
+        if (t.id !== active) p.style.display = 'none'
+        for (const f of t.fields) appendField(p, f)
+      }
+      container.append(tabsWrap)
+      for (const id of Object.keys(panels)) container.append(panels[id])
+      function updateTabsUI() {
+        for (const b of Array.from(tabsWrap.querySelectorAll('.tab-btn'))) {
+          const id = b.dataset.tabId || ''
+          if (id === active) b.classList.add('active')
+          else b.classList.remove('active')
+        }
+        for (const id of Object.keys(panels)) {
+          panels[id].style.display = id === active ? '' : 'none'
+        }
+      }
+      function onTabsClick(e) {
+        const t = e.target
+        const b = t.closest('.tab-btn')
+        if (b && b instanceof HTMLElement) {
+          active = b.dataset.tabId || ''
+          updateTabsUI()
+        }
+      }
+      tabsWrap.addEventListener('click', onTabsClick)
+      updateTabsUI()
+    }
+    const refreshAll = async () => {
+      try {
+        lastValues = await store2.getAll()
+      } catch (e) {}
+      for (const k of Object.keys(fillers)) {
+        for (const fn of fillers[k]) {
+          try {
+            fn()
+          } catch (e) {}
+        }
+      }
+    }
+    function wireStoreChange(store3, fillers2) {
+      var _a
+      try {
+        ;(_a = store3.onChange) == null
+          ? void 0
+          : _a.call(store3, (e) => {
+              if (e.key === '*' || !fillers2[e.key]) {
+                void refreshAll()
+                return
+              }
+              for (const fn of fillers2[e.key]) {
+                try {
+                  fn()
+                } catch (e2) {}
+              }
+            })
+      } catch (e) {}
+    }
+    function fillRadioUI(seg, key) {
+      try {
+        const v = lastValues[key]
+        for (const b of Array.from(seg.querySelectorAll('.seg-btn'))) {
+          const val = b.dataset.value || ''
+          if (val === String(v)) b.classList.add('active')
+          else b.classList.remove('active')
+        }
+      } catch (e) {}
+    }
+    function fillColorUI(seg, key) {
+      try {
+        const v = lastValues[key]
+        for (const b of Array.from(seg.querySelectorAll('.color-swatch'))) {
+          const val = b.dataset.value || ''
+          if (val.toLowerCase() === String(v || '').toLowerCase())
+            b.classList.add('active')
+          else b.classList.remove('active')
+        }
+      } catch (e) {}
+    }
+    function fillToggleUI(onBtn, key) {
+      try {
+        const v = lastValues[key]
+        if (onBtn instanceof HTMLInputElement && onBtn.type === 'checkbox') {
+          onBtn.checked = Boolean(v)
+        }
+      } catch (e) {}
+    }
+    function fillInput(inp, key) {
+      try {
+        const v = lastValues[key]
+        inp.value = String(v != null ? v : '')
+      } catch (e) {}
+    }
+    function fillTextarea(ta, key) {
+      try {
+        const v = lastValues[key]
+        ta.value = String(v != null ? v : '')
+      } catch (e) {}
+    }
+    function fillSelect(sel, key) {
+      try {
+        const v = lastValues[key]
+        for (const o of Array.from(sel.querySelectorAll('option'))) {
+          o.selected = o.value === String(v)
+        }
+      } catch (e) {}
+    }
+    async function handleSegButton(rb) {
+      const key = rb.dataset.key || ''
+      const val = rb.dataset.value || ''
+      if (!key) return
+      try {
+        await store2.set(key, val)
+      } catch (e) {}
+    }
+    async function handleColorSwatch(cs) {
+      const key = cs.dataset.key || ''
+      const val = cs.dataset.value || ''
+      if (!key) return
+      try {
+        await store2.set(key, val)
+      } catch (e) {}
+    }
+    function handleActionBtn(ab) {
+      var _a
+      const key = ab.dataset.key || ''
+      const actionId = ab.dataset.action || ''
+      try {
+        ;(_a = options == null ? void 0 : options.onAction) == null
+          ? void 0
+          : _a.call(options, { key, actionId, target: ab })
+      } catch (e) {}
+    }
+    function onPanelClick(e) {
+      const t = e.target
+      if (t === closeBtn) {
+        host == null ? void 0 : host.remove()
+        globalThis.removeEventListener('keydown', onKeyDown2, true)
+        return
+      }
+      const rb = t.closest('.seg-btn')
+      if (rb && rb instanceof HTMLElement) {
+        void handleSegButton(rb)
+        return
+      }
+      const cs = t.closest('.color-swatch')
+      if (cs && cs instanceof HTMLElement) {
+        void handleColorSwatch(cs)
+        return
+      }
+      const ab = t.closest('.action-btn')
+      if (ab && ab instanceof HTMLElement) handleActionBtn(ab)
+    }
+    function handleInputChange(inp) {
+      var _a
+      const key = (_a = inp.dataset) == null ? void 0 : _a.key
+      if (!key) return
+      const isCheckbox = (inp.type || '').toLowerCase() === 'checkbox'
+      const v = isCheckbox ? Boolean(inp.checked) : inp.value
+      void store2.set(key, v)
+    }
+    function handleTextareaChange(ta) {
+      var _a
+      const key = (_a = ta.dataset) == null ? void 0 : _a.key
+      if (!key) return
+      void store2.set(key, ta.value)
+    }
+    function handleSelectChange(sel) {
+      var _a
+      const key = (_a = sel.dataset) == null ? void 0 : _a.key
+      if (!key) return
+      void store2.set(key, sel.value)
+    }
+    function onPanelChange(e) {
+      const t = e.target
+      const inp = t.closest('input')
+      if (inp && inp instanceof HTMLInputElement) {
+        handleInputChange(inp)
+        return
+      }
+      const ta = t.closest('textarea')
+      if (ta && ta instanceof HTMLTextAreaElement) {
+        handleTextareaChange(ta)
+        return
+      }
+      const sel = t.closest('select')
+      if (sel && sel instanceof HTMLSelectElement) {
+        handleSelectChange(sel)
+      }
+    }
+    if (schema.type === 'simple') renderSimplePanel(grid, schema.fields)
+    else renderTabsPanel(grid, schema.tabs)
+    panel.addEventListener('click', onPanelClick)
+    panel.addEventListener('change', onPanelChange)
+    panel.append(grid)
+    wrap.append(panel)
+    root.append(wrap)
+    wireStoreChange(store2, fillers)
+    void refreshAll()
+    function onKeyDown2(e) {
+      if (e.key === 'Escape') {
+        host == null ? void 0 : host.remove()
+        globalThis.removeEventListener('keydown', onKeyDown2, true)
+      }
+    }
+    globalThis.addEventListener('keydown', onKeyDown2, true)
+  }
+  function createObjectSettingsStore(rootKey, defaults) {
+    let cache
+    let initPromise
+    const changeCbs = []
+    let listenerRegistered = false
+    function registerValueChangeListener() {
+      if (listenerRegistered) return
+      if (typeof GM_addValueChangeListener !== 'function') return
+      try {
+        GM_addValueChangeListener(rootKey, (n, ov, nv, remote) => {
+          console.log('GM_addValueChangeListener', n, ov, nv, remote)
+          try {
+            if (nv && typeof nv === 'object') {
+              const merged = __spreadValues({}, defaults)
+              Object.assign(merged, nv)
+              cache = merged
+            } else {
+              cache = __spreadValues({}, defaults)
+            }
+            for (const f of changeCbs) {
+              f({ key: '*', oldValue: ov, newValue: nv, remote })
+            }
+          } catch (e) {}
+        })
+        listenerRegistered = true
+      } catch (e) {}
+    }
+    registerValueChangeListener()
+    async function ensure() {
+      if (cache) return cache
+      if (initPromise) return initPromise
+      initPromise = (async () => {
+        let obj
+        try {
+          obj = await GM.getValue(rootKey, defaults)
+        } catch (e) {}
+        cache = __spreadValues({}, defaults)
+        if (obj && typeof obj === 'object') Object.assign(cache, obj)
+        initPromise = void 0
+        return cache
+      })()
+      return initPromise
+    }
+    return {
+      async get(key) {
+        var _a
+        const obj = await ensure()
+        return (_a = obj[key]) != null ? _a : defaults[key]
+      },
+      async getAll() {
+        const obj = await ensure()
+        const out = __spreadValues({}, obj)
+        return out
+      },
+      async set(...args) {
+        let obj
+        try {
+          obj = await GM.getValue(rootKey, {})
+        } catch (e) {}
+        if (typeof args[0] === 'string') {
+          const key = args[0]
+          const value = args[1]
+          const dv = defaults[key]
+          setOrDelete(obj, key, value, dv)
+        } else {
+          const kvs = args[0]
+          for (const k of Object.keys(kvs)) {
+            const v = kvs[k]
+            const dv = defaults[k]
+            setOrDelete(obj, k, v, dv)
+          }
+        }
+        cache = __spreadValues({}, defaults)
+        if (obj && typeof obj === 'object') Object.assign(cache, obj)
+        try {
+          await GM.setValue(rootKey, obj)
+        } catch (e) {}
+      },
+      defaults() {
+        return __spreadValues({}, defaults)
+      },
+      onChange(cb) {
+        changeCbs.push(cb)
+      },
+    }
+  }
+  var mode = DEFAULT_READ_HELPER_SETTINGS.mode
+  var style = DEFAULT_READ_HELPER_SETTINGS.style
+  var color = DEFAULT_READ_HELPER_SETTINGS.color
+  var enabled = DEFAULT_READ_HELPER_SETTINGS.enabled
+  var hideOnScroll = DEFAULT_READ_HELPER_SETTINGS.hideOnScroll
+  var moveByArrows = DEFAULT_READ_HELPER_SETTINGS.moveByArrows
+  var skipButtons = DEFAULT_READ_HELPER_SETTINGS.skipButtons
+  var skipLinks = DEFAULT_READ_HELPER_SETTINGS.skipLinks
+  var store = createObjectSettingsStore(
+    READ_HELPER_SETTINGS_KEY,
+    DEFAULT_READ_HELPER_SETTINGS
+  )
   var overlay
   var clickHandlerInstalled = false
   var selectionHandlerInstalled = false
   var dblClickHandlerInstalled = false
   var keyHandlerInstalled = false
-  var menuIds = []
   var selectStartInstalled = false
   var mouseUpInstalled = false
   var scrollHandlerInstalled = false
@@ -798,15 +1020,18 @@
   var scrollingActive = false
   function ensureOverlay() {
     if (!overlay) {
-      overlay = document.createElement('div')
-      overlay.id = 'read-helper-overlay'
-      overlay.style.position = 'fixed'
-      overlay.style.top = '0'
-      overlay.style.left = '0'
-      overlay.style.width = '0'
-      overlay.style.height = '0'
-      overlay.style.pointerEvents = 'none'
-      overlay.style.zIndex = '2147483647'
+      overlay = c('div', {
+        attrs: { id: 'read-helper-overlay' },
+        style: {
+          position: 'fixed',
+          top: '0',
+          left: '0',
+          width: '0',
+          height: '0',
+          pointerEvents: 'none',
+          zIndex: '2147483647',
+        },
+      })
       document.documentElement.append(overlay)
     }
     return overlay
@@ -1035,12 +1260,12 @@
     const tag = (el.tagName || '').toLowerCase()
     if (tag === 'button') return true
     const tokens = Array.from(el.classList || [])
-    for (const c of tokens) {
+    for (const c2 of tokens) {
       if (
-        c === 'btn' ||
-        c.startsWith('btn') ||
-        c === 'button' ||
-        c.startsWith('button')
+        c2 === 'btn' ||
+        c2.startsWith('btn') ||
+        c2 === 'button' ||
+        c2.startsWith('button')
       )
         return true
     }
@@ -1172,18 +1397,21 @@
       for (const g of groups) {
         const h = Math.min(g.height, lineH)
         const padY = Math.max(0, Math.min(DESIRED_PAD_Y, (lineH - h) / 2))
-        const d = document.createElement('div')
-        d.style.position = 'fixed'
-        d.style.left = ''.concat(g.left - BOX_PAD_X, 'px')
-        d.style.top = ''.concat(g.top - padY, 'px')
-        d.style.width = ''.concat(
-          Math.max(0, g.right - g.left + BOX_PAD_X * 2),
-          'px'
-        )
-        d.style.height = ''.concat(Math.max(0, h + padY * 2), 'px')
-        d.style.border = '2px dashed '.concat(color)
-        d.style.borderRadius = '4px'
-        d.style.boxSizing = 'border-box'
+        const d = c('div', {
+          style: {
+            position: 'fixed',
+            left: ''.concat(g.left - BOX_PAD_X, 'px'),
+            top: ''.concat(g.top - padY, 'px'),
+            width: ''.concat(
+              Math.max(0, g.right - g.left + BOX_PAD_X * 2),
+              'px'
+            ),
+            height: ''.concat(Math.max(0, h + padY * 2), 'px'),
+            border: '2px dashed '.concat(color),
+            borderRadius: '4px',
+            boxSizing: 'border-box',
+          },
+        })
         frag.append(d)
       }
       host.append(frag)
@@ -1212,13 +1440,16 @@
       }
       const frag = document.createDocumentFragment()
       for (const g of groups) {
-        const d = document.createElement('div')
-        d.style.position = 'fixed'
-        d.style.left = ''.concat(g.left, 'px')
-        d.style.top = ''.concat(g.bottom + UNDERLINE_OFFSET, 'px')
-        d.style.width = ''.concat(Math.max(0, g.right - g.left), 'px')
-        d.style.height = '0px'
-        d.style.borderBottom = '2px dashed '.concat(color)
+        const d = c('div', {
+          style: {
+            position: 'fixed',
+            left: ''.concat(g.left, 'px'),
+            top: ''.concat(g.bottom + UNDERLINE_OFFSET, 'px'),
+            width: ''.concat(Math.max(0, g.right - g.left), 'px'),
+            height: '0px',
+            borderBottom: '2px dashed '.concat(color),
+          },
+        })
         frag.append(d)
       }
       host.append(frag)
@@ -1228,6 +1459,10 @@
     if (!enabled) return
     const t = e.target
     if (isInteractive(t)) {
+      clearOverlay()
+      return
+    }
+    if (skipLinks && t && t.closest('a')) {
       clearOverlay()
       return
     }
@@ -1447,80 +1682,160 @@
       keyHandlerInstalled = false
     }
   }
-  function registerMenus() {
-    try {
-      if (
-        menuIds.length > 0 &&
-        typeof GM_unregisterMenuCommand === 'function'
-      ) {
-        for (const id2 of menuIds) {
-          try {
-            GM_unregisterMenuCommand(id2)
-          } catch (e) {}
-        }
+  function openSettingsPanel2() {
+    const schema = {
+      type: 'simple',
+      title: '\u9605\u8BFB\u52A9\u624B\u8BBE\u7F6E',
+      fields: [
+        { type: 'toggle', key: 'enabled', label: '\u542F\u7528' },
+        {
+          type: 'radio',
+          key: 'mode',
+          label: '\u6A21\u5F0F',
+          options: [
+            { value: 'sentence', label: '\u6309\u53E5' },
+            { value: 'clause', label: '\u6309\u6BB5' },
+            { value: 'line', label: '\u6309\u884C' },
+            { value: 'paragraph', label: '\u6574\u6BB5' },
+          ],
+        },
+        {
+          type: 'radio',
+          key: 'style',
+          label: '\u6837\u5F0F',
+          options: [
+            { value: 'box', label: '\u865A\u7EBF\u6846' },
+            { value: 'underline', label: '\u4E0B\u5212\u7EBF' },
+          ],
+        },
+        {
+          type: 'colors',
+          key: 'color',
+          label: '\u989C\u8272',
+          options: [
+            { value: '#ff4d4f' },
+            { value: '#3b82f6' },
+            { value: '#22c55e' },
+            { value: '#f59e0b' },
+            { value: '#8b5cf6' },
+            { value: '#111827' },
+          ],
+        },
+        {
+          type: 'toggle',
+          key: 'moveByArrows',
+          label: '\u7528\u65B9\u5411\u952E\u79FB\u52A8',
+        },
+        {
+          type: 'toggle',
+          key: 'hideOnScroll',
+          label: '\u6EDA\u52A8\u65F6\u9690\u85CF',
+        },
+        {
+          type: 'toggle',
+          key: 'skipButtons',
+          label: '\u8DF3\u8FC7\u6309\u94AE',
+        },
+        { type: 'toggle', key: 'skipLinks', label: '\u8DF3\u8FC7\u94FE\u63A5' },
+      ],
+    }
+    openSettingsPanel(schema, store, {
+      hostDatasetKey: 'rhHost',
+      hostDatasetValue: 'read-helper-settings',
+      theme: {
+        activeBg: '#111827',
+        activeFg: '#ffffff',
+        colorRing: '#111827',
+        toggleOnBg: '#111827',
+      },
+    })
+  }
+  function installUrlWatcher() {
+    let lastUrl = globalThis.location.href
+    const onUrlChanged = () => {
+      const cur = globalThis.location.href
+      if (cur === lastUrl) return
+      lastUrl = cur
+      if (!lastRange) return
+      const sc = lastRange.startContainer
+      const ec = lastRange.endContainer
+      const stillConnected =
+        Boolean(sc && sc.isConnected) && Boolean(ec && ec.isConnected)
+      if (!stillConnected) {
+        clearOverlay()
+        return
       }
-      menuIds = []
+      const anc = lastRange.commonAncestorContainer
+      const elem = anc instanceof Element ? anc : anc.parentElement || void 0
+      const block = elem ? closestBlockElement(elem) || elem : void 0
+      if (!block || !isElementVisible(block)) {
+        clearOverlay()
+      }
+    }
+    try {
+      const origPush = history.pushState
+      history.pushState = function (...args) {
+        const ret = origPush.apply(history, args)
+        onUrlChanged()
+        return ret
+      }
     } catch (e) {}
+    try {
+      const origReplace = history.replaceState
+      history.replaceState = function (...args) {
+        const ret = origReplace.apply(history, args)
+        onUrlChanged()
+        return ret
+      }
+    } catch (e) {}
+    globalThis.addEventListener('popstate', onUrlChanged)
+    globalThis.addEventListener('hashchange', onUrlChanged)
+  }
+  function registerMenus() {
     if (typeof GM_registerMenuCommand !== 'function') return
-    const id = GM_registerMenuCommand('\u8BBE\u7F6E', () => {
+    GM_registerMenuCommand('\u8BBE\u7F6E', () => {
       ;(async () => {
         try {
-          const m = await Promise.resolve().then(
-            () => (init_settings_panel(), settings_panel_exports)
-          )
-          if (typeof m.openSettingsPanel === 'function') m.openSettingsPanel()
+          openSettingsPanel2()
         } catch (e) {}
       })()
     })
-    try {
-      menuIds.push(id)
-    } catch (e) {}
   }
   function listenSettings() {
-    if (typeof GM_addValueChangeListener !== 'function') return
-    GM_addValueChangeListener(MODE_KEY2, (_, __, nv) => {
-      mode = nv
-      if (lastRange) {
-        const caret = document.createRange()
-        caret.setStart(lastRange.startContainer, lastRange.startOffset)
-        caret.collapse(true)
-        const r = findSegmentRange(caret, mode)
-        if (r) {
-          drawRange(r)
-          lastRange = r
-        } else {
+    var _a
+    try {
+      ;(_a = store.onChange) == null
+        ? void 0
+        : _a.call(store, () => {
+            void applySettingsFromStore()
+          })
+    } catch (e) {}
+  }
+  async function applySettingsFromStore() {
+    try {
+      const prevEnabled = enabled
+      const obj = await store.getAll()
+      mode = obj.mode
+      style = obj.style
+      color = String(obj.color || '')
+      enabled = Boolean(obj.enabled)
+      hideOnScroll = Boolean(obj.hideOnScroll)
+      moveByArrows = Boolean(obj.moveByArrows)
+      skipButtons = Boolean(obj.skipButtons)
+      skipLinks = Boolean(obj.skipLinks)
+      const changed = prevEnabled !== enabled
+      if (changed) {
+        if (enabled) installEvents()
+        else {
           clearOverlay()
+          removeEvents()
         }
-      }
-    })
-    GM_addValueChangeListener(STYLE_KEY2, (_, __, nv) => {
-      style = nv
-      if (lastRange) drawRange(lastRange)
-      else clearOverlay()
-    })
-    GM_addValueChangeListener(COLOR_KEY2, (_, __, nv) => {
-      color = nv
-      if (lastRange) drawRange(lastRange)
-      else clearOverlay()
-    })
-    GM_addValueChangeListener(ENABLED_KEY2, (_, __, nv) => {
-      enabled = typeof nv === 'string' ? nv === '1' : Boolean(nv)
-      if (enabled) installEvents()
-      else {
+      } else if (lastRange) {
+        drawRange(lastRange)
+      } else {
         clearOverlay()
-        removeEvents()
       }
-    })
-    GM_addValueChangeListener(SCROLL_HIDE_KEY2, (_, __, nv) => {
-      hideOnScroll = Boolean(nv)
-      if (hideOnScroll) clearOverlay()
-    })
-    GM_addValueChangeListener(MOVE_BY_ARROWS_KEY, (_, __, nv) => {
-      moveByArrows = Boolean(nv)
-    })
-    GM_addValueChangeListener(SKIP_BUTTONS_KEY2, (_, __, nv) => {
-      skipButtons = nv === '1' ? true : Boolean(nv)
-    })
+    } catch (e) {}
   }
   function bootstrap() {
     const d = document.documentElement
@@ -1529,39 +1844,8 @@
     if (enabled) installEvents()
     registerMenus()
     listenSettings()
-    void (async () => {
-      try {
-        const mv = await GM.getValue(MODE_KEY2, mode)
-        mode = mv
-      } catch (e) {}
-      try {
-        const sv = await GM.getValue(STYLE_KEY2, style)
-        style = sv
-      } catch (e) {}
-      try {
-        const cv = await GM.getValue(COLOR_KEY2, color)
-        color = String(cv || color)
-      } catch (e) {}
-      try {
-        const ev = await GM.getValue(ENABLED_KEY2, enabled ? '1' : '0')
-        const flag = typeof ev === 'string' ? ev === '1' : Boolean(ev)
-        enabled = flag
-        if (enabled) installEvents()
-        else removeEvents()
-      } catch (e) {}
-      try {
-        const sh = await GM.getValue(SCROLL_HIDE_KEY2, hideOnScroll)
-        hideOnScroll = Boolean(sh)
-      } catch (e) {}
-      try {
-        const ma = await GM.getValue(MOVE_BY_ARROWS_KEY, moveByArrows)
-        moveByArrows = Boolean(ma)
-      } catch (e) {}
-      try {
-        const sb = await GM.getValue(SKIP_BUTTONS_KEY2, skipButtons ? '1' : '0')
-        skipButtons = typeof sb === 'string' ? sb === '1' : Boolean(sb)
-      } catch (e) {}
-    })()
+    void applySettingsFromStore()
+    installUrlWatcher()
   }
   bootstrap()
 })()
