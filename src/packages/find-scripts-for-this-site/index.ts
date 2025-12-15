@@ -1,10 +1,12 @@
 import styleText from 'css:./style.css'
 import {
   registerMenu,
+  unregisterMenu,
   openInTab,
   getValue,
   setValue,
   addStyle,
+  addValueChangeListener,
 } from '../../common/gm'
 
 type RepoConfig = {
@@ -22,8 +24,6 @@ type Config = {
   DEBUG: boolean
   SETTINGS_KEY: string
 }
-
-type TemplateMap = Record<string, string>
 
 // Configuration constants
 const CONFIG: Config = {
@@ -94,8 +94,6 @@ const I18N: Record<string, Record<string, string>> = {
     title_settings: 'Repository Settings',
     btn_save: 'Save',
     btn_cancel: 'Cancel',
-    note_refresh:
-      'Note: Please refresh the page after saving for changes to take effect.',
     title_domain: 'Domain Search',
     title_keyword: 'Keyword Search',
     menu_settings: '⚙️ Settings',
@@ -106,7 +104,6 @@ const I18N: Record<string, Record<string, string>> = {
     title_settings: '仓库设置',
     btn_save: '保存',
     btn_cancel: '取消',
-    note_refresh: '注意：保存后请刷新页面以使更改生效。',
     title_domain: '域名搜索',
     title_keyword: '关键字搜索',
     menu_settings: '⚙️ 设置',
@@ -117,7 +114,6 @@ const I18N: Record<string, Record<string, string>> = {
     title_settings: '倉庫設置',
     btn_save: '保存',
     btn_cancel: '取消',
-    note_refresh: '注意：保存後請刷新頁面以使更改生效。',
     title_domain: '域名搜索',
     title_keyword: '關鍵字搜索',
     menu_settings: '⚙️ 設置',
@@ -128,8 +124,6 @@ const I18N: Record<string, Record<string, string>> = {
     title_settings: 'リポジトリ設定',
     btn_save: '保存',
     btn_cancel: 'キャンセル',
-    note_refresh:
-      '注意：変更を有効にするには、保存後にページを更新してください。',
     title_domain: 'ドメイン検索',
     title_keyword: 'キーワード検索',
     menu_settings: '⚙️ 設定',
@@ -140,8 +134,6 @@ const I18N: Record<string, Record<string, string>> = {
     title_settings: '저장소 설정',
     btn_save: '저장',
     btn_cancel: '취소',
-    note_refresh:
-      '참고: 변경 사항을 적용하려면 저장 후 페이지를 새로 고침하세요.',
     title_domain: '도메인 검색',
     title_keyword: '키워드 검색',
     menu_settings: '⚙️ 설정',
@@ -152,8 +144,6 @@ const I18N: Record<string, Record<string, string>> = {
     title_settings: 'Configuración de repositorios',
     btn_save: 'Guardar',
     btn_cancel: 'Cancelar',
-    note_refresh:
-      'Nota: Por favor, actualice la página después de guardar para que los cambios surtan efecto.',
     title_domain: 'Búsqueda por dominio',
     title_keyword: 'Búsqueda por palabra clave',
     menu_settings: '⚙️ Configuración',
@@ -164,8 +154,6 @@ const I18N: Record<string, Record<string, string>> = {
     title_settings: 'Paramètres des dépôts',
     btn_save: 'Enregistrer',
     btn_cancel: 'Annuler',
-    note_refresh:
-      "Remarque : Veuillez actualiser la page après l'enregistrement pour que les modifications prennent effet.",
     title_domain: 'Recherche par domaine',
     title_keyword: 'Recherche par mot-clé',
     menu_settings: '⚙️ Paramètres',
@@ -176,8 +164,6 @@ const I18N: Record<string, Record<string, string>> = {
     title_settings: 'Repository-Einstellungen',
     btn_save: 'Speichern',
     btn_cancel: 'Abbrechen',
-    note_refresh:
-      'Hinweis: Bitte aktualisieren Sie die Seite nach dem Speichern, damit die Änderungen wirksam werden.',
     title_domain: 'Domain-Suche',
     title_keyword: 'Stichwortsuche',
     menu_settings: '⚙️ Einstellungen',
@@ -188,8 +174,6 @@ const I18N: Record<string, Record<string, string>> = {
     title_settings: 'Настройки репозиториев',
     btn_save: 'Сохранить',
     btn_cancel: 'Отмена',
-    note_refresh:
-      'Примечание: Пожалуйста, обновите страницу после сохранения, чтобы изменения вступили в силу.',
     title_domain: 'Поиск по домену',
     title_keyword: 'Поиск по ключевому слову',
     menu_settings: '⚙️ Настройки',
@@ -307,6 +291,27 @@ function getLocalizedMenuText(
   return template.replace('{icon}', repo.icon).replace('{name}', repo.name)
 }
 
+let MENU_IDS: number[] = []
+let SETTINGS_MENU_ID: number | undefined
+
+function clearMenus(): void {
+  for (const id of MENU_IDS) {
+    unregisterMenu(id)
+  }
+
+  MENU_IDS = []
+  if (SETTINGS_MENU_ID) {
+    unregisterMenu(SETTINGS_MENU_ID)
+    SETTINGS_MENU_ID = undefined
+  }
+}
+
+function registerAllMenus(): void {
+  const domain = extractDomain()
+  registerMenuCommands(domain)
+  registerSettingsMenu()
+}
+
 /**
  * Register menu commands for each repository
  * @param {string} domain - The extracted domain
@@ -317,20 +322,22 @@ function registerMenuCommands(domain: string): void {
     if (repo.domainSearchUrl && repo.domainSearchEnabled) {
       const url = repo.domainSearchUrl.replace('{domain}', domain)
       const menuText = getLocalizedMenuText(repo)
-      registerMenu(menuText, () => {
+      const id = registerMenu(menuText, () => {
         debugLog(`Opening ${repo.name} for domain:`, domain)
         openInTab(url, { active: true, insert: true })
       })
+      MENU_IDS.push(id)
     }
 
     // Register keyword search menu if keywordSearchUrl is defined and enabled
     if (repo.keywordSearchUrl && repo.keywordSearchEnabled) {
       const keywordUrl = repo.keywordSearchUrl.replace('{keyword}', domain)
       const keywordMenuText = getLocalizedMenuText(repo, true)
-      registerMenu(keywordMenuText, () => {
+      const id = registerMenu(keywordMenuText, () => {
         debugLog(`Opening ${repo.name} for keyword search:`, domain)
         openInTab(keywordUrl, { active: true, insert: true })
       })
+      MENU_IDS.push(id)
     }
   }
 }
@@ -414,12 +421,6 @@ function showSettingsDialog(): void {
   titleEl.textContent = t('title_settings')
   const content = document.createElement('div')
   content.id = 'find-scripts-settings-content'
-  const note = document.createElement('div')
-  note.className = 'find-scripts-refresh-note'
-  note.style.marginTop = '15px'
-  note.style.color = '#e74c3c'
-  note.style.fontSize = '0.9em'
-  note.textContent = t('note_refresh')
   const btns = document.createElement('div')
   btns.className = 'find-scripts-buttons'
   const cancelBtn = document.createElement('button')
@@ -430,7 +431,7 @@ function showSettingsDialog(): void {
   saveBtn.className = 'primary'
   saveBtn.textContent = t('btn_save')
   btns.append(cancelBtn, saveBtn)
-  dialog.append(titleEl, content, note, btns)
+  dialog.append(titleEl, content, btns)
 
   // Add repository options
   const contentWrap = dialog.querySelector('#find-scripts-settings-content')!
@@ -518,10 +519,6 @@ function showSettingsDialog(): void {
     // Save settings
     void saveSettings()
 
-    // Refresh menu commands
-    const domain = extractDomain()
-    registerMenuCommands(domain)
-
     // Close dialog
     overlay.remove()
   })
@@ -543,7 +540,7 @@ function showSettingsDialog(): void {
  */
 function registerSettingsMenu(): void {
   const menuText = t('menu_settings')
-  registerMenu(menuText, showSettingsDialog)
+  SETTINGS_MENU_ID = registerMenu(menuText, showSettingsDialog)
 }
 
 /**
@@ -554,11 +551,16 @@ async function initialize(): Promise<void> {
   await loadSettings()
 
   // Register menu commands
-  const domain = extractDomain()
-  registerMenuCommands(domain)
-  registerSettingsMenu()
+  registerAllMenus()
 
-  debugLog('Script initialized for domain:', domain)
+  // Listen settings changes across tabs and current tab
+  void addValueChangeListener(CONFIG.SETTINGS_KEY, () => {
+    void (async () => {
+      await loadSettings()
+      clearMenus()
+      registerAllMenus()
+    })()
+  })
 }
 
 // Initialize the script

@@ -5,7 +5,7 @@ declare module 'css:*' {
 
 declare function GM_addValueChangeListener(
   key: string,
-  cb: (name: string, old_value: any, new_value: any, remote: boolean) => void
+  cb: (key: string, oldValue: any, newValue: any, remote: boolean) => void
 ): number
 
 declare function GM_registerMenuCommand(
@@ -19,15 +19,21 @@ declare function GM_unregisterMenuCommand(menuId: number): void
 declare const GM: {
   getValue<T = unknown>(key: string, defaultValue: T): Promise<T>
   setValue(key: string, value: unknown): Promise<void>
+  addValueChangeListener(
+    key: string,
+    cb: (key: string, oldValue: any, newValue: any, remote: boolean) => void
+  ): Promise<number>
+  removeValueChangeListener(id: number): Promise<void>
 }
 
-declare function GM_getValue(name: string, defaultValue: T): any
-declare function GM_setValue(name: string, value: any): void
+declare function GM_getValue<T = unknown>(key: string, defaultValue: T): any
+declare function GM_setValue(key: string, value: any): void
 declare function GM_addStyle(css: string): void
 declare function GM_openInTab(
   url: string,
   options?: { active?: boolean; insert?: boolean }
 ): void
+declare function GM_removeValueChangeListener(id: number): void
 
 declare function GM_xmlhttpRequest(options: {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'

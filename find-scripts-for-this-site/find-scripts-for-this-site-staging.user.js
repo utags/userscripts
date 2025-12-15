@@ -11,7 +11,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.2.3
+// @version              0.2.4
 // @description          Find userscripts for the current website from popular script repositories
 // @description:zh-CN    查找适用于当前网站的用户脚本，支持多个脚本仓库
 // @description:zh-TW    查找適用於當前網站的用戶腳本，支持多個腳本倉庫
@@ -27,12 +27,15 @@
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2232%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%20font-family%3D%22Menlo%2C%20Monaco%2C%20Consolas%2C%20Courier%20New%2C%20monospace%22%20font-size%3D%2242%22%20font-weight%3D%22700%22%20fill%3D%22%231f2937%22%3E%7B%7D%3C/text%3E%3C/svg%3E
 // @noframes
 // @grant                GM_registerMenuCommand
+// @grant                GM_unregisterMenuCommand
 // @grant                GM_openInTab
 // @grant                GM.getValue
 // @grant                GM_getValue
 // @grant                GM.setValue
 // @grant                GM_setValue
 // @grant                GM_addStyle
+// @grant                GM.addValueChangeListener
+// @grant                GM_addValueChangeListener
 // ==/UserScript==
 //
 ;(() => {
@@ -67,6 +70,11 @@
     }
     return 0
   }
+  function unregisterMenu(menuId) {
+    if (typeof GM_unregisterMenuCommand === 'function') {
+      GM_unregisterMenuCommand(menuId)
+    }
+  }
   function openInTab(url, options) {
     if (typeof GM_openInTab === 'function') {
       GM_openInTab(url, options)
@@ -100,6 +108,18 @@
     const style = document.createElement('style')
     style.textContent = css
     document.head.append(style)
+  }
+  async function addValueChangeListener(key, callback) {
+    if (
+      typeof GM !== 'undefined' &&
+      typeof GM.addValueChangeListener === 'function'
+    ) {
+      return GM.addValueChangeListener(key, callback)
+    }
+    if (typeof GM_addValueChangeListener === 'function') {
+      return GM_addValueChangeListener(key, callback)
+    }
+    return 0
   }
   var CONFIG = {
     REPOSITORIES: [
@@ -168,8 +188,6 @@
       title_settings: 'Repository Settings',
       btn_save: 'Save',
       btn_cancel: 'Cancel',
-      note_refresh:
-        'Note: Please refresh the page after saving for changes to take effect.',
       title_domain: 'Domain Search',
       title_keyword: 'Keyword Search',
       menu_settings: '\u2699\uFE0F Settings',
@@ -182,8 +200,6 @@
       title_settings: '\u4ED3\u5E93\u8BBE\u7F6E',
       btn_save: '\u4FDD\u5B58',
       btn_cancel: '\u53D6\u6D88',
-      note_refresh:
-        '\u6CE8\u610F\uFF1A\u4FDD\u5B58\u540E\u8BF7\u5237\u65B0\u9875\u9762\u4EE5\u4F7F\u66F4\u6539\u751F\u6548\u3002',
       title_domain: '\u57DF\u540D\u641C\u7D22',
       title_keyword: '\u5173\u952E\u5B57\u641C\u7D22',
       menu_settings: '\u2699\uFE0F \u8BBE\u7F6E',
@@ -196,8 +212,6 @@
       title_settings: '\u5009\u5EAB\u8A2D\u7F6E',
       btn_save: '\u4FDD\u5B58',
       btn_cancel: '\u53D6\u6D88',
-      note_refresh:
-        '\u6CE8\u610F\uFF1A\u4FDD\u5B58\u5F8C\u8ACB\u5237\u65B0\u9801\u9762\u4EE5\u4F7F\u66F4\u6539\u751F\u6548\u3002',
       title_domain: '\u57DF\u540D\u641C\u7D22',
       title_keyword: '\u95DC\u9375\u5B57\u641C\u7D22',
       menu_settings: '\u2699\uFE0F \u8A2D\u7F6E',
@@ -210,8 +224,6 @@
       title_settings: '\u30EA\u30DD\u30B8\u30C8\u30EA\u8A2D\u5B9A',
       btn_save: '\u4FDD\u5B58',
       btn_cancel: '\u30AD\u30E3\u30F3\u30BB\u30EB',
-      note_refresh:
-        '\u6CE8\u610F\uFF1A\u5909\u66F4\u3092\u6709\u52B9\u306B\u3059\u308B\u306B\u306F\u3001\u4FDD\u5B58\u5F8C\u306B\u30DA\u30FC\u30B8\u3092\u66F4\u65B0\u3057\u3066\u304F\u3060\u3055\u3044\u3002',
       title_domain: '\u30C9\u30E1\u30A4\u30F3\u691C\u7D22',
       title_keyword: '\u30AD\u30FC\u30EF\u30FC\u30C9\u691C\u7D22',
       menu_settings: '\u2699\uFE0F \u8A2D\u5B9A',
@@ -224,8 +236,6 @@
       title_settings: '\uC800\uC7A5\uC18C \uC124\uC815',
       btn_save: '\uC800\uC7A5',
       btn_cancel: '\uCDE8\uC18C',
-      note_refresh:
-        '\uCC38\uACE0: \uBCC0\uACBD \uC0AC\uD56D\uC744 \uC801\uC6A9\uD558\uB824\uBA74 \uC800\uC7A5 \uD6C4 \uD398\uC774\uC9C0\uB97C \uC0C8\uB85C \uACE0\uCE68\uD558\uC138\uC694.',
       title_domain: '\uB3C4\uBA54\uC778 \uAC80\uC0C9',
       title_keyword: '\uD0A4\uC6CC\uB4DC \uAC80\uC0C9',
       menu_settings: '\u2699\uFE0F \uC124\uC815',
@@ -236,8 +246,6 @@
       title_settings: 'Configuraci\xF3n de repositorios',
       btn_save: 'Guardar',
       btn_cancel: 'Cancelar',
-      note_refresh:
-        'Nota: Por favor, actualice la p\xE1gina despu\xE9s de guardar para que los cambios surtan efecto.',
       title_domain: 'B\xFAsqueda por dominio',
       title_keyword: 'B\xFAsqueda por palabra clave',
       menu_settings: '\u2699\uFE0F Configuraci\xF3n',
@@ -248,8 +256,6 @@
       title_settings: 'Param\xE8tres des d\xE9p\xF4ts',
       btn_save: 'Enregistrer',
       btn_cancel: 'Annuler',
-      note_refresh:
-        "Remarque : Veuillez actualiser la page apr\xE8s l'enregistrement pour que les modifications prennent effet.",
       title_domain: 'Recherche par domaine',
       title_keyword: 'Recherche par mot-cl\xE9',
       menu_settings: '\u2699\uFE0F Param\xE8tres',
@@ -260,8 +266,6 @@
       title_settings: 'Repository-Einstellungen',
       btn_save: 'Speichern',
       btn_cancel: 'Abbrechen',
-      note_refresh:
-        'Hinweis: Bitte aktualisieren Sie die Seite nach dem Speichern, damit die \xC4nderungen wirksam werden.',
       title_domain: 'Domain-Suche',
       title_keyword: 'Stichwortsuche',
       menu_settings: '\u2699\uFE0F Einstellungen',
@@ -275,8 +279,6 @@
         '\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0440\u0435\u043F\u043E\u0437\u0438\u0442\u043E\u0440\u0438\u0435\u0432',
       btn_save: '\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C',
       btn_cancel: '\u041E\u0442\u043C\u0435\u043D\u0430',
-      note_refresh:
-        '\u041F\u0440\u0438\u043C\u0435\u0447\u0430\u043D\u0438\u0435: \u041F\u043E\u0436\u0430\u043B\u0443\u0439\u0441\u0442\u0430, \u043E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u0443 \u043F\u043E\u0441\u043B\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F, \u0447\u0442\u043E\u0431\u044B \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0432\u0441\u0442\u0443\u043F\u0438\u043B\u0438 \u0432 \u0441\u0438\u043B\u0443.',
       title_domain:
         '\u041F\u043E\u0438\u0441\u043A \u043F\u043E \u0434\u043E\u043C\u0435\u043D\u0443',
       title_keyword:
@@ -355,23 +357,42 @@
     const template = t(key)
     return template.replace('{icon}', repo.icon).replace('{name}', repo.name)
   }
+  var MENU_IDS = []
+  var SETTINGS_MENU_ID
+  function clearMenus() {
+    for (const id of MENU_IDS) {
+      unregisterMenu(id)
+    }
+    MENU_IDS = []
+    if (SETTINGS_MENU_ID) {
+      unregisterMenu(SETTINGS_MENU_ID)
+      SETTINGS_MENU_ID = void 0
+    }
+  }
+  function registerAllMenus() {
+    const domain = extractDomain()
+    registerMenuCommands(domain)
+    registerSettingsMenu()
+  }
   function registerMenuCommands(domain) {
     for (const repo of CONFIG.REPOSITORIES) {
       if (repo.domainSearchUrl && repo.domainSearchEnabled) {
         const url = repo.domainSearchUrl.replace('{domain}', domain)
         const menuText = getLocalizedMenuText(repo)
-        registerMenu(menuText, () => {
+        const id = registerMenu(menuText, () => {
           debugLog('Opening '.concat(repo.name, ' for domain:'), domain)
           openInTab(url, { active: true, insert: true })
         })
+        MENU_IDS.push(id)
       }
       if (repo.keywordSearchUrl && repo.keywordSearchEnabled) {
         const keywordUrl = repo.keywordSearchUrl.replace('{keyword}', domain)
         const keywordMenuText = getLocalizedMenuText(repo, true)
-        registerMenu(keywordMenuText, () => {
+        const id = registerMenu(keywordMenuText, () => {
           debugLog('Opening '.concat(repo.name, ' for keyword search:'), domain)
           openInTab(keywordUrl, { active: true, insert: true })
         })
+        MENU_IDS.push(id)
       }
     }
   }
@@ -431,12 +452,6 @@
     titleEl.textContent = t('title_settings')
     const content = document.createElement('div')
     content.id = 'find-scripts-settings-content'
-    const note = document.createElement('div')
-    note.className = 'find-scripts-refresh-note'
-    note.style.marginTop = '15px'
-    note.style.color = '#e74c3c'
-    note.style.fontSize = '0.9em'
-    note.textContent = t('note_refresh')
     const btns = document.createElement('div')
     btns.className = 'find-scripts-buttons'
     const cancelBtn = document.createElement('button')
@@ -447,7 +462,7 @@
     saveBtn.className = 'primary'
     saveBtn.textContent = t('btn_save')
     btns.append(cancelBtn, saveBtn)
-    dialog.append(titleEl, content, note, btns)
+    dialog.append(titleEl, content, btns)
     const contentWrap = dialog.querySelector('#find-scripts-settings-content')
     const domainSection = document.createElement('div')
     const domainTitle = document.createElement('h3')
@@ -509,8 +524,6 @@
         }
       }
       void saveSettings()
-      const domain = extractDomain()
-      registerMenuCommands(domain)
       overlay.remove()
     })
     cancelBtn.addEventListener('click', () => {
@@ -523,14 +536,18 @@
   }
   function registerSettingsMenu() {
     const menuText = t('menu_settings')
-    registerMenu(menuText, showSettingsDialog)
+    SETTINGS_MENU_ID = registerMenu(menuText, showSettingsDialog)
   }
   async function initialize() {
     await loadSettings()
-    const domain = extractDomain()
-    registerMenuCommands(domain)
-    registerSettingsMenu()
-    debugLog('Script initialized for domain:', domain)
+    registerAllMenus()
+    void addValueChangeListener(CONFIG.SETTINGS_KEY, () => {
+      void (async () => {
+        await loadSettings()
+        clearMenus()
+        registerAllMenus()
+      })()
+    })
   }
   void initialize()
 })()

@@ -60,3 +60,40 @@ export function addStyle(css: string): void {
   style.textContent = css
   document.head.append(style)
 }
+
+export async function addValueChangeListener(
+  key: string,
+  callback: (
+    key: string,
+    oldValue: unknown,
+    newValue: unknown,
+    remote: boolean
+  ) => void
+): Promise<number> {
+  if (
+    typeof GM !== 'undefined' &&
+    typeof GM.addValueChangeListener === 'function'
+  ) {
+    return GM.addValueChangeListener(key, callback)
+  }
+
+  if (typeof GM_addValueChangeListener === 'function') {
+    return GM_addValueChangeListener(key, callback as any)
+  }
+
+  return 0
+}
+
+export async function removeValueChangeListener(id: number): Promise<void> {
+  if (
+    typeof GM !== 'undefined' &&
+    typeof GM.removeValueChangeListener === 'function'
+  ) {
+    await GM.removeValueChangeListener(id)
+    return
+  }
+
+  if (typeof GM_removeValueChangeListener === 'function') {
+    GM_removeValueChangeListener(id)
+  }
+}
