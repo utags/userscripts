@@ -47,6 +47,7 @@ const xoConfig = [
       'prefer-destructuring': 0,
       'unicorn/prefer-spread': 0,
       'prefer-object-spread': 0,
+      'unicorn/prefer-at': 0,
       'unicorn/prevent-abbreviations': 0,
       'unicorn/prefer-string-raw': 0,
       'capitalized-comments': 0,

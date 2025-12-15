@@ -21,6 +21,14 @@ declare const GM: {
   setValue(key: string, value: unknown): Promise<void>
 }
 
+declare function GM_getValue(name: string, defaultValue: T): any
+declare function GM_setValue(name: string, value: any): void
+declare function GM_addStyle(css: string): void
+declare function GM_openInTab(
+  url: string,
+  options?: { active?: boolean; insert?: boolean }
+): void
+
 declare function GM_xmlhttpRequest(options: {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
   url: string

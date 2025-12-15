@@ -1,13 +1,13 @@
 // ==UserScript==
-// @name                 Find Scripts For This Site
-// @name:zh-CN           查找适用于当前网站的脚本
-// @name:zh-TW           查找適用於當前網站的腳本
-// @name:ja              このサイト用のスクリプトを探す
-// @name:ko              이 사이트용 스크립트 찾기
-// @name:es              Buscar scripts para este sitio
-// @name:fr              Trouver des scripts pour ce site
-// @name:de              Skripte für diese Website finden
-// @name:ru              Найти скрипты для этого сайта
+// @name                 Find Scripts For This Site - staging
+// @name:zh-CN           查找适用于当前网站的脚本 - staging
+// @name:zh-TW           查找適用於當前網站的腳本 - staging
+// @name:ja              このサイト用のスクリプトを探す - staging
+// @name:ko              이 사이트용 스크립트 찾기 - staging
+// @name:es              Buscar scripts para este sitio - staging
+// @name:fr              Trouver des scripts pour ce site - staging
+// @name:de              Skripte für diese Website finden - staging
+// @name:ru              Найти скрипты для этого сайта - staging
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues

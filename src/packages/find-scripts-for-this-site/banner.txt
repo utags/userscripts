@@ -1,0 +1,30 @@
+// ==UserScript==
+// @name                 Find Scripts For This Site
+// @name:zh-CN           查找适用于当前网站的脚本
+// @name:zh-TW           查找適用於當前網站的腳本
+// @name:ja              このサイト用のスクリプトを探す
+// @name:ko              이 사이트용 스크립트 찾기
+// @name:es              Buscar scripts para este sitio
+// @name:fr              Trouver des scripts pour ce site
+// @name:de              Skripte für diese Website finden
+// @name:ru              Найти скрипты для этого сайта
+// @namespace            {namespace}
+// @homepageURL          {homepage}
+// @supportURL           {bugs.url}
+// @version              0.2.2
+// @description          Find userscripts for the current website from popular script repositories
+// @description:zh-CN    查找适用于当前网站的用户脚本，支持多个脚本仓库
+// @description:zh-TW    查找適用於當前網站的用戶腳本，支持多個腳本倉庫
+// @description:ja       人気のスクリプトリポジトリから現在のウェブサイト用のユーザースクリプトを見つける
+// @description:ko       인기 스크립트 저장소에서 현재 웹사이트용 사용자 스크립트 찾기
+// @description:es       Encuentra userscripts para el sitio web actual desde repositorios populares
+// @description:fr       Trouvez des scripts utilisateur pour le site Web actuel à partir de référentiels de scripts populaires
+// @description:de       Finden Sie Benutzerskripte für die aktuelle Website aus beliebten Skript-Repositories
+// @description:ru       Найдите пользовательские скрипты для текущего веб-сайта из популярных репозиториев скриптов
+// @author               {author}
+// @license              {license}
+// @match                *://*/*
+// @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2232%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%20font-family%3D%22Menlo%2C%20Monaco%2C%20Consolas%2C%20Courier%20New%2C%20monospace%22%20font-size%3D%2242%22%20font-weight%3D%22700%22%20fill%3D%22%231f2937%22%3E%7B%7D%3C/text%3E%3C/svg%3E
+// @noframes
+// ==/UserScript==
+//

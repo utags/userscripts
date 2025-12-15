@@ -29,12 +29,10 @@
 
 ## TypeScript 与 GM API
 
-- 直接使用全局 `GM_*` API，不使用 `(globalThis as any).GM_*`。
-- 在使用处为 `GM_*` 做显式声明，例如：
-  - `declare const GM_registerMenuCommand: (caption: string, onClick: () => void) => any`
-  - `declare const GM_unregisterMenuCommand: (menuId: any) => void`
-  - `declare const GM_addValueChangeListener: (name: string, cb: (name: string, oldValue: string, newValue: string, remote: boolean) => void) => any`
-- 调用前使用 `typeof fn === 'function'` 判定以兼容不同脚本管理器。
+- 统一通过 `src/common/gm.ts` 封装访问 `GM_*` 与 `GM.*`，在封装内提供 fallback。
+- 禁止使用 `(globalThis as any).GM_*` 访问方式。
+- 在 `src/global.d.ts` 统一维护 GM API 类型定义。
+- 业务代码直接调用封装模块方法，无需各处重复 `typeof fn === 'function'` 判定。
 
 ## DOM 与样式约定
 
