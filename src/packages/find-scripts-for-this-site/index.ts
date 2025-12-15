@@ -87,34 +87,120 @@ const CONFIG: Config = {
   SETTINGS_KEY: 'find_scripts_settings', // Key for storing settings
 }
 
-const I18N: {
-  menuTemplate: TemplateMap
-  keywordSearchTemplate: TemplateMap
-} = {
-  // Menu text template for domain search: "{icon} Find scripts by domain on {name}"
-  menuTemplate: {
-    en: '{icon} Find scripts by domain on {name}',
-    'zh-CN': '{icon} 在 {name} 上按域名查找脚本',
-    'zh-TW': '{icon} 在 {name} 上按域名查找腳本',
-    ja: '{icon} {name} でドメインからスクリプトを探す',
-    ko: '{icon} {name}에서 도메인으로 스크립트 찾기',
-    es: '{icon} Buscar scripts por dominio en {name}',
-    fr: '{icon} Trouver des scripts par domaine sur {name}',
-    de: '{icon} Skripte nach Domain auf {name} finden',
-    ru: '{icon} Найти скрипты по домену на {name}',
+const I18N: Record<string, Record<string, string>> = {
+  en: {
+    menu_domain: '{icon} Find scripts by domain on {name}',
+    menu_keyword: '{icon} Find scripts by keyword on {name}',
+    title_settings: 'Repository Settings',
+    btn_save: 'Save',
+    btn_cancel: 'Cancel',
+    note_refresh:
+      'Note: Please refresh the page after saving for changes to take effect.',
+    title_domain: 'Domain Search',
+    title_keyword: 'Keyword Search',
+    menu_settings: '⚙️ Settings',
   },
-  // Menu text template for keyword search: "{icon} Find scripts by keyword on {name}"
-  keywordSearchTemplate: {
-    en: '{icon} Find scripts by keyword on {name}',
-    'zh-CN': '{icon} 在 {name} 上按关键字查找脚本',
-    'zh-TW': '{icon} 在 {name} 上按關鍵字查找腳本',
-    ja: '{icon} {name} でキーワードからスクリプトを探す',
-    ko: '{icon} {name}에서 키워드로 스크립트 찾기',
-    es: '{icon} Buscar scripts por palabra clave en {name}',
-    fr: '{icon} Trouver des scripts par mot-clé sur {name}',
-    de: '{icon} Skripte nach Stichwort auf {name} finden',
-    ru: '{icon} Найти скрипты по ключевому слову на {name}',
+  'zh-CN': {
+    menu_domain: '{icon} 在 {name} 上按域名查找脚本',
+    menu_keyword: '{icon} 在 {name} 上按关键字查找脚本',
+    title_settings: '仓库设置',
+    btn_save: '保存',
+    btn_cancel: '取消',
+    note_refresh: '注意：保存后请刷新页面以使更改生效。',
+    title_domain: '域名搜索',
+    title_keyword: '关键字搜索',
+    menu_settings: '⚙️ 设置',
   },
+  'zh-TW': {
+    menu_domain: '{icon} 在 {name} 上按域名查找腳本',
+    menu_keyword: '{icon} 在 {name} 上按關鍵字查找腳本',
+    title_settings: '倉庫設置',
+    btn_save: '保存',
+    btn_cancel: '取消',
+    note_refresh: '注意：保存後請刷新頁面以使更改生效。',
+    title_domain: '域名搜索',
+    title_keyword: '關鍵字搜索',
+    menu_settings: '⚙️ 設置',
+  },
+  ja: {
+    menu_domain: '{icon} {name} でドメインからスクリプトを探す',
+    menu_keyword: '{icon} {name} でキーワードからスクリプトを探す',
+    title_settings: 'リポジトリ設定',
+    btn_save: '保存',
+    btn_cancel: 'キャンセル',
+    note_refresh:
+      '注意：変更を有効にするには、保存後にページを更新してください。',
+    title_domain: 'ドメイン検索',
+    title_keyword: 'キーワード検索',
+    menu_settings: '⚙️ 設定',
+  },
+  ko: {
+    menu_domain: '{icon} {name}에서 도메인으로 스크립트 찾기',
+    menu_keyword: '{icon} {name}에서 키워드로 스크립트 찾기',
+    title_settings: '저장소 설정',
+    btn_save: '저장',
+    btn_cancel: '취소',
+    note_refresh:
+      '참고: 변경 사항을 적용하려면 저장 후 페이지를 새로 고침하세요.',
+    title_domain: '도메인 검색',
+    title_keyword: '키워드 검색',
+    menu_settings: '⚙️ 설정',
+  },
+  es: {
+    menu_domain: '{icon} Buscar scripts por dominio en {name}',
+    menu_keyword: '{icon} Buscar scripts por palabra clave en {name}',
+    title_settings: 'Configuración de repositorios',
+    btn_save: 'Guardar',
+    btn_cancel: 'Cancelar',
+    note_refresh:
+      'Nota: Por favor, actualice la página después de guardar para que los cambios surtan efecto.',
+    title_domain: 'Búsqueda por dominio',
+    title_keyword: 'Búsqueda por palabra clave',
+    menu_settings: '⚙️ Configuración',
+  },
+  fr: {
+    menu_domain: '{icon} Trouver des scripts par domaine sur {name}',
+    menu_keyword: '{icon} Trouver des scripts par mot-clé sur {name}',
+    title_settings: 'Paramètres des dépôts',
+    btn_save: 'Enregistrer',
+    btn_cancel: 'Annuler',
+    note_refresh:
+      "Remarque : Veuillez actualiser la page après l'enregistrement pour que les modifications prennent effet.",
+    title_domain: 'Recherche par domaine',
+    title_keyword: 'Recherche par mot-clé',
+    menu_settings: '⚙️ Paramètres',
+  },
+  de: {
+    menu_domain: '{icon} Skripte nach Domain auf {name} finden',
+    menu_keyword: '{icon} Skripte nach Stichwort auf {name} finden',
+    title_settings: 'Repository-Einstellungen',
+    btn_save: 'Speichern',
+    btn_cancel: 'Abbrechen',
+    note_refresh:
+      'Hinweis: Bitte aktualisieren Sie die Seite nach dem Speichern, damit die Änderungen wirksam werden.',
+    title_domain: 'Domain-Suche',
+    title_keyword: 'Stichwortsuche',
+    menu_settings: '⚙️ Einstellungen',
+  },
+  ru: {
+    menu_domain: '{icon} Найти скрипты по домену на {name}',
+    menu_keyword: '{icon} Найти скрипты по ключевому слову на {name}',
+    title_settings: 'Настройки репозиториев',
+    btn_save: 'Сохранить',
+    btn_cancel: 'Отмена',
+    note_refresh:
+      'Примечание: Пожалуйста, обновите страницу после сохранения, чтобы изменения вступили в силу.',
+    title_domain: 'Поиск по домену',
+    title_keyword: 'Поиск по ключевому слову',
+    menu_settings: '⚙️ Настройки',
+  },
+}
+const USER_LANG = detectLanguage()
+const LANG_MAP: Record<string, string> =
+  USER_LANG === 'en' ? I18N.en : { ...I18N.en, ...I18N[USER_LANG] }
+
+function t(key: string): string {
+  return LANG_MAP[key]
 }
 
 /**
@@ -131,7 +217,7 @@ function detectLanguage(): string {
     ).toLowerCase()
 
     // Match with supported languages
-    const supportedLangs = Object.keys(I18N.menuTemplate)
+    const supportedLangs = Object.keys(I18N)
 
     // Try to find exact match
     if (supportedLangs.includes(browserLang)) {
@@ -214,14 +300,10 @@ function extractDomain(): string {
  */
 function getLocalizedMenuText(
   repo: RepoConfig,
-  lang: string,
   isKeywordSearch = false
 ): string {
-  // Get template for user's language or fallback to English
-  const templateKey = isKeywordSearch ? 'keywordSearchTemplate' : 'menuTemplate'
-  const template = I18N[templateKey][lang] || I18N[templateKey].en
-
-  // Replace placeholders with actual values
+  const key = isKeywordSearch ? 'menu_keyword' : 'menu_domain'
+  const template = t(key)
   return template.replace('{icon}', repo.icon).replace('{name}', repo.name)
 }
 
@@ -230,15 +312,11 @@ function getLocalizedMenuText(
  * @param {string} domain - The extracted domain
  */
 function registerMenuCommands(domain: string): void {
-  // Detect user's language
-  const userLang = detectLanguage()
-  debugLog('Detected user language:', userLang)
-
   for (const repo of CONFIG.REPOSITORIES) {
     // Register domain search menu if domainSearchUrl is defined and enabled
     if (repo.domainSearchUrl && repo.domainSearchEnabled) {
       const url = repo.domainSearchUrl.replace('{domain}', domain)
-      const menuText = getLocalizedMenuText(repo, userLang)
+      const menuText = getLocalizedMenuText(repo)
       registerMenu(menuText, () => {
         debugLog(`Opening ${repo.name} for domain:`, domain)
         openInTab(url, { active: true, insert: true })
@@ -248,7 +326,7 @@ function registerMenuCommands(domain: string): void {
     // Register keyword search menu if keywordSearchUrl is defined and enabled
     if (repo.keywordSearchUrl && repo.keywordSearchEnabled) {
       const keywordUrl = repo.keywordSearchUrl.replace('{keyword}', domain)
-      const keywordMenuText = getLocalizedMenuText(repo, userLang, true)
+      const keywordMenuText = getLocalizedMenuText(repo, true)
       registerMenu(keywordMenuText, () => {
         debugLog(`Opening ${repo.name} for keyword search:`, domain)
         openInTab(keywordUrl, { active: true, insert: true })
@@ -332,61 +410,8 @@ function showSettingsDialog(): void {
   const dialog = document.createElement('div')
   dialog.id = 'find-scripts-settings-dialog'
 
-  // Detect user's language
-  const userLang = detectLanguage()
-
-  // Set dialog title based on language
-  const titles = {
-    en: 'Repository Settings',
-    'zh-CN': '仓库设置',
-    'zh-TW': '倉庫設置',
-    ja: 'リポジトリ設定',
-    ko: '저장소 설정',
-    es: 'Configuración de repositorios',
-    fr: 'Paramètres des dépôts',
-    de: 'Repository-Einstellungen',
-    ru: 'Настройки репозиториев',
-  }
-
-  const saveButtonText = {
-    en: 'Save',
-    'zh-CN': '保存',
-    'zh-TW': '保存',
-    ja: '保存',
-    ko: '저장',
-    es: 'Guardar',
-    fr: 'Enregistrer',
-    de: 'Speichern',
-    ru: 'Сохранить',
-  }
-
-  const cancelButtonText = {
-    en: 'Cancel',
-    'zh-CN': '取消',
-    'zh-TW': '取消',
-    ja: 'キャンセル',
-    ko: '취소',
-    es: 'Cancelar',
-    fr: 'Annuler',
-    de: 'Abbrechen',
-    ru: 'Отмена',
-  }
-
-  // 添加刷新提示文本
-  const refreshNoteText = {
-    en: 'Note: Please refresh the page after saving for changes to take effect.',
-    'zh-CN': '注意：保存后请刷新页面以使更改生效。',
-    'zh-TW': '注意：保存後請刷新頁面以使更改生效。',
-    ja: '注意：変更を有効にするには、保存後にページを更新してください。',
-    ko: '참고: 변경 사항을 적용하려면 저장 후 페이지를 새로 고침하세요.',
-    es: 'Nota: Por favor, actualice la página después de guardar para que los cambios surtan efecto.',
-    fr: "Remarque : Veuillez actualiser la page après l'enregistrement pour que les modifications prennent effet.",
-    de: 'Hinweis: Bitte aktualisieren Sie die Seite nach dem Speichern, damit die Änderungen wirksam werden.',
-    ru: 'Примечание: Пожалуйста, обновите страницу после сохранения, чтобы изменения вступили в силу.',
-  }
-
   const titleEl = document.createElement('h2')
-  titleEl.textContent = titles[userLang] || titles.en
+  titleEl.textContent = t('title_settings')
   const content = document.createElement('div')
   content.id = 'find-scripts-settings-content'
   const note = document.createElement('div')
@@ -394,51 +419,25 @@ function showSettingsDialog(): void {
   note.style.marginTop = '15px'
   note.style.color = '#e74c3c'
   note.style.fontSize = '0.9em'
-  note.textContent = refreshNoteText[userLang] || refreshNoteText.en
+  note.textContent = t('note_refresh')
   const btns = document.createElement('div')
   btns.className = 'find-scripts-buttons'
   const cancelBtn = document.createElement('button')
   cancelBtn.id = 'find-scripts-cancel'
-  cancelBtn.textContent = cancelButtonText[userLang] || cancelButtonText.en
+  cancelBtn.textContent = t('btn_cancel')
   const saveBtn = document.createElement('button')
   saveBtn.id = 'find-scripts-save'
   saveBtn.className = 'primary'
-  saveBtn.textContent = saveButtonText[userLang] || saveButtonText.en
+  saveBtn.textContent = t('btn_save')
   btns.append(cancelBtn, saveBtn)
   dialog.append(titleEl, content, note, btns)
 
   // Add repository options
   const contentWrap = dialog.querySelector('#find-scripts-settings-content')!
 
-  // Add section titles based on language
-  const domainSearchTitle = {
-    en: 'Domain Search',
-    'zh-CN': '域名搜索',
-    'zh-TW': '域名搜索',
-    ja: 'ドメイン検索',
-    ko: '도메인 검색',
-    es: 'Búsqueda por dominio',
-    fr: 'Recherche par domaine',
-    de: 'Domain-Suche',
-    ru: 'Поиск по домену',
-  }
-
-  const keywordSearchTitle = {
-    en: 'Keyword Search',
-    'zh-CN': '关键字搜索',
-    'zh-TW': '關鍵字搜索',
-    ja: 'キーワード検索',
-    ko: '키워드 검색',
-    es: 'Búsqueda por palabra clave',
-    fr: 'Recherche par mot-clé',
-    de: 'Stichwortsuche',
-    ru: 'Поиск по ключевому слову',
-  }
-
-  // Create domain search section
   const domainSection = document.createElement('div')
   const domainTitle = document.createElement('h3')
-  domainTitle.textContent = domainSearchTitle[userLang] || domainSearchTitle.en
+  domainTitle.textContent = t('title_domain')
   domainSection.append(domainTitle)
   contentWrap.append(domainSection)
 
@@ -466,8 +465,7 @@ function showSettingsDialog(): void {
   // Create keyword search section
   const keywordSection = document.createElement('div')
   const keywordTitle = document.createElement('h3')
-  keywordTitle.textContent =
-    keywordSearchTitle[userLang] || keywordSearchTitle.en
+  keywordTitle.textContent = t('title_keyword')
   keywordSection.append(keywordTitle)
   contentWrap.append(keywordSection)
 
@@ -544,20 +542,7 @@ function showSettingsDialog(): void {
  * Register settings menu command
  */
 function registerSettingsMenu(): void {
-  const settingsText = {
-    en: '⚙️ Settings',
-    'zh-CN': '⚙️ 设置',
-    'zh-TW': '⚙️ 設置',
-    ja: '⚙️ 設定',
-    ko: '⚙️ 설정',
-    es: '⚙️ Configuración',
-    fr: '⚙️ Paramètres',
-    de: '⚙️ Einstellungen',
-    ru: '⚙️ Настройки',
-  }
-
-  const userLang = detectLanguage()
-  const menuText = settingsText[userLang] || settingsText.en
+  const menuText = t('menu_settings')
   registerMenu(menuText, showSettingsDialog)
 }
 

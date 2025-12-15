@@ -2,6 +2,7 @@ export function registerMenu(caption: string, onClick: () => void): number {
   if (typeof GM_registerMenuCommand === 'function') {
     return GM_registerMenuCommand(caption, onClick)
   }
+
   return 0
 }
 

@@ -11,7 +11,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.2.2
+// @version              0.2.3
 // @description          Find userscripts for the current website from popular script repositories
 // @description:zh-CN    查找适用于当前网站的用户脚本，支持多个脚本仓库
 // @description:zh-TW    查找適用於當前網站的用戶腳本，支持多個腳本倉庫
@@ -37,6 +37,28 @@
 //
 ;(() => {
   'use strict'
+  var __defProp = Object.defineProperty
+  var __getOwnPropSymbols = Object.getOwnPropertySymbols
+  var __hasOwnProp = Object.prototype.hasOwnProperty
+  var __propIsEnum = Object.prototype.propertyIsEnumerable
+  var __defNormalProp = (obj, key, value) =>
+    key in obj
+      ? __defProp(obj, key, {
+          enumerable: true,
+          configurable: true,
+          writable: true,
+          value,
+        })
+      : (obj[key] = value)
+  var __spreadValues = (a, b) => {
+    for (var prop in b || (b = {}))
+      if (__hasOwnProp.call(b, prop)) __defNormalProp(a, prop, b[prop])
+    if (__getOwnPropSymbols)
+      for (var prop of __getOwnPropSymbols(b)) {
+        if (__propIsEnum.call(b, prop)) __defNormalProp(a, prop, b[prop])
+      }
+    return a
+  }
   var style_default =
     '#find-scripts-settings-overlay{align-items:center;background:rgba(0,0,0,.5);display:flex;height:100%;justify-content:center;left:0;position:fixed;top:0;width:100%;z-index:9999}#find-scripts-settings-dialog{background:#fff;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);max-height:90%;max-width:90%;overflow-y:auto;padding:20px;width:400px}#find-scripts-settings-dialog h2{border-bottom:1px solid #eee;font-size:18px;margin-bottom:15px;margin-top:0;padding-bottom:10px}.find-scripts-setting-item{align-items:center;display:flex;margin-bottom:12px}.find-scripts-setting-item label{flex-grow:1;margin-left:8px}.find-scripts-buttons{display:flex;gap:10px;justify-content:flex-end;margin-top:15px}.find-scripts-buttons button{background:#f5f5f5;border:1px solid #ccc;border-radius:4px;cursor:pointer;padding:6px 12px}.find-scripts-buttons button:hover{background:#e5e5e5}.find-scripts-buttons button.primary{background:#4a86e8;border-color:#3a76d8;color:#fff}.find-scripts-buttons button.primary:hover{background:#3a76d8}'
   function registerMenu(caption, onClick) {
@@ -140,32 +162,136 @@
     SETTINGS_KEY: 'find_scripts_settings',
   }
   var I18N = {
-    menuTemplate: {
-      en: '{icon} Find scripts by domain on {name}',
-      'zh-CN':
+    en: {
+      menu_domain: '{icon} Find scripts by domain on {name}',
+      menu_keyword: '{icon} Find scripts by keyword on {name}',
+      title_settings: 'Repository Settings',
+      btn_save: 'Save',
+      btn_cancel: 'Cancel',
+      note_refresh:
+        'Note: Please refresh the page after saving for changes to take effect.',
+      title_domain: 'Domain Search',
+      title_keyword: 'Keyword Search',
+      menu_settings: '\u2699\uFE0F Settings',
+    },
+    'zh-CN': {
+      menu_domain:
         '{icon} \u5728 {name} \u4E0A\u6309\u57DF\u540D\u67E5\u627E\u811A\u672C',
-      'zh-TW':
-        '{icon} \u5728 {name} \u4E0A\u6309\u57DF\u540D\u67E5\u627E\u8173\u672C',
-      ja: '{icon} {name} \u3067\u30C9\u30E1\u30A4\u30F3\u304B\u3089\u30B9\u30AF\u30EA\u30D7\u30C8\u3092\u63A2\u3059',
-      ko: '{icon} {name}\uC5D0\uC11C \uB3C4\uBA54\uC778\uC73C\uB85C \uC2A4\uD06C\uB9BD\uD2B8 \uCC3E\uAE30',
-      es: '{icon} Buscar scripts por dominio en {name}',
-      fr: '{icon} Trouver des scripts par domaine sur {name}',
-      de: '{icon} Skripte nach Domain auf {name} finden',
-      ru: '{icon} \u041D\u0430\u0439\u0442\u0438 \u0441\u043A\u0440\u0438\u043F\u0442\u044B \u043F\u043E \u0434\u043E\u043C\u0435\u043D\u0443 \u043D\u0430 {name}',
-    },
-    keywordSearchTemplate: {
-      en: '{icon} Find scripts by keyword on {name}',
-      'zh-CN':
+      menu_keyword:
         '{icon} \u5728 {name} \u4E0A\u6309\u5173\u952E\u5B57\u67E5\u627E\u811A\u672C',
-      'zh-TW':
-        '{icon} \u5728 {name} \u4E0A\u6309\u95DC\u9375\u5B57\u67E5\u627E\u8173\u672C',
-      ja: '{icon} {name} \u3067\u30AD\u30FC\u30EF\u30FC\u30C9\u304B\u3089\u30B9\u30AF\u30EA\u30D7\u30C8\u3092\u63A2\u3059',
-      ko: '{icon} {name}\uC5D0\uC11C \uD0A4\uC6CC\uB4DC\uB85C \uC2A4\uD06C\uB9BD\uD2B8 \uCC3E\uAE30',
-      es: '{icon} Buscar scripts por palabra clave en {name}',
-      fr: '{icon} Trouver des scripts par mot-cl\xE9 sur {name}',
-      de: '{icon} Skripte nach Stichwort auf {name} finden',
-      ru: '{icon} \u041D\u0430\u0439\u0442\u0438 \u0441\u043A\u0440\u0438\u043F\u0442\u044B \u043F\u043E \u043A\u043B\u044E\u0447\u0435\u0432\u043E\u043C\u0443 \u0441\u043B\u043E\u0432\u0443 \u043D\u0430 {name}',
+      title_settings: '\u4ED3\u5E93\u8BBE\u7F6E',
+      btn_save: '\u4FDD\u5B58',
+      btn_cancel: '\u53D6\u6D88',
+      note_refresh:
+        '\u6CE8\u610F\uFF1A\u4FDD\u5B58\u540E\u8BF7\u5237\u65B0\u9875\u9762\u4EE5\u4F7F\u66F4\u6539\u751F\u6548\u3002',
+      title_domain: '\u57DF\u540D\u641C\u7D22',
+      title_keyword: '\u5173\u952E\u5B57\u641C\u7D22',
+      menu_settings: '\u2699\uFE0F \u8BBE\u7F6E',
     },
+    'zh-TW': {
+      menu_domain:
+        '{icon} \u5728 {name} \u4E0A\u6309\u57DF\u540D\u67E5\u627E\u8173\u672C',
+      menu_keyword:
+        '{icon} \u5728 {name} \u4E0A\u6309\u95DC\u9375\u5B57\u67E5\u627E\u8173\u672C',
+      title_settings: '\u5009\u5EAB\u8A2D\u7F6E',
+      btn_save: '\u4FDD\u5B58',
+      btn_cancel: '\u53D6\u6D88',
+      note_refresh:
+        '\u6CE8\u610F\uFF1A\u4FDD\u5B58\u5F8C\u8ACB\u5237\u65B0\u9801\u9762\u4EE5\u4F7F\u66F4\u6539\u751F\u6548\u3002',
+      title_domain: '\u57DF\u540D\u641C\u7D22',
+      title_keyword: '\u95DC\u9375\u5B57\u641C\u7D22',
+      menu_settings: '\u2699\uFE0F \u8A2D\u7F6E',
+    },
+    ja: {
+      menu_domain:
+        '{icon} {name} \u3067\u30C9\u30E1\u30A4\u30F3\u304B\u3089\u30B9\u30AF\u30EA\u30D7\u30C8\u3092\u63A2\u3059',
+      menu_keyword:
+        '{icon} {name} \u3067\u30AD\u30FC\u30EF\u30FC\u30C9\u304B\u3089\u30B9\u30AF\u30EA\u30D7\u30C8\u3092\u63A2\u3059',
+      title_settings: '\u30EA\u30DD\u30B8\u30C8\u30EA\u8A2D\u5B9A',
+      btn_save: '\u4FDD\u5B58',
+      btn_cancel: '\u30AD\u30E3\u30F3\u30BB\u30EB',
+      note_refresh:
+        '\u6CE8\u610F\uFF1A\u5909\u66F4\u3092\u6709\u52B9\u306B\u3059\u308B\u306B\u306F\u3001\u4FDD\u5B58\u5F8C\u306B\u30DA\u30FC\u30B8\u3092\u66F4\u65B0\u3057\u3066\u304F\u3060\u3055\u3044\u3002',
+      title_domain: '\u30C9\u30E1\u30A4\u30F3\u691C\u7D22',
+      title_keyword: '\u30AD\u30FC\u30EF\u30FC\u30C9\u691C\u7D22',
+      menu_settings: '\u2699\uFE0F \u8A2D\u5B9A',
+    },
+    ko: {
+      menu_domain:
+        '{icon} {name}\uC5D0\uC11C \uB3C4\uBA54\uC778\uC73C\uB85C \uC2A4\uD06C\uB9BD\uD2B8 \uCC3E\uAE30',
+      menu_keyword:
+        '{icon} {name}\uC5D0\uC11C \uD0A4\uC6CC\uB4DC\uB85C \uC2A4\uD06C\uB9BD\uD2B8 \uCC3E\uAE30',
+      title_settings: '\uC800\uC7A5\uC18C \uC124\uC815',
+      btn_save: '\uC800\uC7A5',
+      btn_cancel: '\uCDE8\uC18C',
+      note_refresh:
+        '\uCC38\uACE0: \uBCC0\uACBD \uC0AC\uD56D\uC744 \uC801\uC6A9\uD558\uB824\uBA74 \uC800\uC7A5 \uD6C4 \uD398\uC774\uC9C0\uB97C \uC0C8\uB85C \uACE0\uCE68\uD558\uC138\uC694.',
+      title_domain: '\uB3C4\uBA54\uC778 \uAC80\uC0C9',
+      title_keyword: '\uD0A4\uC6CC\uB4DC \uAC80\uC0C9',
+      menu_settings: '\u2699\uFE0F \uC124\uC815',
+    },
+    es: {
+      menu_domain: '{icon} Buscar scripts por dominio en {name}',
+      menu_keyword: '{icon} Buscar scripts por palabra clave en {name}',
+      title_settings: 'Configuraci\xF3n de repositorios',
+      btn_save: 'Guardar',
+      btn_cancel: 'Cancelar',
+      note_refresh:
+        'Nota: Por favor, actualice la p\xE1gina despu\xE9s de guardar para que los cambios surtan efecto.',
+      title_domain: 'B\xFAsqueda por dominio',
+      title_keyword: 'B\xFAsqueda por palabra clave',
+      menu_settings: '\u2699\uFE0F Configuraci\xF3n',
+    },
+    fr: {
+      menu_domain: '{icon} Trouver des scripts par domaine sur {name}',
+      menu_keyword: '{icon} Trouver des scripts par mot-cl\xE9 sur {name}',
+      title_settings: 'Param\xE8tres des d\xE9p\xF4ts',
+      btn_save: 'Enregistrer',
+      btn_cancel: 'Annuler',
+      note_refresh:
+        "Remarque : Veuillez actualiser la page apr\xE8s l'enregistrement pour que les modifications prennent effet.",
+      title_domain: 'Recherche par domaine',
+      title_keyword: 'Recherche par mot-cl\xE9',
+      menu_settings: '\u2699\uFE0F Param\xE8tres',
+    },
+    de: {
+      menu_domain: '{icon} Skripte nach Domain auf {name} finden',
+      menu_keyword: '{icon} Skripte nach Stichwort auf {name} finden',
+      title_settings: 'Repository-Einstellungen',
+      btn_save: 'Speichern',
+      btn_cancel: 'Abbrechen',
+      note_refresh:
+        'Hinweis: Bitte aktualisieren Sie die Seite nach dem Speichern, damit die \xC4nderungen wirksam werden.',
+      title_domain: 'Domain-Suche',
+      title_keyword: 'Stichwortsuche',
+      menu_settings: '\u2699\uFE0F Einstellungen',
+    },
+    ru: {
+      menu_domain:
+        '{icon} \u041D\u0430\u0439\u0442\u0438 \u0441\u043A\u0440\u0438\u043F\u0442\u044B \u043F\u043E \u0434\u043E\u043C\u0435\u043D\u0443 \u043D\u0430 {name}',
+      menu_keyword:
+        '{icon} \u041D\u0430\u0439\u0442\u0438 \u0441\u043A\u0440\u0438\u043F\u0442\u044B \u043F\u043E \u043A\u043B\u044E\u0447\u0435\u0432\u043E\u043C\u0443 \u0441\u043B\u043E\u0432\u0443 \u043D\u0430 {name}',
+      title_settings:
+        '\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0440\u0435\u043F\u043E\u0437\u0438\u0442\u043E\u0440\u0438\u0435\u0432',
+      btn_save: '\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C',
+      btn_cancel: '\u041E\u0442\u043C\u0435\u043D\u0430',
+      note_refresh:
+        '\u041F\u0440\u0438\u043C\u0435\u0447\u0430\u043D\u0438\u0435: \u041F\u043E\u0436\u0430\u043B\u0443\u0439\u0441\u0442\u0430, \u043E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u0443 \u043F\u043E\u0441\u043B\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F, \u0447\u0442\u043E\u0431\u044B \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0432\u0441\u0442\u0443\u043F\u0438\u043B\u0438 \u0432 \u0441\u0438\u043B\u0443.',
+      title_domain:
+        '\u041F\u043E\u0438\u0441\u043A \u043F\u043E \u0434\u043E\u043C\u0435\u043D\u0443',
+      title_keyword:
+        '\u041F\u043E\u0438\u0441\u043A \u043F\u043E \u043A\u043B\u044E\u0447\u0435\u0432\u043E\u043C\u0443 \u0441\u043B\u043E\u0432\u0443',
+      menu_settings:
+        '\u2699\uFE0F \u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438',
+    },
+  }
+  var USER_LANG = detectLanguage()
+  var LANG_MAP =
+    USER_LANG === 'en'
+      ? I18N.en
+      : __spreadValues(__spreadValues({}, I18N.en), I18N[USER_LANG])
+  function t(key) {
+    return LANG_MAP[key]
   }
   function detectLanguage() {
     try {
@@ -174,7 +300,7 @@
         navigator.userLanguage ||
         'en'
       ).toLowerCase()
-      const supportedLangs = Object.keys(I18N.menuTemplate)
+      const supportedLangs = Object.keys(I18N)
       if (supportedLangs.includes(browserLang)) {
         return browserLang
       }
@@ -224,20 +350,16 @@
       return globalThis.location.hostname
     }
   }
-  function getLocalizedMenuText(repo, lang, isKeywordSearch = false) {
-    const templateKey = isKeywordSearch
-      ? 'keywordSearchTemplate'
-      : 'menuTemplate'
-    const template = I18N[templateKey][lang] || I18N[templateKey].en
+  function getLocalizedMenuText(repo, isKeywordSearch = false) {
+    const key = isKeywordSearch ? 'menu_keyword' : 'menu_domain'
+    const template = t(key)
     return template.replace('{icon}', repo.icon).replace('{name}', repo.name)
   }
   function registerMenuCommands(domain) {
-    const userLang = detectLanguage()
-    debugLog('Detected user language:', userLang)
     for (const repo of CONFIG.REPOSITORIES) {
       if (repo.domainSearchUrl && repo.domainSearchEnabled) {
         const url = repo.domainSearchUrl.replace('{domain}', domain)
-        const menuText = getLocalizedMenuText(repo, userLang)
+        const menuText = getLocalizedMenuText(repo)
         registerMenu(menuText, () => {
           debugLog('Opening '.concat(repo.name, ' for domain:'), domain)
           openInTab(url, { active: true, insert: true })
@@ -245,7 +367,7 @@
       }
       if (repo.keywordSearchUrl && repo.keywordSearchEnabled) {
         const keywordUrl = repo.keywordSearchUrl.replace('{keyword}', domain)
-        const keywordMenuText = getLocalizedMenuText(repo, userLang, true)
+        const keywordMenuText = getLocalizedMenuText(repo, true)
         registerMenu(keywordMenuText, () => {
           debugLog('Opening '.concat(repo.name, ' for keyword search:'), domain)
           openInTab(keywordUrl, { active: true, insert: true })
@@ -305,55 +427,8 @@
     overlay.id = 'find-scripts-settings-overlay'
     const dialog = document.createElement('div')
     dialog.id = 'find-scripts-settings-dialog'
-    const userLang = detectLanguage()
-    const titles = {
-      en: 'Repository Settings',
-      'zh-CN': '\u4ED3\u5E93\u8BBE\u7F6E',
-      'zh-TW': '\u5009\u5EAB\u8A2D\u7F6E',
-      ja: '\u30EA\u30DD\u30B8\u30C8\u30EA\u8A2D\u5B9A',
-      ko: '\uC800\uC7A5\uC18C \uC124\uC815',
-      es: 'Configuraci\xF3n de repositorios',
-      fr: 'Param\xE8tres des d\xE9p\xF4ts',
-      de: 'Repository-Einstellungen',
-      ru: '\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0440\u0435\u043F\u043E\u0437\u0438\u0442\u043E\u0440\u0438\u0435\u0432',
-    }
-    const saveButtonText = {
-      en: 'Save',
-      'zh-CN': '\u4FDD\u5B58',
-      'zh-TW': '\u4FDD\u5B58',
-      ja: '\u4FDD\u5B58',
-      ko: '\uC800\uC7A5',
-      es: 'Guardar',
-      fr: 'Enregistrer',
-      de: 'Speichern',
-      ru: '\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C',
-    }
-    const cancelButtonText = {
-      en: 'Cancel',
-      'zh-CN': '\u53D6\u6D88',
-      'zh-TW': '\u53D6\u6D88',
-      ja: '\u30AD\u30E3\u30F3\u30BB\u30EB',
-      ko: '\uCDE8\uC18C',
-      es: 'Cancelar',
-      fr: 'Annuler',
-      de: 'Abbrechen',
-      ru: '\u041E\u0442\u043C\u0435\u043D\u0430',
-    }
-    const refreshNoteText = {
-      en: 'Note: Please refresh the page after saving for changes to take effect.',
-      'zh-CN':
-        '\u6CE8\u610F\uFF1A\u4FDD\u5B58\u540E\u8BF7\u5237\u65B0\u9875\u9762\u4EE5\u4F7F\u66F4\u6539\u751F\u6548\u3002',
-      'zh-TW':
-        '\u6CE8\u610F\uFF1A\u4FDD\u5B58\u5F8C\u8ACB\u5237\u65B0\u9801\u9762\u4EE5\u4F7F\u66F4\u6539\u751F\u6548\u3002',
-      ja: '\u6CE8\u610F\uFF1A\u5909\u66F4\u3092\u6709\u52B9\u306B\u3059\u308B\u306B\u306F\u3001\u4FDD\u5B58\u5F8C\u306B\u30DA\u30FC\u30B8\u3092\u66F4\u65B0\u3057\u3066\u304F\u3060\u3055\u3044\u3002',
-      ko: '\uCC38\uACE0: \uBCC0\uACBD \uC0AC\uD56D\uC744 \uC801\uC6A9\uD558\uB824\uBA74 \uC800\uC7A5 \uD6C4 \uD398\uC774\uC9C0\uB97C \uC0C8\uB85C \uACE0\uCE68\uD558\uC138\uC694.',
-      es: 'Nota: Por favor, actualice la p\xE1gina despu\xE9s de guardar para que los cambios surtan efecto.',
-      fr: "Remarque : Veuillez actualiser la page apr\xE8s l'enregistrement pour que les modifications prennent effet.",
-      de: 'Hinweis: Bitte aktualisieren Sie die Seite nach dem Speichern, damit die \xC4nderungen wirksam werden.',
-      ru: '\u041F\u0440\u0438\u043C\u0435\u0447\u0430\u043D\u0438\u0435: \u041F\u043E\u0436\u0430\u043B\u0443\u0439\u0441\u0442\u0430, \u043E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u0443 \u043F\u043E\u0441\u043B\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F, \u0447\u0442\u043E\u0431\u044B \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0432\u0441\u0442\u0443\u043F\u0438\u043B\u0438 \u0432 \u0441\u0438\u043B\u0443.',
-    }
     const titleEl = document.createElement('h2')
-    titleEl.textContent = titles[userLang] || titles.en
+    titleEl.textContent = t('title_settings')
     const content = document.createElement('div')
     content.id = 'find-scripts-settings-content'
     const note = document.createElement('div')
@@ -361,45 +436,22 @@
     note.style.marginTop = '15px'
     note.style.color = '#e74c3c'
     note.style.fontSize = '0.9em'
-    note.textContent = refreshNoteText[userLang] || refreshNoteText.en
+    note.textContent = t('note_refresh')
     const btns = document.createElement('div')
     btns.className = 'find-scripts-buttons'
     const cancelBtn = document.createElement('button')
     cancelBtn.id = 'find-scripts-cancel'
-    cancelBtn.textContent = cancelButtonText[userLang] || cancelButtonText.en
+    cancelBtn.textContent = t('btn_cancel')
     const saveBtn = document.createElement('button')
     saveBtn.id = 'find-scripts-save'
     saveBtn.className = 'primary'
-    saveBtn.textContent = saveButtonText[userLang] || saveButtonText.en
+    saveBtn.textContent = t('btn_save')
     btns.append(cancelBtn, saveBtn)
     dialog.append(titleEl, content, note, btns)
     const contentWrap = dialog.querySelector('#find-scripts-settings-content')
-    const domainSearchTitle = {
-      en: 'Domain Search',
-      'zh-CN': '\u57DF\u540D\u641C\u7D22',
-      'zh-TW': '\u57DF\u540D\u641C\u7D22',
-      ja: '\u30C9\u30E1\u30A4\u30F3\u691C\u7D22',
-      ko: '\uB3C4\uBA54\uC778 \uAC80\uC0C9',
-      es: 'B\xFAsqueda por dominio',
-      fr: 'Recherche par domaine',
-      de: 'Domain-Suche',
-      ru: '\u041F\u043E\u0438\u0441\u043A \u043F\u043E \u0434\u043E\u043C\u0435\u043D\u0443',
-    }
-    const keywordSearchTitle = {
-      en: 'Keyword Search',
-      'zh-CN': '\u5173\u952E\u5B57\u641C\u7D22',
-      'zh-TW': '\u95DC\u9375\u5B57\u641C\u7D22',
-      ja: '\u30AD\u30FC\u30EF\u30FC\u30C9\u691C\u7D22',
-      ko: '\uD0A4\uC6CC\uB4DC \uAC80\uC0C9',
-      es: 'B\xFAsqueda por palabra clave',
-      fr: 'Recherche par mot-cl\xE9',
-      de: 'Stichwortsuche',
-      ru: '\u041F\u043E\u0438\u0441\u043A \u043F\u043E \u043A\u043B\u044E\u0447\u0435\u0432\u043E\u043C\u0443 \u0441\u043B\u043E\u0432\u0443',
-    }
     const domainSection = document.createElement('div')
     const domainTitle = document.createElement('h3')
-    domainTitle.textContent =
-      domainSearchTitle[userLang] || domainSearchTitle.en
+    domainTitle.textContent = t('title_domain')
     domainSection.append(domainTitle)
     contentWrap.append(domainSection)
     for (const repo of CONFIG.REPOSITORIES) {
@@ -420,8 +472,7 @@
     }
     const keywordSection = document.createElement('div')
     const keywordTitle = document.createElement('h3')
-    keywordTitle.textContent =
-      keywordSearchTitle[userLang] || keywordSearchTitle.en
+    keywordTitle.textContent = t('title_keyword')
     keywordSection.append(keywordTitle)
     contentWrap.append(keywordSection)
     for (const repo of CONFIG.REPOSITORIES) {
@@ -471,19 +522,7 @@
     })
   }
   function registerSettingsMenu() {
-    const settingsText = {
-      en: '\u2699\uFE0F Settings',
-      'zh-CN': '\u2699\uFE0F \u8BBE\u7F6E',
-      'zh-TW': '\u2699\uFE0F \u8A2D\u7F6E',
-      ja: '\u2699\uFE0F \u8A2D\u5B9A',
-      ko: '\u2699\uFE0F \uC124\uC815',
-      es: '\u2699\uFE0F Configuraci\xF3n',
-      fr: '\u2699\uFE0F Param\xE8tres',
-      de: '\u2699\uFE0F Einstellungen',
-      ru: '\u2699\uFE0F \u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438',
-    }
-    const userLang = detectLanguage()
-    const menuText = settingsText[userLang] || settingsText.en
+    const menuText = t('menu_settings')
     registerMenu(menuText, showSettingsDialog)
   }
   async function initialize() {
