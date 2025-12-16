@@ -18,11 +18,31 @@
 // @noframes
 // @run-at               document-idle
 // @grant                GM.getValue
+// @grant                GM_getValue
 // @grant                GM.setValue
+// @grant                GM_setValue
 // ==/UserScript==
 //
 ;(() => {
   'use strict'
+  async function getValue(key, defaultValue) {
+    if (typeof GM !== 'undefined' && typeof GM.getValue === 'function') {
+      return GM.getValue(key, defaultValue)
+    }
+    if (typeof GM_getValue === 'function') {
+      return GM_getValue(key, defaultValue)
+    }
+    return defaultValue
+  }
+  async function setValue(key, value) {
+    if (typeof GM !== 'undefined' && typeof GM.setValue === 'function') {
+      await GM.setValue(key, value)
+      return
+    }
+    if (typeof GM_setValue === 'function') {
+      GM_setValue(key, value)
+    }
+  }
   var SELECTOR_REPLY_BUTTON =
     '.composer-action-reply .save-or-cancel button.create'
   var I18N_LABEL = {
@@ -126,7 +146,7 @@
   }
   async function loadEnabled() {
     try {
-      const val = await GM.getValue(KEY, '0')
+      const val = await getValue(KEY, '0')
       enabledFlag = val === '1'
       updateToggleUI()
     } catch (e) {
@@ -136,7 +156,7 @@
   async function setEnabled(v) {
     enabledFlag = Boolean(v)
     try {
-      await GM.setValue(KEY, v ? '1' : '0')
+      await setValue(KEY, v ? '1' : '0')
     } catch (e) {}
   }
   function updateToggleUI() {

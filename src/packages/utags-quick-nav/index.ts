@@ -8,6 +8,7 @@ import { getFaviconUrl } from '../../utils/favicon'
 import { openAddGroupModal } from './add-group-modal'
 import { showDropdownMenu } from './dropdown'
 import { openEditorModal } from './editor-modal-tabs'
+import { openSettingsPanel } from './settings-panel'
 import {
   getValue,
   setValue,
@@ -73,6 +74,8 @@ type SitePref = {
   theme?: 'light' | 'dark' | 'system'
   pinned?: boolean
   enabled?: boolean
+  layoutMode?: 'floating' | 'sidebar'
+  sidebarSide?: 'left' | 'right'
   edgeWidth?: number
   edgeHeight?: number
   edgeOpacity?: number
@@ -95,6 +98,25 @@ const THEME_DEFAULT: 'light' | 'dark' | 'system' = 'system'
 const PINNED_DEFAULT = false
 const ENABLED_DEFAULT = true
 const HOTKEY_DEFAULT = 'Alt+Shift+K'
+const LAYOUT_DEFAULT: 'floating' | 'sidebar' = 'floating'
+const SIDEBAR_SIDE_DEFAULT: 'left' | 'right' = 'right'
+
+function ensureGlobalStyles() {
+  try {
+    const existed = document.head.querySelector(
+      'style[data-utqn-style="sidebar"]'
+    )
+    if (existed) return
+
+    const style = document.createElement('style')
+    style.dataset.utqnStyle = 'sidebar'
+    style.textContent = `
+html[data-utqn-sidebar="left-open"] body { width: calc(100% - 360px) !important; margin-left: 360px !important; margin-right: 0 !important; }
+html[data-utqn-sidebar="right-open"] body { width: calc(100% - 360px) !important; margin-right: 360px !important; margin-left: 0 !important; }
+`
+    document.head.append(style)
+  } catch {}
+}
 
 let sitePref: SitePref = {
   position: POSITION_DEFAULT,
@@ -140,6 +162,8 @@ function initSitePref(cfg: QuickNavConfig) {
     theme: stored.theme ?? THEME_DEFAULT,
     pinned: stored.pinned ?? PINNED_DEFAULT,
     enabled: stored.enabled ?? ENABLED_DEFAULT,
+    layoutMode: stored.layoutMode ?? LAYOUT_DEFAULT,
+    sidebarSide: stored.sidebarSide ?? SIDEBAR_SIDE_DEFAULT,
     edgeWidth: stored.edgeWidth ?? EDGE_DEFAULT_WIDTH,
     edgeHeight: stored.edgeHeight ?? EDGE_DEFAULT_HEIGHT,
     edgeOpacity: stored.edgeOpacity ?? EDGE_DEFAULT_OPACITY,
@@ -325,6 +349,10 @@ async function saveConfig(cfg: QuickNavConfig) {
       sp.theme = sitePref.theme
     if (sitePref.pinned !== PINNED_DEFAULT) sp.pinned = sitePref.pinned
     if (sitePref.enabled !== ENABLED_DEFAULT) sp.enabled = sitePref.enabled
+    if ((sitePref.layoutMode || LAYOUT_DEFAULT) !== LAYOUT_DEFAULT)
+      sp.layoutMode = sitePref.layoutMode
+    if ((sitePref.sidebarSide || SIDEBAR_SIDE_DEFAULT) !== SIDEBAR_SIDE_DEFAULT)
+      sp.sidebarSide = sitePref.sidebarSide
     if ((sitePref.edgeWidth ?? EDGE_DEFAULT_WIDTH) !== EDGE_DEFAULT_WIDTH)
       sp.edgeWidth = sitePref.edgeWidth
     if ((sitePref.edgeHeight ?? EDGE_DEFAULT_HEIGHT) !== EDGE_DEFAULT_HEIGHT)
@@ -363,6 +391,7 @@ async function saveConfig(cfg: QuickNavConfig) {
 }
 
 function createRoot() {
+  console.log('createRoot')
   const existing = document.querySelector('[data-utqn-host="utags-quick-nav"]')
   if (existing instanceof HTMLElement) {
     const root = (existing as any).shadowRoot as ShadowRoot
@@ -381,9 +410,24 @@ function createRoot() {
 }
 
 function place(el: HTMLElement, cfg: QuickNavConfig) {
-  const p = sitePref.position
   el.style.position = 'fixed'
   el.style.inset = 'auto'
+  if (sitePref.layoutMode === 'sidebar') {
+    el.style.top = '0'
+    el.style.bottom = '0'
+    el.style.left = 'auto'
+    el.style.right = 'auto'
+    el.style.transform = ''
+    if ((sitePref.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left') {
+      el.style.left = '0'
+    } else {
+      el.style.right = '0'
+    }
+
+    return
+  }
+
+  const p = sitePref.position
   switch (p) {
     case 'right-top': {
       el.style.top = '0'
@@ -1119,7 +1163,8 @@ function renderPanelHeader(
   settingsBtn.className = 'icon-btn'
   setIcon(settingsBtn, 'lucide:settings', '设置')
   settingsBtn.addEventListener('click', () => {
-    openEditor(root, cfg)
+    // openEditor(root, cfg)
+    openSettingsPanel()
   })
 
   const pinBtn = document.createElement('button')
@@ -1217,7 +1262,8 @@ function renderPanelHeader(
   }
 
   rightActions.append(settingsBtn)
-  rightActions.append(pinBtn)
+  if ((sitePref.layoutMode || LAYOUT_DEFAULT) !== 'sidebar')
+    rightActions.append(pinBtn)
   rightActions.append(closeBtn)
 
   collapseRow.append(leftActions)
@@ -1246,6 +1292,20 @@ function renderPanel(root: ShadowRoot, cfg: QuickNavConfig, animIn: boolean) {
   wrapper.className = 'utqn' + (isDarkTheme(cfg) ? ' dark' : '')
   const panel = document.createElement('div')
   panel.className = 'panel'
+  if (sitePref.layoutMode === 'sidebar') {
+    try {
+      panel.style.height = '100vh'
+      panel.style.borderRadius = '0'
+    } catch {}
+
+    try {
+      const side =
+        (sitePref.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
+          ? 'sidebar-left'
+          : 'sidebar-right'
+      panel.classList.add('sidebar', side)
+    } catch {}
+  }
 
   const pos = sitePref.position
   const isRight = isRightSide(pos)
@@ -1274,7 +1334,11 @@ function renderPanel(root: ShadowRoot, cfg: QuickNavConfig, animIn: boolean) {
     } catch {}
   })
   wrapper.addEventListener('mouseleave', () => {
-    if (!sitePref.pinned && !suppressCollapse) scheduleAutoCollapse(root, cfg)
+    const pinnedFlag =
+      (sitePref.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
+        ? true
+        : Boolean(sitePref.pinned)
+    if (!pinnedFlag && !suppressCollapse) scheduleAutoCollapse(root, cfg)
   })
   place(wrapper, cfg)
   root.append(wrapper)
@@ -1380,12 +1444,22 @@ function rerender(root: ShadowRoot, cfg: QuickNavConfig) {
   if (sitePref.enabled === false) {
     lastCollapsed = true
     suppressCollapse = false
+    try {
+      delete (document.documentElement as any).dataset.utqnSidebar
+    } catch {}
+
     return
   }
 
-  const isCollapsed = !tempOpen && (tempClosed || !sitePref.pinned)
+  let isCollapsed = !tempOpen && (tempClosed || !sitePref.pinned)
+  if ((sitePref.layoutMode || LAYOUT_DEFAULT) === 'sidebar')
+    isCollapsed = !tempOpen && Boolean(tempClosed)
   if (isCollapsed) {
-    if (!sitePref.edgeHidden) {
+    const effectiveEdgeHidden =
+      (sitePref.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
+        ? true
+        : Boolean(sitePref.edgeHidden)
+    if (!effectiveEdgeHidden) {
       const tab = document.createElement('div')
       tab.className = 'collapsed-tab'
       place(tab, cfg)
@@ -1409,18 +1483,39 @@ function rerender(root: ShadowRoot, cfg: QuickNavConfig) {
         rerender(root, cfg)
       })
       tab.addEventListener('mouseleave', () => {
-        if (!sitePref.pinned && !suppressCollapse)
-          scheduleAutoCollapse(root, cfg)
+        const pinnedFlag =
+          (sitePref.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
+            ? true
+            : Boolean(sitePref.pinned)
+        if (!pinnedFlag && !suppressCollapse) scheduleAutoCollapse(root, cfg)
       })
       root.append(tab)
     }
 
     lastCollapsed = true
     suppressCollapse = false
+    try {
+      delete (document.documentElement as any).dataset.utqnSidebar
+    } catch {}
+
     return
   }
 
   renderPanel(root, cfg, lastCollapsed)
+  if (sitePref.layoutMode === 'sidebar') {
+    ensureGlobalStyles()
+    try {
+      document.documentElement.dataset.utqnSidebar =
+        (sitePref.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
+          ? 'left-open'
+          : 'right-open'
+    } catch {}
+  } else {
+    try {
+      delete (document.documentElement as any).dataset.utqnSidebar
+    } catch {}
+  }
+
   try {
     const cur =
       root.querySelector('.utqn .panel-scroll') ||
@@ -1494,7 +1589,8 @@ function registerMenus(root: ShadowRoot, cfg: QuickNavConfig) {
         rerender(root, cfg)
       }),
       registerMenu('⚙️ 设置快速导航', () => {
-        openEditor(root, cfg)
+        // openEditor(root, cfg)
+        openSettingsPanel()
       }),
       registerMenu(text, () => {
         sitePref.enabled = !sitePref.enabled
@@ -1624,6 +1720,49 @@ function registerUrlChangeListener(root: ShadowRoot, cfg: QuickNavConfig) {
   })
 }
 
+function registerHostAutofix(_root: ShadowRoot, cfg: QuickNavConfig) {
+  try {
+    const mo = new MutationObserver(() => {
+      const existing = document.querySelector(
+        '[data-utqn-host="utags-quick-nav"]'
+      )
+      if (!(existing instanceof HTMLElement)) {
+        try {
+          const host = (_root as any)?.host as HTMLElement | undefined
+          if (host) {
+            if (!document.documentElement.contains(host)) {
+              document.documentElement.append(host)
+            }
+
+            try {
+              if (
+                sitePref.enabled !== false &&
+                sitePref.layoutMode === 'sidebar'
+              ) {
+                document.documentElement.dataset.utqnSidebar =
+                  (sitePref.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
+                    ? 'left-open'
+                    : 'right-open'
+              } else {
+                delete (document.documentElement as any).dataset.utqnSidebar
+              }
+            } catch {}
+
+            return
+          }
+        } catch {}
+
+        const { root: newRoot } = createRoot()
+        rerender(newRoot, cfg)
+      }
+    })
+    mo.observe(document.documentElement || document.body, {
+      childList: true,
+      subtree: true,
+    })
+  } catch {}
+}
+
 function main() {
   try {
     const de = document.documentElement as any
@@ -1635,6 +1774,19 @@ function main() {
   void (async () => {
     const cfg = await loadConfig()
     initSitePref(cfg)
+    ensureGlobalStyles()
+    try {
+      if (sitePref.enabled !== false && sitePref.layoutMode === 'sidebar') {
+        document.documentElement.dataset.utqnSidebar =
+          (sitePref.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
+            ? 'left-open'
+            : 'right-open'
+      } else {
+        delete (document.documentElement as any).dataset.utqnSidebar
+      }
+    } catch {}
+
+    registerHostAutofix(root, cfg)
     if (sitePref.enabled === false) {
       registerMenus(root, cfg)
       registerStorageListener(root, cfg)

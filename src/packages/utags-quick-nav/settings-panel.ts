@@ -2,10 +2,15 @@ import { createOpenModeRadios, createSegmentedRadios } from './segmented-radios'
 import { deepMergeReplaceArrays, setOrDelete } from '../../utils/obj'
 import {
   openSettingsPanel as openPanel,
+  closeSettingsPanel,
   type Field,
+  type Group,
   type PanelSchema,
 } from '../../common/settings'
 import { getValue, setValue, addValueChangeListener } from '../../common/gm'
+import { openEditorModal } from './editor-modal-tabs'
+import styleText from 'css:./style.css'
+import { uid } from '../../utils/uid'
 
 const KEY = 'utqn_config'
 const HOST = location.hostname || ''
@@ -33,6 +38,8 @@ const DEFAULTS = {
   theme: 'system',
   pinned: false,
   enabled: true,
+  layoutMode: 'floating',
+  sidebarSide: 'right',
   edgeWidth: 3,
   edgeHeight: 60,
   edgeOpacity: 0.6,
@@ -115,6 +122,8 @@ function createUtqnSettingsStore(): Store {
         theme: sp.theme ?? DEFAULTS.theme,
         pinned: sp.pinned ?? DEFAULTS.pinned,
         enabled: sp.enabled ?? DEFAULTS.enabled,
+        layoutMode: sp.layoutMode ?? DEFAULTS.layoutMode,
+        sidebarSide: sp.sidebarSide ?? DEFAULTS.sidebarSide,
         edgeWidth: sp.edgeWidth ?? DEFAULTS.edgeWidth,
         edgeHeight: sp.edgeHeight ?? DEFAULTS.edgeHeight,
         edgeOpacity: sp.edgeOpacity ?? DEFAULTS.edgeOpacity,
@@ -138,6 +147,8 @@ function createUtqnSettingsStore(): Store {
         theme: sp.theme ?? DEFAULTS.theme,
         pinned: sp.pinned ?? DEFAULTS.pinned,
         enabled: sp.enabled ?? DEFAULTS.enabled,
+        layoutMode: sp.layoutMode ?? DEFAULTS.layoutMode,
+        sidebarSide: sp.sidebarSide ?? DEFAULTS.sidebarSide,
         edgeWidth: sp.edgeWidth ?? DEFAULTS.edgeWidth,
         edgeHeight: sp.edgeHeight ?? DEFAULTS.edgeHeight,
         edgeOpacity: sp.edgeOpacity ?? DEFAULTS.edgeOpacity,
@@ -189,6 +200,16 @@ function createUtqnSettingsStore(): Store {
 
           case 'enabled': {
             setOrDelete(sp, 'enabled', value, DEFAULTS.enabled)
+            break
+          }
+
+          case 'layoutMode': {
+            setOrDelete(sp, 'layoutMode', value, DEFAULTS.layoutMode)
+            break
+          }
+
+          case 'sidebarSide': {
+            setOrDelete(sp, 'sidebarSide', value, DEFAULTS.sidebarSide)
             break
           }
 
@@ -278,101 +299,136 @@ export function openSettingsPanel(): void {
             label: '快捷键',
             placeholder: DEFAULTS.hotkey,
           },
+          {
+            type: 'action',
+            key: 'group-management',
+            label: '分组管理',
+            actions: [{ id: 'openGroupManager', text: '打开分组管理' }],
+            help: '管理导航分组与导航项',
+          },
         ] as Field[],
       },
       {
         id: 'site',
         title: '站点设置',
-        fields: [
-          { type: 'toggle', key: 'enabled', label: '启用' },
+        groups: [
           {
-            type: 'radio',
-            key: 'defaultOpen',
-            label: '默认打开方式',
-            options: [
-              { value: 'same-tab', label: '同标签' },
-              { value: 'new-tab', label: '新标签' },
-            ],
-            help: '选择点击链接时的默认打开行为',
+            id: 'site-basic',
+            title: '',
+            fields: [
+              { type: 'toggle', key: 'enabled', label: '启用' },
+              {
+                type: 'radio',
+                key: 'defaultOpen',
+                label: '默认打开方式',
+                options: [
+                  { value: 'same-tab', label: '同标签' },
+                  { value: 'new-tab', label: '新标签' },
+                ],
+                help: '选择点击链接时的默认打开行为',
+              },
+              {
+                type: 'radio',
+                key: 'theme',
+                label: '主题',
+                options: [
+                  { value: 'system', label: '系统' },
+                  { value: 'light', label: '浅色' },
+                  { value: 'dark', label: '深色' },
+                ],
+                help: '站点级主题偏好',
+              },
+            ] as Field[],
           },
           {
-            type: 'radio',
-            key: 'theme',
-            label: '主题',
-            options: [
-              { value: 'system', label: '系统' },
-              { value: 'light', label: '浅色' },
-              { value: 'dark', label: '深色' },
-            ],
-            help: '站点级主题偏好',
+            id: 'site-edge',
+            title: '面板与竖线',
+            fields: [
+              {
+                type: 'radio',
+                key: 'layoutMode',
+                label: '显示模式',
+                options: [
+                  { value: 'floating', label: '悬浮' },
+                  { value: 'sidebar', label: '侧边栏' },
+                ],
+              },
+              { type: 'toggle', key: 'pinned', label: '固定面板' },
+              {
+                type: 'radio',
+                key: 'sidebarSide',
+                label: '侧边栏位置',
+                options: [
+                  { value: 'left', label: '左侧' },
+                  { value: 'right', label: '右侧' },
+                ],
+              },
+              {
+                type: 'select',
+                key: 'position',
+                label: '位置',
+                options: POSITION_OPTIONS.map((p) => ({ value: p, label: p })),
+                help: '控制悬停竖线提示的位置',
+              },
+              {
+                type: 'input',
+                key: 'edgeWidth',
+                label: '竖线宽度',
+                help: '单位像素，建议 2-4',
+              },
+              {
+                type: 'input',
+                key: 'edgeHeight',
+                label: '竖线高度',
+                help: '单位像素，建议 40-80',
+              },
+              {
+                type: 'input',
+                key: 'edgeOpacity',
+                label: '不透明度',
+                help: '0-1 之间的小数',
+              },
+              {
+                type: 'colors',
+                key: 'edgeColorLight',
+                label: '浅色主题颜色',
+                options: [
+                  { value: '#1A73E8' },
+                  { value: '#2563EB' },
+                  { value: '#3B82F6' },
+                  { value: '#10B981' },
+                  { value: '#F59E0B' },
+                  { value: '#EF4444' },
+                  { value: '#6B7280' },
+                ],
+                help: '用于浅色主题的竖线颜色',
+              },
+              {
+                type: 'colors',
+                key: 'edgeColorDark',
+                label: '深色主题颜色',
+                options: [
+                  { value: '#8AB4F8' },
+                  { value: '#60A5FA' },
+                  { value: '#93C5FD' },
+                  { value: '#22C55E' },
+                  { value: '#F59E0B' },
+                  { value: '#EF4444' },
+                  { value: '#9CA3AF' },
+                ],
+                help: '用于深色主题的竖线颜色',
+              },
+              { type: 'toggle', key: 'edgeHidden', label: '隐藏竖线' },
+              {
+                type: 'action',
+                key: 'edge-reset',
+                label: '竖线设置',
+                actions: [{ id: 'edgeReset', text: '重置默认' }],
+                help: '恢复竖线宽度/高度/不透明度与颜色为默认值',
+              },
+            ] as Field[],
           },
-          { type: 'toggle', key: 'pinned', label: '固定面板' },
-          {
-            type: 'select',
-            key: 'position',
-            label: '位置',
-            options: POSITION_OPTIONS.map((p) => ({ value: p, label: p })),
-            help: '控制悬停竖线提示的位置',
-          },
-
-          {
-            type: 'input',
-            key: 'edgeWidth',
-            label: '竖线宽度',
-            help: '单位像素，建议 2-4',
-          },
-          {
-            type: 'input',
-            key: 'edgeHeight',
-            label: '竖线高度',
-            help: '单位像素，建议 40-80',
-          },
-          {
-            type: 'input',
-            key: 'edgeOpacity',
-            label: '不透明度',
-            help: '0-1 之间的小数',
-          },
-          {
-            type: 'colors',
-            key: 'edgeColorLight',
-            label: '浅色主题颜色',
-            options: [
-              { value: '#1A73E8' },
-              { value: '#2563EB' },
-              { value: '#3B82F6' },
-              { value: '#10B981' },
-              { value: '#F59E0B' },
-              { value: '#EF4444' },
-              { value: '#6B7280' },
-            ],
-            help: '用于浅色主题的竖线颜色',
-          },
-          {
-            type: 'colors',
-            key: 'edgeColorDark',
-            label: '深色主题颜色',
-            options: [
-              { value: '#8AB4F8' },
-              { value: '#60A5FA' },
-              { value: '#93C5FD' },
-              { value: '#22C55E' },
-              { value: '#F59E0B' },
-              { value: '#EF4444' },
-              { value: '#9CA3AF' },
-            ],
-            help: '用于深色主题的竖线颜色',
-          },
-
-          { type: 'toggle', key: 'edgeHidden', label: '隐藏竖线' },
-          {
-            type: 'action',
-            key: 'edge-reset',
-            label: '竖线设置',
-            actions: [{ id: 'edgeReset', text: '重置默认' }],
-            help: '恢复竖线宽度/高度/不透明度与颜色为默认值',
-          },
-        ] as Field[],
+        ] as Group[],
       },
       {
         id: 'actions',
@@ -381,14 +437,19 @@ export function openSettingsPanel(): void {
           {
             type: 'action',
             key: 'export-import',
-            label: '数据导入与导出',
-            actions: [
-              { id: 'exportJson', text: '导出 JSON 文件' },
-              { id: 'importJson', text: '从 JSON 文件导入' },
-            ],
-            help: '导出/导入所有配置（包含各分组、导航项设置）',
+            label: '数据导出',
+            actions: [{ id: 'exportJson', text: '导出 JSON 文件' }],
+            help: '导出所有配置（包含各分组、导航项设置）',
           },
-          { type: 'input', key: 'syncUrl', label: '同步 URL' },
+          {
+            type: 'action',
+            key: 'export-import',
+            label: '数据导入',
+            actions: [{ id: 'importJson', text: '从 JSON 文件导入' }],
+            help: '导入之前导出的文件',
+          },
+          // 暂时隐藏，以后实现
+          // { type: 'input', key: 'syncUrl', label: '同步 URL' },
           {
             type: 'action',
             key: 'clear-data',
@@ -413,6 +474,112 @@ export function openSettingsPanel(): void {
     },
     onAction({ actionId }) {
       switch (actionId) {
+        case 'openGroupManager': {
+          ;(async () => {
+            try {
+              const existing = document.querySelector(
+                '[data-utqn-host="utags-quick-nav"]'
+              )
+              const root =
+                existing instanceof HTMLElement && existing.shadowRoot
+                  ? existing.shadowRoot
+                  : (() => {
+                      const host = document.createElement('div')
+                      host.dataset.utqnHost = 'utags-quick-nav'
+                      const r = host.attachShadow({ mode: 'open' })
+                      const style = document.createElement('style')
+                      style.textContent = styleText
+                      r.append(style)
+                      document.documentElement.append(host)
+                      return r
+                    })()
+
+              let raw: any = {}
+              try {
+                const s = await getValue(KEY, '')
+                raw = s ? JSON.parse(String(s) || '{}') || {} : {}
+              } catch {}
+
+              if (!Array.isArray(raw.groups) || raw.groups.length === 0) {
+                const g = {
+                  id: uid(),
+                  name: '默认组',
+                  icon: 'lucide:folder',
+                  match: ['*'],
+                  defaultOpen: 'same-tab',
+                  items: [
+                    {
+                      id: uid(),
+                      name: '首页',
+                      icon: 'lucide:home',
+                      type: 'url',
+                      data: '/',
+                      openIn: 'same-tab',
+                      hidden: false,
+                    },
+                  ],
+                  collapsed: false,
+                  itemsPerRow: 1,
+                  hidden: false,
+                }
+                raw.groups = [g]
+              }
+
+              const sitePref = (raw.sitePrefs || {})[HOST] || {
+                defaultOpen: 'same-tab',
+              }
+
+              openEditorModal(root, raw, {
+                async saveConfig(cfg) {
+                  try {
+                    await setValue(KEY, JSON.stringify(cfg))
+                  } catch {}
+                },
+                rerender() {
+                  void 0
+                },
+                sitePref,
+                updateThemeUI() {
+                  void 0
+                },
+                edgeDefaults: {
+                  width: 3,
+                  height: 60,
+                  opacity: 0.6,
+                  colorLight: '#1A73E8',
+                  colorDark: '#8AB4F8',
+                },
+                tempOpenGetter() {
+                  return false
+                },
+              })
+
+              try {
+                const modal = root.querySelector('.modal.editor')!
+                const segs = Array.from(
+                  modal.querySelectorAll('.segmented .seg-item')
+                )
+                for (const seg of segs) {
+                  const textEl = seg.querySelector('.seg-text')
+                  const inputEl = seg.querySelector('.seg-radio')
+                  if (
+                    textEl &&
+                    textEl.textContent === '分组' &&
+                    inputEl instanceof HTMLInputElement
+                  ) {
+                    inputEl.click()
+                    break
+                  }
+                }
+
+                closeSettingsPanel()
+              } catch {}
+            } catch {}
+          })()
+
+          break
+        }
+
         case 'exportJson': {
           ;(async () => {
             try {

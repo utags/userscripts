@@ -24,6 +24,22 @@ div {
   @apply bg-gray-900 border-gray-700 shadow-2xl;
 }
 
+.panel.sidebar-right {
+  border-right-width: 0;
+  border-top-width: 0;
+  border-bottom-width: 0;
+  width: 360px;
+  box-shadow: unset;
+}
+
+.panel.sidebar-left {
+  border-left-width: 0;
+  border-top-width: 0;
+  border-bottom-width: 0;
+  width: 360px;
+  box-shadow: unset;
+}
+
 @keyframes utqn-slide-in-left {
   from {
     opacity: 0;

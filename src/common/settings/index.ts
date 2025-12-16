@@ -100,6 +100,26 @@ type PanelOptions = {
   }) => void
 }
 
+let currentHost: HTMLDivElement | undefined
+
+function onKeyDown(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    closeSettingsPanel()
+  }
+}
+
+export function closeSettingsPanel(): void {
+  try {
+    currentHost?.remove()
+  } catch {}
+
+  try {
+    globalThis.removeEventListener('keydown', onKeyDown, true)
+  } catch {}
+
+  currentHost = undefined
+}
+
 function createToggleRow(label: string, key: string, help?: string) {
   const row = c('div', { className: 'row' })
   const labWrap = c('div', { className: 'label-wrap' })
@@ -279,6 +299,8 @@ export function openSettingsPanel(
   options?: PanelOptions
 ): void {
   const { host, root, existed } = ensureHostAndRoot(options)
+
+  currentHost = host
 
   if (existed) return
 
@@ -505,9 +527,12 @@ export function openSettingsPanel(
 
   function renderGroupsPanel(container: HTMLElement, groups: Group[]) {
     for (const g of groups) {
-      const header = c('h2', { className: 'group-title', text: g.title })
       const body = c('div', { className: 'grid group' })
-      container.append(header)
+      if (g.title) {
+        const header = c('h2', { className: 'group-title', text: g.title })
+        container.append(header)
+      }
+
       container.append(body)
       for (const f of g.fields) appendField(body, f)
     }
@@ -631,8 +656,7 @@ export function openSettingsPanel(
   function onPanelClick(e: MouseEvent) {
     const t = e.target as HTMLElement
     if (t === topCloseBtn) {
-      host?.remove()
-      globalThis.removeEventListener('keydown', onKeyDown, true)
+      closeSettingsPanel()
       return
     }
 
@@ -723,8 +747,7 @@ export function openSettingsPanel(
     outerHeader.addEventListener('click', (e) => {
       const t = e.target as HTMLElement
       if (t === topCloseBtn) {
-        host?.remove()
-        globalThis.removeEventListener('keydown', onKeyDown, true)
+        closeSettingsPanel()
       }
     })
   } catch {}
@@ -793,13 +816,6 @@ export function openSettingsPanel(
 
   wireStoreChange(store, fillers)
   void refreshAll()
-
-  function onKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Escape') {
-      host?.remove()
-      globalThis.removeEventListener('keydown', onKeyDown, true)
-    }
-  }
 
   globalThis.addEventListener('keydown', onKeyDown, true)
 }

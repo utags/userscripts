@@ -1,3 +1,5 @@
+import { getValue, setValue } from '../../common/gm'
+
 const SELECTOR_REPLY_BUTTON =
   '.composer-action-reply .save-or-cancel button.create'
 const I18N_LABEL = {
@@ -111,7 +113,7 @@ function getEnabled() {
 
 async function loadEnabled() {
   try {
-    const val = await GM.getValue<string>(KEY, '0')
+    const val = await getValue<string>(KEY, '0')
     enabledFlag = val === '1'
     updateToggleUI()
   } catch {
@@ -122,7 +124,7 @@ async function loadEnabled() {
 async function setEnabled(v: boolean) {
   enabledFlag = Boolean(v)
   try {
-    await GM.setValue(KEY, v ? '1' : '0')
+    await setValue(KEY, v ? '1' : '0')
   } catch {}
 }
 

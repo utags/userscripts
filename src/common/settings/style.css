@@ -67,6 +67,7 @@
 
 .user-settings .btn {
   @apply px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50;
+  white-space: nowrap;
 }
 
 .user-settings .btn-danger {
@@ -235,6 +236,7 @@
 
 .user-settings .seg {
   @apply flex items-center gap-2;
+  flex-wrap: wrap;
 }
 
 .user-settings .seg-btn {

@@ -18,6 +18,6 @@
 // To load favicons
 // @connect              wsrv.nl
 // @noframes
-// @run-at               document-body
+// @run-at               document-start
 // ==/UserScript==
 //

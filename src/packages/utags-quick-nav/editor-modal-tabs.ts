@@ -33,7 +33,7 @@ export function openEditorModal(
   const h2 = document.createElement('h2')
   h2.textContent = '快速导航设置'
 
-  let tab: 'settings' | 'groups' = 'settings'
+  let tab: 'settings' | 'groups' = 'groups'
   const tabs = createSegmentedRadios(
     tab,
     ['settings', 'groups'] as const,
@@ -85,7 +85,7 @@ export function openEditorModal(
   syncUi()
 
   modal.append(h2)
-  modal.append(tabs)
+  // modal.append(tabs)
   modal.append(settingsWrap)
   modal.append(groupsWrap)
   modal.append(actions)
