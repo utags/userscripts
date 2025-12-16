@@ -1,3 +1,5 @@
+import { registerMenu } from '../../common/gm'
+
 function escapeMD(s: string) {
   s = String(s || '')
   return s.replaceAll('|', '\\|').replaceAll('[', '\\[').replaceAll(']', '\\]')
@@ -103,10 +105,7 @@ function run() {
 }
 
 try {
-  const gmRegisterMenuCommand = (globalThis as any).GM_registerMenuCommand
-  if (typeof gmRegisterMenuCommand === 'function') {
-    gmRegisterMenuCommand('复制选中链接为 Markdown', run)
-  }
+  registerMenu('复制选中链接为 Markdown', run)
 } catch {}
 
 globalThis.addEventListener('keydown', (e) => {

@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.2
+// @version              0.1.3
 // @description          Copy selected link(s) on any page as Markdown: [text](url).
 // @description:zh-CN    在任意页面将选中的链接复制为 Markdown 格式：[文本](链接)。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2210%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M18%2046V18l14%2022L46%2018v28%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E
@@ -17,6 +17,12 @@
 //
 ;(() => {
   'use strict'
+  function registerMenu(caption, onClick) {
+    if (typeof GM_registerMenuCommand === 'function') {
+      return GM_registerMenuCommand(caption, onClick)
+    }
+    return 0
+  }
   function escapeMD(s) {
     s = String(s || '')
     return s
@@ -111,13 +117,7 @@
     void copyText(md)
   }
   try {
-    const gmRegisterMenuCommand = globalThis.GM_registerMenuCommand
-    if (typeof gmRegisterMenuCommand === 'function') {
-      gmRegisterMenuCommand(
-        '\u590D\u5236\u9009\u4E2D\u94FE\u63A5\u4E3A Markdown',
-        run
-      )
-    }
+    registerMenu('\u590D\u5236\u9009\u4E2D\u94FE\u63A5\u4E3A Markdown', run)
   } catch (e) {}
   globalThis.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === 'KeyM') {

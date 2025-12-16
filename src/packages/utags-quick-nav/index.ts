@@ -9,6 +9,13 @@ import { openAddGroupModal } from './add-group-modal'
 import { showDropdownMenu } from './dropdown'
 import { openEditorModal } from './editor-modal-tabs'
 import {
+  getValue,
+  setValue,
+  registerMenu,
+  unregisterMenu,
+  addValueChangeListener,
+} from '../../common/gm'
+import {
   addCurrentPageLinkToGroup,
   pickLinkFromPageAndAdd,
 } from './add-link-actions'
@@ -227,7 +234,7 @@ function openItem(
 
 async function loadConfig(): Promise<QuickNavConfig> {
   try {
-    const v = await GM.getValue(KEY, '')
+    const v = await getValue<string>(KEY, '')
     if (v) {
       const raw = JSON.parse(String(v) || '{}')
       const host = location.hostname || ''
@@ -351,7 +358,7 @@ async function saveConfig(cfg: QuickNavConfig) {
     const s = JSON.stringify(next)
     if (s === lastSaved) return
     lastSaved = s
-    await GM.setValue(KEY, s)
+    await setValue(KEY, s)
   } catch {}
 }
 
@@ -1454,31 +1461,22 @@ function initEdgeExpand(root: ShadowRoot, cfg: QuickNavConfig) {
   })
 }
 
-function registerMenu(root: ShadowRoot, cfg: QuickNavConfig) {
-  if (typeof GM_registerMenuCommand !== 'function') {
-    return
-  }
-
-  if (
-    typeof GM_unregisterMenuCommand === 'function' &&
-    Array.isArray(menuIds)
-  ) {
+function registerMenus(root: ShadowRoot, cfg: QuickNavConfig) {
+  try {
     for (const id of menuIds) {
       try {
-        GM_unregisterMenuCommand(id)
+        unregisterMenu(id)
       } catch {}
     }
 
     menuIds = []
-  }
 
-  try {
     const text = sitePref.enabled
       ? '🚫 禁用当前网站快速导航'
       : '✅ 启用当前网站快速导航'
 
     menuIds.push(
-      GM_registerMenuCommand('🧭 打开快速导航面板', () => {
+      registerMenu('🧭 打开快速导航面板', () => {
         if (sitePref.enabled === false) {
           const ok = globalThis.confirm('当前网站已禁用，是否启用并打开面板？')
           if (ok) {
@@ -1486,7 +1484,7 @@ function registerMenu(root: ShadowRoot, cfg: QuickNavConfig) {
             void saveConfig(cfg)
             tempOpen = true
             rerender(root, cfg)
-            registerMenu(root, cfg)
+            registerMenus(root, cfg)
           }
 
           return
@@ -1495,14 +1493,14 @@ function registerMenu(root: ShadowRoot, cfg: QuickNavConfig) {
         tempOpen = true
         rerender(root, cfg)
       }),
-      GM_registerMenuCommand('⚙️ 设置快速导航', () => {
+      registerMenu('⚙️ 设置快速导航', () => {
         openEditor(root, cfg)
       }),
-      GM_registerMenuCommand(text, () => {
+      registerMenu(text, () => {
         sitePref.enabled = !sitePref.enabled
         void saveConfig(cfg)
         rerender(root, cfg)
-        registerMenu(root, cfg)
+        registerMenus(root, cfg)
       })
     )
   } catch {}
@@ -1510,23 +1508,22 @@ function registerMenu(root: ShadowRoot, cfg: QuickNavConfig) {
 
 function registerStorageListener(root: ShadowRoot, cfg: QuickNavConfig) {
   try {
-    if (typeof GM_addValueChangeListener === 'function')
-      GM_addValueChangeListener(
-        KEY,
-        (_name: string, _old: string, nv: string, remote: boolean) => {
-          if (!remote) return
-          try {
-            const obj = JSON.parse(nv)
-            if (obj && obj.global && obj.groups) {
-              cfg.global = obj.global
-              cfg.groups = obj.groups
-              if (obj.sitePrefs) cfg.sitePrefs = obj.sitePrefs
-              initSitePref(cfg)
-              rerender(root, cfg)
-            }
-          } catch {}
-        }
-      )
+    void addValueChangeListener(
+      KEY,
+      (_name: string, _old: string, nv: string, remote: boolean) => {
+        if (!remote) return
+        try {
+          const obj = JSON.parse(nv)
+          if (obj && obj.global && obj.groups) {
+            cfg.global = obj.global
+            cfg.groups = obj.groups
+            if (obj.sitePrefs) cfg.sitePrefs = obj.sitePrefs
+            initSitePref(cfg)
+            rerender(root, cfg)
+          }
+        } catch {}
+      }
+    )
   } catch {}
 }
 
@@ -1639,7 +1636,7 @@ function main() {
     const cfg = await loadConfig()
     initSitePref(cfg)
     if (sitePref.enabled === false) {
-      registerMenu(root, cfg)
+      registerMenus(root, cfg)
       registerStorageListener(root, cfg)
       registerUrlChangeListener(root, cfg)
       return
@@ -1648,7 +1645,7 @@ function main() {
     rerender(root, cfg)
     registerHotkeys(root, cfg)
     // initEdgeExpand(root, cfg)
-    registerMenu(root, cfg)
+    registerMenus(root, cfg)
     registerStorageListener(root, cfg)
     registerUrlChangeListener(root, cfg)
     try {

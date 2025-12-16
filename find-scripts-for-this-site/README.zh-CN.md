@@ -6,6 +6,8 @@
 
 ![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-25-19-48-03.png)
 
+![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-16-09-57-35.png)
+
 ## 功能特性
 
 - 🔍 一键在多个仓库搜索脚本
@@ -46,6 +48,10 @@
 - 搜索结果不准确：开启调试模式并查看控制台中的域名提取日志
 
 ## 更新日志
+
+### v0.3.x
+
+- 设置界面优化
 
 ### v0.2.4
 

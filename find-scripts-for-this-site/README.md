@@ -6,6 +6,8 @@ A user script to quickly find scripts for the current site across multiple repos
 
 ![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-25-19-47-18.png)
 
+![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-16-09-57-11.png)
+
 ## Features
 
 - 🔍 One-click search across repositories
@@ -48,6 +50,10 @@ A user script to quickly find scripts for the current site across multiple repos
 - If results seem off, enable debug mode and check the extracted domain in console
 
 ## Changelog
+
+### v0.3.x
+
+- Settings panel UI improvements
 
 ### v0.2.4
 

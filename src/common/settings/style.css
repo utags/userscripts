@@ -11,7 +11,13 @@
 }
 
 .user-settings .panel {
-  @apply bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-[380px] max-h-[90vh] overflow-y-auto font-sans text-[13px] text-gray-900;
+  @apply bg-gray-100 rounded-b-xl shadow-xl px-4 pb-4 pt-0 w-[420px] max-h-[90vh] overflow-y-auto font-sans text-[14px] text-gray-900;
+  background: #f2f2f7;
+  -webkit-box-shadow: 0 10px 39px 10px #3e424238;
+  -moz-box-shadow: 0 10px 39px 10px #3e424238;
+  box-shadow: 0 10px 39px 10px #3e424238 !important;
+  scrollbar-color: rgba(156, 163, 175, 0.25) transparent;
+  scrollbar-width: thin;
 }
 
 .user-settings .grid {
@@ -19,11 +25,44 @@
 }
 
 .user-settings .row {
-  @apply flex items-center justify-between gap-3;
+  @apply flex items-center justify-between gap-3 px-4 py-3;
+}
+
+.user-settings .group {
+  @apply bg-white rounded-xl overflow-hidden gap-0;
+}
+
+.user-settings .group .row {
+  @apply bg-white rounded-none border-0 px-4 py-3 relative;
+}
+
+.user-settings .group .row:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.user-settings .header-row {
+  @apply rounded-none px-0 pb-3 pt-0 flex items-center justify-center;
+}
+.user-settings .panel-stuck .header-row .panel-title {
+  opacity: 0;
+  transform: translateY(-2px);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
 }
 
 .user-settings label {
   @apply text-gray-600;
+}
+
+.user-settings .label-wrap {
+  @apply flex flex-col gap-1 text-left min-w-[60px];
 }
 
 .user-settings .btn {
@@ -39,11 +78,19 @@
 }
 
 .user-settings input[type='text'] {
-  @apply px-3 py-2 rounded-md border border-gray-300 text-gray-700 w-[180px];
+  @apply px-3 py-2 rounded-md border border-transparent text-gray-700 w-[180px] text-right outline-none;
+}
+.user-settings input[type='text']:hover,
+.user-settings input[type='text']:focus {
+  @apply border-gray-300;
 }
 
 .user-settings select {
-  @apply px-3 py-2 rounded-md border border-gray-300 text-gray-700 w-[180px];
+  @apply px-3 py-2 rounded-md border border-transparent text-gray-700 w-[180px] text-right outline-none bg-white;
+}
+.user-settings select:hover,
+.user-settings select:focus {
+  @apply border-gray-300;
 }
 
 .user-settings input[type='color'] {
@@ -51,7 +98,11 @@
 }
 
 .user-settings textarea {
-  @apply px-3 py-2 rounded-md border border-gray-300 text-gray-700 w-full;
+  @apply px-3 py-2 rounded-md border border-transparent text-gray-700 w-full text-right outline-none;
+}
+.user-settings textarea:hover,
+.user-settings textarea:focus {
+  @apply border-gray-300;
 }
 
 .user-settings .switch {
@@ -70,8 +121,8 @@
   width: 42px;
   height: 22px;
   border-radius: 9999px;
-  background: #ffffff;
-  border: 1px solid #9ca3af;
+  background: #e5e5ea;
+  border: 1px solid #d1d1d6;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition:
@@ -87,34 +138,90 @@
   width: 18px;
   height: 18px;
   border-radius: 9999px;
-  background: #111827;
+  background: #ffffff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
   transition:
     transform 0.2s ease,
-    background-color 0.2s ease;
+    background-color 0.2s ease,
+    left 0.2s ease,
+    right 0.2s ease;
   transform: translateY(-50%);
 }
 
 .user-settings .toggle-checkbox:checked {
-  background: var(--user-toggle-on-bg, #111827);
-  border-color: var(--user-toggle-on-bg, #111827);
+  background: var(--user-toggle-on-bg, #34c759);
+  border-color: var(--user-toggle-on-bg, #34c759);
 }
 
 .user-settings .panel-title {
-  @apply text-[16px] font-semibold text-gray-700;
+  @apply text-[20px] font-bold text-gray-800;
+}
+
+.user-settings .outer-header {
+  @apply bg-gray-100 relative flex items-center justify-center h-11 rounded-t-xl font-sans;
+  background: #f2f2f7;
+}
+.user-settings .outer-header .outer-title {
+  opacity: 0;
+  transition: opacity 150ms ease;
+  @apply text-[20px] font-bold text-gray-800;
+}
+.user-settings .outer-header.stuck .outer-title {
+  opacity: 1;
+}
+.user-settings .outer-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: #e5e7eb;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+.user-settings .outer-header.stuck::after {
+  opacity: 1;
+}
+
+.user-settings .group-title {
+  @apply text-[13px] font-semibold text-gray-600 px-1;
 }
 
 .user-settings .btn-ghost.icon {
-  @apply w-7 h-7 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+  @apply w-9 h-9 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-700 text-[16px] cursor-pointer select-none;
+}
+.user-settings .close-btn:hover {
+  @apply bg-gray-300 text-gray-900;
+  transform: translateY(-50%);
+  font-size: 19px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.user-settings .close-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition:
+    transform 150ms ease,
+    background-color 150ms ease,
+    color 150ms ease,
+    font-size 150ms ease;
 }
 
 .user-settings .toggle-checkbox:checked::before {
-  transform: translate(20px, -50%);
+  left: auto;
+  right: 2px;
+  transform: translateY(-50%);
   background: #ffffff;
 }
 
 .user-settings .color-row {
-  @apply flex items-center gap-2;
+  @apply flex items-center gap-1.5;
 }
 
 .user-settings .color-swatch {
@@ -131,7 +238,7 @@
 }
 
 .user-settings .seg-btn {
-  @apply px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50;
+  @apply px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer select-none;
 }
 
 .user-settings .seg-btn.active {
@@ -149,7 +256,7 @@
 }
 
 .user-settings .tab-btn {
-  @apply px-3 py-1 rounded-md border border-gray-300 text-gray-700;
+  @apply px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer select-none;
 }
 
 .user-settings .tab-btn.active {
@@ -159,5 +266,68 @@
 }
 
 .user-settings .field-help {
-  @apply text-gray-400 text-[12px];
+  @apply text-gray-400 text-[11px];
+}
+
+@media (prefers-color-scheme: dark) {
+  .user-settings .panel {
+    @apply bg-gray-800 rounded-b-xl text-gray-100;
+    -webkit-box-shadow: 0 10px 39px 10px #00000040;
+    -moz-box-shadow: 0 10px 39px 10px #00000040;
+    box-shadow: 0 10px 39px 10px #00000040 !important;
+  }
+  .user-settings .row {
+    @apply bg-transparent border-0;
+  }
+  .user-settings .header-row {
+    @apply bg-gray-800 border-gray-700;
+  }
+  .user-settings .outer-header {
+    @apply bg-gray-800 rounded-t-xl;
+  }
+  .user-settings .outer-header::after {
+    background: #4b5563;
+  }
+  .user-settings .footer a.issue-link {
+    @apply text-gray-300 hover:text-gray-100;
+  }
+  .user-settings .footer .brand {
+    @apply text-gray-400;
+  }
+  .user-settings label {
+    @apply text-gray-300;
+  }
+  .user-settings .field-help {
+    @apply text-gray-400;
+  }
+  .user-settings .group {
+    @apply bg-gray-700;
+  }
+  .user-settings .group .row:not(:last-child)::after {
+    background: #4b5563;
+  }
+}
+
+.user-settings .panel::-webkit-scrollbar {
+  width: 4px;
+}
+.user-settings .panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.user-settings .panel::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.25);
+  border-radius: 9999px;
+  opacity: 0.25;
+}
+.user-settings .footer {
+  @apply text-[12px] text-gray-500 flex flex-col items-center gap-1 pt-6 pb-3;
+}
+.user-settings .footer a.issue-link {
+  @apply text-gray-600 hover:text-gray-800 underline underline-offset-2 cursor-pointer select-none;
+}
+.user-settings .footer .brand {
+  @apply text-gray-500 hover:text-gray-700 cursor-pointer select-none;
+}
+.user-settings button {
+  user-select: none;
 }

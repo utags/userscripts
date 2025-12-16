@@ -1,4 +1,5 @@
 import { getWrappedIconUrl } from './favicon'
+import { xmlHttpRequest } from '../common/gm'
 
 export function clearChildren(el: Node & ParentNode) {
   try {
@@ -127,7 +128,7 @@ function injectLucideIcon(container: HTMLElement, name: string) {
     const url = `${cdnBase}/lucide-static@latest/icons/${name}.svg`
 
     try {
-      GM_xmlhttpRequest({
+      xmlHttpRequest({
         method: 'GET',
         url,
         onload(res: any) {
@@ -168,7 +169,7 @@ function injectLucideIcon(container: HTMLElement, name: string) {
 
 function injectImageAsData(container: HTMLElement, url: string) {
   try {
-    GM_xmlhttpRequest({
+    xmlHttpRequest({
       method: 'GET',
       url,
       responseType: 'blob' as any,

@@ -1,6 +1,7 @@
 import { c } from '../../utils/c'
 import { setOrDelete } from '../../utils/obj'
 import styleText from 'css:./style.css'
+import { getValue, setValue, addValueChangeListener } from '../gm'
 
 export type FieldOption = { value: string; label: string }
 type FieldToggle = { type: 'toggle'; key: string; label: string; help?: string }
@@ -55,9 +56,13 @@ export type Field =
   | FieldColors
   | FieldAction
 
-export type Tab = { id: string; title: string; fields: Field[] }
+export type Group = { id: string; title: string; fields: Field[] }
+export type Tab =
+  | { id: string; title: string; fields: Field[] }
+  | { id: string; title: string; groups: Group[] }
 export type PanelSchema =
   | { type: 'simple'; title: string; fields: Field[] }
+  | { type: 'simple'; title: string; groups: Group[] }
   | { type: 'tabs'; title: string; tabs: Tab[] }
 
 type Store = {
@@ -77,11 +82,6 @@ type Store = {
   defaults(): Record<string, unknown>
 }
 
-declare const GM: {
-  getValue<T = unknown>(key: string, defaultValue: T): Promise<T>
-  setValue(key: string, value: unknown): Promise<void>
-}
-
 type PanelOptions = {
   hostDatasetKey?: string
   hostDatasetValue?: string
@@ -91,6 +91,7 @@ type PanelOptions = {
     colorRing?: string
     toggleOnBg?: string
   }
+  issuesUrl?: string
   styleText?: string
   onAction?: (info: {
     key: string
@@ -101,6 +102,7 @@ type PanelOptions = {
 
 function createToggleRow(label: string, key: string, help?: string) {
   const row = c('div', { className: 'row' })
+  const labWrap = c('div', { className: 'label-wrap' })
   const lab = c('label', { text: label })
   const seg = c('div', { className: 'toggle-wrap' })
   const chk = c('input', {
@@ -111,8 +113,9 @@ function createToggleRow(label: string, key: string, help?: string) {
   const val = c('div', { className: 'value-wrap' })
   seg.append(chk)
   val.append(seg)
-  if (help) val.append(c('div', { className: 'field-help', text: help }))
-  row.append(lab)
+  labWrap.append(lab)
+  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+  row.append(labWrap)
   row.append(val)
   return { row, chk }
 }
@@ -124,6 +127,7 @@ function createInputRow(
   help?: string
 ) {
   const row = c('div', { className: 'row' })
+  const labWrap = c('div', { className: 'label-wrap' })
   const lab = c('label', { text: label })
   const inp = c('input', {
     type: 'text',
@@ -132,8 +136,9 @@ function createInputRow(
   })
   const val = c('div', { className: 'value-wrap' })
   val.append(inp)
-  if (help) val.append(c('div', { className: 'field-help', text: help }))
-  row.append(lab)
+  labWrap.append(lab)
+  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+  row.append(labWrap)
   row.append(val)
   return { row, inp }
 }
@@ -145,6 +150,7 @@ function createTextareaRow(
   help?: string
 ) {
   const row = c('div', { className: 'row' })
+  const labWrap = c('div', { className: 'label-wrap' })
   const lab = c('label', { text: label })
   const ta = c('textarea', {
     rows: rows || 4,
@@ -152,8 +158,9 @@ function createTextareaRow(
   })
   const val = c('div', { className: 'value-wrap' })
   val.append(ta)
-  if (help) val.append(c('div', { className: 'field-help', text: help }))
-  row.append(lab)
+  labWrap.append(lab)
+  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+  row.append(labWrap)
   row.append(val)
   return { row, ta }
 }
@@ -165,6 +172,7 @@ function createRadioRow(
   help?: string
 ) {
   const row = c('div', { className: 'row' })
+  const labWrap = c('div', { className: 'label-wrap' })
   const lab = c('label', { text: label })
   const seg = c('div', { className: 'seg' })
   for (const o of opts) {
@@ -178,8 +186,9 @@ function createRadioRow(
 
   const val = c('div', { className: 'value-wrap' })
   val.append(seg)
-  if (help) val.append(c('div', { className: 'field-help', text: help }))
-  row.append(lab)
+  labWrap.append(lab)
+  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+  row.append(labWrap)
   row.append(val)
   return { row, seg }
 }
@@ -191,6 +200,7 @@ function createColorRow(
   help?: string
 ) {
   const row = c('div', { className: 'row' })
+  const labWrap = c('div', { className: 'label-wrap' })
   const lab = c('label', { text: label })
   const seg = c('div', { className: 'color-row' })
   for (const o of opts) {
@@ -204,8 +214,9 @@ function createColorRow(
 
   const val = c('div', { className: 'value-wrap' })
   val.append(seg)
-  if (help) val.append(c('div', { className: 'field-help', text: help }))
-  row.append(lab)
+  labWrap.append(lab)
+  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+  row.append(labWrap)
   row.append(val)
   return { row, seg }
 }
@@ -217,6 +228,7 @@ function createSelectRow(
   help?: string
 ) {
   const row = c('div', { className: 'row' })
+  const labWrap = c('div', { className: 'label-wrap' })
   const lab = c('label', { text: label })
   const sel = c('select', { dataset: { key } })
   for (const o of opts) {
@@ -226,8 +238,9 @@ function createSelectRow(
 
   const val = c('div', { className: 'value-wrap' })
   val.append(sel)
-  if (help) val.append(c('div', { className: 'field-help', text: help }))
-  row.append(lab)
+  labWrap.append(lab)
+  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+  row.append(labWrap)
   row.append(val)
   return { row, sel }
 }
@@ -239,6 +252,7 @@ function createActionRow(
   help?: string
 ) {
   const row = c('div', { className: 'row' })
+  const labWrap = c('div', { className: 'label-wrap' })
   const lab = c('label', { text: label })
   const wrap = c('div', { className: 'value-wrap' })
   const act = c('div', { className: 'seg' })
@@ -252,8 +266,9 @@ function createActionRow(
   }
 
   wrap.append(act)
-  if (help) wrap.append(c('div', { className: 'field-help', text: help }))
-  row.append(lab)
+  labWrap.append(lab)
+  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+  row.append(labWrap)
   row.append(wrap)
   return { row }
 }
@@ -263,7 +278,9 @@ export function openSettingsPanel(
   store: Store,
   options?: PanelOptions
 ): void {
-  const { host, root } = ensureHostAndRoot(options)
+  const { host, root, existed } = ensureHostAndRoot(options)
+
+  if (existed) return
 
   let lastValues: Record<string, unknown> = {}
 
@@ -278,7 +295,7 @@ export function openSettingsPanel(
   const panel = c('div', { className: 'panel' })
   const grid = c('div', { className: 'grid' })
 
-  const { row: headerRow, closeBtn } = buildHeader(schema.title)
+  const { row: headerRow } = buildHeader(schema.title)
   grid.append(headerRow)
 
   const fillers: Record<string, Array<() => void>> = {}
@@ -373,6 +390,7 @@ export function openSettingsPanel(
   function ensureHostAndRoot(options?: PanelOptions): {
     host: HTMLDivElement
     root: ShadowRoot
+    existed: boolean
   } {
     const keySan = sanitizeDatasetKey(options?.hostDatasetKey || 'usrHost')
     const sel = `[data-${keySan}="${options?.hostDatasetValue || 'settings'}"]`
@@ -383,16 +401,20 @@ export function openSettingsPanel(
     if (existing instanceof HTMLDivElement && existing.shadowRoot) {
       hostEl = existing
       root = existing.shadowRoot
-      for (const n of Array.from(root.childNodes)) (n as any).remove()
-    } else {
-      const key = options?.hostDatasetKey || 'userHost'
-      const val = options?.hostDatasetValue || 'settings'
-      hostEl = c('div', { dataset: { [key]: val } })
-      root = hostEl.attachShadow({ mode: 'open' })
-      document.documentElement.append(hostEl)
+      try {
+        document.documentElement.append(hostEl)
+      } catch {}
+
+      return { host: hostEl, root, existed: true }
     }
 
-    return { host: hostEl, root }
+    const key = options?.hostDatasetKey || 'userHost'
+    const val = options?.hostDatasetValue || 'settings'
+    hostEl = c('div', { dataset: { [key]: val } })
+    root = hostEl.attachShadow({ mode: 'open' })
+    document.documentElement.append(hostEl)
+
+    return { host: hostEl, root, existed: false }
   }
 
   function applyThemeStyles(wrap: HTMLElement, theme?: PanelOptions['theme']) {
@@ -404,27 +426,31 @@ export function openSettingsPanel(
       properties.push(`--user-color-ring: ${theme.colorRing};`)
     if (theme.toggleOnBg)
       properties.push(`--user-toggle-on-bg: ${theme.toggleOnBg};`)
+    const accent = theme.activeBg || theme.colorRing
+    if (accent) properties.push(`--user-accent: ${accent};`)
     if (properties.length > 0) wrap.style.cssText = properties.join(' ')
   }
 
-  function buildHeader(title: string): {
-    row: HTMLElement
-    closeBtn: HTMLButtonElement
-  } {
-    const row = c('div', { className: 'row' })
+  function buildHeader(title: string): { row: HTMLElement } {
+    const row = c('div', { className: 'row header-row' })
     const titleEl = c('label', { className: 'panel-title', text: title })
-    const closeBtn = c('button', {
-      className: 'btn-ghost icon',
-      text: '×',
-      attrs: { 'aria-label': '关闭' },
-    })
     row.append(titleEl)
-    row.append(closeBtn)
-    return { row, closeBtn }
+    return { row }
   }
 
-  function renderSimplePanel(container: HTMLElement, fields: Field[]) {
-    for (const f of fields) appendField(container, f)
+  function renderSimplePanel(
+    container: HTMLElement,
+    data: { fields?: Field[]; groups?: Group[] }
+  ) {
+    if (data.groups && Array.isArray(data.groups)) {
+      renderGroupsPanel(container, data.groups)
+      return
+    }
+
+    const fields = data.fields || []
+    const body = c('div', { className: 'grid group' })
+    container.append(body)
+    for (const f of fields) appendField(body, f)
   }
 
   function renderTabsPanel(container: HTMLElement, tabs: Tab[]) {
@@ -441,7 +467,12 @@ export function openSettingsPanel(
       const p = c('div', { className: 'grid' })
       panels[t.id] = p
       if (t.id !== active) p.style.display = 'none'
-      for (const f of t.fields) appendField(p, f)
+      if ('groups' in t && Array.isArray((t as any).groups)) {
+        renderGroupsPanel(p, (t as any).groups as Group[])
+      } else if ('fields' in t && Array.isArray((t as any).fields)) {
+        p.className = 'grid group'
+        for (const f of (t as any).fields as Field[]) appendField(p, f)
+      }
     }
 
     container.append(tabsWrap)
@@ -470,6 +501,16 @@ export function openSettingsPanel(
 
     tabsWrap.addEventListener('click', onTabsClick)
     updateTabsUI()
+  }
+
+  function renderGroupsPanel(container: HTMLElement, groups: Group[]) {
+    for (const g of groups) {
+      const header = c('h2', { className: 'group-title', text: g.title })
+      const body = c('div', { className: 'grid group' })
+      container.append(header)
+      container.append(body)
+      for (const f of g.fields) appendField(body, f)
+    }
   }
 
   const refreshAll = async () => {
@@ -589,7 +630,7 @@ export function openSettingsPanel(
 
   function onPanelClick(e: MouseEvent) {
     const t = e.target as HTMLElement
-    if (t === closeBtn) {
+    if (t === topCloseBtn) {
       host?.remove()
       globalThis.removeEventListener('keydown', onKeyDown, true)
       return
@@ -651,14 +692,102 @@ export function openSettingsPanel(
     }
   }
 
-  if (schema.type === 'simple') renderSimplePanel(grid, schema.fields)
-  else renderTabsPanel(grid, schema.tabs)
+  switch (schema.type) {
+    case 'simple': {
+      renderSimplePanel(grid, schema as any)
+      break
+    }
+
+    case 'tabs': {
+      renderTabsPanel(grid, schema.tabs)
+      break
+    }
+  }
 
   panel.addEventListener('click', onPanelClick)
   panel.addEventListener('change', onPanelChange)
 
+  const outerHeader = c('div', { className: 'outer-header' })
+  const outerTitle = c('label', {
+    className: 'outer-title',
+    text: schema.title,
+  })
+  const topCloseBtn = c('button', {
+    className: 'btn-ghost icon close-btn',
+    text: '×',
+    attrs: { 'aria-label': '关闭' },
+  })
+  outerHeader.append(outerTitle)
+  outerHeader.append(topCloseBtn)
+  try {
+    outerHeader.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement
+      if (t === topCloseBtn) {
+        host?.remove()
+        globalThis.removeEventListener('keydown', onKeyDown, true)
+      }
+    })
+  } catch {}
+
   panel.append(grid)
 
+  const footer = c('div', { className: 'footer' })
+  const issueLink = c('a', {
+    className: 'issue-link',
+    text: 'Report an Issue…',
+    attrs: {
+      href: options?.issuesUrl || 'https://github.com/utags/userscripts/issues',
+      target: '_blank',
+      rel: 'noopener noreferrer',
+    },
+  })
+  const brand = c('a', {
+    className: 'brand',
+    text: 'Made with ❤️ by Pipecraft',
+    attrs: {
+      href: 'https://www.pipecraft.net/',
+      target: '_blank',
+      rel: 'noopener noreferrer',
+    },
+  })
+  footer.append(issueLink)
+  footer.append(brand)
+  panel.append(footer)
+
+  const stickyThreshold = 22
+  let stickyTimer: ReturnType<typeof setTimeout> | undefined
+  const stickyDebounceMs = 80
+
+  function updateHeaderStickyCore() {
+    try {
+      const sc = panel.scrollTop || 0
+      const stuck = sc > stickyThreshold
+      if (stuck) {
+        panel.classList.add('panel-stuck')
+        outerHeader.classList.add('stuck')
+      } else {
+        panel.classList.remove('panel-stuck')
+        outerHeader.classList.remove('stuck')
+      }
+    } catch {}
+  }
+
+  function updateHeaderSticky() {
+    try {
+      if (stickyTimer !== undefined) globalThis.clearTimeout(stickyTimer)
+      stickyTimer = globalThis.setTimeout(
+        updateHeaderStickyCore,
+        stickyDebounceMs
+      )
+    } catch {}
+  }
+
+  try {
+    panel.addEventListener('scroll', updateHeaderSticky)
+    updateHeaderStickyCore()
+  } catch {}
+
+  wrap.append(outerHeader)
   wrap.append(panel)
   root.append(wrap)
 
@@ -693,10 +822,8 @@ export function createObjectSettingsStore(
 
   function registerValueChangeListener(): void {
     if (listenerRegistered) return
-    if (typeof GM_addValueChangeListener !== 'function') return
     try {
-      GM_addValueChangeListener(rootKey, (n, ov, nv, remote) => {
-        console.log('GM_addValueChangeListener', n, ov, nv, remote)
+      void addValueChangeListener(rootKey, (n, ov, nv, remote) => {
         try {
           if (nv && typeof nv === 'object') {
             const merged = { ...defaults }
@@ -723,7 +850,7 @@ export function createObjectSettingsStore(
     initPromise = (async () => {
       let obj: Record<string, unknown> | undefined
       try {
-        obj = await GM.getValue<Record<string, unknown>>(rootKey, defaults)
+        obj = await getValue<Record<string, unknown>>(rootKey, defaults)
       } catch {}
 
       cache = { ...defaults }
@@ -751,7 +878,7 @@ export function createObjectSettingsStore(
     ): Promise<void> {
       let obj: Record<string, unknown> | undefined
       try {
-        obj = await GM.getValue<Record<string, unknown>>(rootKey, {})
+        obj = await getValue<Record<string, unknown>>(rootKey, {})
       } catch {}
 
       if (typeof args[0] === 'string') {
@@ -771,7 +898,7 @@ export function createObjectSettingsStore(
       cache = { ...defaults }
       if (obj && typeof obj === 'object') Object.assign(cache, obj)
       try {
-        await GM.setValue(rootKey, obj)
+        await setValue(rootKey, obj)
       } catch {}
 
       // Call onChange callbacks from GM_addValueChangeListener

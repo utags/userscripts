@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.0
+// @version              0.1.1
 // @description          Floating quick navigation with per-site groups, icons, and editable items.
 // @description:zh-CN    悬浮快速导航，支持按站点分组、图标与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -13,10 +13,13 @@
 // @match                *://*/*
 // @noframes
 // @run-at               document-body
-// @grant                GM_addValueChangeListener
-// @grant                GM.getValue
-// @grant                GM.setValue
 // @grant                GM_registerMenuCommand
+// @grant                GM.getValue
+// @grant                GM_getValue
+// @grant                GM.setValue
+// @grant                GM_setValue
+// @grant                GM.addValueChangeListener
+// @grant                GM_addValueChangeListener
 // ==/UserScript==
 //
 ;(() => {
@@ -52,6 +55,42 @@
   var defaultFavicon64 = encodeURIComponent(
     'https://wsrv.nl/?w=64&h=64&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
   )
+  function registerMenu(caption, onClick2) {
+    if (typeof GM_registerMenuCommand === 'function') {
+      return GM_registerMenuCommand(caption, onClick2)
+    }
+    return 0
+  }
+  async function getValue(key, defaultValue) {
+    if (typeof GM !== 'undefined' && typeof GM.getValue === 'function') {
+      return GM.getValue(key, defaultValue)
+    }
+    if (typeof GM_getValue === 'function') {
+      return GM_getValue(key, defaultValue)
+    }
+    return defaultValue
+  }
+  async function setValue(key, value) {
+    if (typeof GM !== 'undefined' && typeof GM.setValue === 'function') {
+      await GM.setValue(key, value)
+      return
+    }
+    if (typeof GM_setValue === 'function') {
+      GM_setValue(key, value)
+    }
+  }
+  async function addValueChangeListener(key, callback) {
+    if (
+      typeof GM !== 'undefined' &&
+      typeof GM.addValueChangeListener === 'function'
+    ) {
+      return GM.addValueChangeListener(key, callback)
+    }
+    if (typeof GM_addValueChangeListener === 'function') {
+      return GM_addValueChangeListener(key, callback)
+    }
+    return 0
+  }
   function isElementVisible(el) {
     if (!el) return true
     try {
@@ -416,9 +455,10 @@
     }
   }
   var style_default =
-    '/*! tailwindcss v4.1.17 | MIT License | https://tailwindcss.com */@layer properties;@layer theme, base, components, utilities;@layer theme{:host,:root{--font-sans:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--color-red-50:oklch(97.1% 0.013 17.38);--color-red-500:oklch(63.7% 0.237 25.331);--color-gray-50:oklch(98.5% 0.002 247.839);--color-gray-100:oklch(96.7% 0.003 264.542);--color-gray-200:oklch(92.8% 0.006 264.531);--color-gray-300:oklch(87.2% 0.01 258.338);--color-gray-400:oklch(70.7% 0.022 261.325);--color-gray-500:oklch(55.1% 0.027 264.364);--color-gray-600:oklch(44.6% 0.03 256.802);--color-gray-700:oklch(37.3% 0.034 259.733);--color-gray-900:oklch(21% 0.034 264.665);--color-white:#fff;--spacing:0.25rem;--font-weight-semibold:600;--radius-md:0.375rem;--radius-xl:0.75rem;--default-font-family:var(--font-sans);--default-mono-font-family:var(--font-mono)}}@layer base{*,::backdrop,::file-selector-button,:after,:before{border:0 solid;box-sizing:border-box;margin:0;padding:0}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;font-family:var(--default-font-family,ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji");font-feature-settings:var(--default-font-feature-settings,normal);font-variation-settings:var(--default-font-variation-settings,normal);-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-tap-highlight-color:transparent}hr{border-top-width:1px;color:inherit;height:0}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:var(--default-mono-font-family,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace);font-feature-settings:var(--default-mono-font-feature-settings,normal);font-size:1em;font-variation-settings:var(--default-mono-font-variation-settings,normal)}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{border-collapse:collapse;border-color:inherit;text-indent:0}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}menu,ol,ul{list-style:none}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{height:auto;max-width:100%}::file-selector-button,button,input,optgroup,select,textarea{background-color:transparent;border-radius:0;color:inherit;font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::-moz-placeholder{opacity:1}::placeholder{opacity:1}@supports (not (-webkit-appearance:-apple-pay-button)) or (contain-intrinsic-size:1px){::-moz-placeholder{color:currentcolor;@supports (color:color-mix(in lab,red,red)){color:color-mix(in oklab,currentcolor 50%,transparent)}}::placeholder{color:currentcolor;@supports (color:color-mix(in lab,red,red)){color:color-mix(in oklab,currentcolor 50%,transparent)}}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-meridiem-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-year-field{padding-block:0}::-webkit-calendar-picker-indicator{line-height:1}:-moz-ui-invalid{box-shadow:none}::file-selector-button,button,input:where([type=button],[type=reset],[type=submit]){-webkit-appearance:button;-moz-appearance:button;appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}}@layer utilities{.container{width:100%;@media (width >= 40rem){max-width:40rem}@media (width >= 48rem){max-width:48rem}@media (width >= 64rem){max-width:64rem}@media (width >= 80rem){max-width:80rem}@media (width >= 96rem){max-width:96rem}}.grid{display:grid}}:host{all:initial}.user-settings{position:fixed;right:calc(var(--spacing)*3);top:calc(var(--spacing)*3);z-index:2147483649;--tw-ring-color:var(--user-color-ring,#111827)}.user-settings .panel{background-color:var(--color-white);border-color:var(--color-gray-200);border-radius:var(--radius-xl);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-900);font-family:var(--font-sans);font-size:13px;max-height:90vh;overflow-y:auto;padding:calc(var(--spacing)*4);width:380px;--tw-shadow:0 20px 25px -5px var(--tw-shadow-color,rgba(0,0,0,.1)),0 8px 10px -6px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.user-settings .grid{display:flex;flex-direction:column;gap:calc(var(--spacing)*3)}.user-settings .row{align-items:center;display:flex;gap:calc(var(--spacing)*3);justify-content:space-between}.user-settings label{color:var(--color-gray-600)}.user-settings .btn{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*3);&:hover{@media (hover:hover){background-color:var(--color-gray-50)}}}.user-settings .btn-danger{border-color:var(--color-red-500);color:var(--color-red-500);&:hover{@media (hover:hover){background-color:var(--color-red-50)}}}.user-settings .btn-ghost{border-radius:var(--radius-md);color:var(--color-gray-500);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2);&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}}.user-settings input[type=text],.user-settings select{color:var(--color-gray-700);padding-block:calc(var(--spacing)*2);padding-inline:calc(var(--spacing)*3);width:180px}.user-settings input[type=color],.user-settings input[type=text],.user-settings select{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px}.user-settings input[type=color]{height:calc(var(--spacing)*8);padding:calc(var(--spacing)*0);width:80px}.user-settings textarea{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*2);padding-inline:calc(var(--spacing)*3);width:100%}.user-settings .switch,.user-settings .toggle-wrap{align-items:center;display:flex;gap:calc(var(--spacing)*2)}.user-settings .toggle-checkbox{-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#fff;border:1px solid #9ca3af;border-radius:9999px;box-shadow:inset 0 1px 1px rgba(0,0,0,.1);cursor:pointer;display:inline-block;height:22px;position:relative;transition:background-color .2s ease,border-color .2s ease;width:42px}.user-settings .toggle-checkbox:before{background:#111827;border-radius:9999px;box-shadow:0 2px 4px rgba(0,0,0,.25);content:"";height:18px;left:2px;position:absolute;top:50%;transform:translateY(-50%);transition:transform .2s ease,background-color .2s ease;width:18px}.user-settings .toggle-checkbox:checked{background:var(--user-toggle-on-bg,#111827);border-color:var(--user-toggle-on-bg,#111827)}.user-settings .panel-title{font-size:16px;--tw-font-weight:var(--font-weight-semibold);color:var(--color-gray-700);font-weight:var(--font-weight-semibold)}.user-settings .btn-ghost.icon{align-items:center;border-radius:calc(infinity*1px);color:var(--color-gray-500);display:flex;height:calc(var(--spacing)*7);justify-content:center;width:calc(var(--spacing)*7);&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}}.user-settings .toggle-checkbox:checked:before{background:#fff;transform:translate(20px,-50%)}.user-settings .color-row{align-items:center;display:flex;gap:calc(var(--spacing)*2)}.user-settings .color-swatch{border-radius:var(--radius-md);cursor:pointer;height:calc(var(--spacing)*6);width:calc(var(--spacing)*6)}.user-settings .color-swatch.active{--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);--tw-ring-offset-width:2px;--tw-ring-offset-shadow:var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-color:var(--user-color-ring,#111827)}.user-settings .seg{align-items:center;display:flex;gap:calc(var(--spacing)*2)}.user-settings .seg-btn{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*3);&:hover{@media (hover:hover){background-color:var(--color-gray-50)}}}.user-settings .seg-btn.active{background:var(--user-active-bg,#111827);border-color:var(--user-active-bg,#111827);color:var(--user-active-fg,#fff)}.user-settings .value-wrap{align-items:flex-end;display:flex;flex-direction:column;gap:calc(var(--spacing)*1);text-align:right}.user-settings .tabs{align-items:center;display:flex;gap:calc(var(--spacing)*2);margin-bottom:calc(var(--spacing)*2)}.user-settings .tab-btn{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*3)}.user-settings .tab-btn.active{background:var(--user-active-bg,#111827);border-color:var(--user-active-bg,#111827);color:var(--user-active-fg,#fff)}.user-settings .field-help{color:var(--color-gray-400);font-size:12px}@property --tw-border-style{syntax:"*";inherits:false;initial-value:solid}@property --tw-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-shadow-color{syntax:"*";inherits:false}@property --tw-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-shadow-color{syntax:"*";inherits:false}@property --tw-inset-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-ring-color{syntax:"*";inherits:false}@property --tw-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-ring-color{syntax:"*";inherits:false}@property --tw-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-ring-inset{syntax:"*";inherits:false}@property --tw-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0}@property --tw-ring-offset-color{syntax:"*";inherits:false;initial-value:#fff}@property --tw-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-font-weight{syntax:"*";inherits:false}@layer properties{*,::backdrop,:after,:before{--tw-border-style:solid;--tw-shadow:0 0 #0000;--tw-shadow-color:initial;--tw-shadow-alpha:100%;--tw-inset-shadow:0 0 #0000;--tw-inset-shadow-color:initial;--tw-inset-shadow-alpha:100%;--tw-ring-color:initial;--tw-ring-shadow:0 0 #0000;--tw-inset-ring-color:initial;--tw-inset-ring-shadow:0 0 #0000;--tw-ring-inset:initial;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-offset-shadow:0 0 #0000;--tw-font-weight:initial}}'
+    '/*! tailwindcss v4.1.17 | MIT License | https://tailwindcss.com */@layer properties;@layer theme, base, components, utilities;@layer theme{:host,:root{--font-sans:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--color-red-50:oklch(97.1% 0.013 17.38);--color-red-500:oklch(63.7% 0.237 25.331);--color-gray-50:oklch(98.5% 0.002 247.839);--color-gray-100:oklch(96.7% 0.003 264.542);--color-gray-300:oklch(87.2% 0.01 258.338);--color-gray-400:oklch(70.7% 0.022 261.325);--color-gray-500:oklch(55.1% 0.027 264.364);--color-gray-600:oklch(44.6% 0.03 256.802);--color-gray-700:oklch(37.3% 0.034 259.733);--color-gray-800:oklch(27.8% 0.033 256.848);--color-gray-900:oklch(21% 0.034 264.665);--color-white:#fff;--spacing:0.25rem;--font-weight-semibold:600;--font-weight-bold:700;--radius-md:0.375rem;--radius-xl:0.75rem;--default-font-family:var(--font-sans);--default-mono-font-family:var(--font-mono)}}@layer base{*,::backdrop,::file-selector-button,:after,:before{border:0 solid;box-sizing:border-box;margin:0;padding:0}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;font-family:var(--default-font-family,ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji");font-feature-settings:var(--default-font-feature-settings,normal);font-variation-settings:var(--default-font-variation-settings,normal);-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-tap-highlight-color:transparent}hr{border-top-width:1px;color:inherit;height:0}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:var(--default-mono-font-family,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace);font-feature-settings:var(--default-mono-font-feature-settings,normal);font-size:1em;font-variation-settings:var(--default-mono-font-variation-settings,normal)}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{border-collapse:collapse;border-color:inherit;text-indent:0}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}menu,ol,ul{list-style:none}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{height:auto;max-width:100%}::file-selector-button,button,input,optgroup,select,textarea{background-color:transparent;border-radius:0;color:inherit;font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::-moz-placeholder{opacity:1}::placeholder{opacity:1}@supports (not (-webkit-appearance:-apple-pay-button)) or (contain-intrinsic-size:1px){::-moz-placeholder{color:currentcolor;@supports (color:color-mix(in lab,red,red)){color:color-mix(in oklab,currentcolor 50%,transparent)}}::placeholder{color:currentcolor;@supports (color:color-mix(in lab,red,red)){color:color-mix(in oklab,currentcolor 50%,transparent)}}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-meridiem-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-year-field{padding-block:0}::-webkit-calendar-picker-indicator{line-height:1}:-moz-ui-invalid{box-shadow:none}::file-selector-button,button,input:where([type=button],[type=reset],[type=submit]){-webkit-appearance:button;-moz-appearance:button;appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}}@layer utilities{.container{width:100%;@media (width >= 40rem){max-width:40rem}@media (width >= 48rem){max-width:48rem}@media (width >= 64rem){max-width:64rem}@media (width >= 80rem){max-width:80rem}@media (width >= 96rem){max-width:96rem}}.grid{display:grid}}:host{all:initial}.user-settings{position:fixed;right:calc(var(--spacing)*3);top:calc(var(--spacing)*3);z-index:2147483649;--tw-ring-color:var(--user-color-ring,#111827)}.user-settings .panel{background-color:var(--color-gray-100);border-bottom-left-radius:var(--radius-xl);border-bottom-right-radius:var(--radius-xl);color:var(--color-gray-900);font-family:var(--font-sans);font-size:14px;max-height:90vh;overflow-y:auto;padding-inline:calc(var(--spacing)*4);padding-bottom:calc(var(--spacing)*4);padding-top:calc(var(--spacing)*0);width:420px;--tw-shadow:0 20px 25px -5px var(--tw-shadow-color,rgba(0,0,0,.1)),0 8px 10px -6px var(--tw-shadow-color,rgba(0,0,0,.1));background:#f2f2f7;box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);box-shadow:0 10px 39px 10px #3e424238!important;scrollbar-color:rgba(156,163,175,.25) transparent;scrollbar-width:thin}.user-settings .grid{display:flex;flex-direction:column;gap:calc(var(--spacing)*3)}.user-settings .row{align-items:center;display:flex;gap:calc(var(--spacing)*3);justify-content:space-between;padding-block:calc(var(--spacing)*3);padding-inline:calc(var(--spacing)*4)}.user-settings .group{background-color:var(--color-white);border-radius:var(--radius-xl);gap:calc(var(--spacing)*0);overflow:hidden}.user-settings .group .row{background-color:var(--color-white);border-radius:0;border-style:var(--tw-border-style);border-width:0;padding-block:calc(var(--spacing)*3);padding-inline:calc(var(--spacing)*4);position:relative}.user-settings .group .row:not(:last-child):after{background:#e5e7eb;bottom:0;content:"";height:1px;left:16px;position:absolute;right:0}.user-settings .header-row{align-items:center;border-radius:0;display:flex;justify-content:center;padding-inline:calc(var(--spacing)*0);padding-bottom:calc(var(--spacing)*3);padding-top:calc(var(--spacing)*0)}.user-settings .panel-stuck .header-row .panel-title{opacity:0;transform:translateY(-2px);transition:opacity .15s ease,transform .15s ease}.user-settings label{color:var(--color-gray-600)}.user-settings .label-wrap{display:flex;flex-direction:column;gap:calc(var(--spacing)*1);min-width:60px;text-align:left}.user-settings .btn{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*3);&:hover{@media (hover:hover){background-color:var(--color-gray-50)}}}.user-settings .btn-danger{border-color:var(--color-red-500);color:var(--color-red-500);&:hover{@media (hover:hover){background-color:var(--color-red-50)}}}.user-settings .btn-ghost{border-radius:var(--radius-md);color:var(--color-gray-500);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2);&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}}.user-settings input[type=text]{border-color:transparent;border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*2);padding-inline:calc(var(--spacing)*3);text-align:right;width:180px;--tw-outline-style:none;outline-style:none}.user-settings input[type=text]:focus,.user-settings input[type=text]:hover{border-color:var(--color-gray-300)}.user-settings select{background-color:var(--color-white);border-color:transparent;border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*2);padding-inline:calc(var(--spacing)*3);text-align:right;width:180px;--tw-outline-style:none;outline-style:none}.user-settings select:focus,.user-settings select:hover{border-color:var(--color-gray-300)}.user-settings input[type=color]{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;height:calc(var(--spacing)*8);padding:calc(var(--spacing)*0);width:80px}.user-settings textarea{border-color:transparent;border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);padding-block:calc(var(--spacing)*2);padding-inline:calc(var(--spacing)*3);text-align:right;width:100%;--tw-outline-style:none;outline-style:none}.user-settings textarea:focus,.user-settings textarea:hover{border-color:var(--color-gray-300)}.user-settings .switch,.user-settings .toggle-wrap{align-items:center;display:flex;gap:calc(var(--spacing)*2)}.user-settings .toggle-checkbox{-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#e5e5ea;border:1px solid #d1d1d6;border-radius:9999px;box-shadow:inset 0 1px 1px rgba(0,0,0,.1);cursor:pointer;display:inline-block;height:22px;position:relative;transition:background-color .2s ease,border-color .2s ease;width:42px}.user-settings .toggle-checkbox:before{background:#fff;border-radius:9999px;box-shadow:0 2px 4px rgba(0,0,0,.25);content:"";height:18px;left:2px;position:absolute;top:50%;transform:translateY(-50%);transition:transform .2s ease,background-color .2s ease,left .2s ease,right .2s ease;width:18px}.user-settings .toggle-checkbox:checked{background:var(--user-toggle-on-bg,#34c759);border-color:var(--user-toggle-on-bg,#34c759)}.user-settings .panel-title{font-size:20px;--tw-font-weight:var(--font-weight-bold);color:var(--color-gray-800);font-weight:var(--font-weight-bold)}.user-settings .outer-header{align-items:center;background-color:var(--color-gray-100);background:#f2f2f7;border-top-left-radius:var(--radius-xl);border-top-right-radius:var(--radius-xl);display:flex;font-family:var(--font-sans);height:calc(var(--spacing)*11);justify-content:center;position:relative}.user-settings .outer-header .outer-title{font-size:20px;opacity:0;transition:opacity .15s ease;--tw-font-weight:var(--font-weight-bold);color:var(--color-gray-800);font-weight:var(--font-weight-bold)}.user-settings .outer-header.stuck .outer-title{opacity:1}.user-settings .outer-header:after{background:#e5e7eb;bottom:0;content:"";height:1px;left:0;opacity:0;position:absolute;right:0;transition:opacity .15s ease}.user-settings .outer-header.stuck:after{opacity:1}.user-settings .group-title{font-size:13px;padding-inline:calc(var(--spacing)*1);--tw-font-weight:var(--font-weight-semibold);color:var(--color-gray-600);font-weight:var(--font-weight-semibold)}.user-settings .btn-ghost.icon{align-items:center;border-radius:calc(infinity*1px);color:var(--color-gray-500);cursor:pointer;display:flex;font-size:16px;height:calc(var(--spacing)*9);justify-content:center;transition:background-color .15s ease,color .15s ease;-webkit-user-select:none;-moz-user-select:none;user-select:none;width:calc(var(--spacing)*9);&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}&:hover{@media (hover:hover){color:var(--color-gray-700)}}}.user-settings .close-btn:hover{background-color:var(--color-gray-300);box-shadow:0 0 0 1px rgba(0,0,0,.05);color:var(--color-gray-900);font-size:19px;transform:translateY(-50%)}.user-settings .close-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);transition:transform .15s ease,background-color .15s ease,color .15s ease,font-size .15s ease}.user-settings .toggle-checkbox:checked:before{background:#fff;left:auto;right:2px;transform:translateY(-50%)}.user-settings .color-row{align-items:center;display:flex;gap:calc(var(--spacing)*1.5)}.user-settings .color-swatch{border-radius:var(--radius-md);cursor:pointer;height:calc(var(--spacing)*6);width:calc(var(--spacing)*6)}.user-settings .color-swatch.active{--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);--tw-ring-offset-width:2px;--tw-ring-offset-shadow:var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-color:var(--user-color-ring,#111827)}.user-settings .seg{align-items:center;display:flex;gap:calc(var(--spacing)*2)}.user-settings .seg-btn{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);cursor:pointer;padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*3);-webkit-user-select:none;-moz-user-select:none;user-select:none;&:hover{@media (hover:hover){background-color:var(--color-gray-50)}}}.user-settings .seg-btn.active{background:var(--user-active-bg,#111827);border-color:var(--user-active-bg,#111827);color:var(--user-active-fg,#fff)}.user-settings .value-wrap{align-items:flex-end;display:flex;flex-direction:column;gap:calc(var(--spacing)*1);text-align:right}.user-settings .tabs{align-items:center;display:flex;gap:calc(var(--spacing)*2);margin-bottom:calc(var(--spacing)*2)}.user-settings .tab-btn{border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;color:var(--color-gray-700);cursor:pointer;padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*3);-webkit-user-select:none;-moz-user-select:none;user-select:none;&:hover{@media (hover:hover){background-color:var(--color-gray-50)}}}.user-settings .tab-btn.active{background:var(--user-active-bg,#111827);border-color:var(--user-active-bg,#111827);color:var(--user-active-fg,#fff)}.user-settings .field-help{color:var(--color-gray-400);font-size:11px}@media (prefers-color-scheme:dark){.user-settings .panel{background-color:var(--color-gray-800);border-bottom-left-radius:var(--radius-xl);border-bottom-right-radius:var(--radius-xl);box-shadow:0 10px 39px 10px #00000040!important;color:var(--color-gray-100)}.user-settings .row{background-color:transparent;border-style:var(--tw-border-style);border-width:0}.user-settings .header-row{background-color:var(--color-gray-800);border-color:var(--color-gray-700)}.user-settings .outer-header{background-color:var(--color-gray-800);border-top-left-radius:var(--radius-xl);border-top-right-radius:var(--radius-xl)}.user-settings .outer-header:after{background:#4b5563}.user-settings .footer a.issue-link{color:var(--color-gray-300);&:hover{@media (hover:hover){color:var(--color-gray-100)}}}.user-settings .footer .brand{color:var(--color-gray-400)}.user-settings label{color:var(--color-gray-300)}.user-settings .field-help{color:var(--color-gray-400)}.user-settings .group{background-color:var(--color-gray-700)}.user-settings .group .row:not(:last-child):after{background:#4b5563}}.user-settings .panel::-webkit-scrollbar{width:4px}.user-settings .panel::-webkit-scrollbar-track{background:transparent}.user-settings .panel::-webkit-scrollbar-thumb{background:rgba(156,163,175,.25);border-radius:9999px;opacity:.25}.user-settings .footer{align-items:center;color:var(--color-gray-500);display:flex;flex-direction:column;font-size:12px;gap:calc(var(--spacing)*1);padding-bottom:calc(var(--spacing)*3);padding-top:calc(var(--spacing)*6)}.user-settings .footer a.issue-link{color:var(--color-gray-600);cursor:pointer;text-decoration-line:underline;text-underline-offset:2px;-webkit-user-select:none;-moz-user-select:none;user-select:none;&:hover{@media (hover:hover){color:var(--color-gray-800)}}}.user-settings .footer .brand{color:var(--color-gray-500);cursor:pointer;-webkit-user-select:none;-moz-user-select:none;user-select:none;&:hover{@media (hover:hover){color:var(--color-gray-700)}}}.user-settings button{-webkit-user-select:none;-moz-user-select:none;user-select:none}@property --tw-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-shadow-color{syntax:"*";inherits:false}@property --tw-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-shadow-color{syntax:"*";inherits:false}@property --tw-inset-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-ring-color{syntax:"*";inherits:false}@property --tw-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-ring-color{syntax:"*";inherits:false}@property --tw-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-ring-inset{syntax:"*";inherits:false}@property --tw-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0}@property --tw-ring-offset-color{syntax:"*";inherits:false;initial-value:#fff}@property --tw-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-border-style{syntax:"*";inherits:false;initial-value:solid}@property --tw-font-weight{syntax:"*";inherits:false}@layer properties{*,::backdrop,:after,:before{--tw-shadow:0 0 #0000;--tw-shadow-color:initial;--tw-shadow-alpha:100%;--tw-inset-shadow:0 0 #0000;--tw-inset-shadow-color:initial;--tw-inset-shadow-alpha:100%;--tw-ring-color:initial;--tw-ring-shadow:0 0 #0000;--tw-inset-ring-color:initial;--tw-inset-ring-shadow:0 0 #0000;--tw-ring-inset:initial;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-offset-shadow:0 0 #0000;--tw-border-style:solid;--tw-font-weight:initial}}'
   function createToggleRow(label, key, help) {
     const row = c('div', { className: 'row' })
+    const labWrap = c('div', { className: 'label-wrap' })
     const lab = c('label', { text: label })
     const seg = c('div', { className: 'toggle-wrap' })
     const chk = c('input', {
@@ -429,13 +469,15 @@
     const val = c('div', { className: 'value-wrap' })
     seg.append(chk)
     val.append(seg)
-    if (help) val.append(c('div', { className: 'field-help', text: help }))
-    row.append(lab)
+    labWrap.append(lab)
+    if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+    row.append(labWrap)
     row.append(val)
     return { row, chk }
   }
   function createInputRow(label, key, placeholder, help) {
     const row = c('div', { className: 'row' })
+    const labWrap = c('div', { className: 'label-wrap' })
     const lab = c('label', { text: label })
     const inp = c('input', {
       type: 'text',
@@ -444,13 +486,15 @@
     })
     const val = c('div', { className: 'value-wrap' })
     val.append(inp)
-    if (help) val.append(c('div', { className: 'field-help', text: help }))
-    row.append(lab)
+    labWrap.append(lab)
+    if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+    row.append(labWrap)
     row.append(val)
     return { row, inp }
   }
   function createTextareaRow(label, key, rows, help) {
     const row = c('div', { className: 'row' })
+    const labWrap = c('div', { className: 'label-wrap' })
     const lab = c('label', { text: label })
     const ta = c('textarea', {
       rows: rows || 4,
@@ -458,13 +502,15 @@
     })
     const val = c('div', { className: 'value-wrap' })
     val.append(ta)
-    if (help) val.append(c('div', { className: 'field-help', text: help }))
-    row.append(lab)
+    labWrap.append(lab)
+    if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+    row.append(labWrap)
     row.append(val)
     return { row, ta }
   }
   function createRadioRow(label, key, opts, help) {
     const row = c('div', { className: 'row' })
+    const labWrap = c('div', { className: 'label-wrap' })
     const lab = c('label', { text: label })
     const seg = c('div', { className: 'seg' })
     for (const o of opts) {
@@ -477,13 +523,15 @@
     }
     const val = c('div', { className: 'value-wrap' })
     val.append(seg)
-    if (help) val.append(c('div', { className: 'field-help', text: help }))
-    row.append(lab)
+    labWrap.append(lab)
+    if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+    row.append(labWrap)
     row.append(val)
     return { row, seg }
   }
   function createColorRow(label, key, opts, help) {
     const row = c('div', { className: 'row' })
+    const labWrap = c('div', { className: 'label-wrap' })
     const lab = c('label', { text: label })
     const seg = c('div', { className: 'color-row' })
     for (const o of opts) {
@@ -496,13 +544,15 @@
     }
     const val = c('div', { className: 'value-wrap' })
     val.append(seg)
-    if (help) val.append(c('div', { className: 'field-help', text: help }))
-    row.append(lab)
+    labWrap.append(lab)
+    if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+    row.append(labWrap)
     row.append(val)
     return { row, seg }
   }
   function createSelectRow(label, key, opts, help) {
     const row = c('div', { className: 'row' })
+    const labWrap = c('div', { className: 'label-wrap' })
     const lab = c('label', { text: label })
     const sel = c('select', { dataset: { key } })
     for (const o of opts) {
@@ -511,13 +561,15 @@
     }
     const val = c('div', { className: 'value-wrap' })
     val.append(sel)
-    if (help) val.append(c('div', { className: 'field-help', text: help }))
-    row.append(lab)
+    labWrap.append(lab)
+    if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+    row.append(labWrap)
     row.append(val)
     return { row, sel }
   }
   function createActionRow(label, key, actions, help) {
     const row = c('div', { className: 'row' })
+    const labWrap = c('div', { className: 'label-wrap' })
     const lab = c('label', { text: label })
     const wrap = c('div', { className: 'value-wrap' })
     const act = c('div', { className: 'seg' })
@@ -532,13 +584,15 @@
       act.append(b)
     }
     wrap.append(act)
-    if (help) wrap.append(c('div', { className: 'field-help', text: help }))
-    row.append(lab)
+    labWrap.append(lab)
+    if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
+    row.append(labWrap)
     row.append(wrap)
     return { row }
   }
   function openSettingsPanel(schema, store2, options) {
-    const { host, root } = ensureHostAndRoot(options)
+    const { host, root, existed } = ensureHostAndRoot(options)
+    if (existed) return
     let lastValues = {}
     const styleTag = c('style', {
       text: style_default.concat(
@@ -550,7 +604,7 @@
     applyThemeStyles(wrap, options == null ? void 0 : options.theme)
     const panel = c('div', { className: 'panel' })
     const grid = c('div', { className: 'grid' })
-    const { row: headerRow, closeBtn } = buildHeader(schema.title)
+    const { row: headerRow } = buildHeader(schema.title)
     grid.append(headerRow)
     const fillers = {}
     const addFiller = (key, fn) => {
@@ -646,17 +700,19 @@
       if (existing instanceof HTMLDivElement && existing.shadowRoot) {
         hostEl = existing
         root2 = existing.shadowRoot
-        for (const n of Array.from(root2.childNodes)) n.remove()
-      } else {
-        const key =
-          (options2 == null ? void 0 : options2.hostDatasetKey) || 'userHost'
-        const val =
-          (options2 == null ? void 0 : options2.hostDatasetValue) || 'settings'
-        hostEl = c('div', { dataset: { [key]: val } })
-        root2 = hostEl.attachShadow({ mode: 'open' })
-        document.documentElement.append(hostEl)
+        try {
+          document.documentElement.append(hostEl)
+        } catch (e) {}
+        return { host: hostEl, root: root2, existed: true }
       }
-      return { host: hostEl, root: root2 }
+      const key =
+        (options2 == null ? void 0 : options2.hostDatasetKey) || 'userHost'
+      const val =
+        (options2 == null ? void 0 : options2.hostDatasetValue) || 'settings'
+      hostEl = c('div', { dataset: { [key]: val } })
+      root2 = hostEl.attachShadow({ mode: 'open' })
+      document.documentElement.append(hostEl)
+      return { host: hostEl, root: root2, existed: false }
     }
     function applyThemeStyles(wrap2, theme) {
       if (!theme) return
@@ -669,22 +725,25 @@
         properties.push('--user-color-ring: '.concat(theme.colorRing, ';'))
       if (theme.toggleOnBg)
         properties.push('--user-toggle-on-bg: '.concat(theme.toggleOnBg, ';'))
+      const accent = theme.activeBg || theme.colorRing
+      if (accent) properties.push('--user-accent: '.concat(accent, ';'))
       if (properties.length > 0) wrap2.style.cssText = properties.join(' ')
     }
     function buildHeader(title) {
-      const row = c('div', { className: 'row' })
+      const row = c('div', { className: 'row header-row' })
       const titleEl = c('label', { className: 'panel-title', text: title })
-      const closeBtn2 = c('button', {
-        className: 'btn-ghost icon',
-        text: '\xD7',
-        attrs: { 'aria-label': '\u5173\u95ED' },
-      })
       row.append(titleEl)
-      row.append(closeBtn2)
-      return { row, closeBtn: closeBtn2 }
+      return { row }
     }
-    function renderSimplePanel(container, fields) {
-      for (const f of fields) appendField(container, f)
+    function renderSimplePanel(container, data) {
+      if (data.groups && Array.isArray(data.groups)) {
+        renderGroupsPanel(container, data.groups)
+        return
+      }
+      const fields = data.fields || []
+      const body = c('div', { className: 'grid group' })
+      container.append(body)
+      for (const f of fields) appendField(body, f)
     }
     function renderTabsPanel(container, tabs) {
       var _a
@@ -701,7 +760,12 @@
         const p = c('div', { className: 'grid' })
         panels[t.id] = p
         if (t.id !== active) p.style.display = 'none'
-        for (const f of t.fields) appendField(p, f)
+        if ('groups' in t && Array.isArray(t.groups)) {
+          renderGroupsPanel(p, t.groups)
+        } else if ('fields' in t && Array.isArray(t.fields)) {
+          p.className = 'grid group'
+          for (const f of t.fields) appendField(p, f)
+        }
       }
       container.append(tabsWrap)
       for (const id of Object.keys(panels)) container.append(panels[id])
@@ -725,6 +789,15 @@
       }
       tabsWrap.addEventListener('click', onTabsClick)
       updateTabsUI()
+    }
+    function renderGroupsPanel(container, groups) {
+      for (const g of groups) {
+        const header = c('h2', { className: 'group-title', text: g.title })
+        const body = c('div', { className: 'grid group' })
+        container.append(header)
+        container.append(body)
+        for (const f of g.fields) appendField(body, f)
+      }
     }
     const refreshAll = async () => {
       try {
@@ -833,7 +906,7 @@
     }
     function onPanelClick(e) {
       const t = e.target
-      if (t === closeBtn) {
+      if (t === topCloseBtn) {
         host == null ? void 0 : host.remove()
         globalThis.removeEventListener('keydown', onKeyDown2, true)
         return
@@ -888,11 +961,94 @@
         handleSelectChange(sel)
       }
     }
-    if (schema.type === 'simple') renderSimplePanel(grid, schema.fields)
-    else renderTabsPanel(grid, schema.tabs)
+    switch (schema.type) {
+      case 'simple': {
+        renderSimplePanel(grid, schema)
+        break
+      }
+      case 'tabs': {
+        renderTabsPanel(grid, schema.tabs)
+        break
+      }
+    }
     panel.addEventListener('click', onPanelClick)
     panel.addEventListener('change', onPanelChange)
+    const outerHeader = c('div', { className: 'outer-header' })
+    const outerTitle = c('label', {
+      className: 'outer-title',
+      text: schema.title,
+    })
+    const topCloseBtn = c('button', {
+      className: 'btn-ghost icon close-btn',
+      text: '\xD7',
+      attrs: { 'aria-label': '\u5173\u95ED' },
+    })
+    outerHeader.append(outerTitle)
+    outerHeader.append(topCloseBtn)
+    try {
+      outerHeader.addEventListener('click', (e) => {
+        const t = e.target
+        if (t === topCloseBtn) {
+          host == null ? void 0 : host.remove()
+          globalThis.removeEventListener('keydown', onKeyDown2, true)
+        }
+      })
+    } catch (e) {}
     panel.append(grid)
+    const footer = c('div', { className: 'footer' })
+    const issueLink = c('a', {
+      className: 'issue-link',
+      text: 'Report an Issue\u2026',
+      attrs: {
+        href:
+          (options == null ? void 0 : options.issuesUrl) ||
+          'https://github.com/utags/userscripts/issues',
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      },
+    })
+    const brand = c('a', {
+      className: 'brand',
+      text: 'Made with \u2764\uFE0F by Pipecraft',
+      attrs: {
+        href: 'https://www.pipecraft.net/',
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      },
+    })
+    footer.append(issueLink)
+    footer.append(brand)
+    panel.append(footer)
+    const stickyThreshold = 22
+    let stickyTimer
+    const stickyDebounceMs = 80
+    function updateHeaderStickyCore() {
+      try {
+        const sc = panel.scrollTop || 0
+        const stuck = sc > stickyThreshold
+        if (stuck) {
+          panel.classList.add('panel-stuck')
+          outerHeader.classList.add('stuck')
+        } else {
+          panel.classList.remove('panel-stuck')
+          outerHeader.classList.remove('stuck')
+        }
+      } catch (e) {}
+    }
+    function updateHeaderSticky() {
+      try {
+        if (stickyTimer !== void 0) globalThis.clearTimeout(stickyTimer)
+        stickyTimer = globalThis.setTimeout(
+          updateHeaderStickyCore,
+          stickyDebounceMs
+        )
+      } catch (e) {}
+    }
+    try {
+      panel.addEventListener('scroll', updateHeaderSticky)
+      updateHeaderStickyCore()
+    } catch (e) {}
+    wrap.append(outerHeader)
     wrap.append(panel)
     root.append(wrap)
     wireStoreChange(store2, fillers)
@@ -912,10 +1068,8 @@
     let listenerRegistered = false
     function registerValueChangeListener() {
       if (listenerRegistered) return
-      if (typeof GM_addValueChangeListener !== 'function') return
       try {
-        GM_addValueChangeListener(rootKey, (n, ov, nv, remote) => {
-          console.log('GM_addValueChangeListener', n, ov, nv, remote)
+        void addValueChangeListener(rootKey, (n, ov, nv, remote) => {
           try {
             if (nv && typeof nv === 'object') {
               const merged = __spreadValues({}, defaults)
@@ -939,7 +1093,7 @@
       initPromise = (async () => {
         let obj
         try {
-          obj = await GM.getValue(rootKey, defaults)
+          obj = await getValue(rootKey, defaults)
         } catch (e) {}
         cache = __spreadValues({}, defaults)
         if (obj && typeof obj === 'object') Object.assign(cache, obj)
@@ -962,7 +1116,7 @@
       async set(...args) {
         let obj
         try {
-          obj = await GM.getValue(rootKey, {})
+          obj = await getValue(rootKey, {})
         } catch (e) {}
         if (typeof args[0] === 'string') {
           const key = args[0]
@@ -980,7 +1134,7 @@
         cache = __spreadValues({}, defaults)
         if (obj && typeof obj === 'object') Object.assign(cache, obj)
         try {
-          await GM.setValue(rootKey, obj)
+          await setValue(rootKey, obj)
         } catch (e) {}
       },
       defaults() {
@@ -1746,7 +1900,6 @@
         activeBg: '#111827',
         activeFg: '#ffffff',
         colorRing: '#111827',
-        toggleOnBg: '#111827',
       },
     })
   }
@@ -1792,14 +1945,13 @@
     globalThis.addEventListener('hashchange', onUrlChanged)
   }
   function registerMenus() {
-    if (typeof GM_registerMenuCommand !== 'function') return
-    GM_registerMenuCommand('\u8BBE\u7F6E', () => {
-      ;(async () => {
+    try {
+      registerMenu('\u8BBE\u7F6E', () => {
         try {
           openSettingsPanel2()
         } catch (e) {}
-      })()
-    })
+      })
+    } catch (e) {}
   }
   function listenSettings() {
     var _a

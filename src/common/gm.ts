@@ -50,17 +50,6 @@ export async function setValue(key: string, value: unknown): Promise<void> {
   }
 }
 
-export function addStyle(css: string): void {
-  if (typeof GM_addStyle === 'function') {
-    GM_addStyle(css)
-    return
-  }
-
-  const style = document.createElement('style')
-  style.textContent = css
-  document.head.append(style)
-}
-
 export async function addValueChangeListener(
   key: string,
   callback: (
@@ -96,4 +85,89 @@ export async function removeValueChangeListener(id: number): Promise<void> {
   if (typeof GM_removeValueChangeListener === 'function') {
     GM_removeValueChangeListener(id)
   }
+}
+
+export function xmlHttpRequest(options: {
+  method: string
+  url: string
+  responseType?: string
+  onload?: (response: any) => void
+  onerror?: (error: unknown) => void
+}): void {
+  try {
+    if (
+      typeof GM !== 'undefined' &&
+      typeof (GM as any).xmlHttpRequest === 'function'
+    ) {
+      ;(GM as any).xmlHttpRequest(options)
+      return
+    }
+  } catch {}
+
+  try {
+    if (typeof GM_xmlhttpRequest === 'function') {
+      GM_xmlhttpRequest(options as any)
+    }
+  } catch {}
+}
+
+export async function xmlHttpRequestWithFallback(options: {
+  method: string
+  url: string
+  responseType?: string
+  onload?: (response: any) => void
+  onerror?: (error: unknown) => void
+}): Promise<void> {
+  try {
+    if (
+      typeof GM !== 'undefined' &&
+      typeof (GM as any).xmlHttpRequest === 'function'
+    ) {
+      ;(GM as any).xmlHttpRequest(options)
+      return
+    }
+  } catch {}
+
+  try {
+    if (typeof GM_xmlhttpRequest === 'function') {
+      GM_xmlhttpRequest(options as any)
+      return
+    }
+  } catch {}
+
+  try {
+    const { url, method, responseType, onload, onerror } = options
+    const init: RequestInit = { method }
+    const res = await fetch(url, init)
+    try {
+      let responseText = ''
+      let response: any
+      if (responseType === 'blob') {
+        response = await res.blob()
+      } else {
+        responseText = await res.text()
+      }
+
+      onload?.({ status: res.status, responseText, response })
+    } catch (error: unknown) {
+      try {
+        onerror?.(error)
+      } catch {}
+    }
+  } catch (error: unknown) {
+    try {
+      options.onerror?.(error)
+    } catch {}
+  }
+}
+
+export function addStyle(css: string): void {
+  if (typeof GM_addStyle === 'function') {
+    GM_addStyle(css)
+    return
+  }
+
+  const style = document.createElement('style')
+  style.textContent = css
+  document.head.append(style)
 }

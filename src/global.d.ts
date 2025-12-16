@@ -24,6 +24,20 @@ declare const GM: {
     cb: (key: string, oldValue: any, newValue: any, remote: boolean) => void
   ): Promise<number>
   removeValueChangeListener(id: number): Promise<void>
+  xmlHttpRequest(options: {
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE'
+    url: string
+    headers?: Record<string, string>
+    data?: string | FormData | ArrayBuffer
+    responseType?: 'text' | 'json' | 'blob'
+    onload?: (response: {
+      status: number
+      responseText?: string
+      response?: any
+      responseHeaders?: string
+    }) => void
+    onerror?: (error: any) => void
+  }): Promise<void>
 }
 
 declare function GM_getValue<T = unknown>(key: string, defaultValue: T): any

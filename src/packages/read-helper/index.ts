@@ -32,6 +32,7 @@ import {
   type Field,
   type PanelSchema,
 } from '../../common/settings'
+import { registerMenu as gmRegisterMenu } from '../../common/gm'
 
 let mode: Mode = DEFAULT_READ_HELPER_SETTINGS.mode
 let style: Style = DEFAULT_READ_HELPER_SETTINGS.style
@@ -57,7 +58,7 @@ let mouseUpInstalled = false
 let scrollHandlerInstalled = false
 let resizeHandlerInstalled = false
 let lastRange: Range | undefined
-let redrawDebounceTimer: number | undefined
+let redrawDebounceTimer: ReturnType<typeof setTimeout> | undefined
 const redrawDebounceMs = 200
 const MERGE_EPS = 2
 const MERGE_MIN_OVERLAP_RATIO = 0.5
@@ -918,7 +919,7 @@ function openSettingsPanel(): void {
       activeBg: '#111827',
       activeFg: '#ffffff',
       colorRing: '#111827',
-      toggleOnBg: '#111827',
+      // toggleOnBg: '#111827',
     },
   })
 }
@@ -971,14 +972,13 @@ function installUrlWatcher(): void {
 }
 
 function registerMenus(): void {
-  if (typeof GM_registerMenuCommand !== 'function') return
-  GM_registerMenuCommand('设置', () => {
-    ;(async () => {
+  try {
+    gmRegisterMenu('设置', () => {
       try {
         openSettingsPanel()
       } catch {}
-    })()
-  })
+    })
+  } catch {}
 }
 
 function listenSettings(): void {

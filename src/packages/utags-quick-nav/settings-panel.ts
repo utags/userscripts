@@ -5,11 +5,7 @@ import {
   type Field,
   type PanelSchema,
 } from '../../common/settings'
-
-declare const GM: {
-  getValue<T = unknown>(key: string, defaultValue: T): Promise<T>
-  setValue(key: string, value: unknown): Promise<void>
-}
+import { getValue, setValue, addValueChangeListener } from '../../common/gm'
 
 const KEY = 'utqn_config'
 const HOST = location.hostname || ''
@@ -65,7 +61,7 @@ type Store = {
 function createUtqnSettingsStore(): Store {
   async function readConfig(): Promise<any> {
     try {
-      const s = await GM.getValue(KEY, '')
+      const s = await getValue(KEY, '')
       if (!s) return {}
       return JSON.parse(String(s) || '{}') || {}
     } catch {
@@ -92,9 +88,8 @@ function createUtqnSettingsStore(): Store {
 
   function registerValueChangeListener(): void {
     if (listenerRegistered) return
-    if (typeof GM_addValueChangeListener !== 'function') return
     try {
-      GM_addValueChangeListener(KEY, (n, ov, nv, remote) => {
+      void addValueChangeListener(KEY, (n, ov, nv, remote) => {
         try {
           for (const f of changeCbs) {
             f({ key: '*', oldValue: ov, newValue: nv, remote })
@@ -246,7 +241,7 @@ function createUtqnSettingsStore(): Store {
       }
 
       try {
-        await GM.setValue(KEY, JSON.stringify(raw))
+        await setValue(KEY, JSON.stringify(raw))
       } catch {}
 
       // Call onChange callbacks from GM_addValueChangeListener
@@ -421,7 +416,7 @@ export function openSettingsPanel(): void {
         case 'exportJson': {
           ;(async () => {
             try {
-              const s = await GM.getValue(KEY, '')
+              const s = await getValue(KEY, '')
               const raw = s ? JSON.parse(String(s) || '{}') || {} : {}
               const date = new Date()
               const timestamp = `${date.getFullYear()}${String(
@@ -467,7 +462,7 @@ export function openSettingsPanel(): void {
               if (!f) return
               const txt = await f.text()
               const obj = JSON.parse(txt)
-              const existing = await GM.getValue(KEY, '')
+              const existing = await getValue(KEY, '')
               const existingObj = existing
                 ? JSON.parse(String(existing) || '{}') || {}
                 : {}
@@ -482,7 +477,7 @@ export function openSettingsPanel(): void {
                 }
               } catch {}
 
-              await GM.setValue(KEY, JSON.stringify(merged))
+              await setValue(KEY, JSON.stringify(merged))
               fileInput.removeEventListener('change', onChange)
               fileInput.remove()
             } catch {}
@@ -502,7 +497,7 @@ export function openSettingsPanel(): void {
           if (!ok) break
           ;(async () => {
             try {
-              await GM.setValue(KEY, JSON.stringify({}))
+              await setValue(KEY, JSON.stringify({}))
             } catch {}
           })()
 

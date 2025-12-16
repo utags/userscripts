@@ -1,13 +1,10 @@
-import styleText from 'css:./style.css'
+import { registerMenu, unregisterMenu, openInTab } from '../../common/gm'
 import {
-  registerMenu,
-  unregisterMenu,
-  openInTab,
-  getValue,
-  setValue,
-  addStyle,
-  addValueChangeListener,
-} from '../../common/gm'
+  openSettingsPanel,
+  createObjectSettingsStore,
+  type Field,
+  type PanelSchema,
+} from '../../common/settings'
 
 type RepoConfig = {
   id: string
@@ -319,7 +316,8 @@ function registerAllMenus(): void {
 function registerMenuCommands(domain: string): void {
   for (const repo of CONFIG.REPOSITORIES) {
     // Register domain search menu if domainSearchUrl is defined and enabled
-    if (repo.domainSearchUrl && repo.domainSearchEnabled) {
+    const domainEnabled = Boolean(CURRENT_SETTINGS[`domain_${repo.id}`])
+    if (repo.domainSearchUrl && domainEnabled) {
       const url = repo.domainSearchUrl.replace('{domain}', domain)
       const menuText = getLocalizedMenuText(repo)
       const id = registerMenu(menuText, () => {
@@ -330,7 +328,8 @@ function registerMenuCommands(domain: string): void {
     }
 
     // Register keyword search menu if keywordSearchUrl is defined and enabled
-    if (repo.keywordSearchUrl && repo.keywordSearchEnabled) {
+    const keywordEnabled = Boolean(CURRENT_SETTINGS[`keyword_${repo.id}`])
+    if (repo.keywordSearchUrl && keywordEnabled) {
       const keywordUrl = repo.keywordSearchUrl.replace('{keyword}', domain)
       const keywordMenuText = getLocalizedMenuText(repo, true)
       const id = registerMenu(keywordMenuText, () => {
@@ -345,193 +344,93 @@ function registerMenuCommands(domain: string): void {
 /**
  * Load settings from GM storage
  */
+let CURRENT_SETTINGS: Record<string, boolean> = {}
+
+function buildDefaults(): Record<string, boolean> {
+  const out: Record<string, boolean> = {}
+  for (const repo of CONFIG.REPOSITORIES) {
+    if (repo.domainSearchUrl)
+      out[`domain_${repo.id}`] = repo.domainSearchEnabled ?? false
+    if (repo.keywordSearchUrl)
+      out[`keyword_${repo.id}`] = repo.keywordSearchEnabled ?? false
+  }
+
+  return out
+}
+
+// Store for settings (single instance)
+const SETTINGS_STORE = createObjectSettingsStore(
+  CONFIG.SETTINGS_KEY,
+  buildDefaults()
+)
+
 async function loadSettings(): Promise<void> {
   try {
-    const savedSettings = await getValue<Record<string, boolean>>(
-      CONFIG.SETTINGS_KEY
-    )
-    if (savedSettings) {
-      // Update repository enabled states
-      for (const repo of CONFIG.REPOSITORIES) {
-        // Load domain search settings
-        if (
-          repo.domainSearchUrl &&
-          savedSettings[`domain_${repo.id}`] !== undefined
-        ) {
-          repo.domainSearchEnabled = savedSettings[`domain_${repo.id}`]
-        }
-
-        // Load keyword search settings
-        if (
-          repo.keywordSearchUrl &&
-          savedSettings[`keyword_${repo.id}`] !== undefined
-        ) {
-          repo.keywordSearchEnabled = savedSettings[`keyword_${repo.id}`]
-        }
-      }
-
-      debugLog('Settings loaded:', savedSettings)
-    }
+    const all = await SETTINGS_STORE.getAll<Record<string, boolean>>()
+    CURRENT_SETTINGS = all
+    debugLog('Settings loaded:', all)
   } catch (error) {
     debugLog('Error loading settings:', error)
   }
 }
 
-/**
- * Save settings to GM storage
- */
-async function saveSettings(): Promise<void> {
+function listenSettings(): void {
   try {
-    const settings: Record<string, boolean> = {}
-    for (const repo of CONFIG.REPOSITORIES) {
-      // Save domain search settings
-      if (repo.domainSearchUrl) {
-        settings[`domain_${repo.id}`] = repo.domainSearchEnabled ?? false
-      }
-
-      // Save keyword search settings
-      if (repo.keywordSearchUrl) {
-        settings[`keyword_${repo.id}`] = repo.keywordSearchEnabled ?? false
-      }
-    }
-
-    await setValue(CONFIG.SETTINGS_KEY, settings)
-
-    debugLog('Settings saved:', settings)
-  } catch (error) {
-    debugLog('Error saving settings:', error)
-  }
+    SETTINGS_STORE.onChange?.(() => {
+      void (async () => {
+        await loadSettings()
+        clearMenus()
+        registerAllMenus()
+      })()
+    })
+  } catch {}
 }
 
 /**
  * Create and show settings dialog
  */
 function showSettingsDialog(): void {
-  // Add CSS for the settings dialog
-  addStyle(styleText)
+  const groupDomain: Field[] = []
+  const groupKeyword: Field[] = []
 
-  // Create overlay and dialog elements
-  const overlay = document.createElement('div')
-  overlay.id = 'find-scripts-settings-overlay'
-
-  const dialog = document.createElement('div')
-  dialog.id = 'find-scripts-settings-dialog'
-
-  const titleEl = document.createElement('h2')
-  titleEl.textContent = t('title_settings')
-  const content = document.createElement('div')
-  content.id = 'find-scripts-settings-content'
-  const btns = document.createElement('div')
-  btns.className = 'find-scripts-buttons'
-  const cancelBtn = document.createElement('button')
-  cancelBtn.id = 'find-scripts-cancel'
-  cancelBtn.textContent = t('btn_cancel')
-  const saveBtn = document.createElement('button')
-  saveBtn.id = 'find-scripts-save'
-  saveBtn.className = 'primary'
-  saveBtn.textContent = t('btn_save')
-  btns.append(cancelBtn, saveBtn)
-  dialog.append(titleEl, content, btns)
-
-  // Add repository options
-  const contentWrap = dialog.querySelector('#find-scripts-settings-content')!
-
-  const domainSection = document.createElement('div')
-  const domainTitle = document.createElement('h3')
-  domainTitle.textContent = t('title_domain')
-  domainSection.append(domainTitle)
-  contentWrap.append(domainSection)
-
-  // Add domain search options
   for (const repo of CONFIG.REPOSITORIES) {
     if (repo.domainSearchUrl) {
-      const item = document.createElement('div')
-      item.className = 'find-scripts-setting-item'
-
-      const checkbox = document.createElement('input')
-      checkbox.type = 'checkbox'
-      checkbox.id = `find-scripts-domain-${repo.id}`
-      checkbox.checked = repo.domainSearchEnabled ?? false
-
-      const label = document.createElement('label')
-      label.htmlFor = `find-scripts-domain-${repo.id}`
-      label.textContent = `${repo.icon} ${repo.name}`
-
-      item.append(checkbox)
-      item.append(label)
-      domainSection.append(item)
+      groupDomain.push({
+        type: 'toggle',
+        key: `domain_${repo.id}`,
+        label: `${repo.icon} ${repo.name}`,
+      })
     }
-  }
 
-  // Create keyword search section
-  const keywordSection = document.createElement('div')
-  const keywordTitle = document.createElement('h3')
-  keywordTitle.textContent = t('title_keyword')
-  keywordSection.append(keywordTitle)
-  contentWrap.append(keywordSection)
-
-  // Add keyword search options
-  for (const repo of CONFIG.REPOSITORIES) {
     if (repo.keywordSearchUrl) {
-      const item = document.createElement('div')
-      item.className = 'find-scripts-setting-item'
-
-      const checkbox = document.createElement('input')
-      checkbox.type = 'checkbox'
-      checkbox.id = `find-scripts-keyword-${repo.id}`
-      checkbox.checked = repo.keywordSearchEnabled ?? false
-
-      const label = document.createElement('label')
-      label.htmlFor = `find-scripts-keyword-${repo.id}`
-      label.textContent = `${repo.icon} ${repo.name}`
-
-      item.append(checkbox)
-      item.append(label)
-      keywordSection.append(item)
+      groupKeyword.push({
+        type: 'toggle',
+        key: `keyword_${repo.id}`,
+        label: `${repo.icon} ${repo.name}`,
+      })
     }
   }
 
-  // Add dialog to page
-  overlay.append(dialog)
-  document.body.append(overlay)
+  const schema: PanelSchema = {
+    type: 'simple',
+    title: t('title_settings'),
+    groups: [
+      { id: 'domain', title: t('title_domain'), fields: groupDomain },
+      { id: 'keyword', title: t('title_keyword'), fields: groupKeyword },
+    ],
+  }
 
-  // Handle save button click
-  saveBtn.addEventListener('click', () => {
-    // Update repository enabled states
-    for (const repo of CONFIG.REPOSITORIES) {
-      // Update domain search enabled state
-      if (repo.domainSearchUrl) {
-        const domainCheckbox = document.querySelector<HTMLInputElement>(
-          `#find-scripts-domain-${repo.id}`
-        )!
-        repo.domainSearchEnabled = Boolean(domainCheckbox.checked)
-      }
+  const store = SETTINGS_STORE
 
-      // Update keyword search enabled state
-      if (repo.keywordSearchUrl) {
-        const keywordCheckbox = document.querySelector<HTMLInputElement>(
-          `#find-scripts-keyword-${repo.id}`
-        )!
-        repo.keywordSearchEnabled = Boolean(keywordCheckbox.checked)
-      }
-    }
-
-    // Save settings
-    void saveSettings()
-
-    // Close dialog
-    overlay.remove()
-  })
-
-  // Handle cancel button click
-  cancelBtn.addEventListener('click', () => {
-    overlay.remove()
-  })
-
-  // Close when clicking outside the dialog
-  overlay.addEventListener('click', (event: MouseEvent) => {
-    const target = event.target as HTMLElement
-    if (target === overlay) overlay.remove()
+  openSettingsPanel(schema, store, {
+    hostDatasetKey: 'fsftsHost',
+    hostDatasetValue: 'find-scripts-settings',
+    theme: {
+      activeBg: '#7c3aed',
+      activeFg: '#ffffff',
+      colorRing: '#7c3aed',
+      toggleOnBg: '#7c3aed',
+    },
   })
 }
 
@@ -553,14 +452,8 @@ async function initialize(): Promise<void> {
   // Register menu commands
   registerAllMenus()
 
-  // Listen settings changes across tabs and current tab
-  void addValueChangeListener(CONFIG.SETTINGS_KEY, () => {
-    void (async () => {
-      await loadSettings()
-      clearMenus()
-      registerAllMenus()
-    })()
-  })
+  // Listen settings changes
+  listenSettings()
 }
 
 // Initialize the script
