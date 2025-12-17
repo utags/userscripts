@@ -1,0 +1,111 @@
+# UTags Shortcuts
+
+**UTags Shortcuts** is a powerful userscript that provides a floating or sidebar navigation panel for quick access to your favorite links and scripts. It features per-site grouping, icon support, and versatile customization options, making it an essential tool for power users who want to streamline their browsing workflow.
+
+[中文文档](https://github.com/utags/userscripts/blob/main/utags-shortcuts/README.zh-CN.md)
+
+## Key Features
+
+- **Per-Site Grouping**: Automatically displays relevant navigation groups based on the website you are currently visiting. Configure groups to appear on specific domains or URL patterns.
+- **Two Display Modes**:
+  - **Floating Mode**: A discreet floating icon that expands on hover, perfect for saving screen space.
+  - **Sidebar Mode**: A fixed sidebar (left or right) for quick and always-visible access, ideal for wide screens.
+- **Versatile Items**:
+  - **URLs**: Add quick links to any webpage. Supports relative paths to the current page.
+  - **JS Scripts**: Execute small JavaScript snippets directly from the menu for quick automation.
+- **Visual Customization**:
+  - **Icons**: Automatically fetches favicons or supports custom icon URLs.
+  - **Themes**: seamlessly adapts to system or website themes (Light/Dark/System).
+- **Easy Management**:
+  - **Quick Add**: Instantly add the current page to a group.
+  - **Visual Editor**: Drag-and-drop to reorder items, manage groups, and edit properties via a user-friendly interface.
+- **Keyboard Shortcuts**: Toggle the panel instantly with `Alt+Shift+K`.
+
+## Installation
+
+- Requires a user script manager: [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), or [ScriptCat](https://scriptcat.org/)
+- Install from: [GitHub](https://github.com/utags/userscripts/raw/main/utags-shortcuts/utags-shortcuts.user.js) · [Greasy Fork](https://greasyfork.org/scripts/558485-utags-shortcuts) · [ScriptCat](https://scriptcat.org/script-show-page/4910)
+
+## Usage
+
+1.  **Opening the Panel**:
+    - Hover over the "edge strip" (default: top-right edge of the screen).
+    - Or use the shortcut `Alt+Shift+K`.
+2.  **Adding Links**:
+    - Open the panel and click the `+` button at the bottom to add the current page to a group.
+    - You can choose which group to add the link to or create a new group.
+3.  **Managing Items**:
+    - Right-click the floating icon or click the **Settings** button in the panel to open the configuration modal.
+    - Here you can:
+      - Create, edit, or delete groups.
+      - Add or edit specific items (Links or Scripts).
+      - Change matching rules for when groups should appear.
+      - Adjust layout preferences (Floating vs. Sidebar).
+
+## Use Cases
+
+- **Site-Specific Tools**: Create a "GitHub" group that only appears on `github.com`, containing links to your Issues, Pull Requests, and Profile.
+- **Global Toolbox**: Create a "Tools" group that appears on every site (`*`), offering quick access to translation services, JSON formatters, or note-taking apps.
+- **Reading Assistant**: Add "Next Chapter" or "Previous Chapter" scripts/links for your favorite novel reading sites.
+- **Development Helper**: Execute quick JS snippets to fill forms, clear cache, or switch environments.
+
+## Configuration
+
+Access the settings panel to customize:
+
+- **Layout Mode**: Switch between Floating and Sidebar.
+- **Sidebar Position**: Left or Right.
+- **Default Open Behavior**: Open links in the same tab or a new tab.
+- **Appearance**: Adjust the size, opacity, and color of the edge trigger strip.
+- **Hotkey**: Customize the toggle shortcut.
+
+## Changelog
+
+### v0.1.6
+
+- Added sidebar mode.
+- Added JS script execution support.
+- Improved UI and customization options.
+
+## More Useful Scripts
+
+### 🏷️ UTags - Add User Tags to Links
+
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/460718-utags-add-usertags-to-links)
+- **Features**: Add custom tags and notes to user, post, video and other links
+- **Highlights**: Support special tag filtering (like spam, block, clickbait, etc.), data export/import, auto-mark viewed posts
+- **Supported Sites**: V2EX, X(Twitter), Reddit, GitHub, Bilibili, Zhihu, Linux.do, Youtube and 50+ websites
+- **Description**: Super useful tag management tool for adding tags to forum users or posts, making it easy to identify or block low-quality content
+
+### 🧰 UTags Advanced Filter
+
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/en/script-show-page/4653) · [GitHub Raw](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
+- **Features**: Real-time filtering and hiding of scripts on GreasyFork
+- **Highlights**: Available as both a userscript and a browser extension
+- **Supported Sites**: Greasy Fork
+- **Description**: A tool that supports real-time filtering and hiding on GreasyFork, available in userscript and browser extension versions
+
+### 🔗 Links Helper
+
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/464541-links-helper)
+- **Features**: Open third-party website links in new tabs, parse text links into hyperlinks
+- **Highlights**: Support custom rules, parse Markdown and BBCode formats, convert image links to image tags
+- **Supported Sites**: Universal for all websites, including Google, YouTube, GitHub, V2EX, etc.
+- **Description**: Enhance link browsing experience, automatically process various link formats for more convenient web browsing
+
+### 🔍 Find Scripts For This Site
+
+- **Link**: [GitHub](https://github.com/utags/userscripts/raw/main/find-scripts-for-this-site/find-scripts-for-this-site.user.js) · [Greasy Fork](https://greasyfork.org/scripts/550659-find-scripts-for-this-site) · [ScriptCat](https://scriptcat.org/script-show-page/4276)
+- **Features**: Quickly find scripts for the current site across multiple repositories
+- **Highlights**: Settings dialog, real-time sync, smart domain extraction
+- **Supported Sites**: All websites
+- **Description**: A user script to quickly find scripts for the current site across multiple repositories, now with a settings dialog and real-time sync across tabs
+
+## License
+
+MIT License — see [LICENSE](https://github.com/utags/userscripts/blob/main/LICENSE)
+
+## Related Links
+
+- Project: https://github.com/utags/userscripts
+- Issues: https://github.com/utags/userscripts/issues

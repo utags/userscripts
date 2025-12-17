@@ -8,7 +8,7 @@ export function createSegmentedRadios<T extends string>(
 ) {
   const wrap = document.createElement('div')
   wrap.className = 'segmented'
-  const name = (opts?.namePrefix || 'utqn-seg-') + uid()
+  const name = (opts?.namePrefix || 'ushortcuts-seg-') + uid()
   const labels = (opts?.labels ?? {}) as Partial<Record<T, string>>
   for (const m of values) {
     const label = document.createElement('label')
@@ -51,7 +51,7 @@ export function createOpenModeRadios(
     onChange,
     {
       labels,
-      namePrefix: 'utqn-open-',
+      namePrefix: 'ushortcuts-open-',
     }
   )
 }

@@ -15,8 +15,7 @@ import { uid } from '../../utils/uid'
 import { importJson } from '../../utils/import-json'
 
 const SETTINGS_KEY = 'settings'
-const CONFIG_KEY = 'utqn_config'
-const HOST = location.hostname || ''
+export const CONFIG_KEY = 'ushortcuts'
 
 const POSITION_OPTIONS = [
   'right-top',
@@ -53,6 +52,13 @@ const DEFAULTS = {
 
 const COMMON_SETTINGS_FIELDS: Field[] = [
   { type: 'toggle', key: 'enabled', label: '启用' },
+  {
+    type: 'input',
+    key: 'hotkey',
+    label: '快捷键',
+    placeholder: DEFAULTS.hotkey,
+    help: '打开面板的快捷键',
+  },
   {
     type: 'radio',
     key: 'defaultOpen',
@@ -161,7 +167,7 @@ const EDGE_SETTINGS_FIELDS: Field[] = [
   },
 ]
 
-export function createUtqnSettingsStore() {
+export function createUshortcutsSettingsStore() {
   return createSettingsStore(SETTINGS_KEY, DEFAULTS, true)
 }
 
@@ -175,21 +181,8 @@ export function openSettingsPanel(store: Store): void {
         title: '全局设置',
         groups: [
           {
-            id: 'global-shortcuts',
-            title: '',
-            fields: [
-              {
-                type: 'input',
-                key: 'hotkey',
-                label: '快捷键',
-                placeholder: DEFAULTS.hotkey,
-              },
-            ] as Field[],
-          },
-
-          {
             id: 'global-basic',
-            title: '通用',
+            title: '',
             fields: COMMON_SETTINGS_FIELDS,
           },
           {
@@ -266,7 +259,9 @@ export function openSettingsPanel(store: Store): void {
                 type: 'action',
                 key: 'export-import',
                 label: '数据导出',
-                actions: [{ id: 'exportNavDataJson', text: '导出 JSON 文件' }],
+                actions: [
+                  { id: 'exportShortcutsDataJson', text: '导出 JSON 文件' },
+                ],
                 help: '导出所有配置（包含各分组、导航项设置）',
               },
               {
@@ -274,7 +269,7 @@ export function openSettingsPanel(store: Store): void {
                 key: 'export-import',
                 label: '数据导入',
                 actions: [
-                  { id: 'importNavDataJson', text: '从 JSON 文件导入' },
+                  { id: 'importShortcutsDataJson', text: '从 JSON 文件导入' },
                 ],
                 help: '导入之前导出的文件',
               },
@@ -282,7 +277,9 @@ export function openSettingsPanel(store: Store): void {
                 type: 'action',
                 key: 'clear-data',
                 label: '清空所有数据',
-                actions: [{ id: 'clearNavData', text: '执行', kind: 'danger' }],
+                actions: [
+                  { id: 'clearShortcutsData', text: '执行', kind: 'danger' },
+                ],
               },
             ] as Field[],
           },
@@ -314,8 +311,8 @@ export function openSettingsPanel(store: Store): void {
   }
 
   openPanel(schema, store, {
-    hostDatasetKey: 'utqnHost',
-    hostDatasetValue: 'utags-quick-nav-settings',
+    hostDatasetKey: 'ushortcutsHost',
+    hostDatasetValue: 'ushortcuts-settings',
     theme: {
       activeBg: '#111827',
       activeFg: '#ffffff',
@@ -328,14 +325,14 @@ export function openSettingsPanel(store: Store): void {
           ;(async () => {
             try {
               const existing = document.querySelector(
-                '[data-utqn-host="utags-quick-nav"]'
+                '[data-ushortcuts-host="ushortcuts"]'
               )
               const root =
                 existing instanceof HTMLElement && existing.shadowRoot
                   ? existing.shadowRoot
                   : (() => {
                       const host = document.createElement('div')
-                      host.dataset.utqnHost = 'utags-quick-nav'
+                      host.dataset.ushortcutsHost = 'ushortcuts'
                       const r = host.attachShadow({ mode: 'open' })
                       const style = document.createElement('style')
                       style.textContent = styleText
@@ -428,7 +425,7 @@ export function openSettingsPanel(store: Store): void {
           break
         }
 
-        case 'exportNavDataJson': {
+        case 'exportShortcutsDataJson': {
           ;(async () => {
             try {
               const s = await getValue(CONFIG_KEY, '')
@@ -453,7 +450,7 @@ export function openSettingsPanel(store: Store): void {
               const url = URL.createObjectURL(blob)
               const a = document.createElement('a')
               a.href = url
-              a.download = `utags-quick-nav-data-${timestamp}.json`
+              a.download = `utags-shortcuts-data-${timestamp}.json`
               a.click()
               setTimeout(() => {
                 URL.revokeObjectURL(url)
@@ -488,7 +485,7 @@ export function openSettingsPanel(store: Store): void {
               const url = URL.createObjectURL(blob)
               const a = document.createElement('a')
               a.href = url
-              a.download = `utags-quick-nav-settings-${timestamp}.json`
+              a.download = `utags-shortcuts-settings-${timestamp}.json`
               a.click()
               setTimeout(() => {
                 URL.revokeObjectURL(url)
@@ -499,7 +496,7 @@ export function openSettingsPanel(store: Store): void {
           break
         }
 
-        case 'importNavDataJson': {
+        case 'importShortcutsDataJson': {
           importJson({
             validate: (data: any) => data && Array.isArray(data.groups),
             errorMessage: '无效的导航数据文件（缺少 groups 字段）',
@@ -535,7 +532,7 @@ export function openSettingsPanel(store: Store): void {
           break
         }
 
-        case 'clearNavData': {
+        case 'clearShortcutsData': {
           const ok = globalThis.confirm(
             '是否真的要清空数据？不可逆，建议先导出备份。'
           )

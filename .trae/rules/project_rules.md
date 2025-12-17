@@ -36,16 +36,16 @@
 
 ## DOM 与样式约定
 
-- UI 采用 Shadow DOM 宿主，宿主属性：`data-utqn-host="utags-quick-nav"`，同时设置 `host.dataset.utqnHost = 'utags-quick-nav'`。
+- UI 采用 Shadow DOM 宿主，宿主属性：`data-ushortcuts-host="utags-shortcuts"`，同时设置 `host.dataset.ushortcutsHost = 'utags-shortcuts'`。
 - 使用 `dataset` 设置自定义属性，避免 `setAttribute` 触发 lint 规则。
 - 样式使用 Tailwind CSS（类选择器与 `@apply`），避免 `backdrop-filter` 等高开销效果。
 
 ## 防重复注入
 
-- 在入口处添加单例标记：`document.documentElement.dataset.utqn = '1'`。
+- 在入口处添加单例标记：`document.documentElement.dataset.ushortcuts = '1'`。
 - 若已标记，则直接返回，避免多脚本管理器或重复执行造成冲突。
 - 创建根节点时优先复用已存在宿主以避免重复节点：
-  - 通过 `document.querySelector('[data-utqn-host="utags-quick-nav"]')` 查找并复用。
+  - 通过 `document.querySelector('[data-ushortcuts-host="utags-shortcuts"]')` 查找并复用。
 
 ## 交互与渲染
 
@@ -60,7 +60,7 @@
 - 示例：
   - `src/packages/copy-selected-links-as-markdown/`
   - `src/packages/discourse-prevent-jump-on-reply/`
-  - `src/packages/utags-quick-nav/`
+  - `src/packages/utags-shortcuts/`
 - 构建脚本：`scripts/userscript/build-all.mjs`
 - 类型配置：`tsconfig.json`；代码规范使用 `xo` 与 `prettier`
 

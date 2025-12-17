@@ -24,7 +24,7 @@ export function openAddGroupModal(
   const modal = document.createElement('div')
   modal.className = 'modal'
   try {
-    const panel = root.querySelector('.utqn')
+    const panel = root.querySelector('.ushortcuts')
     const isDarkPanel = panel?.classList.contains('dark')
     const prefersDark = (() => {
       try {
@@ -95,7 +95,7 @@ export function openAddGroupModal(
     ['icon', 'url', 'emoji'],
     {
       labels: { icon: '图标', url: 'URL', emoji: 'Emoji' },
-      namePrefix: 'utqn-group-icon-kind-',
+      namePrefix: 'ushortcuts-group-icon-kind-',
     }
   )
   iconRow.append(iconLabel)
@@ -196,7 +196,7 @@ export function openAddGroupModal(
     (v) => {
       colVal = v
     },
-    { namePrefix: 'utqn-cols-' }
+    { namePrefix: 'ushortcuts-cols-' }
   )
   colsRow.append(colsLabel)
   colsRow.append(colsRadios)
@@ -214,7 +214,10 @@ export function openAddGroupModal(
     (v) => {
       groupState = v
     },
-    { labels: { visible: '显示', hidden: '隐藏' }, namePrefix: 'utqn-state-' }
+    {
+      labels: { visible: '显示', hidden: '隐藏' },
+      namePrefix: 'ushortcuts-state-',
+    }
   )
   stateRow.append(stateLabel)
   stateRow.append(stateRadios)

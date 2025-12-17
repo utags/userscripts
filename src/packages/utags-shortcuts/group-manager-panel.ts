@@ -75,7 +75,7 @@ export function createGroupManagerPanel(
       ['icon', 'url', 'emoji'],
       {
         labels: { icon: '图标', url: 'URL', emoji: 'Emoji' },
-        namePrefix: 'utqn-group-icon-kind-',
+        namePrefix: 'ushortcuts-group-icon-kind-',
         onValueChange() {
           const v = iconComp.getFinal()
           active.icon = v
@@ -195,7 +195,7 @@ export function createGroupManagerPanel(
           ['icon', 'url', 'emoji'],
           {
             labels: { icon: '图标', url: 'URL', emoji: 'Emoji' },
-            namePrefix: 'utqn-item-icon-kind-',
+            namePrefix: 'ushortcuts-item-icon-kind-',
             placeholders: { icon: 'home', url: 'https://...', emoji: 'emoji' },
             onValueChange() {
               const grp = (cfg.groups || []).find((g: any) => g.id === groupId)

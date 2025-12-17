@@ -26,7 +26,7 @@ export function openAddLinkModal(
   const modal = document.createElement('div')
   modal.className = 'modal'
   try {
-    const panel = root.querySelector('.utqn')
+    const panel = root.querySelector('.ushortcuts')
     const isDarkPanel = panel?.classList.contains('dark')
     if (isDarkPanel) modal.classList.add('dark')
   } catch {}
@@ -90,7 +90,7 @@ export function openAddLinkModal(
     ['icon', 'favicon', 'url', 'emoji'],
     {
       labels: { icon: '图标', favicon: 'Favicon', url: 'URL', emoji: 'Emoji' },
-      namePrefix: 'utqn-item-icon-kind-',
+      namePrefix: 'ushortcuts-item-icon-kind-',
     }
   )
   iconRow.append(iconLabel)
@@ -190,7 +190,10 @@ export function openAddLinkModal(
       typeValue = v
       syncTypeUi()
     },
-    { labels: { url: 'URL', js: 'JS' }, namePrefix: 'utqn-item-type-' }
+    {
+      labels: { url: 'URL', js: 'JS' },
+      namePrefix: 'ushortcuts-item-type-',
+    }
   )
   const syncTypeUi = () => {
     if (typeValue === 'url') {
@@ -240,7 +243,7 @@ export function openAddLinkModal(
     },
     {
       labels: { visible: '显示', hidden: '隐藏' },
-      namePrefix: 'utqn-item-state-',
+      namePrefix: 'ushortcuts-item-state-',
     }
   )
   visibleRow.append(visibleLabel)

@@ -8,11 +8,11 @@ div {
   line-height: normal;
 }
 
-.utqn {
+.ushortcuts {
   @apply fixed z-[2147483647] font-sans text-[13px] text-gray-900;
 }
 
-.utqn.dark {
+.ushortcuts.dark {
   @apply text-gray-100;
 }
 
@@ -20,7 +20,7 @@ div {
   @apply bg-white border border-gray-200 rounded-xl shadow-xl p-3 flex flex-col gap-3 max-w-[360px] max-h-[100vh] overflow-y-auto;
 }
 
-.utqn.dark .panel {
+.ushortcuts.dark .panel {
   @apply bg-gray-900 border-gray-700 shadow-2xl;
 }
 
@@ -40,7 +40,7 @@ div {
   box-shadow: unset;
 }
 
-@keyframes utqn-slide-in-left {
+@keyframes ushortcuts-slide-in-left {
   from {
     opacity: 0;
     transform: translateX(-12px);
@@ -50,7 +50,7 @@ div {
     transform: translateX(0);
   }
 }
-@keyframes utqn-slide-in-right {
+@keyframes ushortcuts-slide-in-right {
   from {
     opacity: 0;
     transform: translateX(12px);
@@ -60,7 +60,7 @@ div {
     transform: translateX(0);
   }
 }
-@keyframes utqn-slide-in-top {
+@keyframes ushortcuts-slide-in-top {
   from {
     opacity: 0;
     transform: translateY(0);
@@ -70,7 +70,7 @@ div {
     transform: translateY(0);
   }
 }
-@keyframes utqn-slide-in-bottom {
+@keyframes ushortcuts-slide-in-bottom {
   from {
     opacity: 0;
     transform: translateY(0);
@@ -80,7 +80,7 @@ div {
     transform: translateY(0);
   }
 }
-@keyframes utqn-slide-out-left {
+@keyframes ushortcuts-slide-out-left {
   from {
     opacity: 1;
     transform: translateX(0);
@@ -90,7 +90,7 @@ div {
     transform: translateX(-12px);
   }
 }
-@keyframes utqn-slide-out-right {
+@keyframes ushortcuts-slide-out-right {
   from {
     opacity: 1;
     transform: translateX(0);
@@ -100,7 +100,7 @@ div {
     transform: translateX(12px);
   }
 }
-@keyframes utqn-slide-out-top {
+@keyframes ushortcuts-slide-out-top {
   from {
     opacity: 1;
     transform: translateY(0);
@@ -110,7 +110,7 @@ div {
     transform: translateY(0);
   }
 }
-@keyframes utqn-slide-out-bottom {
+@keyframes ushortcuts-slide-out-bottom {
   from {
     opacity: 1;
     transform: translateY(0);
@@ -122,28 +122,28 @@ div {
 }
 
 .anim-in-left {
-  animation: utqn-slide-in-left 200ms ease-out;
+  animation: ushortcuts-slide-in-left 200ms ease-out;
 }
 .anim-in-right {
-  animation: utqn-slide-in-right 200ms ease-out;
+  animation: ushortcuts-slide-in-right 200ms ease-out;
 }
 .anim-in-top {
-  animation: utqn-slide-in-top 200ms ease-out;
+  animation: ushortcuts-slide-in-top 200ms ease-out;
 }
 .anim-in-bottom {
-  animation: utqn-slide-in-bottom 200ms ease-out;
+  animation: ushortcuts-slide-in-bottom 200ms ease-out;
 }
 .anim-out-left {
-  animation: utqn-slide-out-left 180ms ease-in forwards;
+  animation: ushortcuts-slide-out-left 180ms ease-in forwards;
 }
 .anim-out-right {
-  animation: utqn-slide-out-right 180ms ease-in forwards;
+  animation: ushortcuts-slide-out-right 180ms ease-in forwards;
 }
 .anim-out-top {
-  animation: utqn-slide-out-top 180ms ease-in forwards;
+  animation: ushortcuts-slide-out-top 180ms ease-in forwards;
 }
 .anim-out-bottom {
-  animation: utqn-slide-out-bottom 180ms ease-in forwards;
+  animation: ushortcuts-slide-out-bottom 180ms ease-in forwards;
 }
 
 .header {
@@ -169,16 +169,16 @@ div {
 .icon-btn {
   @apply w-6 h-6 p-0 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150;
 }
-.utqn.dark .icon-btn {
+.ushortcuts.dark .icon-btn {
   @apply text-gray-300 hover:bg-gray-800 hover:text-white;
 }
-.utqn.dark .icon img.lucide-icon {
+.ushortcuts.dark .icon img.lucide-icon {
   filter: invert(1) brightness(1.15) saturate(1.1);
 }
 .icon-btn.active {
   @apply bg-gray-200 text-gray-900 ring-1 ring-gray-300;
 }
-.utqn.dark .icon-btn.active {
+.ushortcuts.dark .icon-btn.active {
   @apply bg-gray-700 text-white ring-1 ring-gray-600;
 }
 
@@ -186,7 +186,7 @@ div {
   @apply flex items-center gap-1.5 font-semibold text-gray-800;
 }
 
-.utqn.dark .title {
+.ushortcuts.dark .title {
   @apply text-gray-100;
 }
 
@@ -194,14 +194,14 @@ div {
   @apply appearance-none inline-flex items-center justify-center gap-1.5 border border-gray-300 bg-white text-gray-800 rounded-lg px-2.5 py-1.5 cursor-pointer hover:bg-gray-100 transition-all duration-150 active:scale-[0.99] shadow-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-300;
 }
 
-.utqn.dark .btn {
+.ushortcuts.dark .btn {
   @apply border-gray-700 bg-gray-800 text-gray-200 hover:bg-gray-700 focus:ring-gray-700;
 }
 
 .btn-primary {
   @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:border-blue-700 shadow-md;
 }
-.utqn.dark .btn-primary,
+.ushortcuts.dark .btn-primary,
 .modal.dark .btn-primary {
   @apply bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600 text-white;
 }
@@ -209,7 +209,7 @@ div {
 .btn-secondary {
   @apply bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-200;
 }
-.utqn.dark .btn-secondary,
+.ushortcuts.dark .btn-secondary,
 .modal.dark .btn-secondary {
   @apply bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700;
 }
@@ -235,14 +235,14 @@ div {
   @apply bg-gray-100;
 }
 
-.utqn.dark .item {
+.ushortcuts.dark .item {
   @apply text-gray-100;
 }
-.utqn.dark .item:hover {
+.ushortcuts.dark .item:hover {
   @apply bg-gray-800;
 }
 
-.utqn.dark .item {
+.ushortcuts.dark .item {
   @apply border-gray-700 bg-gray-800 text-gray-100 hover:bg-gray-700;
 }
 
@@ -253,7 +253,7 @@ div {
 .collapsed-tab {
   @apply fixed z-[2147483647] w-[3px] h-[60px] bg-gray-700 opacity-40 rounded-none;
 }
-.utqn.dark .collapsed-tab {
+.ushortcuts.dark .collapsed-tab {
   @apply bg-gray-400 opacity-40;
 }
 .collapsed-tab:hover {
@@ -298,7 +298,7 @@ div {
 .modal .segmented {
   @apply mb-3;
 }
-.utqn.dark .segmented {
+.ushortcuts.dark .segmented {
   @apply border-gray-700 bg-gray-800;
 }
 .seg-item {
@@ -311,13 +311,13 @@ div {
   @apply px-2 py-1 rounded-full text-gray-700 w-full;
   text-align: center;
 }
-.utqn.dark .seg-text {
+.ushortcuts.dark .seg-text {
   @apply text-gray-300;
 }
 .seg-item .seg-radio:checked + .seg-text {
   @apply bg-white text-gray-900 ring-1 ring-gray-300;
 }
-.utqn.dark .seg-item .seg-radio:checked + .seg-text {
+.ushortcuts.dark .seg-item .seg-radio:checked + .seg-text {
   @apply bg-gray-700 text-gray-100 ring-1 ring-gray-600;
 }
 .seg-item .seg-radio:focus + .seg-text {
@@ -331,7 +331,7 @@ div {
 .field-help {
   @apply block w-full basis-full ml-[130px] text-[12px] leading-snug text-gray-700 bg-gray-100 px-2 py-1 rounded-md;
 }
-.utqn.dark .field-help,
+.ushortcuts.dark .field-help,
 .modal.dark .field-help {
   @apply text-gray-300 bg-gray-800;
 }
@@ -341,7 +341,7 @@ div {
 .field-help a {
   @apply text-blue-600 underline;
 }
-.utqn.dark .field-help a,
+.ushortcuts.dark .field-help a,
 .modal.dark .field-help a {
   @apply text-blue-400 underline;
 }
@@ -372,11 +372,11 @@ textarea {
   @apply bg-gray-900 text-white border-gray-900;
 }
 
-.utqn.dark .group-pill {
+.ushortcuts.dark .group-pill {
   @apply border-gray-700 text-gray-200 hover:bg-gray-700;
 }
 
-.utqn.dark .group-pill.active {
+.ushortcuts.dark .group-pill.active {
   @apply bg-gray-100 text-gray-900 border-gray-100;
 }
 
@@ -388,20 +388,20 @@ textarea {
   @apply opacity-50 cursor-not-allowed;
 }
 
-.utqn.dark .section {
+.ushortcuts.dark .section {
 }
 
 .divider {
   @apply h-px bg-gray-200;
 }
-.utqn.dark .divider {
+.ushortcuts.dark .divider {
   @apply bg-gray-700;
 }
 
 .section-title {
   @apply text-xs uppercase tracking-wider text-gray-600 mt-3 mb-1 px-2 py-1 rounded-md bg-gray-100;
 }
-.utqn.dark .section-title {
+.ushortcuts.dark .section-title {
   @apply text-gray-300 bg-gray-800;
 }
 
@@ -413,7 +413,7 @@ textarea {
   @apply bg-white rounded-2xl shadow-2xl w-[720px] max-w-[92vw] p-3;
 }
 
-.utqn.dark .modal {
+.ushortcuts.dark .modal {
   @apply bg-gray-900 text-gray-100;
 }
 
@@ -421,9 +421,9 @@ textarea {
   @apply bg-gray-900 text-gray-100;
 }
 
-.utqn.dark .modal input,
-.utqn.dark .modal select,
-.utqn.dark .modal textarea {
+.ushortcuts.dark .modal input,
+.ushortcuts.dark .modal select,
+.ushortcuts.dark .modal textarea {
   @apply border-gray-700 bg-gray-800 text-gray-100;
 }
 
@@ -433,8 +433,8 @@ textarea {
   @apply border-gray-700 bg-gray-800 text-gray-100;
 }
 
-.utqn.dark .modal input::placeholder,
-.utqn.dark .modal textarea::placeholder {
+.ushortcuts.dark .modal input::placeholder,
+.ushortcuts.dark .modal textarea::placeholder {
   color: #9ca3af;
 }
 
@@ -470,7 +470,7 @@ textarea {
 .editor .row label {
   @apply w-[120px] text-gray-500;
 }
-.utqn.dark .editor .row label {
+.ushortcuts.dark .editor .row label {
   @apply text-gray-400;
 }
 
@@ -479,9 +479,9 @@ textarea {
 .editor textarea {
   @apply border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-gray-300;
 }
-.utqn.dark .editor input,
-.utqn.dark .editor select,
-.utqn.dark .editor textarea {
+.ushortcuts.dark .editor input,
+.ushortcuts.dark .editor select,
+.ushortcuts.dark .editor textarea {
   @apply border-gray-700 bg-gray-800 focus:ring-gray-700;
 }
 
@@ -508,10 +508,10 @@ textarea:disabled {
 .editor .item-row:hover {
   @apply bg-gray-100;
 }
-.utqn.dark .editor .item-row {
+.ushortcuts.dark .editor .item-row {
   @apply bg-gray-800;
 }
-.utqn.dark .editor .item-row:hover {
+.ushortcuts.dark .editor .item-row:hover {
   @apply bg-gray-700;
 }
 
@@ -523,7 +523,7 @@ textarea:disabled {
   @apply w-[120px] text-gray-500;
 }
 
-.utqn.dark .row label {
+.ushortcuts.dark .row label {
   @apply text-gray-400;
 }
 .panel-actions {
@@ -536,26 +536,26 @@ textarea:disabled {
 .theme-switch {
   @apply inline-flex items-center gap-1 bg-gray-100 rounded-full px-1 py-[2px] border border-gray-200 shadow-sm;
 }
-.utqn.dark .theme-switch {
+.ushortcuts.dark .theme-switch {
   @apply bg-gray-800;
 }
 .theme-btn {
   @apply w-6 h-6 p-0 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors duration-150;
 }
-.utqn.dark .theme-btn {
+.ushortcuts.dark .theme-btn {
   @apply text-gray-300 hover:bg-gray-700 hover:text-white;
 }
 .theme-btn.active {
   @apply bg-white ring-1 ring-gray-300;
 }
-.utqn.dark .theme-btn.active {
+.ushortcuts.dark .theme-btn.active {
   @apply bg-gray-700 ring-1 ring-gray-600;
 }
 
 .collapse-btn {
   @apply w-6 h-6 p-0 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors duration-150;
 }
-.utqn.dark .collapse-btn {
+.ushortcuts.dark .collapse-btn {
   @apply text-gray-300 hover:bg-gray-700 hover:text-white;
 }
 .item + .icon-btn {
@@ -587,19 +587,19 @@ textarea:disabled {
 .quick-add-menu {
   @apply fixed z-[2147483647] bg-white border border-gray-200 rounded-lg shadow-xl p-1.5 min-w-[160px] font-sans text-[13px];
 }
-.utqn.dark ~ .quick-add-menu,
-.utqn.dark .quick-add-menu {
+.ushortcuts.dark ~ .quick-add-menu,
+.ushortcuts.dark .quick-add-menu {
   @apply bg-gray-900 border-gray-700 text-gray-100 shadow-black/40;
 }
 .quick-add-item {
   @apply w-full flex items-center gap-1.5 px-2 py-1.5 rounded-md text-left hover:bg-gray-100 transition-colors duration-150 text-gray-900;
 }
-.utqn.dark ~ .quick-add-menu .quick-add-item,
-.utqn.dark .quick-add-menu .quick-add-item {
+.ushortcuts.dark ~ .quick-add-menu .quick-add-item,
+.ushortcuts.dark .quick-add-menu .quick-add-item {
   @apply text-gray-100 hover:bg-gray-800;
 }
-.utqn.dark ~ .quick-add-menu .icon img.lucide-icon,
-.utqn.dark .quick-add-menu .icon img.lucide-icon {
+.ushortcuts.dark ~ .quick-add-menu .icon img.lucide-icon,
+.ushortcuts.dark .quick-add-menu .icon img.lucide-icon {
   filter: invert(1) brightness(1.15) saturate(1.1);
 }
 .picker-highlight {
@@ -628,8 +628,8 @@ textarea:disabled {
     'Apple Color Emoji',
     'Segoe UI Emoji';
 }
-.utqn.dark ~ .picker-tip,
-.utqn.dark .picker-tip {
+.ushortcuts.dark ~ .picker-tip,
+.ushortcuts.dark .picker-tip {
   background: #111827;
   color: #f9fafb;
   border-color: #374151;
@@ -648,7 +648,7 @@ textarea:disabled {
   z-index: 2147483647;
   background-color: #ffffff;
 }
-.utqn.dark .panel.all-mode .header {
+.ushortcuts.dark .panel.all-mode .header {
   background-color: #111827;
 }
 .panel-columns {
@@ -673,7 +673,7 @@ textarea:disabled {
   transition: opacity 0.15s ease;
 }
 
-@keyframes utqn-fade-in {
+@keyframes ushortcuts-fade-in {
   from {
     opacity: 0.01;
   }
@@ -684,7 +684,7 @@ textarea:disabled {
 
 .section.fade-in,
 .item-wrap.fade-in {
-  animation: utqn-fade-in 0.15s ease both;
+  animation: ushortcuts-fade-in 0.15s ease both;
 }
 
 .section.is-hidden .header {
@@ -693,7 +693,7 @@ textarea:disabled {
 .section.is-hidden {
   @apply outline outline-1 outline-dashed outline-gray-300 rounded-lg bg-gray-50;
 }
-.utqn.dark .section.is-hidden {
+.ushortcuts.dark .section.is-hidden {
   @apply outline-gray-600 bg-gray-800;
 }
 .item-wrap.is-hidden .item {
@@ -702,14 +702,14 @@ textarea:disabled {
 .item-wrap.is-hidden {
   @apply outline outline-1 outline-dashed outline-gray-300 rounded-md;
 }
-.utqn.dark .item-wrap.is-hidden {
+.ushortcuts.dark .item-wrap.is-hidden {
   @apply outline-gray-600;
 }
 
 .empty-msg {
   @apply text-xs text-gray-500 px-2 py-1;
 }
-.utqn.dark .empty-msg {
+.ushortcuts.dark .empty-msg {
   @apply text-gray-400;
 }
 

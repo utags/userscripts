@@ -1,4 +1,3 @@
-import { openSettingsPanel as openUtqnSettingsPanel } from './settings-panel'
 import { createGroupManagerPanel } from './group-manager-panel'
 import { createSegmentedRadios } from './segmented-radios'
 
@@ -43,7 +42,7 @@ export function openEditorModal(
     },
     {
       labels: { settings: '设置', groups: '分组' },
-      namePrefix: 'utqn-editor-tabs-',
+      namePrefix: 'ushortcuts-editor-tabs-',
     }
   )
 

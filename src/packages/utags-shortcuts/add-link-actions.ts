@@ -2,13 +2,13 @@ import { querySelectorAllDeep } from '../../utils/dom'
 import { uid } from '../../utils/uid'
 
 function ensurePickerStylesIn(r: Document | ShadowRoot) {
-  const has = (r as any).querySelector?.('#utqn-picker-styles')
+  const has = (r as any).querySelector?.('#ushortcuts-picker-styles')
   if (has) return
   const st = document.createElement('style')
-  st.id = 'utqn-picker-styles'
+  st.id = 'ushortcuts-picker-styles'
   st.textContent =
-    '.utqn-picker-highlight{outline:2px dashed #ef4444!important;outline-offset:0!important;box-shadow:0 0 0 2px rgba(239,68,68,.35) inset!important;cursor:pointer!important;}' +
-    '.utqn-picker-tip{position:fixed;top:12px;right:12px;z-index:2147483647;background:#fff;color:#111827;border:1px solid #e5e7eb;border-radius:8px;padding:6px 10px;box-shadow:0 10px 20px rgba(0,0,0,0.1);font:13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}'
+    '.ushortcuts-picker-highlight{outline:2px dashed #ef4444!important;outline-offset:0!important;box-shadow:0 0 0 2px rgba(239,68,68,.35) inset!important;cursor:pointer!important;}' +
+    '.ushortcuts-picker-tip{position:fixed;top:12px;right:12px;z-index:2147483647;background:#fff;color:#111827;border:1px solid #e5e7eb;border-radius:8px;padding:6px 10px;box-shadow:0 10px 20px rgba(0,0,0,0.1);font:13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}'
   if (r instanceof Document) {
     r.head.append(st)
   } else {
@@ -124,7 +124,7 @@ export function pickLinkFromPage(
   }
 
   const tip = document.createElement('div')
-  tip.className = 'utqn-picker-tip'
+  tip.className = 'ushortcuts-picker-tip'
   tip.textContent = '点击红框链接添加，ESC 取消'
   document.body.append(tip)
 
@@ -141,20 +141,20 @@ export function pickLinkFromPage(
     return u.protocol === 'http:' || u.protocol === 'https:'
   })
 
-  const panelEl = root.querySelector('.utqn')
+  const panelEl = root.querySelector('.ushortcuts')
   const prevPanelDisplay =
     panelEl instanceof HTMLElement ? panelEl.style.display || '' : ''
   if (panelEl instanceof HTMLElement) panelEl.style.display = 'none'
 
   const cleanup = () => {
-    for (const a of anchors) a.classList.remove('utqn-picker-highlight')
+    for (const a of anchors) a.classList.remove('ushortcuts-picker-highlight')
     try {
       tip.remove()
     } catch {}
 
     if (panelEl instanceof HTMLElement) panelEl.style.display = prevPanelDisplay
     try {
-      const ov = document.querySelector('#utqn-picker-overlay')
+      const ov = document.querySelector('#ushortcuts-picker-overlay')
       ov?.remove()
     } catch {}
 
@@ -178,11 +178,11 @@ export function pickLinkFromPage(
     const rn = a.getRootNode()
     if (rn instanceof Document || rn instanceof ShadowRoot)
       ensurePickerStylesIn(rn)
-    a.classList.add('utqn-picker-highlight')
+    a.classList.add('ushortcuts-picker-highlight')
   }
 
   const overlay = document.createElement('div')
-  overlay.id = 'utqn-picker-overlay'
+  overlay.id = 'ushortcuts-picker-overlay'
   overlay.style.position = 'fixed'
   overlay.style.inset = '0'
   overlay.style.zIndex = '2147483647'

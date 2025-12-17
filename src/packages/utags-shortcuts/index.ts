@@ -8,7 +8,11 @@ import { getFaviconUrl } from '../../utils/favicon'
 import { openAddGroupModal } from './add-group-modal'
 import { showDropdownMenu } from './dropdown'
 import { openEditorModal } from './editor-modal-tabs'
-import { openSettingsPanel, createUtqnSettingsStore } from './settings-panel'
+import {
+  CONFIG_KEY,
+  openSettingsPanel,
+  createUshortcutsSettingsStore,
+} from './settings-panel'
 import {
   getValue,
   setValue,
@@ -37,7 +41,7 @@ type Position =
   | 'bottom-right'
 type ItemType = 'url' | 'js'
 
-type NavItem = {
+type ShortcutsItem = {
   id: string
   name: string
   icon?: string
@@ -47,23 +51,22 @@ type NavItem = {
   hidden?: boolean
 }
 
-type NavGroup = {
+type ShortcutsGroup = {
   id: string
   name: string
   icon?: string
   match: string[]
   defaultOpen?: OpenMode
-  items: NavItem[]
+  items: ShortcutsItem[]
   collapsed?: boolean
   itemsPerRow?: number
   hidden?: boolean
 }
 
-type QuickNavConfig = {
-  groups: NavGroup[]
+type ShortcutsConfig = {
+  groups: ShortcutsGroup[]
 }
 
-const KEY = 'utqn_config'
 const EDGE_DEFAULT_WIDTH = 3
 const EDGE_DEFAULT_HEIGHT = 60
 const EDGE_DEFAULT_OPACITY = 0.6
@@ -82,21 +85,21 @@ const SIDEBAR_SIDE_DEFAULT: 'left' | 'right' = 'right'
 function ensureGlobalStyles() {
   try {
     const existed = document.head.querySelector(
-      'style[data-utqn-style="sidebar"]'
+      'style[data-ushortcuts-style="sidebar"]'
     )
     if (existed) return
 
     const style = document.createElement('style')
-    style.dataset.utqnStyle = 'sidebar'
+    style.dataset.ushortcutsStyle = 'sidebar'
     style.textContent = `
-html[data-utqn-sidebar="left-open"] body { width: calc(100% - 360px) !important; margin-left: 360px !important; margin-right: 0 !important; }
-html[data-utqn-sidebar="right-open"] body { width: calc(100% - 360px) !important; margin-right: 360px !important; margin-left: 0 !important; }
+html[data-utags-shortcuts-sidebar="left-open"] body { width: calc(100% - 360px) !important; margin-left: 360px !important; margin-right: 0 !important; }
+html[data-utags-shortcuts-sidebar="right-open"] body { width: calc(100% - 360px) !important; margin-right: 360px !important; margin-left: 0 !important; }
 `
     document.head.append(style)
   } catch {}
 }
 
-const store = createUtqnSettingsStore()
+const store = createUshortcutsSettingsStore()
 let settings: any = {}
 let lastSaved = ''
 let tempOpen = false
@@ -129,7 +132,7 @@ function matchPattern(url: string, pattern: string) {
   }
 }
 
-function matchGroup(url: string, g: NavGroup) {
+function matchGroup(url: string, g: ShortcutsGroup) {
   let hit = false
   for (const p of g.match) {
     const neg = p.startsWith('!')
@@ -143,9 +146,9 @@ function matchGroup(url: string, g: NavGroup) {
 }
 
 function openItem(
-  it: NavItem,
-  group: NavGroup,
-  cfg: QuickNavConfig,
+  it: ShortcutsItem,
+  group: ShortcutsGroup,
+  cfg: ShortcutsConfig,
   opts?: { forceNewTab?: boolean }
 ) {
   const mode: OpenMode = it.openIn || group.defaultOpen || settings.defaultOpen
@@ -167,21 +170,28 @@ function openItem(
   try {
     const onMsg = (ev: MessageEvent) => {
       const d: any = (ev && (ev as any).data) || null
-      if (d && typeof d.__utqn_err__ === 'string' && d.__utqn_err__) {
+      if (
+        d &&
+        typeof d.__ushortcuts_err__ === 'string' &&
+        d.__ushortcuts_err__
+      ) {
         try {
           if (typeof (globalThis as any).alert === 'function') {
             ;(globalThis as any).alert(
-              '脚本执行出错：' + String(d.__utqn_err__)
+              '脚本执行出错：' + String(d.__ushortcuts_err__)
             )
           } else {
-            console.error('脚本执行出错：' + String(d.__utqn_err__))
+            console.error('脚本执行出错：' + String(d.__ushortcuts_err__))
           }
         } catch {}
 
         return
       }
 
-      const raw = d && typeof d.__utqn_url__ === 'string' ? d.__utqn_url__ : ''
+      const raw =
+        d && typeof d.__ushortcuts_url__ === 'string'
+          ? d.__ushortcuts_url__
+          : ''
       if (!raw) return
       try {
         const url = new URL(
@@ -189,8 +199,8 @@ function openItem(
           location.href
         ).href
         const overrideMode =
-          d && typeof d.__utqn_mode__ === 'string'
-            ? (d.__utqn_mode__ as OpenMode)
+          d && typeof d.__ushortcuts_mode__ === 'string'
+            ? (d.__ushortcuts_mode__ as OpenMode)
             : undefined
         const finalMode: OpenMode = opts?.forceNewTab
           ? 'new-tab'
@@ -204,19 +214,19 @@ function openItem(
 
     const s = document.createElement('script')
     const codeSrc = JSON.stringify(String(it.data || ''))
-    s.textContent = `(async function(){try{var __code=${codeSrc};var __fn=new Function(__code);var __ret=__fn();if(__ret&&typeof __ret.then==='function'){__ret=await __ret;}var __url='';var __mode='';if(typeof __ret==='string'&&__ret.trim()){__url=__ret.trim();}else if(__ret&&typeof __ret==='object'){try{if(typeof __ret.error==='string'&&__ret.error){window.postMessage({__utqn_err__:__ret.error},'*');return;}var __x=__ret.url||(__ret.href?String(__ret):'');if(typeof __x==='string'&&__x.trim()){__url=__x.trim();}var __m=__ret.mode; if(__m==='same-tab'||__m==='new-tab'){__mode=__m;} }catch{}}if(__url){window.postMessage({__utqn_url__:__url,__utqn_mode__:__mode},'*');}}catch(e){try{window.postMessage({__utqn_err__:String(e&&(e.message||e))},'*');}catch{}}})()`
+    s.textContent = `(async function(){try{var __code=${codeSrc};var __fn=new Function(__code);var __ret=__fn();if(__ret&&typeof __ret.then==='function'){__ret=await __ret;}var __url='';var __mode='';if(typeof __ret==='string'&&__ret.trim()){__url=__ret.trim();}else if(__ret&&typeof __ret==='object'){try{if(typeof __ret.error==='string'&&__ret.error){window.postMessage({__ushortcuts_err__:__ret.error},'*');return;}var __x=__ret.url||(__ret.href?String(__ret):'');if(typeof __x==='string'&&__x.trim()){__url=__x.trim();}var __m=__ret.mode; if(__m==='same-tab'||__m==='new-tab'){__mode=__m;} }catch{}}if(__url){window.postMessage({__ushortcuts_url__:__url,__ushortcuts_mode__:__mode},'*');}}catch(e){try{window.postMessage({__ushortcuts_err__:String(e&&(e.message||e))},'*');}catch{}}})()`
     ;(document.documentElement || document.body).append(s)
     s.remove()
   } catch {}
 }
 
-async function loadConfig(): Promise<QuickNavConfig> {
+async function loadConfig(): Promise<ShortcutsConfig> {
   try {
-    const v = await getValue<string>(KEY, '')
+    const v = await getValue<string>(CONFIG_KEY, '')
     if (v) {
       const raw = JSON.parse(String(v) || '{}')
       const host = location.hostname || ''
-      const ensureGroup = (gg: any): NavGroup => ({
+      const ensureGroup = (gg: any): ShortcutsGroup => ({
         id: String(gg?.id || uid()),
         name: String(gg?.name || '默认组'),
         icon: String(gg?.icon || 'lucide:folder'),
@@ -228,11 +238,11 @@ async function loadConfig(): Promise<QuickNavConfig> {
         hidden: Boolean(gg?.hidden),
       })
 
-      const groupsArr: NavGroup[] = Array.isArray(raw?.groups)
+      const groupsArr: ShortcutsGroup[] = Array.isArray(raw?.groups)
         ? raw.groups.map((x: any) => ensureGroup(x))
         : []
       if (groupsArr.length === 0) {
-        const g: NavGroup = ensureGroup({})
+        const g: ShortcutsGroup = ensureGroup({})
         g.items = [
           {
             id: uid(),
@@ -247,7 +257,7 @@ async function loadConfig(): Promise<QuickNavConfig> {
         groupsArr.push(g)
       }
 
-      const cfg: QuickNavConfig = {
+      const cfg: ShortcutsConfig = {
         groups: groupsArr,
       }
       return cfg
@@ -255,7 +265,7 @@ async function loadConfig(): Promise<QuickNavConfig> {
   } catch {}
 
   const host = location.hostname || ''
-  const g: NavGroup = {
+  const g: ShortcutsGroup = {
     id: uid(),
     name: '默认组',
     icon: 'lucide:folder',
@@ -290,25 +300,27 @@ async function loadConfig(): Promise<QuickNavConfig> {
   }
 }
 
-async function saveConfig(cfg: QuickNavConfig) {
+async function saveConfig(cfg: ShortcutsConfig) {
   try {
     const s = JSON.stringify(cfg)
     if (s === lastSaved) return
     lastSaved = s
-    await setValue(KEY, s)
+    await setValue(CONFIG_KEY, s)
   } catch {}
 }
 
 function createRoot() {
   console.log('createRoot')
-  const existing = document.querySelector('[data-utqn-host="utags-quick-nav"]')
+  const existing = document.querySelector(
+    '[data-ushortcuts-host="utags-shortcuts"]'
+  )
   if (existing instanceof HTMLElement) {
     const root = (existing as any).shadowRoot as ShadowRoot
     return { host: existing, root }
   }
 
   const host = document.createElement('div')
-  host.dataset.utqnHost = 'utags-quick-nav'
+  host.dataset.ushortcutsHost = 'utags-shortcuts'
 
   const root = host.attachShadow({ mode: 'open' })
   const style = document.createElement('style')
@@ -318,7 +330,7 @@ function createRoot() {
   return { host, root }
 }
 
-function place(el: HTMLElement, cfg: QuickNavConfig) {
+function place(el: HTMLElement, cfg: ShortcutsConfig) {
   el.style.position = 'fixed'
   el.style.inset = 'auto'
   if (settings.layoutMode === 'sidebar') {
@@ -441,7 +453,7 @@ function scorePattern(url: string, pattern: string) {
   return pat.replaceAll('*', '').length
 }
 
-function groupScore(url: string, g: NavGroup) {
+function groupScore(url: string, g: ShortcutsGroup) {
   let max = -1
   for (const p of g.match) {
     const neg = p.startsWith('!')
@@ -458,7 +470,7 @@ function groupScore(url: string, g: NavGroup) {
   return max
 }
 
-function currentGroups(cfg: QuickNavConfig) {
+function currentGroups(cfg: ShortcutsConfig) {
   if (showAllGroups) {
     return cfg.groups.filter((g) => showHiddenGroups || !g.hidden)
   }
@@ -489,7 +501,7 @@ function preserveScroll(panel: HTMLElement, cb: () => void) {
   } catch {}
 }
 
-function isDarkTheme(cfg: QuickNavConfig) {
+function isDarkTheme(cfg: ShortcutsConfig) {
   const t = settings.theme || THEME_DEFAULT
   if (t === 'dark') return true
   if (t === 'light') return false
@@ -567,7 +579,7 @@ function isEditableTarget(t: EventTarget | undefined) {
   return Boolean(ce)
 }
 
-function registerHotkeys(root: ShadowRoot, cfg: QuickNavConfig) {
+function registerHotkeys(root: ShadowRoot, cfg: ShortcutsConfig) {
   document.addEventListener('keydown', (e) => {
     if (e.defaultPrevented) return
     if (isEditableTarget((e as any).target || undefined)) return
@@ -585,7 +597,7 @@ function registerHotkeys(root: ShadowRoot, cfg: QuickNavConfig) {
     if (p.shift !== hasShift) return
     if (e.code !== p.code) return
     e.preventDefault()
-    const visible = Boolean(root.querySelector('.utqn .panel'))
+    const visible = Boolean(root.querySelector('.ushortcuts .panel'))
     if (visible) {
       collapseWithAnim(root, cfg)
     } else {
@@ -595,11 +607,11 @@ function registerHotkeys(root: ShadowRoot, cfg: QuickNavConfig) {
   })
 }
 
-function renderNavItem(
+function renderShortcutsItem(
   root: ShadowRoot,
-  cfg: QuickNavConfig,
-  g: NavGroup,
-  it: NavItem,
+  cfg: ShortcutsConfig,
+  g: ShortcutsGroup,
+  it: ShortcutsItem,
   section: Element,
   isEditing: boolean,
   siteDefaultOpenConst: 'same-tab' | 'new-tab',
@@ -746,8 +758,8 @@ function renderNavItem(
 
 function renderGroupSection(
   root: ShadowRoot,
-  cfg: QuickNavConfig,
-  g: NavGroup,
+  cfg: ShortcutsConfig,
+  g: ShortcutsGroup,
   body: HTMLElement
 ) {
   const isEditing = editingGroups.has(g.id)
@@ -995,7 +1007,7 @@ function renderGroupSection(
   for (const it of g.items) {
     if (it.hidden && !showHiddenItems && !isEditing) continue
     visibleCount++
-    const wrap = renderNavItem(
+    const wrap = renderShortcutsItem(
       root,
       cfg,
       g,
@@ -1030,7 +1042,7 @@ function renderGroupSection(
 
 function renderPanelHeader(
   root: ShadowRoot,
-  cfg: QuickNavConfig,
+  cfg: ShortcutsConfig,
   panel: HTMLElement
 ) {
   const collapseRow = document.createElement('div')
@@ -1186,9 +1198,9 @@ function renderPanelHeader(
   return body
 }
 
-function renderPanel(root: ShadowRoot, cfg: QuickNavConfig, animIn: boolean) {
+function renderPanel(root: ShadowRoot, cfg: ShortcutsConfig, animIn: boolean) {
   const wrapper = document.createElement('div')
-  wrapper.className = 'utqn' + (isDarkTheme(cfg) ? ' dark' : '')
+  wrapper.className = 'ushortcuts' + (isDarkTheme(cfg) ? ' dark' : '')
   const panel = document.createElement('div')
   panel.className = 'panel'
   if (settings.layoutMode === 'sidebar') {
@@ -1243,7 +1255,7 @@ function renderPanel(root: ShadowRoot, cfg: QuickNavConfig, animIn: boolean) {
   root.append(wrapper)
 }
 
-function openEditor(root: ShadowRoot, cfg: QuickNavConfig) {
+function openEditor(root: ShadowRoot, cfg: ShortcutsConfig) {
   openEditorModal(root, cfg, {
     saveConfig(c) {
       void saveConfig(c)
@@ -1266,7 +1278,7 @@ function openEditor(root: ShadowRoot, cfg: QuickNavConfig) {
 
 function openQuickAddMenu(
   root: ShadowRoot,
-  cfg: QuickNavConfig,
+  cfg: ShortcutsConfig,
   anchor: HTMLElement
 ) {
   suppressCollapse = true
@@ -1321,14 +1333,14 @@ function openQuickAddMenu(
 
 let lastCollapsed = true
 let suppressCollapse = false
-function rerender(root: ShadowRoot, cfg: QuickNavConfig) {
+function rerender(root: ShadowRoot, cfg: ShortcutsConfig) {
   suppressCollapse = true
   let sx = 0
   let sy = 0
   try {
     const cur =
-      root.querySelector('.utqn .panel-scroll') ||
-      root.querySelector('.utqn .panel')
+      root.querySelector('.ushortcuts .panel-scroll') ||
+      root.querySelector('.ushortcuts .panel')
     if (cur) {
       sx = cur.scrollLeft
       sy = cur.scrollTop
@@ -1336,7 +1348,7 @@ function rerender(root: ShadowRoot, cfg: QuickNavConfig) {
   } catch {}
 
   for (const n of Array.from(
-    root.querySelectorAll('.utqn,.collapsed-tab,.quick-add-menu')
+    root.querySelectorAll('.ushortcuts,.collapsed-tab,.quick-add-menu')
   ))
     n.remove()
 
@@ -1344,7 +1356,7 @@ function rerender(root: ShadowRoot, cfg: QuickNavConfig) {
     lastCollapsed = true
     suppressCollapse = false
     try {
-      delete (document.documentElement as any).dataset.utqnSidebar
+      delete (document.documentElement as any).dataset.utagsShortcutsSidebar
     } catch {}
 
     return
@@ -1394,7 +1406,7 @@ function rerender(root: ShadowRoot, cfg: QuickNavConfig) {
     lastCollapsed = true
     suppressCollapse = false
     try {
-      delete (document.documentElement as any).dataset.utqnSidebar
+      delete (document.documentElement as any).dataset.utagsShortcutsSidebar
     } catch {}
 
     return
@@ -1405,8 +1417,8 @@ function rerender(root: ShadowRoot, cfg: QuickNavConfig) {
 
   try {
     const cur =
-      root.querySelector('.utqn .panel-scroll') ||
-      root.querySelector('.utqn .panel')
+      root.querySelector('.ushortcuts .panel-scroll') ||
+      root.querySelector('.ushortcuts .panel')
     if (cur) {
       cur.scrollLeft = sx
       cur.scrollTop = sy
@@ -1423,7 +1435,7 @@ function rerender(root: ShadowRoot, cfg: QuickNavConfig) {
   suppressCollapse = false
 }
 
-function initEdgeExpand(root: ShadowRoot, cfg: QuickNavConfig) {
+function initEdgeExpand(root: ShadowRoot, cfg: ShortcutsConfig) {
   let lastOpen = 0
   document.addEventListener('mousemove', (e) => {
     const now = Date.now()
@@ -1443,7 +1455,7 @@ function initEdgeExpand(root: ShadowRoot, cfg: QuickNavConfig) {
   })
 }
 
-function registerMenus(root: ShadowRoot, cfg: QuickNavConfig) {
+function registerMenus(root: ShadowRoot, cfg: ShortcutsConfig) {
   try {
     for (const id of menuIds) {
       try {
@@ -1482,10 +1494,10 @@ function registerMenus(root: ShadowRoot, cfg: QuickNavConfig) {
   } catch {}
 }
 
-function registerStorageListener(root: ShadowRoot, cfg: QuickNavConfig) {
+function registerStorageListener(root: ShadowRoot, cfg: ShortcutsConfig) {
   try {
     void addValueChangeListener(
-      KEY,
+      CONFIG_KEY,
       (_name: string, _old: string, nv: string, remote: boolean) => {
         try {
           const obj = JSON.parse(nv)
@@ -1500,17 +1512,17 @@ function registerStorageListener(root: ShadowRoot, cfg: QuickNavConfig) {
 }
 
 let collapseTimer: number | undefined
-function scheduleAutoCollapse(root: ShadowRoot, cfg: QuickNavConfig) {
+function scheduleAutoCollapse(root: ShadowRoot, cfg: ShortcutsConfig) {
   if (collapseTimer) clearTimeout(collapseTimer)
   collapseTimer = setTimeout(() => {
     collapseWithAnim(root, cfg)
   }, 500) as unknown as number
 }
 
-function collapseWithAnim(root: ShadowRoot, cfg: QuickNavConfig) {
+function collapseWithAnim(root: ShadowRoot, cfg: ShortcutsConfig) {
   try {
     const p = settings.position
-    const sel = root.querySelector('.utqn .panel')
+    const sel = root.querySelector('.ushortcuts .panel')
     if (sel) {
       if (isHorizontalPos(p)) {
         const isTop = isTopSide(p)
@@ -1537,8 +1549,8 @@ function collapseWithAnim(root: ShadowRoot, cfg: QuickNavConfig) {
   rerender(root, cfg)
 }
 
-function updateThemeUI(root: ShadowRoot, cfg: QuickNavConfig) {
-  const wrapper = root.querySelector('.utqn')
+function updateThemeUI(root: ShadowRoot, cfg: ShortcutsConfig) {
+  const wrapper = root.querySelector('.ushortcuts')
   if (!wrapper) return
   wrapper.classList.toggle('dark', isDarkTheme(cfg))
   const curTheme = settings.theme || THEME_DEFAULT
@@ -1555,7 +1567,7 @@ function updateThemeUI(root: ShadowRoot, cfg: QuickNavConfig) {
   }
 }
 
-function registerUrlChangeListener(root: ShadowRoot, cfg: QuickNavConfig) {
+function registerUrlChangeListener(root: ShadowRoot, cfg: ShortcutsConfig) {
   let last = location.href
   function onChange() {
     const now = location.href
@@ -1600,21 +1612,21 @@ function updateSidebarClass() {
   try {
     if (settings.enabled !== false && settings.layoutMode === 'sidebar') {
       ensureGlobalStyles()
-      document.documentElement.dataset.utqnSidebar =
+      document.documentElement.dataset.utagsShortcutsSidebar =
         (settings.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
           ? 'left-open'
           : 'right-open'
     } else {
-      delete (document.documentElement as any).dataset.utqnSidebar
+      delete (document.documentElement as any).dataset.utagsShortcutsSidebar
     }
   } catch {}
 }
 
-function registerHostAutofix(_root: ShadowRoot, cfg: QuickNavConfig) {
+function registerHostAutofix(_root: ShadowRoot, cfg: ShortcutsConfig) {
   try {
     const mo = new MutationObserver(() => {
       const existing = document.querySelector(
-        '[data-utqn-host="utags-quick-nav"]'
+        '[data-ushortcuts-host="utags-shortcuts"]'
       )
       if (!(existing instanceof HTMLElement)) {
         try {
@@ -1646,8 +1658,8 @@ function registerHostAutofix(_root: ShadowRoot, cfg: QuickNavConfig) {
 function main() {
   try {
     const de = document.documentElement as any
-    if (de && de.dataset && de.dataset.utqn === '1') return
-    if (de && de.dataset) de.dataset.utqn = '1'
+    if (de && de.dataset && de.dataset.utagsShortcuts === '1') return
+    if (de && de.dataset) de.dataset.utagsShortcuts = '1'
   } catch {}
 
   const { root } = createRoot()
