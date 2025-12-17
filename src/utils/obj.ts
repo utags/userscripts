@@ -20,27 +20,27 @@ export function deepMergeReplaceArrays(target: any, source: any): any {
   return out
 }
 
+export const normalizeToDefaultType = (val: any, dv: any): any => {
+  const t = typeof dv
+
+  if (t === 'number') {
+    const n = Number(val)
+    return Number.isFinite(n) ? n : dv
+  }
+
+  if (t === 'object') {
+    return val && typeof val === 'object' ? val : dv
+  }
+
+  return typeof val === t ? val : dv
+}
+
 export function setOrDelete(
   obj: Record<string, any>,
   key: string,
   value: any,
   defaultValue: any
 ): void {
-  const normalizeToDefaultType = (val: any, dv: any): any => {
-    const t = typeof dv
-
-    if (t === 'number') {
-      const n = Number(val)
-      return Number.isFinite(n) ? n : dv
-    }
-
-    if (t === 'object') {
-      return val && typeof val === 'object' ? val : dv
-    }
-
-    return typeof val === t ? val : dv
-  }
-
   const normalized = normalizeToDefaultType(value, defaultValue)
   const isEqual = (a: any, b: any): boolean => {
     // Primitive compare; fallback to JSON for objects

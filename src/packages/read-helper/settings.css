@@ -5,7 +5,7 @@
 }
 
 .rh {
-  @apply fixed top-3 right-3 z-[2147483649];
+  @apply fixed top-3 right-3 z-[2147483647];
 }
 .rh .panel {
   @apply bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-[360px] max-h-[90vh] overflow-y-auto font-sans text-[13px] text-gray-900;

@@ -1,7 +1,7 @@
 import { registerMenu, unregisterMenu, openInTab } from '../../common/gm'
 import {
   openSettingsPanel,
-  createObjectSettingsStore,
+  createSettingsStore,
   type Field,
   type PanelSchema,
 } from '../../common/settings'
@@ -19,7 +19,6 @@ type RepoConfig = {
 type Config = {
   REPOSITORIES: RepoConfig[]
   DEBUG: boolean
-  SETTINGS_KEY: string
 }
 
 // Configuration constants
@@ -81,7 +80,6 @@ const CONFIG: Config = {
     },
   ],
   DEBUG: false, // Set to true for debug logging
-  SETTINGS_KEY: 'find_scripts_settings', // Key for storing settings
 }
 
 const I18N: Record<string, Record<string, string>> = {
@@ -359,10 +357,7 @@ function buildDefaults(): Record<string, boolean> {
 }
 
 // Store for settings (single instance)
-const SETTINGS_STORE = createObjectSettingsStore(
-  CONFIG.SETTINGS_KEY,
-  buildDefaults()
-)
+const SETTINGS_STORE = createSettingsStore('', buildDefaults())
 
 async function loadSettings(): Promise<void> {
   try {
@@ -376,7 +371,7 @@ async function loadSettings(): Promise<void> {
 
 function listenSettings(): void {
   try {
-    SETTINGS_STORE.onChange?.(() => {
+    SETTINGS_STORE.onChange(() => {
       void (async () => {
         await loadSettings()
         clearMenus()

@@ -8,7 +8,7 @@ import { getFaviconUrl } from '../../utils/favicon'
 import { openAddGroupModal } from './add-group-modal'
 import { showDropdownMenu } from './dropdown'
 import { openEditorModal } from './editor-modal-tabs'
-import { openSettingsPanel } from './settings-panel'
+import { openSettingsPanel, createUtqnSettingsStore } from './settings-panel'
 import {
   getValue,
   setValue,
@@ -60,32 +60,10 @@ type NavGroup = {
 }
 
 type QuickNavConfig = {
-  global: {
-    syncUrl?: string
-    hotkey?: string
-  }
-  sitePrefs?: Record<string, Partial<SitePref>>
   groups: NavGroup[]
 }
 
-type SitePref = {
-  position: Position
-  defaultOpen: OpenMode
-  theme?: 'light' | 'dark' | 'system'
-  pinned?: boolean
-  enabled?: boolean
-  layoutMode?: 'floating' | 'sidebar'
-  sidebarSide?: 'left' | 'right'
-  edgeWidth?: number
-  edgeHeight?: number
-  edgeOpacity?: number
-  edgeColorLight?: string
-  edgeColorDark?: string
-  edgeHidden?: boolean
-}
-
 const KEY = 'utqn_config'
-const SITE_KEY = location.hostname || ''
 const EDGE_DEFAULT_WIDTH = 3
 const EDGE_DEFAULT_HEIGHT = 60
 const EDGE_DEFAULT_OPACITY = 0.6
@@ -118,10 +96,8 @@ html[data-utqn-sidebar="right-open"] body { width: calc(100% - 360px) !important
   } catch {}
 }
 
-let sitePref: SitePref = {
-  position: POSITION_DEFAULT,
-  defaultOpen: OPEN_DEFAULT,
-}
+const store = createUtqnSettingsStore()
+let settings: any = {}
 let lastSaved = ''
 let tempOpen = false
 let tempClosed = false
@@ -153,28 +129,6 @@ function matchPattern(url: string, pattern: string) {
   }
 }
 
-function initSitePref(cfg: QuickNavConfig) {
-  if (!cfg.sitePrefs) cfg.sitePrefs = {}
-  const stored: Partial<SitePref> = cfg.sitePrefs[SITE_KEY] || {}
-  const cur: SitePref = {
-    position: stored.position ?? POSITION_DEFAULT,
-    defaultOpen: stored.defaultOpen ?? OPEN_DEFAULT,
-    theme: stored.theme ?? THEME_DEFAULT,
-    pinned: stored.pinned ?? PINNED_DEFAULT,
-    enabled: stored.enabled ?? ENABLED_DEFAULT,
-    layoutMode: stored.layoutMode ?? LAYOUT_DEFAULT,
-    sidebarSide: stored.sidebarSide ?? SIDEBAR_SIDE_DEFAULT,
-    edgeWidth: stored.edgeWidth ?? EDGE_DEFAULT_WIDTH,
-    edgeHeight: stored.edgeHeight ?? EDGE_DEFAULT_HEIGHT,
-    edgeOpacity: stored.edgeOpacity ?? EDGE_DEFAULT_OPACITY,
-    edgeColorLight: stored.edgeColorLight ?? EDGE_DEFAULT_COLOR_LIGHT,
-    edgeColorDark: stored.edgeColorDark ?? EDGE_DEFAULT_COLOR_DARK,
-    edgeHidden: stored.edgeHidden ?? EDGE_DEFAULT_HIDDEN,
-  }
-  sitePref = cur
-  cfg.sitePrefs[SITE_KEY] = cur
-}
-
 function matchGroup(url: string, g: NavGroup) {
   let hit = false
   for (const p of g.match) {
@@ -194,7 +148,7 @@ function openItem(
   cfg: QuickNavConfig,
   opts?: { forceNewTab?: boolean }
 ) {
-  const mode: OpenMode = it.openIn || group.defaultOpen || sitePref.defaultOpen
+  const mode: OpenMode = it.openIn || group.defaultOpen || settings.defaultOpen
   if (it.type === 'url') {
     const url = new URL(
       resolveUrlTemplate(String(it.data || '/')),
@@ -286,7 +240,7 @@ async function loadConfig(): Promise<QuickNavConfig> {
             icon: 'lucide:home',
             type: 'url',
             data: '/',
-            openIn: 'same-tab',
+            openIn: OPEN_DEFAULT,
             hidden: false,
           },
         ]
@@ -294,8 +248,6 @@ async function loadConfig(): Promise<QuickNavConfig> {
       }
 
       const cfg: QuickNavConfig = {
-        global: raw?.global || {},
-        sitePrefs: raw?.sitePrefs || {},
         groups: groupsArr,
       }
       return cfg
@@ -308,7 +260,7 @@ async function loadConfig(): Promise<QuickNavConfig> {
     name: '默认组',
     icon: 'lucide:folder',
     match: ['*'],
-    defaultOpen: 'same-tab',
+    defaultOpen: OPEN_DEFAULT,
     items: [
       {
         id: uid(),
@@ -316,7 +268,7 @@ async function loadConfig(): Promise<QuickNavConfig> {
         icon: 'lucide:home',
         type: 'url',
         data: '/',
-        openIn: 'same-tab',
+        openIn: OPEN_DEFAULT,
         hidden: false,
       },
       {
@@ -325,7 +277,7 @@ async function loadConfig(): Promise<QuickNavConfig> {
         icon: 'favicon',
         type: 'url',
         data: 'https://www.google.com/search?q=site:{hostname}%20{selected||query}',
-        openIn: 'same-tab',
+        openIn: 'new-tab',
         hidden: false,
       },
     ],
@@ -334,56 +286,13 @@ async function loadConfig(): Promise<QuickNavConfig> {
     hidden: false,
   }
   return {
-    global: {},
     groups: [g],
   }
 }
 
 async function saveConfig(cfg: QuickNavConfig) {
   try {
-    const sp: Partial<SitePref> = {}
-    if (sitePref.position !== POSITION_DEFAULT) sp.position = sitePref.position
-    if (sitePref.defaultOpen !== OPEN_DEFAULT)
-      sp.defaultOpen = sitePref.defaultOpen
-    if ((sitePref.theme || THEME_DEFAULT) !== THEME_DEFAULT)
-      sp.theme = sitePref.theme
-    if (sitePref.pinned !== PINNED_DEFAULT) sp.pinned = sitePref.pinned
-    if (sitePref.enabled !== ENABLED_DEFAULT) sp.enabled = sitePref.enabled
-    if ((sitePref.layoutMode || LAYOUT_DEFAULT) !== LAYOUT_DEFAULT)
-      sp.layoutMode = sitePref.layoutMode
-    if ((sitePref.sidebarSide || SIDEBAR_SIDE_DEFAULT) !== SIDEBAR_SIDE_DEFAULT)
-      sp.sidebarSide = sitePref.sidebarSide
-    if ((sitePref.edgeWidth ?? EDGE_DEFAULT_WIDTH) !== EDGE_DEFAULT_WIDTH)
-      sp.edgeWidth = sitePref.edgeWidth
-    if ((sitePref.edgeHeight ?? EDGE_DEFAULT_HEIGHT) !== EDGE_DEFAULT_HEIGHT)
-      sp.edgeHeight = sitePref.edgeHeight
-    if ((sitePref.edgeOpacity ?? EDGE_DEFAULT_OPACITY) !== EDGE_DEFAULT_OPACITY)
-      sp.edgeOpacity = sitePref.edgeOpacity
-    if (
-      (sitePref.edgeColorLight ?? EDGE_DEFAULT_COLOR_LIGHT) !==
-      EDGE_DEFAULT_COLOR_LIGHT
-    )
-      sp.edgeColorLight = sitePref.edgeColorLight
-    if (
-      (sitePref.edgeColorDark ?? EDGE_DEFAULT_COLOR_DARK) !==
-      EDGE_DEFAULT_COLOR_DARK
-    )
-      sp.edgeColorDark = sitePref.edgeColorDark
-    if ((sitePref.edgeHidden ?? EDGE_DEFAULT_HIDDEN) !== EDGE_DEFAULT_HIDDEN)
-      sp.edgeHidden = sitePref.edgeHidden
-
-    const nextSitePrefs: Record<string, Partial<SitePref>> = {
-      ...cfg.sitePrefs,
-    }
-    if (Object.keys(sp).length > 0) nextSitePrefs[SITE_KEY] = sp
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    else delete nextSitePrefs[SITE_KEY]
-
-    const next: QuickNavConfig = {
-      ...cfg,
-      sitePrefs: nextSitePrefs,
-    }
-    const s = JSON.stringify(next)
+    const s = JSON.stringify(cfg)
     if (s === lastSaved) return
     lastSaved = s
     await setValue(KEY, s)
@@ -412,13 +321,13 @@ function createRoot() {
 function place(el: HTMLElement, cfg: QuickNavConfig) {
   el.style.position = 'fixed'
   el.style.inset = 'auto'
-  if (sitePref.layoutMode === 'sidebar') {
+  if (settings.layoutMode === 'sidebar') {
     el.style.top = '0'
     el.style.bottom = '0'
     el.style.left = 'auto'
     el.style.right = 'auto'
     el.style.transform = ''
-    if ((sitePref.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left') {
+    if ((settings.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left') {
       el.style.left = '0'
     } else {
       el.style.right = '0'
@@ -427,33 +336,11 @@ function place(el: HTMLElement, cfg: QuickNavConfig) {
     return
   }
 
-  const p = sitePref.position
+  const p = settings.position
   switch (p) {
-    case 'right-top': {
-      el.style.top = '0'
-      el.style.right = '0'
-
-      break
-    }
-
     case 'left-top': {
       el.style.top = '0'
       el.style.left = '0'
-
-      break
-    }
-
-    case 'left-bottom': {
-      el.style.bottom = '0'
-      el.style.left = '0'
-
-      break
-    }
-
-    case 'right-bottom': {
-      el.style.bottom = '0'
-      el.style.right = '0'
-
       break
     }
 
@@ -461,7 +348,12 @@ function place(el: HTMLElement, cfg: QuickNavConfig) {
       el.style.top = '50%'
       el.style.left = '0'
       el.style.transform = 'translateY(-50%)'
+      break
+    }
 
+    case 'left-bottom': {
+      el.style.bottom = '0'
+      el.style.left = '0'
       break
     }
 
@@ -469,7 +361,12 @@ function place(el: HTMLElement, cfg: QuickNavConfig) {
       el.style.top = '50%'
       el.style.right = '0'
       el.style.transform = 'translateY(-50%)'
+      break
+    }
 
+    case 'right-bottom': {
+      el.style.bottom = '0'
+      el.style.right = '0'
       break
     }
 
@@ -507,6 +404,13 @@ function place(el: HTMLElement, cfg: QuickNavConfig) {
 
     case 'bottom-right': {
       el.style.bottom = '0'
+      el.style.right = '0'
+      break
+    }
+
+    // 'right-top' and other cases
+    default: {
+      el.style.top = '0'
       el.style.right = '0'
       break
     }
@@ -586,7 +490,7 @@ function preserveScroll(panel: HTMLElement, cb: () => void) {
 }
 
 function isDarkTheme(cfg: QuickNavConfig) {
-  const t = sitePref.theme || THEME_DEFAULT
+  const t = settings.theme || THEME_DEFAULT
   if (t === 'dark') return true
   if (t === 'light') return false
   try {
@@ -667,7 +571,7 @@ function registerHotkeys(root: ShadowRoot, cfg: QuickNavConfig) {
   document.addEventListener('keydown', (e) => {
     if (e.defaultPrevented) return
     if (isEditableTarget((e as any).target || undefined)) return
-    const spec = cfg.global.hotkey || HOTKEY_DEFAULT
+    const spec = settings.hotkey || HOTKEY_DEFAULT
     const p = parseHotkeySpec(spec)
     if (!p) return
     if (!(p.ctrl || p.meta || p.alt)) return
@@ -881,9 +785,9 @@ function renderGroupSection(
   })
   const actions = document.createElement('div')
   actions.className = 'header-actions'
-  const siteDefaultOpenConst = sitePref.defaultOpen as 'same-tab' | 'new-tab'
+  const siteDefaultOpenConst = settings.defaultOpen as 'same-tab' | 'new-tab'
   const editMenuRightSide =
-    isRightSide(sitePref.position) || sitePref.position.endsWith('-right')
+    isRightSide(settings.position) || settings.position.endsWith('-right')
   const groupMenuRightSide = editMenuRightSide
 
   if (isEditing) {
@@ -940,7 +844,7 @@ function renderGroupSection(
                   rerender(r, c)
                 },
                 defaultOpen: (g.defaultOpen ??
-                  (sitePref.defaultOpen || 'same-tab')) as
+                  (settings.defaultOpen || OPEN_DEFAULT)) as
                   | 'same-tab'
                   | 'new-tab',
                 defaultGroupId: g.id,
@@ -963,7 +867,7 @@ function renderGroupSection(
                   },
                 },
                 g.id,
-                (g.defaultOpen ?? (sitePref.defaultOpen || 'same-tab')) as
+                (g.defaultOpen ?? (settings.defaultOpen || OPEN_DEFAULT)) as
                   | 'same-tab'
                   | 'new-tab'
               )
@@ -985,7 +889,7 @@ function renderGroupSection(
                   },
                 },
                 g.id,
-                (g.defaultOpen ?? (sitePref.defaultOpen || 'same-tab')) as
+                (g.defaultOpen ?? (settings.defaultOpen || OPEN_DEFAULT)) as
                   | 'same-tab'
                   | 'new-tab'
               )
@@ -1085,7 +989,9 @@ function renderGroupSection(
   items.style.setProperty('--cols', String(isEditing ? 1 : g.itemsPerRow || 1))
   items.style.display = g.collapsed ? 'none' : ''
   let visibleCount = 0
-  const defOpen = (sitePref.defaultOpen || 'same-tab') as 'same-tab' | 'new-tab'
+  const defOpen = (settings.defaultOpen || OPEN_DEFAULT) as
+    | 'same-tab'
+    | 'new-tab'
   for (const it of g.items) {
     if (it.hidden && !showHiddenItems && !isEditing) continue
     visibleCount++
@@ -1164,26 +1070,19 @@ function renderPanelHeader(
   setIcon(settingsBtn, 'lucide:settings', '设置')
   settingsBtn.addEventListener('click', () => {
     // openEditor(root, cfg)
-    openSettingsPanel()
+    openSettingsPanel(store)
   })
 
   const pinBtn = document.createElement('button')
   pinBtn.className = 'icon-btn'
   setIcon(
     pinBtn,
-    sitePref.pinned ? 'lucide:pin' : 'lucide:pin-off',
-    sitePref.pinned ? '取消固定' : '固定显示'
+    settings.pinned ? 'lucide:pin' : 'lucide:pin-off',
+    settings.pinned ? '取消固定' : '固定显示'
   )
-  pinBtn.classList.toggle('active', Boolean(sitePref.pinned))
+  pinBtn.classList.toggle('active', Boolean(settings.pinned))
   pinBtn.addEventListener('click', () => {
-    sitePref.pinned = !sitePref.pinned
-    void saveConfig(cfg)
-    pinBtn.classList.toggle('active', Boolean(sitePref.pinned))
-    setIcon(
-      pinBtn,
-      sitePref.pinned ? 'lucide:pin' : 'lucide:pin-off',
-      sitePref.pinned ? '取消固定' : '固定显示'
-    )
+    void store.set({ pinned: !settings.pinned })
   })
 
   rightActions.append(plusBtn)
@@ -1262,7 +1161,7 @@ function renderPanelHeader(
   }
 
   rightActions.append(settingsBtn)
-  if ((sitePref.layoutMode || LAYOUT_DEFAULT) !== 'sidebar')
+  if ((settings.layoutMode || LAYOUT_DEFAULT) !== 'sidebar')
     rightActions.append(pinBtn)
   rightActions.append(closeBtn)
 
@@ -1292,7 +1191,7 @@ function renderPanel(root: ShadowRoot, cfg: QuickNavConfig, animIn: boolean) {
   wrapper.className = 'utqn' + (isDarkTheme(cfg) ? ' dark' : '')
   const panel = document.createElement('div')
   panel.className = 'panel'
-  if (sitePref.layoutMode === 'sidebar') {
+  if (settings.layoutMode === 'sidebar') {
     try {
       panel.style.height = '100vh'
       panel.style.borderRadius = '0'
@@ -1300,14 +1199,14 @@ function renderPanel(root: ShadowRoot, cfg: QuickNavConfig, animIn: boolean) {
 
     try {
       const side =
-        (sitePref.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
+        (settings.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
           ? 'sidebar-left'
           : 'sidebar-right'
       panel.classList.add('sidebar', side)
     } catch {}
   }
 
-  const pos = sitePref.position
+  const pos = settings.position
   const isRight = isRightSide(pos)
   const isHoriz = isHorizontalPos(pos)
   const isTop = isTopSide(pos)
@@ -1335,9 +1234,9 @@ function renderPanel(root: ShadowRoot, cfg: QuickNavConfig, animIn: boolean) {
   })
   wrapper.addEventListener('mouseleave', () => {
     const pinnedFlag =
-      (sitePref.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
+      (settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
         ? true
-        : Boolean(sitePref.pinned)
+        : Boolean(settings.pinned)
     if (!pinnedFlag && !suppressCollapse) scheduleAutoCollapse(root, cfg)
   })
   place(wrapper, cfg)
@@ -1352,7 +1251,7 @@ function openEditor(root: ShadowRoot, cfg: QuickNavConfig) {
     rerender(r, c) {
       rerender(r, c)
     },
-    sitePref,
+    sitePref: settings,
     updateThemeUI,
     edgeDefaults: {
       width: EDGE_DEFAULT_WIDTH,
@@ -1373,7 +1272,7 @@ function openQuickAddMenu(
   suppressCollapse = true
   tempOpen = true
   const rightSide =
-    isRightSide(sitePref.position) || sitePref.position.endsWith('-right')
+    isRightSide(settings.position) || settings.position.endsWith('-right')
   showDropdownMenu(
     root,
     anchor,
@@ -1390,7 +1289,7 @@ function openQuickAddMenu(
             rerender(r, c) {
               rerender(r, c)
             },
-            defaultOpen: sitePref.defaultOpen as 'same-tab' | 'new-tab',
+            defaultOpen: settings.defaultOpen as 'same-tab' | 'new-tab',
             defaultMatch: ['*://' + (location.hostname || '') + '/*'],
           })
         },
@@ -1408,7 +1307,7 @@ function openQuickAddMenu(
             rerender(r, c) {
               rerender(r, c)
             },
-            defaultOpen: (sitePref.defaultOpen || 'same-tab') as
+            defaultOpen: (settings.defaultOpen || OPEN_DEFAULT) as
               | 'same-tab'
               | 'new-tab',
             defaultGroupId: (matched[0] || cfg.groups[0])?.id,
@@ -1441,7 +1340,7 @@ function rerender(root: ShadowRoot, cfg: QuickNavConfig) {
   ))
     n.remove()
 
-  if (sitePref.enabled === false) {
+  if (settings.enabled === false) {
     lastCollapsed = true
     suppressCollapse = false
     try {
@@ -1451,31 +1350,31 @@ function rerender(root: ShadowRoot, cfg: QuickNavConfig) {
     return
   }
 
-  let isCollapsed = !tempOpen && (tempClosed || !sitePref.pinned)
-  if ((sitePref.layoutMode || LAYOUT_DEFAULT) === 'sidebar')
+  let isCollapsed = !tempOpen && (tempClosed || !settings.pinned)
+  if ((settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar')
     isCollapsed = !tempOpen && Boolean(tempClosed)
   if (isCollapsed) {
     const effectiveEdgeHidden =
-      (sitePref.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
+      (settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
         ? true
-        : Boolean(sitePref.edgeHidden)
+        : Boolean(settings.edgeHidden)
     if (!effectiveEdgeHidden) {
       const tab = document.createElement('div')
       tab.className = 'collapsed-tab'
       place(tab, cfg)
       try {
-        const gw = sitePref.edgeWidth ?? EDGE_DEFAULT_WIDTH
-        const gh = sitePref.edgeHeight ?? EDGE_DEFAULT_HEIGHT
-        const go = sitePref.edgeOpacity ?? EDGE_DEFAULT_OPACITY
-        const horiz = isHorizontalPos(sitePref.position)
+        const gw = settings.edgeWidth ?? EDGE_DEFAULT_WIDTH
+        const gh = settings.edgeHeight ?? EDGE_DEFAULT_HEIGHT
+        const go = settings.edgeOpacity ?? EDGE_DEFAULT_OPACITY
+        const horiz = isHorizontalPos(settings.position)
         const thickness = Math.max(1, Math.min(24, gw))
         const length = Math.max(24, Math.min(320, gh))
         tab.style.width = horiz ? `${length}px` : `${thickness}px`
         tab.style.height = horiz ? `${thickness}px` : `${length}px`
         tab.style.opacity = String(Math.max(0, Math.min(1, go)))
         tab.style.backgroundColor = isDarkTheme(cfg)
-          ? String(sitePref.edgeColorDark || EDGE_DEFAULT_COLOR_DARK)
-          : String(sitePref.edgeColorLight || EDGE_DEFAULT_COLOR_LIGHT)
+          ? String(settings.edgeColorDark || EDGE_DEFAULT_COLOR_DARK)
+          : String(settings.edgeColorLight || EDGE_DEFAULT_COLOR_LIGHT)
       } catch {}
 
       tab.addEventListener('mouseenter', () => {
@@ -1484,9 +1383,9 @@ function rerender(root: ShadowRoot, cfg: QuickNavConfig) {
       })
       tab.addEventListener('mouseleave', () => {
         const pinnedFlag =
-          (sitePref.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
+          (settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
             ? true
-            : Boolean(sitePref.pinned)
+            : Boolean(settings.pinned)
         if (!pinnedFlag && !suppressCollapse) scheduleAutoCollapse(root, cfg)
       })
       root.append(tab)
@@ -1502,19 +1401,7 @@ function rerender(root: ShadowRoot, cfg: QuickNavConfig) {
   }
 
   renderPanel(root, cfg, lastCollapsed)
-  if (sitePref.layoutMode === 'sidebar') {
-    ensureGlobalStyles()
-    try {
-      document.documentElement.dataset.utqnSidebar =
-        (sitePref.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
-          ? 'left-open'
-          : 'right-open'
-    } catch {}
-  } else {
-    try {
-      delete (document.documentElement as any).dataset.utqnSidebar
-    } catch {}
-  }
+  updateSidebarClass()
 
   try {
     const cur =
@@ -1544,7 +1431,7 @@ function initEdgeExpand(root: ShadowRoot, cfg: QuickNavConfig) {
     const w = window.innerWidth
     const nearLeft = e.clientX < 6
     const nearRight = e.clientX > w - 6
-    const pref = sitePref
+    const pref = settings
     if (
       (pref.position === 'left-center' && nearLeft) ||
       (pref.position === 'right-center' && nearRight)
@@ -1566,20 +1453,17 @@ function registerMenus(root: ShadowRoot, cfg: QuickNavConfig) {
 
     menuIds = []
 
-    const text = sitePref.enabled
+    const text = settings.enabled
       ? '🚫 禁用当前网站快速导航'
       : '✅ 启用当前网站快速导航'
 
     menuIds.push(
       registerMenu('🧭 打开快速导航面板', () => {
-        if (sitePref.enabled === false) {
+        if (settings.enabled === false) {
           const ok = globalThis.confirm('当前网站已禁用，是否启用并打开面板？')
           if (ok) {
-            sitePref.enabled = true
-            void saveConfig(cfg)
+            void store.set({ enabled: true })
             tempOpen = true
-            rerender(root, cfg)
-            registerMenus(root, cfg)
           }
 
           return
@@ -1589,14 +1473,10 @@ function registerMenus(root: ShadowRoot, cfg: QuickNavConfig) {
         rerender(root, cfg)
       }),
       registerMenu('⚙️ 设置快速导航', () => {
-        // openEditor(root, cfg)
-        openSettingsPanel()
+        openSettingsPanel(store)
       }),
       registerMenu(text, () => {
-        sitePref.enabled = !sitePref.enabled
-        void saveConfig(cfg)
-        rerender(root, cfg)
-        registerMenus(root, cfg)
+        void store.set({ enabled: !settings.enabled })
       })
     )
   } catch {}
@@ -1610,11 +1490,8 @@ function registerStorageListener(root: ShadowRoot, cfg: QuickNavConfig) {
         if (!remote) return
         try {
           const obj = JSON.parse(nv)
-          if (obj && obj.global && obj.groups) {
-            cfg.global = obj.global
+          if (obj && obj.groups) {
             cfg.groups = obj.groups
-            if (obj.sitePrefs) cfg.sitePrefs = obj.sitePrefs
-            initSitePref(cfg)
             rerender(root, cfg)
           }
         } catch {}
@@ -1633,7 +1510,7 @@ function scheduleAutoCollapse(root: ShadowRoot, cfg: QuickNavConfig) {
 
 function collapseWithAnim(root: ShadowRoot, cfg: QuickNavConfig) {
   try {
-    const p = sitePref.position
+    const p = settings.position
     const sel = root.querySelector('.utqn .panel')
     if (sel) {
       if (isHorizontalPos(p)) {
@@ -1665,7 +1542,7 @@ function updateThemeUI(root: ShadowRoot, cfg: QuickNavConfig) {
   const wrapper = root.querySelector('.utqn')
   if (!wrapper) return
   wrapper.classList.toggle('dark', isDarkTheme(cfg))
-  const curTheme = sitePref.theme || THEME_DEFAULT
+  const curTheme = settings.theme || THEME_DEFAULT
   const map: Record<string, string> = {
     系统: 'system',
     浅色: 'light',
@@ -1720,6 +1597,20 @@ function registerUrlChangeListener(root: ShadowRoot, cfg: QuickNavConfig) {
   })
 }
 
+function updateSidebarClass() {
+  try {
+    if (settings.enabled !== false && settings.layoutMode === 'sidebar') {
+      ensureGlobalStyles()
+      document.documentElement.dataset.utqnSidebar =
+        (settings.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
+          ? 'left-open'
+          : 'right-open'
+    } else {
+      delete (document.documentElement as any).dataset.utqnSidebar
+    }
+  } catch {}
+}
+
 function registerHostAutofix(_root: ShadowRoot, cfg: QuickNavConfig) {
   try {
     const mo = new MutationObserver(() => {
@@ -1730,24 +1621,14 @@ function registerHostAutofix(_root: ShadowRoot, cfg: QuickNavConfig) {
         try {
           const host = (_root as any)?.host as HTMLElement | undefined
           if (host) {
+            // Some websites will remove the host element from the DOM
+            // when document.body loads. (2libra.com)
+            // We need to add it back to the DOM.
             if (!document.documentElement.contains(host)) {
               document.documentElement.append(host)
             }
 
-            try {
-              if (
-                sitePref.enabled !== false &&
-                sitePref.layoutMode === 'sidebar'
-              ) {
-                document.documentElement.dataset.utqnSidebar =
-                  (sitePref.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
-                    ? 'left-open'
-                    : 'right-open'
-              } else {
-                delete (document.documentElement as any).dataset.utqnSidebar
-              }
-            } catch {}
-
+            updateSidebarClass()
             return
           }
         } catch {}
@@ -1773,37 +1654,31 @@ function main() {
   const { root } = createRoot()
   void (async () => {
     const cfg = await loadConfig()
-    initSitePref(cfg)
-    ensureGlobalStyles()
-    try {
-      if (sitePref.enabled !== false && sitePref.layoutMode === 'sidebar') {
-        document.documentElement.dataset.utqnSidebar =
-          (sitePref.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
-            ? 'left-open'
-            : 'right-open'
-      } else {
-        delete (document.documentElement as any).dataset.utqnSidebar
-      }
-    } catch {}
+    settings = await store.getAll()
+    console.log('settings initial', settings)
 
-    registerHostAutofix(root, cfg)
-    if (sitePref.enabled === false) {
+    const updateState = () => {
+      rerender(root, cfg)
       registerMenus(root, cfg)
-      registerStorageListener(root, cfg)
-      registerUrlChangeListener(root, cfg)
-      return
+      updateSidebarClass()
     }
 
-    rerender(root, cfg)
+    store.onChange(async () => {
+      settings = await store.getAll()
+      console.log('settings onChange', settings)
+      updateState()
+    })
+
+    ensureGlobalStyles()
+    registerHostAutofix(root, cfg)
     registerHotkeys(root, cfg)
-    // initEdgeExpand(root, cfg)
-    registerMenus(root, cfg)
     registerStorageListener(root, cfg)
     registerUrlChangeListener(root, cfg)
+
     try {
       const mq = globalThis.matchMedia('(prefers-color-scheme: dark)')
       mq.addEventListener('change', () => {
-        if ((sitePref.theme || 'system') === 'system') rerender(root, cfg)
+        if ((settings.theme || 'system') === 'system') rerender(root, cfg)
       })
     } catch {}
 
@@ -1812,6 +1687,9 @@ function main() {
         if (document.visibilityState === 'visible') rerender(root, cfg)
       })
     } catch {}
+
+    // initEdgeExpand(root, cfg)
+    updateState()
   })()
 }
 

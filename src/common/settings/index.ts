@@ -1,16 +1,23 @@
 import { c } from '../../utils/c'
-import { setOrDelete } from '../../utils/obj'
+import { normalizeToDefaultType, setOrDelete } from '../../utils/obj'
 import styleText from 'css:./style.css'
 import { getValue, setValue, addValueChangeListener } from '../gm'
 
 export type FieldOption = { value: string; label: string }
-type FieldToggle = { type: 'toggle'; key: string; label: string; help?: string }
+type FieldToggle = {
+  type: 'toggle'
+  key: string
+  label: string
+  help?: string
+  isSitePref?: boolean
+}
 type FieldInput = {
   type: 'input'
   key: string
   label: string
   placeholder?: string
   help?: string
+  isSitePref?: boolean
 }
 type FieldColors = {
   type: 'colors'
@@ -18,6 +25,7 @@ type FieldColors = {
   label: string
   options: Array<{ value: string }>
   help?: string
+  isSitePref?: boolean
 }
 type FieldTextarea = {
   type: 'textarea'
@@ -25,6 +33,7 @@ type FieldTextarea = {
   label: string
   rows?: number
   help?: string
+  isSitePref?: boolean
 }
 type FieldRadio = {
   type: 'radio'
@@ -32,6 +41,7 @@ type FieldRadio = {
   label: string
   options: FieldOption[]
   help?: string
+  isSitePref?: boolean
 }
 type FieldSelect = {
   type: 'select'
@@ -39,6 +49,7 @@ type FieldSelect = {
   label: string
   options: FieldOption[]
   help?: string
+  isSitePref?: boolean
 }
 type FieldAction = {
   type: 'action'
@@ -46,6 +57,7 @@ type FieldAction = {
   label: string
   actions: Array<{ id: string; text: string; kind?: 'danger' }>
   help?: string
+  isSitePref?: boolean
 }
 export type Field =
   | FieldToggle
@@ -65,8 +77,8 @@ export type PanelSchema =
   | { type: 'simple'; title: string; groups: Group[] }
   | { type: 'tabs'; title: string; tabs: Tab[] }
 
-type Store = {
-  onChange?: (
+export type Store = {
+  onChange: (
     cb: (e: {
       key: string
       oldValue: unknown
@@ -74,12 +86,23 @@ type Store = {
       remote: boolean
     }) => void
   ) => void
-  get<T = unknown>(key: string): Promise<T>
-  getAll<
-    T extends Record<string, unknown> = Record<string, unknown>,
-  >(): Promise<T>
-  set(...args: [string, unknown] | [Record<string, unknown>]): Promise<void>
+  get<T = unknown>(key: string, isGlobalPref?: boolean): Promise<T>
+  getAll<T extends Record<string, unknown> = Record<string, unknown>>(
+    isGlobalPref?: boolean
+  ): Promise<T>
+  set(
+    ...args:
+      | [string, unknown]
+      | [string, unknown, boolean]
+      | [Record<string, unknown>]
+      | [Record<string, unknown>, boolean]
+  ): Promise<void>
+  reset(isGlobalPref?: boolean): Promise<void>
   defaults(): Record<string, unknown>
+}
+
+function isObject(item: unknown): item is Record<string, unknown> {
+  return Boolean(item) && typeof item === 'object'
 }
 
 type PanelOptions = {
@@ -120,176 +143,142 @@ export function closeSettingsPanel(): void {
   currentHost = undefined
 }
 
-function createToggleRow(label: string, key: string, help?: string) {
+type BaseFieldRowOptions = {
+  label: string
+  key: string
+  help?: string
+  isSitePref?: boolean
+}
+
+function createFieldRow(
+  opts: BaseFieldRowOptions,
+  content: HTMLElement | HTMLElement[]
+) {
   const row = c('div', { className: 'row' })
   const labWrap = c('div', { className: 'label-wrap' })
-  const lab = c('label', { text: label })
+  const lab = c('label', { text: opts.label })
+  labWrap.append(lab)
+
+  if (opts.help) {
+    labWrap.append(c('div', { className: 'field-help', text: opts.help }))
+  }
+
+  const val = c('div', { className: 'value-wrap' })
+  if (Array.isArray(content)) {
+    val.append(...content)
+  } else {
+    val.append(content)
+  }
+
+  row.append(labWrap)
+  row.append(val)
+  return row
+}
+
+function createToggleRow(opts: BaseFieldRowOptions) {
   const seg = c('div', { className: 'toggle-wrap' })
   const chk = c('input', {
     type: 'checkbox',
     className: 'toggle-checkbox',
-    dataset: { key },
+    dataset: { key: opts.key, isSitePref: opts.isSitePref ? '1' : '' },
   })
-  const val = c('div', { className: 'value-wrap' })
   seg.append(chk)
-  val.append(seg)
-  labWrap.append(lab)
-  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
-  row.append(labWrap)
-  row.append(val)
+  const row = createFieldRow(opts, seg)
   return { row, chk }
 }
 
-function createInputRow(
-  label: string,
-  key: string,
-  placeholder?: string,
-  help?: string
-) {
-  const row = c('div', { className: 'row' })
-  const labWrap = c('div', { className: 'label-wrap' })
-  const lab = c('label', { text: label })
+function createInputRow(opts: BaseFieldRowOptions & { placeholder?: string }) {
   const inp = c('input', {
     type: 'text',
-    placeholder: placeholder || '',
-    dataset: { key },
+    placeholder: opts.placeholder || '',
+    dataset: { key: opts.key, isSitePref: opts.isSitePref ? '1' : '' },
   })
-  const val = c('div', { className: 'value-wrap' })
-  val.append(inp)
-  labWrap.append(lab)
-  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
-  row.append(labWrap)
-  row.append(val)
+  const row = createFieldRow(opts, inp)
   return { row, inp }
 }
 
-function createTextareaRow(
-  label: string,
-  key: string,
-  rows?: number,
-  help?: string
-) {
-  const row = c('div', { className: 'row' })
-  const labWrap = c('div', { className: 'label-wrap' })
-  const lab = c('label', { text: label })
+function createTextareaRow(opts: BaseFieldRowOptions & { rows?: number }) {
   const ta = c('textarea', {
-    rows: rows || 4,
-    dataset: { key },
+    rows: opts.rows || 4,
+    dataset: { key: opts.key, isSitePref: opts.isSitePref ? '1' : '' },
   })
-  const val = c('div', { className: 'value-wrap' })
-  val.append(ta)
-  labWrap.append(lab)
-  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
-  row.append(labWrap)
-  row.append(val)
+  const row = createFieldRow(opts, ta)
   return { row, ta }
 }
 
 function createRadioRow(
-  label: string,
-  key: string,
-  opts: FieldOption[],
-  help?: string
+  opts: BaseFieldRowOptions & { options: FieldOption[] }
 ) {
-  const row = c('div', { className: 'row' })
-  const labWrap = c('div', { className: 'label-wrap' })
-  const lab = c('label', { text: label })
   const seg = c('div', { className: 'seg' })
-  for (const o of opts) {
+  for (const o of opts.options) {
     const b = c('button', {
       className: 'seg-btn',
-      dataset: { key, value: o.value },
+      dataset: {
+        key: opts.key,
+        value: o.value,
+        isSitePref: opts.isSitePref ? '1' : '',
+      },
       text: o.label,
     })
     seg.append(b)
   }
 
-  const val = c('div', { className: 'value-wrap' })
-  val.append(seg)
-  labWrap.append(lab)
-  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
-  row.append(labWrap)
-  row.append(val)
+  const row = createFieldRow(opts, seg)
   return { row, seg }
 }
 
 function createColorRow(
-  label: string,
-  key: string,
-  opts: Array<{ value: string }>,
-  help?: string
+  opts: BaseFieldRowOptions & { options: Array<{ value: string }> }
 ) {
-  const row = c('div', { className: 'row' })
-  const labWrap = c('div', { className: 'label-wrap' })
-  const lab = c('label', { text: label })
   const seg = c('div', { className: 'color-row' })
-  for (const o of opts) {
+  for (const o of opts.options) {
     const b = c('button', {
       className: 'color-swatch',
-      dataset: { key, value: o.value },
+      dataset: {
+        key: opts.key,
+        value: o.value,
+        isSitePref: opts.isSitePref ? '1' : '',
+      },
       style: { backgroundColor: o.value },
     })
     seg.append(b)
   }
 
-  const val = c('div', { className: 'value-wrap' })
-  val.append(seg)
-  labWrap.append(lab)
-  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
-  row.append(labWrap)
-  row.append(val)
+  const row = createFieldRow(opts, seg)
   return { row, seg }
 }
 
 function createSelectRow(
-  label: string,
-  key: string,
-  opts: FieldOption[],
-  help?: string
+  opts: BaseFieldRowOptions & { options: FieldOption[] }
 ) {
-  const row = c('div', { className: 'row' })
-  const labWrap = c('div', { className: 'label-wrap' })
-  const lab = c('label', { text: label })
-  const sel = c('select', { dataset: { key } })
-  for (const o of opts) {
+  const sel = c('select', {
+    dataset: { key: opts.key, isSitePref: opts.isSitePref ? '1' : '' },
+  })
+  for (const o of opts.options) {
     const opt = c('option', { value: o.value, text: o.label })
     sel.append(opt)
   }
 
-  const val = c('div', { className: 'value-wrap' })
-  val.append(sel)
-  labWrap.append(lab)
-  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
-  row.append(labWrap)
-  row.append(val)
+  const row = createFieldRow(opts, sel)
   return { row, sel }
 }
 
 function createActionRow(
-  label: string,
-  key: string,
-  actions: Array<{ id: string; text: string; kind?: 'danger' }>,
-  help?: string
+  opts: BaseFieldRowOptions & {
+    actions: Array<{ id: string; text: string; kind?: 'danger' }>
+  }
 ) {
-  const row = c('div', { className: 'row' })
-  const labWrap = c('div', { className: 'label-wrap' })
-  const lab = c('label', { text: label })
-  const wrap = c('div', { className: 'value-wrap' })
   const act = c('div', { className: 'seg' })
-  for (const a of actions) {
+  for (const a of opts.actions) {
     const b = c('button', {
       className: `btn action-btn${a.kind === 'danger' ? ' btn-danger' : ''}`,
-      dataset: { key, action: a.id },
+      dataset: { key: opts.key, action: a.id },
       text: a.text,
     })
     act.append(b)
   }
 
-  wrap.append(act)
-  labWrap.append(lab)
-  if (help) labWrap.append(c('div', { className: 'field-help', text: help }))
-  row.append(labWrap)
-  row.append(wrap)
+  const row = createFieldRow(opts, act)
   return { row }
 }
 
@@ -304,7 +293,10 @@ export function openSettingsPanel(
 
   if (existed) return
 
-  let lastValues: Record<string, unknown> = {}
+  let lastValues: {
+    global: Record<string, unknown>
+    site: Record<string, unknown>
+  } = { global: {}, site: {} }
 
   const styleTag = c('style', {
     text: styleText.concat(options?.styleText || ''),
@@ -339,7 +331,12 @@ export function openSettingsPanel(
   function appendField(container: HTMLElement, f: Field) {
     switch (f.type) {
       case 'toggle': {
-        const { row, chk } = createToggleRow(f.label, f.key, f.help)
+        const { row, chk } = createToggleRow({
+          label: f.label,
+          key: f.key,
+          help: f.help,
+          isSitePref: f.isSitePref,
+        })
         appendAndFill(container, row, f.key, () => {
           fillToggleUI(chk, f.key)
         })
@@ -347,12 +344,13 @@ export function openSettingsPanel(
       }
 
       case 'input': {
-        const { row, inp } = createInputRow(
-          f.label,
-          f.key,
-          f.placeholder,
-          f.help
-        )
+        const { row, inp } = createInputRow({
+          label: f.label,
+          key: f.key,
+          placeholder: f.placeholder,
+          help: f.help,
+          isSitePref: f.isSitePref,
+        })
         appendAndFill(container, row, f.key, () => {
           fillInput(inp, f.key)
         })
@@ -360,7 +358,13 @@ export function openSettingsPanel(
       }
 
       case 'textarea': {
-        const { row, ta } = createTextareaRow(f.label, f.key, f.rows, f.help)
+        const { row, ta } = createTextareaRow({
+          label: f.label,
+          key: f.key,
+          rows: f.rows,
+          help: f.help,
+          isSitePref: f.isSitePref,
+        })
         appendAndFill(container, row, f.key, () => {
           fillTextarea(ta, f.key)
         })
@@ -368,7 +372,13 @@ export function openSettingsPanel(
       }
 
       case 'radio': {
-        const { row, seg } = createRadioRow(f.label, f.key, f.options, f.help)
+        const { row, seg } = createRadioRow({
+          label: f.label,
+          key: f.key,
+          options: f.options,
+          help: f.help,
+          isSitePref: f.isSitePref,
+        })
         appendAndFill(container, row, f.key, () => {
           fillRadioUI(seg, f.key)
         })
@@ -376,7 +386,13 @@ export function openSettingsPanel(
       }
 
       case 'select': {
-        const { row, sel } = createSelectRow(f.label, f.key, f.options, f.help)
+        const { row, sel } = createSelectRow({
+          label: f.label,
+          key: f.key,
+          options: f.options,
+          help: f.help,
+          isSitePref: f.isSitePref,
+        })
         appendAndFill(container, row, f.key, () => {
           fillSelect(sel, f.key)
         })
@@ -384,7 +400,13 @@ export function openSettingsPanel(
       }
 
       case 'colors': {
-        const { row, seg } = createColorRow(f.label, f.key, f.options, f.help)
+        const { row, seg } = createColorRow({
+          label: f.label,
+          key: f.key,
+          options: f.options,
+          help: f.help,
+          isSitePref: f.isSitePref,
+        })
         appendAndFill(container, row, f.key, () => {
           fillColorUI(seg, f.key)
         })
@@ -392,7 +414,12 @@ export function openSettingsPanel(
       }
 
       case 'action': {
-        const { row } = createActionRow(f.label, f.key, f.actions, f.help)
+        const { row } = createActionRow({
+          label: f.label,
+          key: f.key,
+          actions: f.actions,
+          help: f.help,
+        })
         container.append(row)
         break
       }
@@ -540,7 +567,9 @@ export function openSettingsPanel(
 
   const refreshAll = async () => {
     try {
-      lastValues = await store.getAll()
+      const g = await store.getAll(true)
+      const s = await store.getAll(false)
+      lastValues = { global: g, site: s }
     } catch {}
 
     for (const k of Object.keys(fillers)) {
@@ -572,9 +601,24 @@ export function openSettingsPanel(
     } catch {}
   }
 
+  function getFieldValue(key: string, el: HTMLElement) {
+    const isSitePref = Boolean(el.dataset.isSitePref)
+    const values = isSitePref ? lastValues.site : lastValues.global
+    return values[key]
+  }
+
+  function getFieldInfo(el: HTMLElement) {
+    const key = el.dataset.key
+    if (!key) return null
+    const isSitePref = Boolean(el.dataset.isSitePref)
+    return { key, isSitePref }
+  }
+
   function fillRadioUI(seg: Element, key: string) {
     try {
-      const v = lastValues[key] as any
+      const btn = seg.querySelector<HTMLElement>('.seg-btn')
+      if (!btn) return
+      const v = getFieldValue(key, btn) as any
       for (const b of Array.from(seg.querySelectorAll('.seg-btn'))) {
         const val = (b as any).dataset.value || ''
         if (val === String(v)) (b as HTMLElement).classList.add('active')
@@ -585,7 +629,9 @@ export function openSettingsPanel(
 
   function fillColorUI(seg: Element, key: string) {
     try {
-      const v = lastValues[key] as any
+      const btn = seg.querySelector<HTMLElement>('.color-swatch')
+      if (!btn) return
+      const v = getFieldValue(key, btn) as any
       for (const b of Array.from(seg.querySelectorAll('.color-swatch'))) {
         const val = (b as any).dataset.value || ''
         if (val.toLowerCase() === String(v || '').toLowerCase())
@@ -597,8 +643,8 @@ export function openSettingsPanel(
 
   function fillToggleUI(onBtn: Element, key: string) {
     try {
-      const v = lastValues[key] as any
       if (onBtn instanceof HTMLInputElement && onBtn.type === 'checkbox') {
+        const v = getFieldValue(key, onBtn as HTMLElement) as any
         onBtn.checked = Boolean(v)
       }
     } catch {}
@@ -606,21 +652,21 @@ export function openSettingsPanel(
 
   function fillInput(inp: HTMLInputElement, key: string) {
     try {
-      const v = lastValues[key] as any
+      const v = getFieldValue(key, inp) as any
       inp.value = String(v ?? '')
     } catch {}
   }
 
   function fillTextarea(ta: HTMLTextAreaElement, key: string) {
     try {
-      const v = lastValues[key] as any
+      const v = getFieldValue(key, ta) as any
       ta.value = String(v ?? '')
     } catch {}
   }
 
   function fillSelect(sel: HTMLSelectElement, key: string) {
     try {
-      const v = lastValues[key] as any
+      const v = getFieldValue(key, sel) as any
       for (const o of Array.from(sel.querySelectorAll('option'))) {
         o.selected = (o as any).value === String(v)
       }
@@ -628,20 +674,20 @@ export function openSettingsPanel(
   }
 
   async function handleSegButton(rb: HTMLElement) {
-    const key = rb.dataset.key || ''
+    const info = getFieldInfo(rb)
+    if (!info) return
     const val = rb.dataset.value || ''
-    if (!key) return
     try {
-      await store.set(key, val)
+      await store.set(info.key, val, !info.isSitePref)
     } catch {}
   }
 
   async function handleColorSwatch(cs: HTMLElement) {
-    const key = cs.dataset.key || ''
+    const info = getFieldInfo(cs)
+    if (!info) return
     const val = cs.dataset.value || ''
-    if (!key) return
     try {
-      await store.set(key, val)
+      await store.set(info.key, val, !info.isSitePref)
     } catch {}
   }
 
@@ -677,23 +723,23 @@ export function openSettingsPanel(
   }
 
   function handleInputChange(inp: HTMLInputElement) {
-    const key = (inp as any).dataset?.key
-    if (!key) return
+    const info = getFieldInfo(inp)
+    if (!info) return
     const isCheckbox = (inp.type || '').toLowerCase() === 'checkbox'
     const v = isCheckbox ? Boolean(inp.checked) : inp.value
-    void store.set(key, v)
+    void store.set(info.key, v, !info.isSitePref)
   }
 
   function handleTextareaChange(ta: HTMLTextAreaElement) {
-    const key = (ta as any).dataset?.key
-    if (!key) return
-    void store.set(key, ta.value)
+    const info = getFieldInfo(ta)
+    if (!info) return
+    void store.set(info.key, ta.value, !info.isSitePref)
   }
 
   function handleSelectChange(sel: HTMLSelectElement) {
-    const key = (sel as any).dataset?.key
-    if (!key) return
-    void store.set(key, sel.value)
+    const info = getFieldInfo(sel)
+    if (!info) return
+    void store.set(info.key, sel.value, !info.isSitePref)
   }
 
   function onPanelChange(e: Event) {
@@ -820,11 +866,16 @@ export function openSettingsPanel(
   globalThis.addEventListener('keydown', onKeyDown, true)
 }
 
-export function createObjectSettingsStore(
-  rootKey: string,
-  defaults: Record<string, unknown>
+export function createSettingsStore(
+  storageKey: string | undefined,
+  defaults: Record<string, unknown>,
+  isSupportSitePref = false
 ): Store {
+  const rootKey = storageKey || 'settings'
   let cache: Record<string, unknown> | undefined
+  let globalCache: Record<string, unknown> | undefined
+  let siteCache: Record<string, unknown> | undefined
+
   let initPromise: Promise<Record<string, unknown>> | undefined
   const changeCbs: Array<
     (e: {
@@ -836,19 +887,40 @@ export function createObjectSettingsStore(
   > = []
   let listenerRegistered = false
 
+  const getHostname = () => globalThis.location?.hostname || 'unknown'
+
+  function updateCache(obj: unknown) {
+    if (isSupportSitePref) {
+      const rootObj = (isObject(obj) ? obj : {}) as Record<
+        string,
+        Record<string, unknown>
+      >
+      const globalData = rootObj.global
+      globalCache = { ...defaults }
+      if (isObject(globalData)) {
+        Object.assign(globalCache, globalData)
+      }
+
+      const hostname = getHostname()
+      const siteData = rootObj[hostname]
+      siteCache = { ...globalCache }
+      if (isObject(siteData)) {
+        Object.assign(siteCache, siteData)
+      }
+
+      cache = siteCache
+    } else {
+      cache = { ...defaults }
+      if (isObject(obj)) Object.assign(cache, obj)
+    }
+  }
+
   function registerValueChangeListener(): void {
     if (listenerRegistered) return
     try {
       void addValueChangeListener(rootKey, (n, ov, nv, remote) => {
         try {
-          if (nv && typeof nv === 'object') {
-            const merged = { ...defaults }
-            Object.assign(merged, nv as Record<string, unknown>)
-            cache = merged
-          } else {
-            cache = { ...defaults }
-          }
-
+          updateCache(nv)
           for (const f of changeCbs) {
             f({ key: '*', oldValue: ov, newValue: nv, remote })
           }
@@ -866,63 +938,129 @@ export function createObjectSettingsStore(
     initPromise = (async () => {
       let obj: Record<string, unknown> | undefined
       try {
-        obj = await getValue<Record<string, unknown>>(rootKey, defaults)
+        obj = await getValue<Record<string, unknown>>(rootKey, undefined)
       } catch {}
 
-      cache = { ...defaults }
-      if (obj && typeof obj === 'object') Object.assign(cache, obj)
+      updateCache(obj)
       initPromise = undefined
-      return cache
+      return cache!
     })()
     return initPromise
   }
 
   return {
-    async get<T = unknown>(key: string): Promise<T> {
-      const obj = await ensure()
-      return (obj[key] as T) ?? (defaults[key] as T)
+    async get<T = unknown>(key: string, isGlobalPref?: boolean): Promise<T> {
+      await ensure()
+      if (isSupportSitePref) {
+        if (isGlobalPref) return globalCache![key] as T
+        return siteCache![key] as T
+      }
+
+      return cache![key] as T
     },
-    async getAll<
-      T extends Record<string, unknown> = Record<string, unknown>,
-    >(): Promise<T> {
-      const obj = await ensure()
-      const out = { ...obj }
-      return out as unknown as T
+    async getAll<T extends Record<string, unknown> = Record<string, unknown>>(
+      isGlobalPref?: boolean
+    ): Promise<T> {
+      await ensure()
+      if (isSupportSitePref) {
+        if (isGlobalPref) return { ...globalCache } as unknown as T
+        return { ...siteCache } as unknown as T
+      }
+
+      return { ...cache } as unknown as T
     },
     async set(
-      ...args: [string, unknown] | [Record<string, unknown>]
+      ...args:
+        | [string, unknown]
+        | [string, unknown, boolean]
+        | [Record<string, unknown>]
+        | [Record<string, unknown>, boolean]
     ): Promise<void> {
-      let obj: Record<string, unknown> | undefined
+      let obj: any
       try {
-        obj = await getValue<Record<string, unknown>>(rootKey, {})
+        obj = await getValue<any>(rootKey, {})
       } catch {}
 
+      if (!isObject(obj)) obj = {}
+
+      let isGlobalPref = false
+      let key: string | undefined
+      let value: unknown | undefined
+      let values: Record<string, unknown> | undefined
+
       if (typeof args[0] === 'string') {
-        const key = args[0]
-        const value = args[1]
-        const dv = defaults[key]
-        setOrDelete(obj as any, key, value, dv)
+        key = args[0]
+        value = args[1]
+        isGlobalPref = Boolean(args[2])
       } else {
-        const kvs = args[0]
-        for (const k of Object.keys(kvs)) {
-          const v = kvs[k]
-          const dv = defaults[k]
-          setOrDelete(obj as any, k, v, dv)
+        values = args[0]
+        isGlobalPref = Boolean(args[1])
+      }
+
+      let target: Record<string, unknown>
+      let global: Record<string, unknown>
+      if (isSupportSitePref) {
+        const hostname = isGlobalPref ? 'global' : getHostname()
+        if (!isObject(obj[hostname])) obj[hostname] = {}
+        target = obj[hostname]
+        global = isObject(obj.global) ? obj.global : {}
+      } else {
+        target = obj
+      }
+
+      const isSitePref = isSupportSitePref && !isGlobalPref
+
+      const apply = (key: string, value: unknown) => {
+        if (isSitePref && key in global) {
+          const normalized = normalizeToDefaultType(value, defaults[key])
+          target[key] = normalized
+          return
+        }
+
+        setOrDelete(target, key, value, defaults[key])
+      }
+
+      if (key !== undefined) {
+        apply(key, value)
+      } else if (values) {
+        for (const k of Object.keys(values)) {
+          const v = values[k]
+          apply(k, v)
         }
       }
 
-      cache = { ...defaults }
-      if (obj && typeof obj === 'object') Object.assign(cache, obj)
+      if (isSupportSitePref && target && Object.keys(target).length === 0) {
+        const hostname = isGlobalPref ? 'global' : getHostname()
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        delete obj[hostname]
+      }
+
+      updateCache(obj)
       try {
         await setValue(rootKey, obj)
       } catch {}
+    },
+    async reset(isGlobalPref?: boolean) {
+      let obj: any
 
-      // Call onChange callbacks from GM_addValueChangeListener
-      // try {
-      //   for (const cb of changeCbs) {
-      //     cb({ key: '*', oldValue: oldObj, newValue: obj, remote: false })
-      //   }
-      // } catch {}
+      if (isSupportSitePref) {
+        try {
+          obj = await getValue<any>(rootKey, {})
+        } catch {}
+
+        if (!isObject(obj)) obj = {}
+
+        const hostname = isGlobalPref ? 'global' : getHostname()
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        delete obj[hostname]
+      } else {
+        obj = {}
+      }
+
+      updateCache(obj)
+      try {
+        await setValue(rootKey, obj)
+      } catch {}
     },
     defaults() {
       return { ...defaults }

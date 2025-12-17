@@ -20,14 +20,9 @@ import {
   rangeForText,
   isPunctuationRect,
 } from '../../utils/text'
+import { type Mode, type Style, DEFAULT_READ_HELPER_SETTINGS } from './config'
 import {
-  type Mode,
-  type Style,
-  DEFAULT_READ_HELPER_SETTINGS,
-  READ_HELPER_SETTINGS_KEY,
-} from './config'
-import {
-  createObjectSettingsStore,
+  createSettingsStore,
   openSettingsPanel as openPanel,
   type Field,
   type PanelSchema,
@@ -43,10 +38,7 @@ let moveByArrows = DEFAULT_READ_HELPER_SETTINGS.moveByArrows
 let skipButtons = DEFAULT_READ_HELPER_SETTINGS.skipButtons
 let skipLinks = DEFAULT_READ_HELPER_SETTINGS.skipLinks
 
-const store = createObjectSettingsStore(
-  READ_HELPER_SETTINGS_KEY,
-  DEFAULT_READ_HELPER_SETTINGS
-)
+const store = createSettingsStore('', DEFAULT_READ_HELPER_SETTINGS)
 
 let overlay: HTMLDivElement | undefined
 let clickHandlerInstalled = false
@@ -75,7 +67,8 @@ function ensureOverlay(): HTMLDivElement {
         width: '0',
         height: '0',
         pointerEvents: 'none',
-        zIndex: '2147483647',
+        // z-index should lower than settings panel
+        zIndex: '2147483645',
       },
     })
     document.documentElement.append(overlay)
@@ -983,7 +976,7 @@ function registerMenus(): void {
 
 function listenSettings(): void {
   try {
-    store.onChange?.(() => {
+    store.onChange(() => {
       void applySettingsFromStore()
     })
   } catch {}

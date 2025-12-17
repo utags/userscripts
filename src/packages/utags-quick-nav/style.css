@@ -9,7 +9,7 @@ div {
 }
 
 .utqn {
-  @apply fixed z-[21474836] font-sans text-[13px] text-gray-900;
+  @apply fixed z-[2147483647] font-sans text-[13px] text-gray-900;
 }
 
 .utqn.dark {
@@ -251,7 +251,7 @@ div {
 }
 
 .collapsed-tab {
-  @apply fixed z-[21474836] w-[3px] h-[60px] bg-gray-700 opacity-40 rounded-none;
+  @apply fixed z-[2147483647] w-[3px] h-[60px] bg-gray-700 opacity-40 rounded-none;
 }
 .utqn.dark .collapsed-tab {
   @apply bg-gray-400 opacity-40;
@@ -645,7 +645,7 @@ textarea:disabled {
 .panel.all-mode .header {
   position: sticky;
   top: 0;
-  z-index: 21474836;
+  z-index: 2147483647;
   background-color: #ffffff;
 }
 .utqn.dark .panel.all-mode .header {

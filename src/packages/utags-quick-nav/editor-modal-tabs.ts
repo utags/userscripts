@@ -25,7 +25,7 @@ export function openEditorModal(
   const mask = document.createElement('div')
   mask.className = 'modal-mask'
   try {
-    ;(mask.style as any).zIndex = '2147483648'
+    ;(mask.style as any).zIndex = '2147483647'
   } catch {}
 
   const modal = document.createElement('div')
@@ -49,9 +49,6 @@ export function openEditorModal(
 
   const settingsWrap = document.createElement('div')
   const groupsWrap = document.createElement('div')
-  try {
-    openUtqnSettingsPanel()
-  } catch {}
 
   const groupsPanel = createGroupManagerPanel(root, cfg, {
     saveConfig: helpers.saveConfig,
@@ -75,11 +72,6 @@ export function openEditorModal(
   const syncUi = () => {
     settingsWrap.style.display = tab === 'settings' ? '' : 'none'
     groupsWrap.style.display = tab === 'groups' ? '' : 'none'
-    if (tab === 'settings') {
-      try {
-        openUtqnSettingsPanel()
-      } catch {}
-    }
   }
 
   syncUi()

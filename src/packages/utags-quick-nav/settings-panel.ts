@@ -1,18 +1,21 @@
 import { createOpenModeRadios, createSegmentedRadios } from './segmented-radios'
-import { deepMergeReplaceArrays, setOrDelete } from '../../utils/obj'
+import { deepMergeReplaceArrays } from '../../utils/obj'
 import {
+  createSettingsStore,
   openSettingsPanel as openPanel,
   closeSettingsPanel,
   type Field,
   type Group,
   type PanelSchema,
+  type Store,
 } from '../../common/settings'
-import { getValue, setValue, addValueChangeListener } from '../../common/gm'
+import { getValue, setValue } from '../../common/gm'
 import { openEditorModal } from './editor-modal-tabs'
 import styleText from 'css:./style.css'
 import { uid } from '../../utils/uid'
 
-const KEY = 'utqn_config'
+const KEY = 'settings'
+const CONFIG_KEY = 'utqn_config'
 const HOST = location.hostname || ''
 
 const POSITION_OPTIONS = [
@@ -48,243 +51,121 @@ const DEFAULTS = {
   edgeHidden: false,
 } as const
 
-type Store = {
-  onChange?: (
-    cb: (e: {
-      key: string
-      oldValue: unknown
-      newValue: unknown
-      remote: boolean
-    }) => void
-  ) => void
-  get<T = unknown>(key: string): Promise<T>
-  getAll<
-    T extends Record<string, unknown> = Record<string, unknown>,
-  >(): Promise<T>
-  set(...args: [string, unknown] | [Record<string, unknown>]): Promise<void>
-  defaults(): Record<string, unknown>
+const COMMON_SETTINGS_FIELDS: Field[] = [
+  { type: 'toggle', key: 'enabled', label: '启用' },
+  {
+    type: 'radio',
+    key: 'defaultOpen',
+    label: '默认打开方式',
+    options: [
+      { value: 'same-tab', label: '同标签' },
+      { value: 'new-tab', label: '新标签' },
+    ],
+    help: '选择点击链接时的默认打开行为',
+  },
+  {
+    type: 'radio',
+    key: 'theme',
+    label: '主题',
+    options: [
+      { value: 'system', label: '系统' },
+      { value: 'light', label: '浅色' },
+      { value: 'dark', label: '深色' },
+    ],
+    help: '站点级主题偏好',
+  },
+]
+
+const EDGE_SETTINGS_FIELDS: Field[] = [
+  {
+    type: 'radio',
+    key: 'layoutMode',
+    label: '显示模式',
+    options: [
+      { value: 'floating', label: '悬浮' },
+      { value: 'sidebar', label: '侧边栏' },
+    ],
+  },
+  { type: 'toggle', key: 'pinned', label: '固定面板' },
+  {
+    type: 'radio',
+    key: 'sidebarSide',
+    label: '侧边栏位置',
+    options: [
+      { value: 'left', label: '左侧' },
+      { value: 'right', label: '右侧' },
+    ],
+  },
+  {
+    type: 'select',
+    key: 'position',
+    label: '位置',
+    options: POSITION_OPTIONS.map((p) => ({ value: p, label: p })),
+    help: '控制悬停竖线提示的位置',
+  },
+  {
+    type: 'input',
+    key: 'edgeWidth',
+    label: '竖线宽度',
+    help: '单位像素，建议 2-4',
+  },
+  {
+    type: 'input',
+    key: 'edgeHeight',
+    label: '竖线高度',
+    help: '单位像素，建议 40-80',
+  },
+  {
+    type: 'input',
+    key: 'edgeOpacity',
+    label: '不透明度',
+    help: '0-1 之间的小数',
+  },
+  {
+    type: 'colors',
+    key: 'edgeColorLight',
+    label: '浅色主题颜色',
+    options: [
+      { value: '#1A73E8' },
+      { value: '#2563EB' },
+      { value: '#3B82F6' },
+      { value: '#10B981' },
+      { value: '#F59E0B' },
+      { value: '#EF4444' },
+      { value: '#6B7280' },
+    ],
+    help: '用于浅色主题的竖线颜色',
+  },
+  {
+    type: 'colors',
+    key: 'edgeColorDark',
+    label: '深色主题颜色',
+    options: [
+      { value: '#8AB4F8' },
+      { value: '#60A5FA' },
+      { value: '#93C5FD' },
+      { value: '#22C55E' },
+      { value: '#F59E0B' },
+      { value: '#EF4444' },
+      { value: '#9CA3AF' },
+    ],
+    help: '用于深色主题的竖线颜色',
+  },
+  { type: 'toggle', key: 'edgeHidden', label: '隐藏竖线' },
+  {
+    type: 'action',
+    key: 'edge-reset',
+    label: '竖线设置',
+    actions: [{ id: 'edgeReset', text: '重置默认' }],
+    help: '恢复竖线宽度/高度/不透明度与颜色为默认值',
+  },
+]
+
+export function createUtqnSettingsStore() {
+  return createSettingsStore(KEY, DEFAULTS, true)
 }
 
-function createUtqnSettingsStore(): Store {
-  async function readConfig(): Promise<any> {
-    try {
-      const s = await getValue(KEY, '')
-      if (!s) return {}
-      return JSON.parse(String(s) || '{}') || {}
-    } catch {
-      return {}
-    }
-  }
-
-  function ensureSitePref(raw: any): any {
-    const sitePrefs = raw.sitePrefs || {}
-    const sp = sitePrefs[HOST] || {}
-    return sp
-  }
-
-  const changeCbs: Array<
-    (e: {
-      key: string
-      oldValue: unknown
-      newValue: unknown
-      remote: boolean
-    }) => void
-  > = []
-
-  let listenerRegistered = false
-
-  function registerValueChangeListener(): void {
-    if (listenerRegistered) return
-    try {
-      void addValueChangeListener(KEY, (n, ov, nv, remote) => {
-        try {
-          for (const f of changeCbs) {
-            f({ key: '*', oldValue: ov, newValue: nv, remote })
-          }
-        } catch {}
-      })
-      listenerRegistered = true
-    } catch {}
-  }
-
-  registerValueChangeListener()
-
-  return {
-    async get<T = unknown>(key: string): Promise<T> {
-      const raw = await readConfig()
-      const sp = ensureSitePref(raw)
-      const g = raw.global || {}
-      const map: Record<string, unknown> = {
-        hotkey: g.hotkey ?? DEFAULTS.hotkey,
-        syncUrl: g.syncUrl ?? DEFAULTS.syncUrl,
-        position: sp.position ?? DEFAULTS.position,
-        defaultOpen: sp.defaultOpen ?? DEFAULTS.defaultOpen,
-        theme: sp.theme ?? DEFAULTS.theme,
-        pinned: sp.pinned ?? DEFAULTS.pinned,
-        enabled: sp.enabled ?? DEFAULTS.enabled,
-        layoutMode: sp.layoutMode ?? DEFAULTS.layoutMode,
-        sidebarSide: sp.sidebarSide ?? DEFAULTS.sidebarSide,
-        edgeWidth: sp.edgeWidth ?? DEFAULTS.edgeWidth,
-        edgeHeight: sp.edgeHeight ?? DEFAULTS.edgeHeight,
-        edgeOpacity: sp.edgeOpacity ?? DEFAULTS.edgeOpacity,
-        edgeColorLight: sp.edgeColorLight ?? DEFAULTS.edgeColorLight,
-        edgeColorDark: sp.edgeColorDark ?? DEFAULTS.edgeColorDark,
-        edgeHidden: sp.edgeHidden ?? DEFAULTS.edgeHidden,
-      }
-      return (map[key] as T) ?? (DEFAULTS as any)[key]
-    },
-    async getAll<
-      T extends Record<string, unknown> = Record<string, unknown>,
-    >(): Promise<T> {
-      const raw = await readConfig()
-      const sp = ensureSitePref(raw)
-      const g = raw.global || {}
-      const map: Record<string, unknown> = {
-        hotkey: g.hotkey ?? DEFAULTS.hotkey,
-        syncUrl: g.syncUrl ?? DEFAULTS.syncUrl,
-        position: sp.position ?? DEFAULTS.position,
-        defaultOpen: sp.defaultOpen ?? DEFAULTS.defaultOpen,
-        theme: sp.theme ?? DEFAULTS.theme,
-        pinned: sp.pinned ?? DEFAULTS.pinned,
-        enabled: sp.enabled ?? DEFAULTS.enabled,
-        layoutMode: sp.layoutMode ?? DEFAULTS.layoutMode,
-        sidebarSide: sp.sidebarSide ?? DEFAULTS.sidebarSide,
-        edgeWidth: sp.edgeWidth ?? DEFAULTS.edgeWidth,
-        edgeHeight: sp.edgeHeight ?? DEFAULTS.edgeHeight,
-        edgeOpacity: sp.edgeOpacity ?? DEFAULTS.edgeOpacity,
-        edgeColorLight: sp.edgeColorLight ?? DEFAULTS.edgeColorLight,
-        edgeColorDark: sp.edgeColorDark ?? DEFAULTS.edgeColorDark,
-        edgeHidden: sp.edgeHidden ?? DEFAULTS.edgeHidden,
-      }
-      const out = { ...map }
-      return out as unknown as T
-    },
-    async set(
-      ...args: [string, unknown] | [Record<string, unknown>]
-    ): Promise<void> {
-      const raw = await readConfig()
-      if (!raw.sitePrefs) raw.sitePrefs = {}
-      if (!raw.global) raw.global = {}
-      const sp = raw.sitePrefs[HOST] || {}
-      const apply = (key: string, value: unknown) => {
-        switch (key) {
-          case 'hotkey': {
-            setOrDelete(raw.global, 'hotkey', value, DEFAULTS.hotkey)
-            break
-          }
-
-          case 'syncUrl': {
-            setOrDelete(raw.global, 'syncUrl', value, DEFAULTS.syncUrl)
-            break
-          }
-
-          case 'position': {
-            setOrDelete(sp, 'position', value, DEFAULTS.position)
-            break
-          }
-
-          case 'defaultOpen': {
-            setOrDelete(sp, 'defaultOpen', value, DEFAULTS.defaultOpen)
-            break
-          }
-
-          case 'theme': {
-            setOrDelete(sp, 'theme', value, DEFAULTS.theme)
-            break
-          }
-
-          case 'pinned': {
-            setOrDelete(sp, 'pinned', value, DEFAULTS.pinned)
-            break
-          }
-
-          case 'enabled': {
-            setOrDelete(sp, 'enabled', value, DEFAULTS.enabled)
-            break
-          }
-
-          case 'layoutMode': {
-            setOrDelete(sp, 'layoutMode', value, DEFAULTS.layoutMode)
-            break
-          }
-
-          case 'sidebarSide': {
-            setOrDelete(sp, 'sidebarSide', value, DEFAULTS.sidebarSide)
-            break
-          }
-
-          case 'edgeWidth': {
-            setOrDelete(sp, 'edgeWidth', value, DEFAULTS.edgeWidth)
-            break
-          }
-
-          case 'edgeHeight': {
-            setOrDelete(sp, 'edgeHeight', value, DEFAULTS.edgeHeight)
-            break
-          }
-
-          case 'edgeOpacity': {
-            setOrDelete(sp, 'edgeOpacity', value, DEFAULTS.edgeOpacity)
-            break
-          }
-
-          case 'edgeColorLight': {
-            setOrDelete(sp, 'edgeColorLight', value, DEFAULTS.edgeColorLight)
-            break
-          }
-
-          case 'edgeColorDark': {
-            setOrDelete(sp, 'edgeColorDark', value, DEFAULTS.edgeColorDark)
-            break
-          }
-
-          case 'edgeHidden': {
-            setOrDelete(sp, 'edgeHidden', value, DEFAULTS.edgeHidden)
-            break
-          }
-
-          default: {
-            break
-          }
-        }
-      }
-
-      if (typeof args[0] === 'string') apply(args[0], args[1])
-      else {
-        const kvs = args[0]
-        for (const k of Object.keys(kvs)) apply(k, kvs[k])
-      }
-
-      if (Object.keys(sp).length > 0) raw.sitePrefs[HOST] = sp
-      else {
-        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-        delete raw.sitePrefs[HOST]
-      }
-
-      try {
-        await setValue(KEY, JSON.stringify(raw))
-      } catch {}
-
-      // Call onChange callbacks from GM_addValueChangeListener
-      // try {
-      //   for (const cb of changeCbs) {
-      //     cb({ key: '*', oldValue: undefined, newValue: raw, remote: false })
-      //   }
-      // } catch {}
-    },
-    defaults() {
-      return { ...DEFAULTS }
-    },
-    onChange(cb) {
-      try {
-        changeCbs.push(cb)
-      } catch {}
-    },
-  }
-}
-
-export function openSettingsPanel(): void {
-  const store = createUtqnSettingsStore()
+export function openSettingsPanel(store: Store): void {
   const schema: PanelSchema = {
     type: 'tabs',
     title: '快速导航设置',
@@ -292,21 +173,56 @@ export function openSettingsPanel(): void {
       {
         id: 'global',
         title: '全局设置',
-        fields: [
+        groups: [
           {
-            type: 'input',
-            key: 'hotkey',
-            label: '快捷键',
-            placeholder: DEFAULTS.hotkey,
+            id: 'global-shortcuts',
+            title: '',
+            fields: [
+              {
+                type: 'input',
+                key: 'hotkey',
+                label: '快捷键',
+                placeholder: DEFAULTS.hotkey,
+              },
+            ] as Field[],
           },
           {
-            type: 'action',
-            key: 'group-management',
-            label: '分组管理',
-            actions: [{ id: 'openGroupManager', text: '打开分组管理' }],
-            help: '管理导航分组与导航项',
+            id: 'global-group-manager',
+            title: '',
+            fields: [
+              {
+                type: 'action',
+                key: 'group-management',
+                label: '分组管理',
+                actions: [{ id: 'openGroupManager', text: '打开分组管理' }],
+                help: '管理导航分组与导航项',
+              },
+            ] as Field[],
           },
-        ] as Field[],
+          {
+            id: 'global-basic',
+            title: '通用',
+            fields: COMMON_SETTINGS_FIELDS,
+          },
+          {
+            id: 'global-edge',
+            title: '面板与竖线',
+            fields: EDGE_SETTINGS_FIELDS,
+          },
+          {
+            id: 'global-reset',
+            title: '',
+            fields: [
+              {
+                type: 'action',
+                key: 'global-reset',
+                label: '重置',
+                actions: [{ id: 'resetGlobal', text: '重置全局设置' }],
+                help: '恢复全局设置为默认值',
+              },
+            ] as Field[],
+          },
+        ] as Group[],
       },
       {
         id: 'site',
@@ -315,116 +231,29 @@ export function openSettingsPanel(): void {
           {
             id: 'site-basic',
             title: '',
-            fields: [
-              { type: 'toggle', key: 'enabled', label: '启用' },
-              {
-                type: 'radio',
-                key: 'defaultOpen',
-                label: '默认打开方式',
-                options: [
-                  { value: 'same-tab', label: '同标签' },
-                  { value: 'new-tab', label: '新标签' },
-                ],
-                help: '选择点击链接时的默认打开行为',
-              },
-              {
-                type: 'radio',
-                key: 'theme',
-                label: '主题',
-                options: [
-                  { value: 'system', label: '系统' },
-                  { value: 'light', label: '浅色' },
-                  { value: 'dark', label: '深色' },
-                ],
-                help: '站点级主题偏好',
-              },
-            ] as Field[],
+            fields: COMMON_SETTINGS_FIELDS.map((f) => ({
+              ...f,
+              isSitePref: true,
+            })),
           },
           {
             id: 'site-edge',
             title: '面板与竖线',
+            fields: EDGE_SETTINGS_FIELDS.map((f) => ({
+              ...f,
+              isSitePref: true,
+            })),
+          },
+          {
+            id: 'site-reset',
+            title: '',
             fields: [
               {
-                type: 'radio',
-                key: 'layoutMode',
-                label: '显示模式',
-                options: [
-                  { value: 'floating', label: '悬浮' },
-                  { value: 'sidebar', label: '侧边栏' },
-                ],
-              },
-              { type: 'toggle', key: 'pinned', label: '固定面板' },
-              {
-                type: 'radio',
-                key: 'sidebarSide',
-                label: '侧边栏位置',
-                options: [
-                  { value: 'left', label: '左侧' },
-                  { value: 'right', label: '右侧' },
-                ],
-              },
-              {
-                type: 'select',
-                key: 'position',
-                label: '位置',
-                options: POSITION_OPTIONS.map((p) => ({ value: p, label: p })),
-                help: '控制悬停竖线提示的位置',
-              },
-              {
-                type: 'input',
-                key: 'edgeWidth',
-                label: '竖线宽度',
-                help: '单位像素，建议 2-4',
-              },
-              {
-                type: 'input',
-                key: 'edgeHeight',
-                label: '竖线高度',
-                help: '单位像素，建议 40-80',
-              },
-              {
-                type: 'input',
-                key: 'edgeOpacity',
-                label: '不透明度',
-                help: '0-1 之间的小数',
-              },
-              {
-                type: 'colors',
-                key: 'edgeColorLight',
-                label: '浅色主题颜色',
-                options: [
-                  { value: '#1A73E8' },
-                  { value: '#2563EB' },
-                  { value: '#3B82F6' },
-                  { value: '#10B981' },
-                  { value: '#F59E0B' },
-                  { value: '#EF4444' },
-                  { value: '#6B7280' },
-                ],
-                help: '用于浅色主题的竖线颜色',
-              },
-              {
-                type: 'colors',
-                key: 'edgeColorDark',
-                label: '深色主题颜色',
-                options: [
-                  { value: '#8AB4F8' },
-                  { value: '#60A5FA' },
-                  { value: '#93C5FD' },
-                  { value: '#22C55E' },
-                  { value: '#F59E0B' },
-                  { value: '#EF4444' },
-                  { value: '#9CA3AF' },
-                ],
-                help: '用于深色主题的竖线颜色',
-              },
-              { type: 'toggle', key: 'edgeHidden', label: '隐藏竖线' },
-              {
                 type: 'action',
-                key: 'edge-reset',
-                label: '竖线设置',
-                actions: [{ id: 'edgeReset', text: '重置默认' }],
-                help: '恢复竖线宽度/高度/不透明度与颜色为默认值',
+                key: 'site-reset',
+                label: '重置',
+                actions: [{ id: 'resetSite', text: '重置站点设置' }],
+                help: '恢复当前站点设置为默认值',
               },
             ] as Field[],
           },
@@ -496,7 +325,7 @@ export function openSettingsPanel(): void {
 
               let raw: any = {}
               try {
-                const s = await getValue(KEY, '')
+                const s = await getValue(CONFIG_KEY, '')
                 raw = s ? JSON.parse(String(s) || '{}') || {} : {}
               } catch {}
 
@@ -525,14 +354,12 @@ export function openSettingsPanel(): void {
                 raw.groups = [g]
               }
 
-              const sitePref = (raw.sitePrefs || {})[HOST] || {
-                defaultOpen: 'same-tab',
-              }
+              const sitePref = await store.getAll()
 
               openEditorModal(root, raw, {
                 async saveConfig(cfg) {
                   try {
-                    await setValue(KEY, JSON.stringify(cfg))
+                    await setValue(CONFIG_KEY, JSON.stringify(cfg))
                   } catch {}
                 },
                 rerender() {
@@ -665,6 +492,32 @@ export function openSettingsPanel(): void {
           ;(async () => {
             try {
               await setValue(KEY, JSON.stringify({}))
+            } catch {}
+          })()
+
+          break
+        }
+
+        case 'resetGlobal': {
+          const ok = globalThis.confirm(
+            '确认要重置全局设置吗？（不影响站点设置）'
+          )
+          if (!ok) break
+          ;(async () => {
+            try {
+              await store.reset(true)
+            } catch {}
+          })()
+
+          break
+        }
+
+        case 'resetSite': {
+          const ok = globalThis.confirm('确认要重置当前站点设置吗？')
+          if (!ok) break
+          ;(async () => {
+            try {
+              await store.reset(false)
             } catch {}
           })()
 

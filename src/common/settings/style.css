@@ -5,7 +5,7 @@
 }
 
 .user-settings {
-  @apply fixed top-3 right-3 z-[2147483649];
+  @apply fixed top-3 right-3 z-[2147483647];
   /* Tailwind ring color proxy */
   --tw-ring-color: var(--user-color-ring, #111827);
 }

@@ -30,7 +30,7 @@ export function openEditorModal(
   const mask = document.createElement('div')
   mask.className = 'modal-mask'
   try {
-    ;(mask.style as any).zIndex = '2147483648'
+    ;(mask.style as any).zIndex = '2147483647'
   } catch {}
 
   const modal = document.createElement('div')

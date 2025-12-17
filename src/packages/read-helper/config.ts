@@ -12,8 +12,6 @@ export type ReadHelperSettings = {
   skipLinks: boolean
 }
 
-export const READ_HELPER_SETTINGS_KEY = 'read_helper_settings'
-
 export const DEFAULT_READ_HELPER_SETTINGS: ReadHelperSettings = {
   mode: 'sentence',
   style: 'underline',
