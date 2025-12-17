@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.2
+// @version              0.1.3
 // @description          Floating quick navigation with per-site groups, icons, and editable items.
 // @description:zh-CN    悬浮快速导航，支持按站点分组、图标与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -3084,7 +3084,51 @@
       },
     }
   }
-  var KEY = 'settings'
+  function importJson(options) {
+    const {
+      validate,
+      onSuccess,
+      confirmMessage = '\u5BFC\u5165\u4F1A\u4E0E\u73B0\u6709\u6570\u636E\u5408\u5E76\uFF0C\u662F\u5426\u7EE7\u7EED\uFF1F',
+      errorMessage = '\u5BFC\u5165\u7684\u6570\u636E\u683C\u5F0F\u4E0D\u6B63\u786E',
+    } = options
+    const ok = globalThis.confirm(confirmMessage)
+    if (!ok) return
+    const fileInput = document.createElement('input')
+    fileInput.type = 'file'
+    fileInput.accept = 'application/json'
+    fileInput.style.display = 'none'
+    const onChange = async () => {
+      var _a
+      try {
+        const f = (_a = fileInput.files) == null ? void 0 : _a[0]
+        if (!f) return
+        const txt = await f.text()
+        let obj
+        try {
+          obj = JSON.parse(txt)
+        } catch (e) {
+          alert('\u65E0\u6CD5\u89E3\u6790 JSON \u6587\u4EF6')
+          return
+        }
+        if (validate && !validate(obj)) {
+          alert(errorMessage)
+          return
+        }
+        await onSuccess(obj)
+        alert('\u5BFC\u5165\u5B8C\u6210')
+      } catch (error) {
+        console.error(error)
+        alert('\u5BFC\u5165\u5931\u8D25')
+      } finally {
+        fileInput.removeEventListener('change', onChange)
+        fileInput.remove()
+      }
+    }
+    fileInput.addEventListener('change', onChange)
+    document.documentElement.append(fileInput)
+    fileInput.click()
+  }
+  var SETTINGS_KEY = 'settings'
   var CONFIG_KEY = 'utqn_config'
   var HOST = location.hostname || ''
   var POSITION_OPTIONS = [
@@ -3227,7 +3271,7 @@
     },
   ]
   function createUtqnSettingsStore() {
-    return createSettingsStore(KEY, DEFAULTS, true)
+    return createSettingsStore(SETTINGS_KEY, DEFAULTS, true)
   }
   function openSettingsPanel2(store2) {
     const schema = {
@@ -3247,24 +3291,6 @@
                   key: 'hotkey',
                   label: '\u5FEB\u6377\u952E',
                   placeholder: DEFAULTS.hotkey,
-                },
-              ],
-            },
-            {
-              id: 'global-group-manager',
-              title: '',
-              fields: [
-                {
-                  type: 'action',
-                  key: 'group-management',
-                  label: '\u5206\u7EC4\u7BA1\u7406',
-                  actions: [
-                    {
-                      id: 'openGroupManager',
-                      text: '\u6253\u5F00\u5206\u7EC4\u7BA1\u7406',
-                    },
-                  ],
-                  help: '\u7BA1\u7406\u5BFC\u822A\u5206\u7EC4\u4E0E\u5BFC\u822A\u9879',
                 },
               ],
             },
@@ -3343,37 +3369,88 @@
         {
           id: 'actions',
           title: '\u6570\u636E\u7BA1\u7406',
-          fields: [
+          groups: [
             {
-              type: 'action',
-              key: 'export-import',
-              label: '\u6570\u636E\u5BFC\u51FA',
-              actions: [
-                { id: 'exportJson', text: '\u5BFC\u51FA JSON \u6587\u4EF6' },
-              ],
-              help: '\u5BFC\u51FA\u6240\u6709\u914D\u7F6E\uFF08\u5305\u542B\u5404\u5206\u7EC4\u3001\u5BFC\u822A\u9879\u8BBE\u7F6E\uFF09',
-            },
-            {
-              type: 'action',
-              key: 'export-import',
-              label: '\u6570\u636E\u5BFC\u5165',
-              actions: [
+              id: 'data-group-manager',
+              title: '\u5206\u7EC4\u4E0E\u5BFC\u822A\u9879',
+              fields: [
                 {
-                  id: 'importJson',
-                  text: '\u4ECE JSON \u6587\u4EF6\u5BFC\u5165',
+                  type: 'action',
+                  key: 'group-management',
+                  label: '\u5206\u7EC4\u7BA1\u7406',
+                  actions: [
+                    {
+                      id: 'openGroupManager',
+                      text: '\u6253\u5F00\u5206\u7EC4\u7BA1\u7406',
+                    },
+                  ],
+                  help: '\u7BA1\u7406\u5BFC\u822A\u5206\u7EC4\u4E0E\u5BFC\u822A\u9879',
+                },
+                {
+                  type: 'action',
+                  key: 'export-import',
+                  label: '\u6570\u636E\u5BFC\u51FA',
+                  actions: [
+                    {
+                      id: 'exportNavDataJson',
+                      text: '\u5BFC\u51FA JSON \u6587\u4EF6',
+                    },
+                  ],
+                  help: '\u5BFC\u51FA\u6240\u6709\u914D\u7F6E\uFF08\u5305\u542B\u5404\u5206\u7EC4\u3001\u5BFC\u822A\u9879\u8BBE\u7F6E\uFF09',
+                },
+                {
+                  type: 'action',
+                  key: 'export-import',
+                  label: '\u6570\u636E\u5BFC\u5165',
+                  actions: [
+                    {
+                      id: 'importNavDataJson',
+                      text: '\u4ECE JSON \u6587\u4EF6\u5BFC\u5165',
+                    },
+                  ],
+                  help: '\u5BFC\u5165\u4E4B\u524D\u5BFC\u51FA\u7684\u6587\u4EF6',
+                },
+                {
+                  type: 'action',
+                  key: 'clear-data',
+                  label: '\u6E05\u7A7A\u6240\u6709\u6570\u636E',
+                  actions: [
+                    {
+                      id: 'clearNavData',
+                      text: '\u6267\u884C',
+                      kind: 'danger',
+                    },
+                  ],
                 },
               ],
-              help: '\u5BFC\u5165\u4E4B\u524D\u5BFC\u51FA\u7684\u6587\u4EF6',
             },
             {
-              type: 'action',
-              key: 'clear-data',
-              label: '\u6E05\u7A7A\u6240\u6709\u6570\u636E',
-              actions: [
+              id: 'data-settings',
+              title: '\u8BBE\u7F6E',
+              fields: [
                 {
-                  id: 'clearData',
-                  text: '\u6E05\u7A7A\u6240\u6709\u6570\u636E',
-                  kind: 'danger',
+                  type: 'action',
+                  key: 'export-import',
+                  label: '\u6570\u636E\u5BFC\u51FA',
+                  actions: [
+                    {
+                      id: 'exportSettingsJson',
+                      text: '\u5BFC\u51FA JSON \u6587\u4EF6',
+                    },
+                  ],
+                  help: '\u5BFC\u51FA\u6240\u6709\u8BBE\u7F6E',
+                },
+                {
+                  type: 'action',
+                  key: 'export-import',
+                  label: '\u6570\u636E\u5BFC\u5165',
+                  actions: [
+                    {
+                      id: 'importSettingsJson',
+                      text: '\u4ECE JSON \u6587\u4EF6\u5BFC\u5165',
+                    },
+                  ],
+                  help: '\u5BFC\u5165\u4E4B\u524D\u5BFC\u51FA\u7684\u6587\u4EF6',
                 },
               ],
             },
@@ -3484,10 +3561,10 @@
             })()
             break
           }
-          case 'exportJson': {
+          case 'exportNavDataJson': {
             ;(async () => {
               try {
-                const s = await getValue(KEY, '')
+                const s = await getValue(CONFIG_KEY, '')
                 const raw = s ? JSON.parse(String(s) || '{}') || {} : {}
                 const date = /* @__PURE__ */ new Date()
                 const timestamp = ''
@@ -3503,7 +3580,34 @@
                 const url = URL.createObjectURL(blob)
                 const a = document.createElement('a')
                 a.href = url
-                a.download = 'utags-quick-nav-config-'.concat(
+                a.download = 'utags-quick-nav-data-'.concat(timestamp, '.json')
+                a.click()
+                setTimeout(() => {
+                  URL.revokeObjectURL(url)
+                }, 1e3)
+              } catch (e) {}
+            })()
+            break
+          }
+          case 'exportSettingsJson': {
+            ;(async () => {
+              try {
+                const raw = await getValue(SETTINGS_KEY, {})
+                const date = /* @__PURE__ */ new Date()
+                const timestamp = ''
+                  .concat(date.getFullYear())
+                  .concat(String(date.getMonth() + 1).padStart(2, '0'))
+                  .concat(String(date.getDate()).padStart(2, '0'), '_')
+                  .concat(String(date.getHours()).padStart(2, '0'))
+                  .concat(String(date.getMinutes()).padStart(2, '0'))
+                  .concat(String(date.getSeconds()).padStart(2, '0'))
+                const blob = new Blob([JSON.stringify(raw, null, 2)], {
+                  type: 'application/json',
+                })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = 'utags-quick-nav-settings-'.concat(
                   timestamp,
                   '.json'
                 )
@@ -3515,57 +3619,44 @@
             })()
             break
           }
-          case 'importJson': {
-            const ok = globalThis.confirm(
-              '\u5BFC\u5165\u4F1A\u4E0E\u73B0\u6709\u6570\u636E\u5408\u5E76\uFF0C\u662F\u5426\u7EE7\u7EED\uFF1F'
-            )
-            if (!ok) break
-            const fileInput = document.createElement('input')
-            fileInput.type = 'file'
-            fileInput.accept = 'application/json'
-            fileInput.style.display = 'none'
-            const onChange = async () => {
-              var _a
-              try {
-                const f = (_a = fileInput.files) == null ? void 0 : _a[0]
-                if (!f) return
-                const txt = await f.text()
-                const obj = JSON.parse(txt)
-                const existing = await getValue(KEY, '')
+          case 'importNavDataJson': {
+            importJson({
+              validate: (data) => data && Array.isArray(data.groups),
+              errorMessage:
+                '\u65E0\u6548\u7684\u5BFC\u822A\u6570\u636E\u6587\u4EF6\uFF08\u7F3A\u5C11 groups \u5B57\u6BB5\uFF09',
+              async onSuccess(obj) {
+                const existing = await getValue(CONFIG_KEY, '')
                 const existingObj = existing
                   ? JSON.parse(String(existing) || '{}') || {}
                   : {}
                 const merged = deepMergeReplaceArrays(existingObj, obj)
-                try {
-                  if (
-                    obj &&
-                    obj.sitePrefs &&
-                    typeof obj.sitePrefs === 'object'
-                  ) {
-                    merged.sitePrefs = merged.sitePrefs || {}
-                    for (const host of Object.keys(obj.sitePrefs)) {
-                      merged.sitePrefs[host] = obj.sitePrefs[host]
-                    }
-                  }
-                } catch (e) {}
-                await setValue(KEY, JSON.stringify(merged))
-                fileInput.removeEventListener('change', onChange)
-                fileInput.remove()
-              } catch (e) {}
-            }
-            fileInput.addEventListener('change', onChange)
-            document.documentElement.append(fileInput)
-            fileInput.click()
+                await setValue(CONFIG_KEY, JSON.stringify(merged))
+              },
+            })
             break
           }
-          case 'clearData': {
+          case 'importSettingsJson': {
+            importJson({
+              validate: (data) =>
+                data && typeof data === 'object' && !Array.isArray(data),
+              errorMessage:
+                '\u65E0\u6548\u7684\u8BBE\u7F6E\u6587\u4EF6\uFF08\u683C\u5F0F\u5E94\u4E3A\u5BF9\u8C61\uFF09',
+              async onSuccess(obj) {
+                const existing = await getValue(SETTINGS_KEY, {})
+                const merged = __spreadValues(__spreadValues({}, existing), obj)
+                await setValue(SETTINGS_KEY, merged)
+              },
+            })
+            break
+          }
+          case 'clearNavData': {
             const ok = globalThis.confirm(
               '\u662F\u5426\u771F\u7684\u8981\u6E05\u7A7A\u6570\u636E\uFF1F\u4E0D\u53EF\u9006\uFF0C\u5EFA\u8BAE\u5148\u5BFC\u51FA\u5907\u4EFD\u3002'
             )
             if (!ok) break
             ;(async () => {
               try {
-                await setValue(KEY, JSON.stringify({}))
+                await setValue(CONFIG_KEY, JSON.stringify({}))
               } catch (e) {}
             })()
             break
@@ -3617,7 +3708,7 @@
       },
     })
   }
-  var KEY2 = 'utqn_config'
+  var KEY = 'utqn_config'
   var EDGE_DEFAULT_WIDTH = 3
   var EDGE_DEFAULT_HEIGHT = 60
   var EDGE_DEFAULT_OPACITY = 0.6
@@ -3737,7 +3828,7 @@
   }
   async function loadConfig() {
     try {
-      const v = await getValue(KEY2, '')
+      const v = await getValue(KEY, '')
       if (v) {
         const raw = JSON.parse(String(v) || '{}')
         const host2 = location.hostname || ''
@@ -3823,7 +3914,7 @@
       const s = JSON.stringify(cfg)
       if (s === lastSaved) return
       lastSaved = s
-      await setValue(KEY2, s)
+      await setValue(KEY, s)
     } catch (e) {}
   }
   function createRoot() {
@@ -4883,8 +4974,7 @@
   }
   function registerStorageListener(root, cfg) {
     try {
-      void addValueChangeListener(KEY2, (_name, _old, nv, remote) => {
-        if (!remote) return
+      void addValueChangeListener(KEY, (_name, _old, nv, remote) => {
         try {
           const obj = JSON.parse(nv)
           if (obj && obj.groups) {

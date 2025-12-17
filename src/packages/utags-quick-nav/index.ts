@@ -1487,7 +1487,6 @@ function registerStorageListener(root: ShadowRoot, cfg: QuickNavConfig) {
     void addValueChangeListener(
       KEY,
       (_name: string, _old: string, nv: string, remote: boolean) => {
-        if (!remote) return
         try {
           const obj = JSON.parse(nv)
           if (obj && obj.groups) {
