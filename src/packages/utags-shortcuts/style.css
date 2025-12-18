@@ -169,17 +169,35 @@ div {
 .icon-btn {
   @apply w-6 h-6 p-0 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150;
 }
-.ushortcuts.dark .icon-btn {
+.ushortcuts.dark .icon-btn,
+.modal.dark .icon-btn {
   @apply text-gray-300 hover:bg-gray-800 hover:text-white;
 }
-.ushortcuts.dark .icon img.lucide-icon {
+.ushortcuts.dark .icon img.lucide-icon,
+.modal.dark .icon img.lucide-icon {
   filter: invert(1) brightness(1.15) saturate(1.1);
 }
 .icon-btn.active {
   @apply bg-gray-200 text-gray-900 ring-1 ring-gray-300;
 }
-.ushortcuts.dark .icon-btn.active {
+.ushortcuts.dark .icon-btn.active,
+.modal.dark .icon-btn.active {
   @apply bg-gray-700 text-white ring-1 ring-gray-600;
+}
+
+.text-danger {
+  @apply text-red-500;
+}
+.text-danger:hover {
+  @apply text-red-600;
+}
+.ushortcuts.dark .text-danger,
+.modal.dark .text-danger {
+  @apply text-red-400;
+}
+.ushortcuts.dark .text-danger:hover,
+.modal.dark .text-danger:hover {
+  @apply text-red-300;
 }
 
 .title {
@@ -286,7 +304,7 @@ div {
 
 .modal .check {
   @apply inline-flex items-center gap-2 h-[32px];
-  width: unset;
+  width: unset !important;
 }
 .modal .check input[type='checkbox'] {
   @apply w-[14px] h-[14px];
@@ -372,11 +390,13 @@ textarea {
   @apply bg-gray-900 text-white border-gray-900;
 }
 
-.ushortcuts.dark .group-pill {
+.ushortcuts.dark .group-pill,
+.modal.dark .group-pill {
   @apply border-gray-700 text-gray-200 hover:bg-gray-700;
 }
 
-.ushortcuts.dark .group-pill.active {
+.ushortcuts.dark .group-pill.active,
+.modal.dark .group-pill.active {
   @apply bg-gray-100 text-gray-900 border-gray-100;
 }
 
@@ -394,14 +414,16 @@ textarea {
 .divider {
   @apply h-px bg-gray-200;
 }
-.ushortcuts.dark .divider {
+.ushortcuts.dark .divider,
+.modal.dark .divider {
   @apply bg-gray-700;
 }
 
 .section-title {
   @apply text-xs uppercase tracking-wider text-gray-600 mt-3 mb-1 px-2 py-1 rounded-md bg-gray-100;
 }
-.ushortcuts.dark .section-title {
+.ushortcuts.dark .section-title,
+.modal.dark .section-title {
   @apply text-gray-300 bg-gray-800;
 }
 
@@ -508,10 +530,12 @@ textarea:disabled {
 .editor .item-row:hover {
   @apply bg-gray-100;
 }
-.ushortcuts.dark .editor .item-row {
+.ushortcuts.dark .editor .item-row,
+.modal.dark .item-row {
   @apply bg-gray-800;
 }
-.ushortcuts.dark .editor .item-row:hover {
+.ushortcuts.dark .editor .item-row:hover,
+.modal.dark .item-row:hover {
   @apply bg-gray-700;
 }
 
@@ -536,19 +560,22 @@ textarea:disabled {
 .theme-switch {
   @apply inline-flex items-center gap-1 bg-gray-100 rounded-full px-1 py-[2px] border border-gray-200 shadow-sm;
 }
-.ushortcuts.dark .theme-switch {
+.ushortcuts.dark .theme-switch,
+.modal.dark .theme-switch {
   @apply bg-gray-800;
 }
 .theme-btn {
   @apply w-6 h-6 p-0 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors duration-150;
 }
-.ushortcuts.dark .theme-btn {
+.ushortcuts.dark .theme-btn,
+.modal.dark .theme-btn {
   @apply text-gray-300 hover:bg-gray-700 hover:text-white;
 }
 .theme-btn.active {
   @apply bg-white ring-1 ring-gray-300;
 }
-.ushortcuts.dark .theme-btn.active {
+.ushortcuts.dark .theme-btn.active,
+.modal.dark .theme-btn.active {
   @apply bg-gray-700 ring-1 ring-gray-600;
 }
 
@@ -716,4 +743,169 @@ textarea:disabled {
 .segmented label.seg-item {
   width: unset;
   min-width: 50px;
+}
+
+/* Split Layout */
+.panel-split {
+  @apply flex h-[500px] max-h-[70vh] border border-gray-200 rounded-lg overflow-hidden;
+}
+.ushortcuts.dark .panel-split,
+.modal.dark .panel-split {
+  @apply border-gray-700;
+}
+
+/* Sidebar */
+.panel-sidebar {
+  @apply w-[160px] flex-none border-r border-gray-200 bg-gray-50 overflow-y-auto flex flex-col;
+}
+.ushortcuts.dark .panel-sidebar,
+.modal.dark .panel-sidebar {
+  @apply border-gray-700 bg-gray-800/50;
+}
+
+.sidebar-item {
+  @apply px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors text-left;
+}
+.ushortcuts.dark .sidebar-item,
+.modal.dark .sidebar-item {
+  @apply border-gray-700/50 hover:bg-gray-700;
+}
+.sidebar-item.active {
+  @apply bg-white border-l-4 border-l-blue-500 border-r-transparent shadow-sm;
+}
+.ushortcuts.dark .sidebar-item.active,
+.modal.dark .sidebar-item.active {
+  @apply bg-gray-800 border-l-blue-400;
+}
+
+.sidebar-item-name {
+  @apply block font-medium text-gray-900 truncate text-sm;
+}
+.ushortcuts.dark .sidebar-item-name,
+.modal.dark .sidebar-item-name {
+  @apply text-gray-100;
+}
+.sidebar-item-desc {
+  @apply block text-xs text-gray-400 mt-0.5 truncate font-normal;
+}
+.ushortcuts.dark .sidebar-item-desc,
+.modal.dark .sidebar-item-desc {
+  @apply text-gray-500;
+}
+
+.sidebar-actions {
+  @apply p-2 border-t border-gray-200 mt-auto sticky bottom-0 bg-gray-50 flex flex-col gap-2;
+}
+.ushortcuts.dark .sidebar-actions,
+.modal.dark .sidebar-actions {
+  @apply border-gray-700 bg-gray-800;
+}
+
+/* Content */
+.panel-content {
+  @apply flex-1 flex flex-col min-w-0 bg-white;
+}
+.ushortcuts.dark .panel-content,
+.modal.dark .panel-content {
+  @apply bg-gray-900;
+}
+
+.content-header {
+  @apply px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-white sticky top-0 z-10;
+}
+.ushortcuts.dark .content-header,
+.modal.dark .content-header {
+  @apply border-gray-700 bg-gray-900;
+}
+.content-title {
+  @apply text-lg font-bold text-gray-900;
+}
+.ushortcuts.dark .content-title,
+.modal.dark .content-title {
+  @apply text-gray-100;
+}
+
+/* Tabs */
+.content-tabs {
+  @apply flex border-b border-gray-200 px-4 gap-4 bg-gray-50/50;
+}
+.ushortcuts.dark .content-tabs,
+.modal.dark .content-tabs {
+  @apply border-gray-700 bg-gray-800/30;
+}
+.tab-btn {
+  @apply py-2 border-b-2 border-transparent text-gray-500 font-medium cursor-pointer hover:text-gray-700 text-sm;
+}
+.ushortcuts.dark .tab-btn,
+.modal.dark .tab-btn {
+  @apply text-gray-400 hover:text-gray-200;
+}
+.tab-btn.active {
+  @apply border-blue-500 text-blue-600;
+}
+.ushortcuts.dark .tab-btn.active,
+.modal.dark .tab-btn.active {
+  @apply border-blue-400 text-blue-400;
+}
+
+.tab-pane {
+  @apply flex-1 overflow-y-auto p-4;
+}
+
+/* Modern Shortcut List */
+.shortcut-list {
+  @apply flex flex-col gap-2;
+}
+
+.shortcut-item {
+  @apply flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm transition-all;
+}
+.ushortcuts.dark .shortcut-item,
+.modal.dark .shortcut-item {
+  @apply border-gray-700 bg-gray-800 hover:border-gray-600;
+}
+.shortcut-item.is-hidden {
+  @apply opacity-60 bg-gray-50 border-dashed;
+}
+.ushortcuts.dark .shortcut-item.is-hidden,
+.modal.dark .shortcut-item.is-hidden {
+  @apply bg-gray-800/50;
+}
+
+.shortcut-icon {
+  @apply w-8 h-8 flex items-center justify-center rounded-md bg-gray-50 text-gray-500 flex-none overflow-hidden;
+}
+.ushortcuts.dark .shortcut-icon,
+.modal.dark .shortcut-icon {
+  @apply bg-gray-700 text-gray-400;
+}
+
+.shortcut-info {
+  @apply flex-1 min-w-0;
+}
+
+.shortcut-name {
+  @apply font-medium text-gray-900 truncate text-sm;
+}
+.ushortcuts.dark .shortcut-name,
+.modal.dark .shortcut-name {
+  @apply text-gray-100;
+}
+
+.shortcut-meta {
+  @apply flex items-center gap-2 text-xs text-gray-400 mt-0.5;
+}
+.ushortcuts.dark .shortcut-meta,
+.modal.dark .shortcut-meta {
+  @apply text-gray-500;
+}
+
+.shortcut-actions {
+  @apply flex items-center gap-1 opacity-0 transition-opacity;
+}
+.group:hover .shortcut-actions {
+  opacity: 1;
+}
+.shortcut-actions .icon-btn {
+  @apply w-7 h-7;
 }

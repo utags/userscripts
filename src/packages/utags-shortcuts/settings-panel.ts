@@ -325,14 +325,14 @@ export function openSettingsPanel(store: Store): void {
           ;(async () => {
             try {
               const existing = document.querySelector(
-                '[data-ushortcuts-host="ushortcuts"]'
+                '[data-ushortcuts-host="utags-shortcuts"]'
               )
               const root =
                 existing instanceof HTMLElement && existing.shadowRoot
                   ? existing.shadowRoot
                   : (() => {
                       const host = document.createElement('div')
-                      host.dataset.ushortcutsHost = 'ushortcuts'
+                      host.dataset.ushortcutsHost = 'utags-shortcuts'
                       const r = host.attachShadow({ mode: 'open' })
                       const style = document.createElement('style')
                       style.textContent = styleText

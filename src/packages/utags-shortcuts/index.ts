@@ -1166,10 +1166,37 @@ function renderPanelHeader(
       })
     })
 
+    const manageGroupsBtn = document.createElement('button')
+    manageGroupsBtn.className = 'btn mini'
+    manageGroupsBtn.textContent = '管理分组'
+    manageGroupsBtn.addEventListener('click', () => {
+      openEditorModal(root, cfg, {
+        saveConfig(c) {
+          void saveConfig(c)
+        },
+        rerender(r, c) {
+          rerender(r, c)
+        },
+        sitePref: {
+          defaultOpen: settings.defaultOpen || OPEN_DEFAULT,
+        },
+        updateThemeUI,
+        edgeDefaults: {
+          width: EDGE_DEFAULT_WIDTH,
+          height: EDGE_DEFAULT_HEIGHT,
+          opacity: EDGE_DEFAULT_OPACITY,
+          colorLight: EDGE_DEFAULT_COLOR_LIGHT,
+          colorDark: EDGE_DEFAULT_COLOR_DARK,
+        },
+        tempOpenGetter: () => tempOpen,
+      })
+    })
+
     rightActions.append(showHiddenGroupsLabel)
     rightActions.append(showHiddenItemsLabel)
     rightActions.append(expandAllBtn)
     rightActions.append(collapseAllBtn)
+    rightActions.append(manageGroupsBtn)
   }
 
   rightActions.append(settingsBtn)
@@ -1252,7 +1279,12 @@ function renderPanel(root: ShadowRoot, cfg: ShortcutsConfig, animIn: boolean) {
     if (!pinnedFlag && !suppressCollapse) scheduleAutoCollapse(root, cfg)
   })
   place(wrapper, cfg)
-  root.append(wrapper)
+  const mask = root.querySelector('.modal-mask')
+  if (mask) {
+    mask.before(wrapper)
+  } else {
+    root.append(wrapper)
+  }
 }
 
 function openEditor(root: ShadowRoot, cfg: ShortcutsConfig) {

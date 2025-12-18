@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.6
+// @version              0.1.7
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -463,7 +463,7 @@
     })
   }
   var style_default =
-    '/*! tailwindcss v4.1.17 | MIT License | https://tailwindcss.com */@layer properties;@layer theme, base, components, utilities;@layer theme{:host,:root{--font-sans:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--color-blue-400:oklch(70.7% 0.165 254.624);--color-blue-500:oklch(62.3% 0.214 259.815);--color-blue-600:oklch(54.6% 0.245 262.881);--color-blue-700:oklch(48.8% 0.243 264.376);--color-gray-50:oklch(98.5% 0.002 247.839);--color-gray-100:oklch(96.7% 0.003 264.542);--color-gray-200:oklch(92.8% 0.006 264.531);--color-gray-300:oklch(87.2% 0.01 258.338);--color-gray-400:oklch(70.7% 0.022 261.325);--color-gray-500:oklch(55.1% 0.027 264.364);--color-gray-600:oklch(44.6% 0.03 256.802);--color-gray-700:oklch(37.3% 0.034 259.733);--color-gray-800:oklch(27.8% 0.033 256.848);--color-gray-900:oklch(21% 0.034 264.665);--color-black:#000;--color-white:#fff;--spacing:0.25rem;--text-xs:0.75rem;--text-xs--line-height:1.33333;--font-weight-medium:500;--font-weight-semibold:600;--tracking-wider:0.05em;--leading-snug:1.375;--radius-md:0.375rem;--radius-lg:0.5rem;--radius-xl:0.75rem;--radius-2xl:1rem;--default-transition-duration:150ms;--default-transition-timing-function:cubic-bezier(0.4,0,0.2,1);--default-font-family:var(--font-sans);--default-mono-font-family:var(--font-mono)}}@layer base{*,::backdrop,::file-selector-button,:after,:before{border:0 solid;box-sizing:border-box;margin:0;padding:0}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;font-family:var(--default-font-family,ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji");font-feature-settings:var(--default-font-feature-settings,normal);font-variation-settings:var(--default-font-variation-settings,normal);-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-tap-highlight-color:transparent}hr{border-top-width:1px;color:inherit;height:0}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:var(--default-mono-font-family,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace);font-feature-settings:var(--default-mono-font-feature-settings,normal);font-size:1em;font-variation-settings:var(--default-mono-font-variation-settings,normal)}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{border-collapse:collapse;border-color:inherit;text-indent:0}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}menu,ol,ul{list-style:none}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{height:auto;max-width:100%}::file-selector-button,button,input,optgroup,select,textarea{background-color:transparent;border-radius:0;color:inherit;font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::-moz-placeholder{opacity:1}::placeholder{opacity:1}@supports (not (-webkit-appearance:-apple-pay-button)) or (contain-intrinsic-size:1px){::-moz-placeholder{color:currentcolor;@supports (color:color-mix(in lab,red,red)){color:color-mix(in oklab,currentcolor 50%,transparent)}}::placeholder{color:currentcolor;@supports (color:color-mix(in lab,red,red)){color:color-mix(in oklab,currentcolor 50%,transparent)}}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-meridiem-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-year-field{padding-block:0}::-webkit-calendar-picker-indicator{line-height:1}:-moz-ui-invalid{box-shadow:none}::file-selector-button,button,input:where([type=button],[type=reset],[type=submit]){-webkit-appearance:button;-moz-appearance:button;appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}}@layer utilities{.visible{visibility:visible}.fixed{position:fixed}.flex{display:flex}.grid{display:grid}.hidden{display:none}.inline-flex{display:inline-flex}.transform{transform:var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,)}}:host{all:initial}div{line-height:normal}.ushortcuts{color:var(--color-gray-900);font-family:var(--font-sans);font-size:13px;position:fixed;z-index:2147483647}.ushortcuts.dark{color:var(--color-gray-100)}.panel{background-color:var(--color-white);border-color:var(--color-gray-200);border-radius:var(--radius-xl);border-style:var(--tw-border-style);border-width:1px;display:flex;flex-direction:column;gap:calc(var(--spacing)*3);max-height:100vh;max-width:360px;overflow-y:auto;padding:calc(var(--spacing)*3);--tw-shadow:0 20px 25px -5px var(--tw-shadow-color,rgba(0,0,0,.1)),0 8px 10px -6px var(--tw-shadow-color,rgba(0,0,0,.1))}.panel,.ushortcuts.dark .panel{box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.ushortcuts.dark .panel{background-color:var(--color-gray-900);border-color:var(--color-gray-700);--tw-shadow:0 25px 50px -12px var(--tw-shadow-color,rgba(0,0,0,.25))}.panel.sidebar-right{border-bottom-width:0;border-right-width:0;border-top-width:0;box-shadow:unset;width:360px}.panel.sidebar-left{border-bottom-width:0;border-left-width:0;border-top-width:0;box-shadow:unset;width:360px}@keyframes ushortcuts-slide-in-left{0%{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}@keyframes ushortcuts-slide-in-right{0%{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}@keyframes ushortcuts-slide-in-top{0%{opacity:0;transform:translateY(0)}to{opacity:1;transform:translateY(0)}}@keyframes ushortcuts-slide-in-bottom{0%{opacity:0;transform:translateY(0)}to{opacity:1;transform:translateY(0)}}@keyframes ushortcuts-slide-out-left{0%{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-12px)}}@keyframes ushortcuts-slide-out-right{0%{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(12px)}}@keyframes ushortcuts-slide-out-top{0%{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(0)}}@keyframes ushortcuts-slide-out-bottom{0%{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(0)}}.anim-in-left{animation:ushortcuts-slide-in-left .2s ease-out}.anim-in-right{animation:ushortcuts-slide-in-right .2s ease-out}.anim-in-top{animation:ushortcuts-slide-in-top .2s ease-out}.anim-in-bottom{animation:ushortcuts-slide-in-bottom .2s ease-out}.anim-out-left{animation:ushortcuts-slide-out-left .18s ease-in forwards}.anim-out-right{animation:ushortcuts-slide-out-right .18s ease-in forwards}.anim-out-top{animation:ushortcuts-slide-out-top .18s ease-in forwards}.anim-out-bottom{animation:ushortcuts-slide-out-bottom .18s ease-in forwards}.header{gap:calc(var(--spacing)*2);justify-content:space-between}.header,.header-actions{align-items:center;display:flex}.header-actions{gap:calc(var(--spacing)*1.5)}.header-actions .icon-btn{opacity:0;transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:opacity;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));--tw-duration:150ms;transition-duration:.15s}.header-actions .icon-btn.toggle,.section .header:hover .header-actions .icon-btn:not(.toggle){opacity:100%}.section .header{margin-bottom:calc(var(--spacing)*0)}.icon-btn{align-items:center;border-radius:var(--radius-md);color:var(--color-gray-600);display:flex;height:calc(var(--spacing)*6);justify-content:center;padding:calc(var(--spacing)*0);transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));width:calc(var(--spacing)*6);--tw-duration:150ms;transition-duration:.15s;&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}&:hover{@media (hover:hover){color:var(--color-gray-900)}}}.ushortcuts.dark .icon-btn{color:var(--color-gray-300);&:hover{@media (hover:hover){background-color:var(--color-gray-800)}}&:hover{@media (hover:hover){color:var(--color-white)}}}.ushortcuts.dark .icon img.lucide-icon{filter:invert(1) brightness(1.15) saturate(1.1)}.icon-btn.active{background-color:var(--color-gray-200);color:var(--color-gray-900);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);--tw-ring-color:var(--color-gray-300)}.icon-btn.active,.ushortcuts.dark .icon-btn.active{box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.ushortcuts.dark .icon-btn.active{background-color:var(--color-gray-700);color:var(--color-white);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);--tw-ring-color:var(--color-gray-600)}.title{align-items:center;display:flex;gap:calc(var(--spacing)*1.5);--tw-font-weight:var(--font-weight-semibold);color:var(--color-gray-800);font-weight:var(--font-weight-semibold)}.ushortcuts.dark .title{color:var(--color-gray-100)}.btn{align-items:center;-webkit-appearance:none;-moz-appearance:none;appearance:none;background-color:var(--color-white);border-color:var(--color-gray-300);border-radius:var(--radius-lg);border-style:var(--tw-border-style);border-width:1px;cursor:pointer;display:inline-flex;gap:calc(var(--spacing)*1.5);justify-content:center;padding-block:calc(var(--spacing)*1.5);padding-inline:calc(var(--spacing)*2.5);--tw-font-weight:var(--font-weight-medium);color:var(--color-gray-800);font-weight:var(--font-weight-medium);--tw-shadow:0 1px 3px 0 var(--tw-shadow-color,rgba(0,0,0,.1)),0 1px 2px -1px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:all;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));--tw-duration:150ms;transition-duration:.15s;&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}&:focus{--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);--tw-ring-color:var(--color-gray-300);--tw-outline-style:none;outline-style:none}&:active{scale:.99}}.ushortcuts.dark .btn{background-color:var(--color-gray-800);border-color:var(--color-gray-700);color:var(--color-gray-200);&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}&:focus{--tw-ring-color:var(--color-gray-700)}}.btn-primary{background-color:var(--color-blue-600);border-color:var(--color-blue-600);color:var(--color-white);--tw-shadow:0 4px 6px -1px var(--tw-shadow-color,rgba(0,0,0,.1)),0 2px 4px -2px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);&:hover{@media (hover:hover){border-color:var(--color-blue-700)}}&:hover{@media (hover:hover){background-color:var(--color-blue-700)}}}.modal.dark .btn-primary,.ushortcuts.dark .btn-primary{background-color:var(--color-blue-500);border-color:var(--color-blue-500);color:var(--color-white);&:hover{@media (hover:hover){border-color:var(--color-blue-600)}}&:hover{@media (hover:hover){background-color:var(--color-blue-600)}}}.btn-secondary{background-color:var(--color-gray-100);border-color:var(--color-gray-300);color:var(--color-gray-800);&:hover{@media (hover:hover){background-color:var(--color-gray-200)}}}.modal.dark .btn-secondary,.ushortcuts.dark .btn-secondary{background-color:var(--color-gray-800);border-color:var(--color-gray-700);color:var(--color-gray-200);&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}}.items{display:grid;gap:calc(var(--spacing)*1);grid-template-columns:repeat(var(--cols,1),minmax(0,1fr))}.items input[type=checkbox]{flex:none;height:14px;width:14px}.item{align-items:center;border-radius:var(--radius-md);color:var(--color-gray-900);display:inline-flex;gap:calc(var(--spacing)*1.5);min-width:calc(var(--spacing)*0);overflow:hidden;padding-block:calc(var(--spacing)*1.5);padding-inline:calc(var(--spacing)*2);text-decoration-line:none;text-overflow:ellipsis;transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));white-space:nowrap;--tw-duration:150ms;transition-duration:.15s;width:100%}.item:hover{background-color:var(--color-gray-100)}.ushortcuts.dark .item:hover{background-color:var(--color-gray-800)}.ushortcuts.dark .item{background-color:var(--color-gray-800);border-color:var(--color-gray-700);color:var(--color-gray-100);&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}}.icon{align-items:center;display:inline-flex;flex:none;height:calc(var(--spacing)*4);justify-content:center;overflow:hidden;width:calc(var(--spacing)*4);--tw-leading:1;line-height:1;white-space:nowrap}.collapsed-tab{background-color:var(--color-gray-700);border-radius:0;height:60px;opacity:40%;position:fixed;width:3px;z-index:2147483647}.ushortcuts.dark .collapsed-tab{background-color:var(--color-gray-400);opacity:40%}.collapsed-tab:hover{opacity:80%}.modal-mask{align-items:center;background-color:color-mix(in srgb,#000 40%,transparent);display:flex;inset:calc(var(--spacing)*0);justify-content:center;position:fixed;z-index:2147483647;@supports (color:color-mix(in lab,red,red)){background-color:color-mix(in oklab,var(--color-black) 40%,transparent)}}.modal{color:var(--color-gray-900);font-family:var(--font-sans);font-size:13px}.modal h2:not(.section-title){font-size:16px;margin:calc(var(--spacing)*0);margin-bottom:calc(var(--spacing)*2.5)}.row{display:flex;flex-wrap:wrap;gap:calc(var(--spacing)*2);margin-block:calc(var(--spacing)*1.5)}.modal .row{align-items:center}.modal .actions{justify-content:flex-end}.modal .check{align-items:center;display:inline-flex;gap:calc(var(--spacing)*2);height:32px;width:unset}.modal .check input[type=checkbox]{height:14px;width:14px}.segmented{align-items:center;background-color:var(--color-gray-100);border-color:var(--color-gray-200);border-radius:calc(infinity*1px);border-style:var(--tw-border-style);border-width:1px;display:inline-flex;gap:calc(var(--spacing)*1);padding-block:calc(var(--spacing)*.5);padding-inline:calc(var(--spacing)*1);--tw-shadow:0 1px 3px 0 var(--tw-shadow-color,rgba(0,0,0,.1)),0 1px 2px -1px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.modal .segmented{margin-bottom:calc(var(--spacing)*3)}.ushortcuts.dark .segmented{background-color:var(--color-gray-800);border-color:var(--color-gray-700)}.seg-item{align-items:center;border-radius:calc(infinity*1px);cursor:pointer;display:inline-flex;-webkit-user-select:none;-moz-user-select:none;user-select:none}.seg-radio{border-width:0;clip-path:inset(50%);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;white-space:nowrap;width:1px}.seg-text{border-radius:calc(infinity*1px);color:var(--color-gray-700);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2);text-align:center;width:100%}.ushortcuts.dark .seg-text{color:var(--color-gray-300)}.seg-item .seg-radio:checked+.seg-text{background-color:var(--color-white);color:var(--color-gray-900);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);--tw-ring-color:var(--color-gray-300)}.seg-item .seg-radio:checked+.seg-text,.ushortcuts.dark .seg-item .seg-radio:checked+.seg-text{box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.ushortcuts.dark .seg-item .seg-radio:checked+.seg-text{background-color:var(--color-gray-700);color:var(--color-gray-100);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);--tw-ring-color:var(--color-gray-600)}.seg-item .seg-radio:focus+.seg-text{--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);--tw-ring-color:var(--color-blue-500)}.field-help{background-color:var(--color-gray-100);border-radius:var(--radius-md);display:block;flex-basis:100%;font-size:12px;margin-left:130px;padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2);width:100%;--tw-leading:var(--leading-snug);color:var(--color-gray-700);line-height:var(--leading-snug)}.modal.dark .field-help,.ushortcuts.dark .field-help{background-color:var(--color-gray-800);color:var(--color-gray-300)}.field-help-title{align-items:center;display:flex;gap:calc(var(--spacing)*1);margin-bottom:calc(var(--spacing)*1);--tw-font-weight:var(--font-weight-semibold);font-weight:var(--font-weight-semibold)}.field-help a{color:var(--color-blue-600);text-decoration-line:underline}.modal.dark .field-help a,.ushortcuts.dark .field-help a{color:var(--color-blue-400);text-decoration-line:underline}input,select,textarea{border-color:var(--color-gray-300);border-radius:var(--radius-lg);border-style:var(--tw-border-style);border-width:1px;flex:1;font-size:13px;padding-block:calc(var(--spacing)*1.5);padding-inline:calc(var(--spacing)*2)}textarea{min-height:80px}.grid{display:grid;gap:calc(var(--spacing)*2);grid-template-columns:repeat(2,minmax(0,1fr))}.group-list{display:flex;flex-wrap:wrap;gap:calc(var(--spacing)*1.5);margin-top:calc(var(--spacing)*1.5)}.group-pill{border-color:var(--color-gray-200);border-radius:calc(infinity*1px);border-style:var(--tw-border-style);border-width:1px;cursor:pointer;padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2);transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));--tw-duration:150ms;transition-duration:.15s;&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}}.group-pill.active{background-color:var(--color-gray-900);border-color:var(--color-gray-900);color:var(--color-white)}.ushortcuts.dark .group-pill{border-color:var(--color-gray-700);color:var(--color-gray-200);&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}}.ushortcuts.dark .group-pill.active{background-color:var(--color-gray-100);border-color:var(--color-gray-100);color:var(--color-gray-900)}.mini{border-radius:var(--radius-md);font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height));padding-block:calc(var(--spacing)*.5);padding-inline:calc(var(--spacing)*1.5)}.btn:disabled{cursor:not-allowed;opacity:50%}.divider{background-color:var(--color-gray-200);height:1px}.ushortcuts.dark .divider{background-color:var(--color-gray-700)}.section-title{background-color:var(--color-gray-100);border-radius:var(--radius-md);font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height));margin-bottom:calc(var(--spacing)*1);margin-top:calc(var(--spacing)*3);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2);--tw-tracking:var(--tracking-wider);color:var(--color-gray-600);letter-spacing:var(--tracking-wider);text-transform:uppercase}.ushortcuts.dark .section-title{background-color:var(--color-gray-800);color:var(--color-gray-300)}.row label.mini{align-items:center;display:inline-flex;gap:calc(var(--spacing)*2)}.modal{background-color:var(--color-white);border-radius:var(--radius-2xl);max-width:92vw;padding:calc(var(--spacing)*3);width:720px;--tw-shadow:0 25px 50px -12px var(--tw-shadow-color,rgba(0,0,0,.25));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.modal.dark,.ushortcuts.dark .modal{background-color:var(--color-gray-900);color:var(--color-gray-100)}.modal.dark input,.modal.dark select,.modal.dark textarea,.ushortcuts.dark .modal input,.ushortcuts.dark .modal select,.ushortcuts.dark .modal textarea{background-color:var(--color-gray-800);border-color:var(--color-gray-700);color:var(--color-gray-100)}.ushortcuts.dark .modal input::-moz-placeholder,.ushortcuts.dark .modal textarea::-moz-placeholder{color:#9ca3af}.ushortcuts.dark .modal input::placeholder,.ushortcuts.dark .modal textarea::placeholder{color:#9ca3af}.modal.dark input::-moz-placeholder,.modal.dark textarea::-moz-placeholder{color:#9ca3af}.modal.dark input::placeholder,.modal.dark textarea::placeholder{color:#9ca3af}.modal.dark .row label{color:var(--color-gray-400)}.modal.dark .segmented{background-color:var(--color-gray-800);border-color:var(--color-gray-700)}.modal.dark .seg-item .seg-radio:checked+.seg-text{background-color:var(--color-gray-700);color:var(--color-gray-100);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);--tw-ring-color:var(--color-gray-600)}.modal.dark .seg-text{color:var(--color-gray-300)}.editor{border-radius:var(--radius-2xl);max-height:72vh;overflow-y:auto;padding:calc(var(--spacing)*4)}.editor .grid,.editor .row{gap:calc(var(--spacing)*2)}.editor .row{align-items:center}.editor .row label{color:var(--color-gray-500);width:120px}.ushortcuts.dark .editor .row label{color:var(--color-gray-400)}.editor input,.editor select,.editor textarea{background-color:var(--color-white);border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;padding-block:calc(var(--spacing)*1.5);padding-inline:calc(var(--spacing)*2);&:focus{--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);--tw-ring-color:var(--color-gray-300);--tw-outline-style:none;outline-style:none}}.ushortcuts.dark .editor input,.ushortcuts.dark .editor select,.ushortcuts.dark .editor textarea{background-color:var(--color-gray-800);border-color:var(--color-gray-700);&:focus{--tw-ring-color:var(--color-gray-700)}}input:disabled,select:disabled,textarea:disabled{background-color:var(--color-gray-100);cursor:not-allowed;opacity:60%}.dark input:disabled,.dark select:disabled,.dark textarea:disabled{background-color:var(--color-gray-700);cursor:not-allowed;opacity:60%}.editor .item-row{align-items:center;background-color:var(--color-gray-50);border-radius:var(--radius-md);display:grid;gap:8px;grid-template-columns:1.2fr 1.1fr .9fr 2fr 1fr .9fr 1.3fr auto auto;padding-block:calc(var(--spacing)*1.5);padding-inline:calc(var(--spacing)*2)}.editor .item-row:hover{background-color:var(--color-gray-100)}.ushortcuts.dark .editor .item-row{background-color:var(--color-gray-800)}.ushortcuts.dark .editor .item-row:hover{background-color:var(--color-gray-700)}.editor .btn{border-radius:var(--radius-md);font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height));padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2)}.row label{color:var(--color-gray-500);width:120px}.ushortcuts.dark .row label{color:var(--color-gray-400)}.panel-actions,.panel-actions-left{align-items:center;display:flex;gap:calc(var(--spacing)*1.5)}.theme-switch{align-items:center;background-color:var(--color-gray-100);border-color:var(--color-gray-200);border-radius:calc(infinity*1px);border-style:var(--tw-border-style);border-width:1px;display:inline-flex;gap:calc(var(--spacing)*1);padding-block:2px;padding-inline:calc(var(--spacing)*1);--tw-shadow:0 1px 3px 0 var(--tw-shadow-color,rgba(0,0,0,.1)),0 1px 2px -1px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.ushortcuts.dark .theme-switch{background-color:var(--color-gray-800)}.theme-btn{align-items:center;border-radius:calc(infinity*1px);color:var(--color-gray-600);display:flex;height:calc(var(--spacing)*6);justify-content:center;padding:calc(var(--spacing)*0);transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));width:calc(var(--spacing)*6);--tw-duration:150ms;transition-duration:.15s;&:hover{@media (hover:hover){background-color:var(--color-gray-200)}}&:hover{@media (hover:hover){color:var(--color-gray-900)}}}.ushortcuts.dark .theme-btn{color:var(--color-gray-300);&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}&:hover{@media (hover:hover){color:var(--color-white)}}}.theme-btn.active{background-color:var(--color-white);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);--tw-ring-color:var(--color-gray-300)}.theme-btn.active,.ushortcuts.dark .theme-btn.active{box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.ushortcuts.dark .theme-btn.active{background-color:var(--color-gray-700);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);--tw-ring-color:var(--color-gray-600)}.collapse-btn{align-items:center;border-radius:var(--radius-md);color:var(--color-gray-600);display:flex;height:calc(var(--spacing)*6);justify-content:center;padding:calc(var(--spacing)*0);transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));width:calc(var(--spacing)*6);--tw-duration:150ms;transition-duration:.15s;&:hover{@media (hover:hover){background-color:var(--color-gray-200)}}&:hover{@media (hover:hover){color:var(--color-gray-900)}}}.ushortcuts.dark .collapse-btn{color:var(--color-gray-300);&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}&:hover{@media (hover:hover){color:var(--color-white)}}}.item+.icon-btn{justify-self:flex-end}.items{align-items:center;margin-top:calc(var(--spacing)*1.5)}.item-wrap{align-items:center;display:flex;gap:8px;justify-content:space-between}.item-wrap .item{flex:1}.item-wrap .icon-btn{opacity:0;transition:opacity .15s ease-in-out}.item-wrap:hover .icon-btn{opacity:1}.item-wrap:focus-within .icon-btn{opacity:1}.quick-add-menu{background-color:var(--color-white);border-color:var(--color-gray-200);border-radius:var(--radius-lg);border-style:var(--tw-border-style);border-width:1px;font-family:var(--font-sans);font-size:13px;min-width:160px;padding:calc(var(--spacing)*1.5);position:fixed;z-index:2147483647;--tw-shadow:0 20px 25px -5px var(--tw-shadow-color,rgba(0,0,0,.1)),0 8px 10px -6px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.ushortcuts.dark .quick-add-menu,.ushortcuts.dark~.quick-add-menu{background-color:var(--color-gray-900);border-color:var(--color-gray-700);color:var(--color-gray-100);--tw-shadow-color:color-mix(in srgb,#000 40%,transparent);@supports (color:color-mix(in lab,red,red)){--tw-shadow-color:color-mix(in oklab,color-mix(in oklab,var(--color-black) 40%,transparent) var(--tw-shadow-alpha),transparent)}}.quick-add-item{align-items:center;border-radius:var(--radius-md);color:var(--color-gray-900);display:flex;gap:calc(var(--spacing)*1.5);padding-block:calc(var(--spacing)*1.5);padding-inline:calc(var(--spacing)*2);text-align:left;transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));width:100%;--tw-duration:150ms;transition-duration:.15s;&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}}.ushortcuts.dark .quick-add-menu .quick-add-item,.ushortcuts.dark~.quick-add-menu .quick-add-item{color:var(--color-gray-100);&:hover{@media (hover:hover){background-color:var(--color-gray-800)}}}.ushortcuts.dark .quick-add-menu .icon img.lucide-icon,.ushortcuts.dark~.quick-add-menu .icon img.lucide-icon{filter:invert(1) brightness(1.15) saturate(1.1)}.picker-highlight{cursor:pointer!important;outline:2px dashed #ef4444!important;outline-offset:2px!important}.picker-tip{background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 10px 20px rgba(0,0,0,.1);color:#111827;font:13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;padding:6px 10px;position:fixed;right:12px;top:12px;z-index:2147483647}.ushortcuts.dark .picker-tip,.ushortcuts.dark~.picker-tip{background:#111827;border-color:#374151;color:#f9fafb}.panel.all-mode{height:100vh;max-width:100vw;overflow:hidden;width:100vw}.panel-scroll{height:calc(100% - 36px);overflow-x:auto;width:100%}.panel.all-mode .header{background-color:#fff;position:sticky;top:0;z-index:2147483647}.ushortcuts.dark .panel.all-mode .header{background-color:#111827}.panel-columns{-moz-column-gap:12px;column-gap:12px;-moz-column-width:360px;column-width:360px;height:100%}.divider,.section{-moz-column-break-inside:avoid;break-inside:avoid}.check{align-items:center;display:inline-flex;gap:calc(var(--spacing)*2);height:32px}.check input[type=checkbox]{height:14px;width:14px}.item-wrap,.section{transition:opacity .15s ease}@keyframes ushortcuts-fade-in{0%{opacity:.01}to{opacity:1}}.item-wrap.fade-in,.section.fade-in{animation:ushortcuts-fade-in .15s ease both}.section.is-hidden .header{opacity:60%}.section.is-hidden{background-color:var(--color-gray-50);border-radius:var(--radius-lg);outline-color:var(--color-gray-300);outline-style:var(--tw-outline-style);outline-width:1px;--tw-outline-style:dashed;outline-style:dashed}.ushortcuts.dark .section.is-hidden{background-color:var(--color-gray-800);outline-color:var(--color-gray-600)}.item-wrap.is-hidden .item{opacity:60%}.item-wrap.is-hidden{border-radius:var(--radius-md);outline-color:var(--color-gray-300);outline-style:var(--tw-outline-style);outline-width:1px;--tw-outline-style:dashed;outline-style:dashed}.ushortcuts.dark .item-wrap.is-hidden{outline-color:var(--color-gray-600)}.empty-msg{color:var(--color-gray-500);font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height));padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2)}.ushortcuts.dark .empty-msg{color:var(--color-gray-400)}.segmented label.seg-item{min-width:50px;width:unset}@property --tw-rotate-x{syntax:"*";inherits:false}@property --tw-rotate-y{syntax:"*";inherits:false}@property --tw-rotate-z{syntax:"*";inherits:false}@property --tw-skew-x{syntax:"*";inherits:false}@property --tw-skew-y{syntax:"*";inherits:false}@property --tw-border-style{syntax:"*";inherits:false;initial-value:solid}@property --tw-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-shadow-color{syntax:"*";inherits:false}@property --tw-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-shadow-color{syntax:"*";inherits:false}@property --tw-inset-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-ring-color{syntax:"*";inherits:false}@property --tw-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-ring-color{syntax:"*";inherits:false}@property --tw-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-ring-inset{syntax:"*";inherits:false}@property --tw-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0}@property --tw-ring-offset-color{syntax:"*";inherits:false;initial-value:#fff}@property --tw-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-duration{syntax:"*";inherits:false}@property --tw-font-weight{syntax:"*";inherits:false}@property --tw-leading{syntax:"*";inherits:false}@property --tw-tracking{syntax:"*";inherits:false}@property --tw-outline-style{syntax:"*";inherits:false;initial-value:solid}@layer properties{*,::backdrop,:after,:before{--tw-rotate-x:initial;--tw-rotate-y:initial;--tw-rotate-z:initial;--tw-skew-x:initial;--tw-skew-y:initial;--tw-border-style:solid;--tw-shadow:0 0 #0000;--tw-shadow-color:initial;--tw-shadow-alpha:100%;--tw-inset-shadow:0 0 #0000;--tw-inset-shadow-color:initial;--tw-inset-shadow-alpha:100%;--tw-ring-color:initial;--tw-ring-shadow:0 0 #0000;--tw-inset-ring-color:initial;--tw-inset-ring-shadow:0 0 #0000;--tw-ring-inset:initial;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-offset-shadow:0 0 #0000;--tw-duration:initial;--tw-font-weight:initial;--tw-leading:initial;--tw-tracking:initial;--tw-outline-style:solid}}'
+    '/*! tailwindcss v4.1.17 | MIT License | https://tailwindcss.com */@layer properties;@layer theme, base, components, utilities;@layer theme{:host,:root{--font-sans:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--color-red-300:oklch(80.8% 0.114 19.571);--color-red-400:oklch(70.4% 0.191 22.216);--color-red-500:oklch(63.7% 0.237 25.331);--color-red-600:oklch(57.7% 0.245 27.325);--color-blue-300:oklch(80.9% 0.105 251.813);--color-blue-400:oklch(70.7% 0.165 254.624);--color-blue-500:oklch(62.3% 0.214 259.815);--color-blue-600:oklch(54.6% 0.245 262.881);--color-blue-700:oklch(48.8% 0.243 264.376);--color-gray-50:oklch(98.5% 0.002 247.839);--color-gray-100:oklch(96.7% 0.003 264.542);--color-gray-200:oklch(92.8% 0.006 264.531);--color-gray-300:oklch(87.2% 0.01 258.338);--color-gray-400:oklch(70.7% 0.022 261.325);--color-gray-500:oklch(55.1% 0.027 264.364);--color-gray-600:oklch(44.6% 0.03 256.802);--color-gray-700:oklch(37.3% 0.034 259.733);--color-gray-800:oklch(27.8% 0.033 256.848);--color-gray-900:oklch(21% 0.034 264.665);--color-black:#000;--color-white:#fff;--spacing:0.25rem;--text-xs:0.75rem;--text-xs--line-height:1.33333;--text-sm:0.875rem;--text-sm--line-height:1.42857;--text-lg:1.125rem;--text-lg--line-height:1.55556;--font-weight-normal:400;--font-weight-medium:500;--font-weight-semibold:600;--font-weight-bold:700;--tracking-wider:0.05em;--leading-snug:1.375;--radius-md:0.375rem;--radius-lg:0.5rem;--radius-xl:0.75rem;--radius-2xl:1rem;--default-transition-duration:150ms;--default-transition-timing-function:cubic-bezier(0.4,0,0.2,1);--default-font-family:var(--font-sans);--default-mono-font-family:var(--font-mono)}}@layer base{*,::backdrop,::file-selector-button,:after,:before{border:0 solid;box-sizing:border-box;margin:0;padding:0}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;font-family:var(--default-font-family,ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji");font-feature-settings:var(--default-font-feature-settings,normal);font-variation-settings:var(--default-font-variation-settings,normal);-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-tap-highlight-color:transparent}hr{border-top-width:1px;color:inherit;height:0}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:var(--default-mono-font-family,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace);font-feature-settings:var(--default-mono-font-feature-settings,normal);font-size:1em;font-variation-settings:var(--default-mono-font-variation-settings,normal)}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{border-collapse:collapse;border-color:inherit;text-indent:0}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}menu,ol,ul{list-style:none}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{height:auto;max-width:100%}::file-selector-button,button,input,optgroup,select,textarea{background-color:transparent;border-radius:0;color:inherit;font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::-moz-placeholder{opacity:1}::placeholder{opacity:1}@supports (not (-webkit-appearance:-apple-pay-button)) or (contain-intrinsic-size:1px){::-moz-placeholder{color:currentcolor;@supports (color:color-mix(in lab,red,red)){color:color-mix(in oklab,currentcolor 50%,transparent)}}::placeholder{color:currentcolor;@supports (color:color-mix(in lab,red,red)){color:color-mix(in oklab,currentcolor 50%,transparent)}}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-meridiem-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-year-field{padding-block:0}::-webkit-calendar-picker-indicator{line-height:1}:-moz-ui-invalid{box-shadow:none}::file-selector-button,button,input:where([type=button],[type=reset],[type=submit]){-webkit-appearance:button;-moz-appearance:button;appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}}@layer utilities{.visible{visibility:visible}.fixed{position:fixed}.container{width:100%;@media (width >= 40rem){max-width:40rem}@media (width >= 48rem){max-width:48rem}@media (width >= 64rem){max-width:64rem}@media (width >= 80rem){max-width:80rem}@media (width >= 96rem){max-width:96rem}}.mt-4{margin-top:calc(var(--spacing)*4)}.mb-3{margin-bottom:calc(var(--spacing)*3)}.flex{display:flex}.grid{display:grid}.hidden{display:none}.inline-flex{display:inline-flex}.w-full{width:100%}.flex-1{flex:1}.transform{transform:var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,)}.justify-center{justify-content:center}.justify-end{justify-content:flex-end}.gap-2{gap:calc(var(--spacing)*2)}.text-xs{font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height))}.text-red-600{color:var(--color-red-600)}.shadow{--tw-shadow:0 1px 3px 0 var(--tw-shadow-color,rgba(0,0,0,.1)),0 1px 2px -1px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}}:host{all:initial}div{line-height:normal}.ushortcuts{color:var(--color-gray-900);font-family:var(--font-sans);font-size:13px;position:fixed;z-index:2147483647}.ushortcuts.dark{color:var(--color-gray-100)}.panel{background-color:var(--color-white);border-color:var(--color-gray-200);border-radius:var(--radius-xl);border-style:var(--tw-border-style);border-width:1px;display:flex;flex-direction:column;gap:calc(var(--spacing)*3);max-height:100vh;max-width:360px;overflow-y:auto;padding:calc(var(--spacing)*3);--tw-shadow:0 20px 25px -5px var(--tw-shadow-color,rgba(0,0,0,.1)),0 8px 10px -6px var(--tw-shadow-color,rgba(0,0,0,.1))}.panel,.ushortcuts.dark .panel{box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.ushortcuts.dark .panel{background-color:var(--color-gray-900);border-color:var(--color-gray-700);--tw-shadow:0 25px 50px -12px var(--tw-shadow-color,rgba(0,0,0,.25))}.panel.sidebar-right{border-bottom-width:0;border-right-width:0;border-top-width:0;box-shadow:unset;width:360px}.panel.sidebar-left{border-bottom-width:0;border-left-width:0;border-top-width:0;box-shadow:unset;width:360px}@keyframes ushortcuts-slide-in-left{0%{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}@keyframes ushortcuts-slide-in-right{0%{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}@keyframes ushortcuts-slide-in-top{0%{opacity:0;transform:translateY(0)}to{opacity:1;transform:translateY(0)}}@keyframes ushortcuts-slide-in-bottom{0%{opacity:0;transform:translateY(0)}to{opacity:1;transform:translateY(0)}}@keyframes ushortcuts-slide-out-left{0%{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-12px)}}@keyframes ushortcuts-slide-out-right{0%{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(12px)}}@keyframes ushortcuts-slide-out-top{0%{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(0)}}@keyframes ushortcuts-slide-out-bottom{0%{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(0)}}.anim-in-left{animation:ushortcuts-slide-in-left .2s ease-out}.anim-in-right{animation:ushortcuts-slide-in-right .2s ease-out}.anim-in-top{animation:ushortcuts-slide-in-top .2s ease-out}.anim-in-bottom{animation:ushortcuts-slide-in-bottom .2s ease-out}.anim-out-left{animation:ushortcuts-slide-out-left .18s ease-in forwards}.anim-out-right{animation:ushortcuts-slide-out-right .18s ease-in forwards}.anim-out-top{animation:ushortcuts-slide-out-top .18s ease-in forwards}.anim-out-bottom{animation:ushortcuts-slide-out-bottom .18s ease-in forwards}.header{gap:calc(var(--spacing)*2);justify-content:space-between}.header,.header-actions{align-items:center;display:flex}.header-actions{gap:calc(var(--spacing)*1.5)}.header-actions .icon-btn{opacity:0;transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:opacity;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));--tw-duration:150ms;transition-duration:.15s}.header-actions .icon-btn.toggle,.section .header:hover .header-actions .icon-btn:not(.toggle){opacity:100%}.section .header{margin-bottom:calc(var(--spacing)*0)}.icon-btn{align-items:center;border-radius:var(--radius-md);color:var(--color-gray-600);display:flex;height:calc(var(--spacing)*6);justify-content:center;padding:calc(var(--spacing)*0);transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));width:calc(var(--spacing)*6);--tw-duration:150ms;transition-duration:.15s;&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}&:hover{@media (hover:hover){color:var(--color-gray-900)}}}.modal.dark .icon-btn,.ushortcuts.dark .icon-btn{color:var(--color-gray-300);&:hover{@media (hover:hover){background-color:var(--color-gray-800)}}&:hover{@media (hover:hover){color:var(--color-white)}}}.modal.dark .icon img.lucide-icon,.ushortcuts.dark .icon img.lucide-icon{filter:invert(1) brightness(1.15) saturate(1.1)}.icon-btn.active{background-color:var(--color-gray-200);color:var(--color-gray-900);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);--tw-ring-color:var(--color-gray-300)}.icon-btn.active,.modal.dark .icon-btn.active,.ushortcuts.dark .icon-btn.active{box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.modal.dark .icon-btn.active,.ushortcuts.dark .icon-btn.active{background-color:var(--color-gray-700);color:var(--color-white);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);--tw-ring-color:var(--color-gray-600)}.text-danger{color:var(--color-red-500)}.text-danger:hover{color:var(--color-red-600)}.modal.dark .text-danger,.ushortcuts.dark .text-danger{color:var(--color-red-400)}.modal.dark .text-danger:hover,.ushortcuts.dark .text-danger:hover{color:var(--color-red-300)}.title{align-items:center;display:flex;gap:calc(var(--spacing)*1.5);--tw-font-weight:var(--font-weight-semibold);color:var(--color-gray-800);font-weight:var(--font-weight-semibold)}.ushortcuts.dark .title{color:var(--color-gray-100)}.btn{align-items:center;-webkit-appearance:none;-moz-appearance:none;appearance:none;background-color:var(--color-white);border-color:var(--color-gray-300);border-radius:var(--radius-lg);border-style:var(--tw-border-style);border-width:1px;cursor:pointer;display:inline-flex;gap:calc(var(--spacing)*1.5);justify-content:center;padding-block:calc(var(--spacing)*1.5);padding-inline:calc(var(--spacing)*2.5);--tw-font-weight:var(--font-weight-medium);color:var(--color-gray-800);font-weight:var(--font-weight-medium);--tw-shadow:0 1px 3px 0 var(--tw-shadow-color,rgba(0,0,0,.1)),0 1px 2px -1px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:all;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));--tw-duration:150ms;transition-duration:.15s;&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}&:focus{--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);--tw-ring-color:var(--color-gray-300);--tw-outline-style:none;outline-style:none}&:active{scale:.99}}.ushortcuts.dark .btn{background-color:var(--color-gray-800);border-color:var(--color-gray-700);color:var(--color-gray-200);&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}&:focus{--tw-ring-color:var(--color-gray-700)}}.btn-primary{background-color:var(--color-blue-600);border-color:var(--color-blue-600);color:var(--color-white);--tw-shadow:0 4px 6px -1px var(--tw-shadow-color,rgba(0,0,0,.1)),0 2px 4px -2px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);&:hover{@media (hover:hover){border-color:var(--color-blue-700)}}&:hover{@media (hover:hover){background-color:var(--color-blue-700)}}}.modal.dark .btn-primary,.ushortcuts.dark .btn-primary{background-color:var(--color-blue-500);border-color:var(--color-blue-500);color:var(--color-white);&:hover{@media (hover:hover){border-color:var(--color-blue-600)}}&:hover{@media (hover:hover){background-color:var(--color-blue-600)}}}.btn-secondary{background-color:var(--color-gray-100);border-color:var(--color-gray-300);color:var(--color-gray-800);&:hover{@media (hover:hover){background-color:var(--color-gray-200)}}}.modal.dark .btn-secondary,.ushortcuts.dark .btn-secondary{background-color:var(--color-gray-800);border-color:var(--color-gray-700);color:var(--color-gray-200);&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}}.items{display:grid;gap:calc(var(--spacing)*1);grid-template-columns:repeat(var(--cols,1),minmax(0,1fr))}.items input[type=checkbox]{flex:none;height:14px;width:14px}.item{align-items:center;border-radius:var(--radius-md);color:var(--color-gray-900);display:inline-flex;gap:calc(var(--spacing)*1.5);min-width:calc(var(--spacing)*0);overflow:hidden;padding-block:calc(var(--spacing)*1.5);padding-inline:calc(var(--spacing)*2);text-decoration-line:none;text-overflow:ellipsis;transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));white-space:nowrap;--tw-duration:150ms;transition-duration:.15s;width:100%}.item:hover{background-color:var(--color-gray-100)}.ushortcuts.dark .item:hover{background-color:var(--color-gray-800)}.ushortcuts.dark .item{background-color:var(--color-gray-800);border-color:var(--color-gray-700);color:var(--color-gray-100);&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}}.icon{align-items:center;display:inline-flex;flex:none;height:calc(var(--spacing)*4);justify-content:center;overflow:hidden;width:calc(var(--spacing)*4);--tw-leading:1;line-height:1;white-space:nowrap}.collapsed-tab{background-color:var(--color-gray-700);border-radius:0;height:60px;opacity:40%;position:fixed;width:3px;z-index:2147483647}.ushortcuts.dark .collapsed-tab{background-color:var(--color-gray-400);opacity:40%}.collapsed-tab:hover{opacity:80%}.modal-mask{align-items:center;background-color:color-mix(in srgb,#000 40%,transparent);display:flex;inset:calc(var(--spacing)*0);justify-content:center;position:fixed;z-index:2147483647;@supports (color:color-mix(in lab,red,red)){background-color:color-mix(in oklab,var(--color-black) 40%,transparent)}}.modal{color:var(--color-gray-900);font-family:var(--font-sans);font-size:13px}.modal h2:not(.section-title){font-size:16px;margin:calc(var(--spacing)*0);margin-bottom:calc(var(--spacing)*2.5)}.row{display:flex;flex-wrap:wrap;gap:calc(var(--spacing)*2);margin-block:calc(var(--spacing)*1.5)}.modal .row{align-items:center}.modal .actions{justify-content:flex-end}.modal .check{align-items:center;display:inline-flex;gap:calc(var(--spacing)*2);height:32px;width:unset!important}.modal .check input[type=checkbox]{height:14px;width:14px}.segmented{align-items:center;background-color:var(--color-gray-100);border-color:var(--color-gray-200);border-radius:calc(infinity*1px);border-style:var(--tw-border-style);border-width:1px;display:inline-flex;gap:calc(var(--spacing)*1);padding-block:calc(var(--spacing)*.5);padding-inline:calc(var(--spacing)*1);--tw-shadow:0 1px 3px 0 var(--tw-shadow-color,rgba(0,0,0,.1)),0 1px 2px -1px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.modal .segmented{margin-bottom:calc(var(--spacing)*3)}.ushortcuts.dark .segmented{background-color:var(--color-gray-800);border-color:var(--color-gray-700)}.seg-item{align-items:center;border-radius:calc(infinity*1px);cursor:pointer;display:inline-flex;-webkit-user-select:none;-moz-user-select:none;user-select:none}.seg-radio{border-width:0;clip-path:inset(50%);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;white-space:nowrap;width:1px}.seg-text{border-radius:calc(infinity*1px);color:var(--color-gray-700);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2);text-align:center;width:100%}.ushortcuts.dark .seg-text{color:var(--color-gray-300)}.seg-item .seg-radio:checked+.seg-text{background-color:var(--color-white);color:var(--color-gray-900);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);--tw-ring-color:var(--color-gray-300)}.seg-item .seg-radio:checked+.seg-text,.ushortcuts.dark .seg-item .seg-radio:checked+.seg-text{box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.ushortcuts.dark .seg-item .seg-radio:checked+.seg-text{background-color:var(--color-gray-700);color:var(--color-gray-100);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);--tw-ring-color:var(--color-gray-600)}.seg-item .seg-radio:focus+.seg-text{--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);--tw-ring-color:var(--color-blue-500)}.field-help{background-color:var(--color-gray-100);border-radius:var(--radius-md);display:block;flex-basis:100%;font-size:12px;margin-left:130px;padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2);width:100%;--tw-leading:var(--leading-snug);color:var(--color-gray-700);line-height:var(--leading-snug)}.modal.dark .field-help,.ushortcuts.dark .field-help{background-color:var(--color-gray-800);color:var(--color-gray-300)}.field-help-title{align-items:center;display:flex;gap:calc(var(--spacing)*1);margin-bottom:calc(var(--spacing)*1);--tw-font-weight:var(--font-weight-semibold);font-weight:var(--font-weight-semibold)}.field-help a{color:var(--color-blue-600);text-decoration-line:underline}.modal.dark .field-help a,.ushortcuts.dark .field-help a{color:var(--color-blue-400);text-decoration-line:underline}input,select,textarea{border-color:var(--color-gray-300);border-radius:var(--radius-lg);border-style:var(--tw-border-style);border-width:1px;flex:1;font-size:13px;padding-block:calc(var(--spacing)*1.5);padding-inline:calc(var(--spacing)*2)}textarea{min-height:80px}.grid{display:grid;gap:calc(var(--spacing)*2);grid-template-columns:repeat(2,minmax(0,1fr))}.group-list{display:flex;flex-wrap:wrap;gap:calc(var(--spacing)*1.5);margin-top:calc(var(--spacing)*1.5)}.group-pill{border-color:var(--color-gray-200);border-radius:calc(infinity*1px);border-style:var(--tw-border-style);border-width:1px;cursor:pointer;padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2);transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));--tw-duration:150ms;transition-duration:.15s;&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}}.group-pill.active{background-color:var(--color-gray-900);border-color:var(--color-gray-900);color:var(--color-white)}.modal.dark .group-pill,.ushortcuts.dark .group-pill{border-color:var(--color-gray-700);color:var(--color-gray-200);&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}}.modal.dark .group-pill.active,.ushortcuts.dark .group-pill.active{background-color:var(--color-gray-100);border-color:var(--color-gray-100);color:var(--color-gray-900)}.mini{border-radius:var(--radius-md);font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height));padding-block:calc(var(--spacing)*.5);padding-inline:calc(var(--spacing)*1.5)}.btn:disabled{cursor:not-allowed;opacity:50%}.divider{background-color:var(--color-gray-200);height:1px}.modal.dark .divider,.ushortcuts.dark .divider{background-color:var(--color-gray-700)}.section-title{background-color:var(--color-gray-100);border-radius:var(--radius-md);font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height));margin-bottom:calc(var(--spacing)*1);margin-top:calc(var(--spacing)*3);padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2);--tw-tracking:var(--tracking-wider);color:var(--color-gray-600);letter-spacing:var(--tracking-wider);text-transform:uppercase}.modal.dark .section-title,.ushortcuts.dark .section-title{background-color:var(--color-gray-800);color:var(--color-gray-300)}.row label.mini{align-items:center;display:inline-flex;gap:calc(var(--spacing)*2)}.modal{background-color:var(--color-white);border-radius:var(--radius-2xl);max-width:92vw;padding:calc(var(--spacing)*3);width:720px;--tw-shadow:0 25px 50px -12px var(--tw-shadow-color,rgba(0,0,0,.25));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.modal.dark,.ushortcuts.dark .modal{background-color:var(--color-gray-900);color:var(--color-gray-100)}.modal.dark input,.modal.dark select,.modal.dark textarea,.ushortcuts.dark .modal input,.ushortcuts.dark .modal select,.ushortcuts.dark .modal textarea{background-color:var(--color-gray-800);border-color:var(--color-gray-700);color:var(--color-gray-100)}.ushortcuts.dark .modal input::-moz-placeholder,.ushortcuts.dark .modal textarea::-moz-placeholder{color:#9ca3af}.ushortcuts.dark .modal input::placeholder,.ushortcuts.dark .modal textarea::placeholder{color:#9ca3af}.modal.dark input::-moz-placeholder,.modal.dark textarea::-moz-placeholder{color:#9ca3af}.modal.dark input::placeholder,.modal.dark textarea::placeholder{color:#9ca3af}.modal.dark .row label{color:var(--color-gray-400)}.modal.dark .segmented{background-color:var(--color-gray-800);border-color:var(--color-gray-700)}.modal.dark .seg-item .seg-radio:checked+.seg-text{background-color:var(--color-gray-700);color:var(--color-gray-100);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);--tw-ring-color:var(--color-gray-600)}.modal.dark .seg-text{color:var(--color-gray-300)}.editor{border-radius:var(--radius-2xl);max-height:72vh;overflow-y:auto;padding:calc(var(--spacing)*4)}.editor .grid,.editor .row{gap:calc(var(--spacing)*2)}.editor .row{align-items:center}.editor .row label{color:var(--color-gray-500);width:120px}.ushortcuts.dark .editor .row label{color:var(--color-gray-400)}.editor input,.editor select,.editor textarea{background-color:var(--color-white);border-color:var(--color-gray-300);border-radius:var(--radius-md);border-style:var(--tw-border-style);border-width:1px;padding-block:calc(var(--spacing)*1.5);padding-inline:calc(var(--spacing)*2);&:focus{--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow);--tw-ring-color:var(--color-gray-300);--tw-outline-style:none;outline-style:none}}.ushortcuts.dark .editor input,.ushortcuts.dark .editor select,.ushortcuts.dark .editor textarea{background-color:var(--color-gray-800);border-color:var(--color-gray-700);&:focus{--tw-ring-color:var(--color-gray-700)}}input:disabled,select:disabled,textarea:disabled{background-color:var(--color-gray-100);cursor:not-allowed;opacity:60%}.dark input:disabled,.dark select:disabled,.dark textarea:disabled{background-color:var(--color-gray-700);cursor:not-allowed;opacity:60%}.editor .item-row{align-items:center;background-color:var(--color-gray-50);border-radius:var(--radius-md);display:grid;gap:8px;grid-template-columns:1.2fr 1.1fr .9fr 2fr 1fr .9fr 1.3fr auto auto;padding-block:calc(var(--spacing)*1.5);padding-inline:calc(var(--spacing)*2)}.editor .item-row:hover{background-color:var(--color-gray-100)}.modal.dark .item-row,.ushortcuts.dark .editor .item-row{background-color:var(--color-gray-800)}.modal.dark .item-row:hover,.ushortcuts.dark .editor .item-row:hover{background-color:var(--color-gray-700)}.editor .btn{border-radius:var(--radius-md);font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height));padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2)}.row label{color:var(--color-gray-500);width:120px}.ushortcuts.dark .row label{color:var(--color-gray-400)}.panel-actions,.panel-actions-left{align-items:center;display:flex;gap:calc(var(--spacing)*1.5)}.theme-switch{align-items:center;background-color:var(--color-gray-100);border-color:var(--color-gray-200);border-radius:calc(infinity*1px);border-style:var(--tw-border-style);border-width:1px;display:inline-flex;gap:calc(var(--spacing)*1);padding-block:2px;padding-inline:calc(var(--spacing)*1);--tw-shadow:0 1px 3px 0 var(--tw-shadow-color,rgba(0,0,0,.1)),0 1px 2px -1px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.modal.dark .theme-switch,.ushortcuts.dark .theme-switch{background-color:var(--color-gray-800)}.theme-btn{align-items:center;border-radius:calc(infinity*1px);color:var(--color-gray-600);display:flex;height:calc(var(--spacing)*6);justify-content:center;padding:calc(var(--spacing)*0);transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));width:calc(var(--spacing)*6);--tw-duration:150ms;transition-duration:.15s;&:hover{@media (hover:hover){background-color:var(--color-gray-200)}}&:hover{@media (hover:hover){color:var(--color-gray-900)}}}.modal.dark .theme-btn,.ushortcuts.dark .theme-btn{color:var(--color-gray-300);&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}&:hover{@media (hover:hover){color:var(--color-white)}}}.theme-btn.active{background-color:var(--color-white);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);--tw-ring-color:var(--color-gray-300)}.modal.dark .theme-btn.active,.theme-btn.active,.ushortcuts.dark .theme-btn.active{box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.modal.dark .theme-btn.active,.ushortcuts.dark .theme-btn.active{background-color:var(--color-gray-700);--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);--tw-ring-color:var(--color-gray-600)}.collapse-btn{align-items:center;border-radius:var(--radius-md);color:var(--color-gray-600);display:flex;height:calc(var(--spacing)*6);justify-content:center;padding:calc(var(--spacing)*0);transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));width:calc(var(--spacing)*6);--tw-duration:150ms;transition-duration:.15s;&:hover{@media (hover:hover){background-color:var(--color-gray-200)}}&:hover{@media (hover:hover){color:var(--color-gray-900)}}}.ushortcuts.dark .collapse-btn{color:var(--color-gray-300);&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}&:hover{@media (hover:hover){color:var(--color-white)}}}.item+.icon-btn{justify-self:flex-end}.items{align-items:center;margin-top:calc(var(--spacing)*1.5)}.item-wrap{align-items:center;display:flex;gap:8px;justify-content:space-between}.item-wrap .item{flex:1}.item-wrap .icon-btn{opacity:0;transition:opacity .15s ease-in-out}.item-wrap:hover .icon-btn{opacity:1}.item-wrap:focus-within .icon-btn{opacity:1}.quick-add-menu{background-color:var(--color-white);border-color:var(--color-gray-200);border-radius:var(--radius-lg);border-style:var(--tw-border-style);border-width:1px;font-family:var(--font-sans);font-size:13px;min-width:160px;padding:calc(var(--spacing)*1.5);position:fixed;z-index:2147483647;--tw-shadow:0 20px 25px -5px var(--tw-shadow-color,rgba(0,0,0,.1)),0 8px 10px -6px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.ushortcuts.dark .quick-add-menu,.ushortcuts.dark~.quick-add-menu{background-color:var(--color-gray-900);border-color:var(--color-gray-700);color:var(--color-gray-100);--tw-shadow-color:color-mix(in srgb,#000 40%,transparent);@supports (color:color-mix(in lab,red,red)){--tw-shadow-color:color-mix(in oklab,color-mix(in oklab,var(--color-black) 40%,transparent) var(--tw-shadow-alpha),transparent)}}.quick-add-item{align-items:center;border-radius:var(--radius-md);color:var(--color-gray-900);display:flex;gap:calc(var(--spacing)*1.5);padding-block:calc(var(--spacing)*1.5);padding-inline:calc(var(--spacing)*2);text-align:left;transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));width:100%;--tw-duration:150ms;transition-duration:.15s;&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}}.ushortcuts.dark .quick-add-menu .quick-add-item,.ushortcuts.dark~.quick-add-menu .quick-add-item{color:var(--color-gray-100);&:hover{@media (hover:hover){background-color:var(--color-gray-800)}}}.ushortcuts.dark .quick-add-menu .icon img.lucide-icon,.ushortcuts.dark~.quick-add-menu .icon img.lucide-icon{filter:invert(1) brightness(1.15) saturate(1.1)}.picker-highlight{cursor:pointer!important;outline:2px dashed #ef4444!important;outline-offset:2px!important}.picker-tip{background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 10px 20px rgba(0,0,0,.1);color:#111827;font:13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;padding:6px 10px;position:fixed;right:12px;top:12px;z-index:2147483647}.ushortcuts.dark .picker-tip,.ushortcuts.dark~.picker-tip{background:#111827;border-color:#374151;color:#f9fafb}.panel.all-mode{height:100vh;max-width:100vw;overflow:hidden;width:100vw}.panel-scroll{height:calc(100% - 36px);overflow-x:auto;width:100%}.panel.all-mode .header{background-color:#fff;position:sticky;top:0;z-index:2147483647}.ushortcuts.dark .panel.all-mode .header{background-color:#111827}.panel-columns{-moz-column-gap:12px;column-gap:12px;-moz-column-width:360px;column-width:360px;height:100%}.divider,.section{-moz-column-break-inside:avoid;break-inside:avoid}.check{align-items:center;display:inline-flex;gap:calc(var(--spacing)*2);height:32px}.check input[type=checkbox]{height:14px;width:14px}.item-wrap,.section{transition:opacity .15s ease}@keyframes ushortcuts-fade-in{0%{opacity:.01}to{opacity:1}}.item-wrap.fade-in,.section.fade-in{animation:ushortcuts-fade-in .15s ease both}.section.is-hidden .header{opacity:60%}.section.is-hidden{background-color:var(--color-gray-50);border-radius:var(--radius-lg);outline-color:var(--color-gray-300);outline-style:var(--tw-outline-style);outline-width:1px;--tw-outline-style:dashed;outline-style:dashed}.ushortcuts.dark .section.is-hidden{background-color:var(--color-gray-800);outline-color:var(--color-gray-600)}.item-wrap.is-hidden .item{opacity:60%}.item-wrap.is-hidden{border-radius:var(--radius-md);outline-color:var(--color-gray-300);outline-style:var(--tw-outline-style);outline-width:1px;--tw-outline-style:dashed;outline-style:dashed}.ushortcuts.dark .item-wrap.is-hidden{outline-color:var(--color-gray-600)}.empty-msg{color:var(--color-gray-500);font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height));padding-block:calc(var(--spacing)*1);padding-inline:calc(var(--spacing)*2)}.ushortcuts.dark .empty-msg{color:var(--color-gray-400)}.segmented label.seg-item{min-width:50px;width:unset}.panel-split{border-color:var(--color-gray-200);border-radius:var(--radius-lg);border-style:var(--tw-border-style);border-width:1px;display:flex;height:500px;max-height:70vh;overflow:hidden}.modal.dark .panel-split,.ushortcuts.dark .panel-split{border-color:var(--color-gray-700)}.panel-sidebar{background-color:var(--color-gray-50);border-color:var(--color-gray-200);border-right-style:var(--tw-border-style);border-right-width:1px;display:flex;flex:none;flex-direction:column;overflow-y:auto;width:160px}.modal.dark .panel-sidebar,.ushortcuts.dark .panel-sidebar{background-color:color-mix(in srgb,oklch(27.8% .033 256.848) 50%,transparent);border-color:var(--color-gray-700);@supports (color:color-mix(in lab,red,red)){background-color:color-mix(in oklab,var(--color-gray-800) 50%,transparent)}}.sidebar-item{border-bottom-style:var(--tw-border-style);border-bottom-width:1px;border-color:var(--color-gray-100);cursor:pointer;padding-block:calc(var(--spacing)*2);padding-inline:calc(var(--spacing)*3);text-align:left;transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));&:hover{@media (hover:hover){background-color:var(--color-gray-100)}}}.modal.dark .sidebar-item,.ushortcuts.dark .sidebar-item{border-color:color-mix(in srgb,oklch(37.3% .034 259.733) 50%,transparent);@supports (color:color-mix(in lab,red,red)){border-color:color-mix(in oklab,var(--color-gray-700) 50%,transparent)}&:hover{@media (hover:hover){background-color:var(--color-gray-700)}}}.sidebar-item.active{background-color:var(--color-white);border-left:4px var(--tw-border-style) var(--color-blue-500);border-right-color:transparent;--tw-shadow:0 1px 3px 0 var(--tw-shadow-color,rgba(0,0,0,.1)),0 1px 2px -1px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.modal.dark .sidebar-item.active,.ushortcuts.dark .sidebar-item.active{background-color:var(--color-gray-800);border-left-color:var(--color-blue-400)}.sidebar-item-name{display:block;font-size:var(--text-sm);line-height:var(--tw-leading,var(--text-sm--line-height));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;--tw-font-weight:var(--font-weight-medium);color:var(--color-gray-900);font-weight:var(--font-weight-medium)}.modal.dark .sidebar-item-name,.ushortcuts.dark .sidebar-item-name{color:var(--color-gray-100)}.sidebar-item-desc{display:block;font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height));margin-top:calc(var(--spacing)*.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;--tw-font-weight:var(--font-weight-normal);color:var(--color-gray-400);font-weight:var(--font-weight-normal)}.modal.dark .sidebar-item-desc,.ushortcuts.dark .sidebar-item-desc{color:var(--color-gray-500)}.sidebar-actions{background-color:var(--color-gray-50);border-color:var(--color-gray-200);border-top-style:var(--tw-border-style);border-top-width:1px;bottom:calc(var(--spacing)*0);display:flex;flex-direction:column;gap:calc(var(--spacing)*2);margin-top:auto;padding:calc(var(--spacing)*2);position:sticky}.modal.dark .sidebar-actions,.ushortcuts.dark .sidebar-actions{background-color:var(--color-gray-800);border-color:var(--color-gray-700)}.panel-content{background-color:var(--color-white);display:flex;flex:1;flex-direction:column;min-width:calc(var(--spacing)*0)}.modal.dark .panel-content,.ushortcuts.dark .panel-content{background-color:var(--color-gray-900)}.content-header{align-items:center;background-color:var(--color-white);border-bottom-style:var(--tw-border-style);border-bottom-width:1px;border-color:var(--color-gray-200);display:flex;justify-content:space-between;padding-block:calc(var(--spacing)*3);padding-inline:calc(var(--spacing)*4);position:sticky;top:calc(var(--spacing)*0);z-index:10}.modal.dark .content-header,.ushortcuts.dark .content-header{background-color:var(--color-gray-900);border-color:var(--color-gray-700)}.content-title{font-size:var(--text-lg);line-height:var(--tw-leading,var(--text-lg--line-height));--tw-font-weight:var(--font-weight-bold);color:var(--color-gray-900);font-weight:var(--font-weight-bold)}.modal.dark .content-title,.ushortcuts.dark .content-title{color:var(--color-gray-100)}.content-tabs{background-color:color-mix(in srgb,oklch(98.5% .002 247.839) 50%,transparent);border-bottom-style:var(--tw-border-style);border-bottom-width:1px;border-color:var(--color-gray-200);display:flex;gap:calc(var(--spacing)*4);@supports (color:color-mix(in lab,red,red)){background-color:color-mix(in oklab,var(--color-gray-50) 50%,transparent)}padding-inline:calc(var(--spacing)*4)}.modal.dark .content-tabs,.ushortcuts.dark .content-tabs{background-color:color-mix(in srgb,oklch(27.8% .033 256.848) 30%,transparent);border-color:var(--color-gray-700);@supports (color:color-mix(in lab,red,red)){background-color:color-mix(in oklab,var(--color-gray-800) 30%,transparent)}}.tab-btn{border-bottom:2px var(--tw-border-style);border-color:transparent;cursor:pointer;font-size:var(--text-sm);line-height:var(--tw-leading,var(--text-sm--line-height));padding-block:calc(var(--spacing)*2);--tw-font-weight:var(--font-weight-medium);color:var(--color-gray-500);font-weight:var(--font-weight-medium);&:hover{@media (hover:hover){color:var(--color-gray-700)}}}.modal.dark .tab-btn,.ushortcuts.dark .tab-btn{color:var(--color-gray-400);&:hover{@media (hover:hover){color:var(--color-gray-200)}}}.tab-btn.active{border-color:var(--color-blue-500);color:var(--color-blue-600)}.modal.dark .tab-btn.active,.ushortcuts.dark .tab-btn.active{border-color:var(--color-blue-400);color:var(--color-blue-400)}.tab-pane{flex:1;overflow-y:auto;padding:calc(var(--spacing)*4)}.shortcut-list{display:flex;flex-direction:column;gap:calc(var(--spacing)*2)}.shortcut-item{align-items:center;background-color:var(--color-white);border-color:var(--color-gray-200);border-radius:var(--radius-lg);border-style:var(--tw-border-style);border-width:1px;display:flex;gap:calc(var(--spacing)*3);padding:calc(var(--spacing)*2.5);transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:all;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));&:hover{@media (hover:hover){border-color:var(--color-blue-300)}}&:hover{@media (hover:hover){--tw-shadow:0 1px 3px 0 var(--tw-shadow-color,rgba(0,0,0,.1)),0 1px 2px -1px var(--tw-shadow-color,rgba(0,0,0,.1));box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}}}.modal.dark .shortcut-item,.ushortcuts.dark .shortcut-item{background-color:var(--color-gray-800);border-color:var(--color-gray-700);&:hover{@media (hover:hover){border-color:var(--color-gray-600)}}}.shortcut-item.is-hidden{--tw-border-style:dashed;background-color:var(--color-gray-50);border-style:dashed;opacity:60%}.modal.dark .shortcut-item.is-hidden,.ushortcuts.dark .shortcut-item.is-hidden{background-color:color-mix(in srgb,oklch(27.8% .033 256.848) 50%,transparent);@supports (color:color-mix(in lab,red,red)){background-color:color-mix(in oklab,var(--color-gray-800) 50%,transparent)}}.shortcut-icon{align-items:center;background-color:var(--color-gray-50);border-radius:var(--radius-md);color:var(--color-gray-500);display:flex;flex:none;height:calc(var(--spacing)*8);justify-content:center;overflow:hidden;width:calc(var(--spacing)*8)}.modal.dark .shortcut-icon,.ushortcuts.dark .shortcut-icon{background-color:var(--color-gray-700);color:var(--color-gray-400)}.shortcut-info{flex:1;min-width:calc(var(--spacing)*0)}.shortcut-name{font-size:var(--text-sm);line-height:var(--tw-leading,var(--text-sm--line-height));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;--tw-font-weight:var(--font-weight-medium);color:var(--color-gray-900);font-weight:var(--font-weight-medium)}.modal.dark .shortcut-name,.ushortcuts.dark .shortcut-name{color:var(--color-gray-100)}.shortcut-meta{align-items:center;color:var(--color-gray-400);display:flex;font-size:var(--text-xs);gap:calc(var(--spacing)*2);line-height:var(--tw-leading,var(--text-xs--line-height));margin-top:calc(var(--spacing)*.5)}.modal.dark .shortcut-meta,.ushortcuts.dark .shortcut-meta{color:var(--color-gray-500)}.shortcut-actions{align-items:center;display:flex;gap:calc(var(--spacing)*1);opacity:0;transition-duration:var(--tw-duration,var(--default-transition-duration));transition-property:opacity;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function))}.group:hover .shortcut-actions{opacity:1}.shortcut-actions .icon-btn{height:calc(var(--spacing)*7);width:calc(var(--spacing)*7)}@property --tw-rotate-x{syntax:"*";inherits:false}@property --tw-rotate-y{syntax:"*";inherits:false}@property --tw-rotate-z{syntax:"*";inherits:false}@property --tw-skew-x{syntax:"*";inherits:false}@property --tw-skew-y{syntax:"*";inherits:false}@property --tw-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-shadow-color{syntax:"*";inherits:false}@property --tw-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-shadow-color{syntax:"*";inherits:false}@property --tw-inset-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-ring-color{syntax:"*";inherits:false}@property --tw-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-ring-color{syntax:"*";inherits:false}@property --tw-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-ring-inset{syntax:"*";inherits:false}@property --tw-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0}@property --tw-ring-offset-color{syntax:"*";inherits:false;initial-value:#fff}@property --tw-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-border-style{syntax:"*";inherits:false;initial-value:solid}@property --tw-duration{syntax:"*";inherits:false}@property --tw-font-weight{syntax:"*";inherits:false}@property --tw-leading{syntax:"*";inherits:false}@property --tw-tracking{syntax:"*";inherits:false}@property --tw-outline-style{syntax:"*";inherits:false;initial-value:solid}@layer properties{*,::backdrop,:after,:before{--tw-rotate-x:initial;--tw-rotate-y:initial;--tw-rotate-z:initial;--tw-skew-x:initial;--tw-skew-y:initial;--tw-shadow:0 0 #0000;--tw-shadow-color:initial;--tw-shadow-alpha:100%;--tw-inset-shadow:0 0 #0000;--tw-inset-shadow-color:initial;--tw-inset-shadow-alpha:100%;--tw-ring-color:initial;--tw-ring-shadow:0 0 #0000;--tw-inset-ring-color:initial;--tw-inset-ring-shadow:0 0 #0000;--tw-ring-inset:initial;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-offset-shadow:0 0 #0000;--tw-border-style:solid;--tw-duration:initial;--tw-font-weight:initial;--tw-leading:initial;--tw-tracking:initial;--tw-outline-style:solid}}'
   function ensurePickerStylesIn(r) {
     var _a
     const has =
@@ -662,6 +662,122 @@
       if (excludeId && x.id === excludeId) return false
       return xd === d
     })
+  }
+  function createModalFrame(options) {
+    const { root, title, onClose } = options
+    const previousFocus = root.activeElement || document.activeElement
+    for (const n of Array.from(root.querySelectorAll('.modal-mask'))) n.remove()
+    const mask = document.createElement('div')
+    mask.className = 'modal-mask'
+    try {
+      mask.style.zIndex = '2147483647'
+    } catch (e) {}
+    const modal = document.createElement('div')
+    modal.className = 'modal'
+    modal.style.overscrollBehavior = 'contain'
+    modal.tabIndex = -1
+    try {
+      const panel = root.querySelector('.ushortcuts')
+      const isDarkPanel =
+        panel == null ? void 0 : panel.classList.contains('dark')
+      const prefersDark = (() => {
+        var _a, _b
+        try {
+          return (_b =
+            (_a = globalThis.matchMedia) == null
+              ? void 0
+              : _a.call(globalThis, '(prefers-color-scheme: dark)')) == null
+            ? void 0
+            : _b.matches
+        } catch (e) {
+          return false
+        }
+      })()
+      if (isDarkPanel || prefersDark) modal.classList.add('dark')
+    } catch (e) {}
+    const h2 = document.createElement('h2')
+    h2.textContent = title
+    modal.append(h2)
+    const body = document.createElement('div')
+    modal.append(body)
+    const actions = document.createElement('div')
+    actions.className = 'row actions'
+    modal.append(actions)
+    mask.append(modal)
+    root.append(mask)
+    const preventBackgroundScroll = (e) => {
+      const path = e.composedPath()
+      if (!path.includes(modal)) {
+        e.preventDefault()
+      }
+    }
+    document.addEventListener('wheel', preventBackgroundScroll, {
+      passive: false,
+    })
+    document.addEventListener('touchmove', preventBackgroundScroll, {
+      passive: false,
+    })
+    const close = () => {
+      try {
+        mask.remove()
+      } catch (e) {}
+      try {
+        document.removeEventListener('keydown', onKey, true)
+        document.removeEventListener('wheel', preventBackgroundScroll)
+        document.removeEventListener('touchmove', preventBackgroundScroll)
+      } catch (e) {}
+      if (onClose) onClose()
+      try {
+        if (previousFocus && 'focus' in previousFocus) {
+          previousFocus.focus()
+        }
+      } catch (e) {}
+    }
+    const onKey = (e) => {
+      const visible = root.contains(mask) && modal.style.display !== 'none'
+      if (!visible) return
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        close()
+        return
+      }
+      if (e.key === 'Tab') {
+        const focusables = Array.from(
+          modal.querySelectorAll(
+            'a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])'
+          )
+        ).filter((el) => !el.hasAttribute('disabled'))
+        if (focusables.length === 0) return
+        const first = focusables[0]
+        const last = focusables[focusables.length - 1]
+        const current = root.activeElement
+        if (e.shiftKey) {
+          if (current === first || !modal.contains(current)) {
+            e.preventDefault()
+            last.focus()
+          }
+        } else if (current === last || !modal.contains(current)) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
+    }
+    document.addEventListener('keydown', onKey, true)
+    requestAnimationFrame(() => {
+      const focusables = modal.querySelectorAll(
+        'input, button, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusables.length > 0) {
+        focusables[0].focus()
+      }
+    })
+    return {
+      mask,
+      modal,
+      body,
+      actions,
+      close,
+    }
   }
   function createSegmentedRadios(initial, values, onChange, opts) {
     var _a, _b
@@ -908,74 +1024,64 @@
       getFinal: getFinalValue,
     }
   }
-  function openAddLinkModal(root, cfg, helpers) {
-    var _a, _b, _c
-    for (const n of Array.from(root.querySelectorAll('.modal-mask'))) n.remove()
-    const mask = document.createElement('div')
-    mask.className = 'modal-mask'
-    try {
-      mask.style.zIndex = '2147483647'
-    } catch (e) {}
-    const modal = document.createElement('div')
-    modal.className = 'modal'
-    try {
-      const panel = root.querySelector('.ushortcuts')
-      const isDarkPanel =
-        panel == null ? void 0 : panel.classList.contains('dark')
-      if (isDarkPanel) modal.classList.add('dark')
-    } catch (e) {}
-    const h2 = document.createElement('h2')
-    h2.textContent = helpers.existingItem
-      ? '\u7F16\u8F91\u94FE\u63A5'
-      : '\u6DFB\u52A0\u94FE\u63A5'
+  function renderLinkForm(container, data, options) {
     const grid = document.createElement('div')
     grid.className = 'grid'
     try {
       grid.style.gridTemplateColumns = '1fr'
     } catch (e) {}
-    const grpRow = document.createElement('div')
-    grpRow.className = 'row'
-    const grpLabel = document.createElement('label')
-    grpLabel.textContent = '\u5206\u7EC4'
-    const grpSel = document.createElement('select')
-    const firstGroup = (cfg.groups && cfg.groups[0]) || void 0
-    const defaultGroup =
-      helpers.defaultGroupId || (firstGroup && firstGroup.id) || ''
-    for (const g of cfg.groups || []) {
-      const o = document.createElement('option')
-      o.value = g.id
-      o.textContent = g.name
-      if (g.id === defaultGroup) o.selected = true
-      grpSel.append(o)
+    const notifyChange = () => {
+      if (options.onChange) options.onChange()
     }
-    if (helpers.existingItem) {
-      try {
-        const gid = helpers.defaultGroupId || defaultGroup
-        grpSel.value = gid
+    if (options.groups && options.groups.length > 0) {
+      const grpRow = document.createElement('div')
+      grpRow.className = 'row'
+      const grpLabel = document.createElement('label')
+      grpLabel.textContent = '\u5206\u7EC4'
+      const grpSel = document.createElement('select')
+      for (const g of options.groups) {
+        const o = document.createElement('option')
+        o.value = g.id
+        o.textContent = g.name
+        if (g.id === data.groupId) o.selected = true
+        grpSel.append(o)
+      }
+      grpSel.addEventListener('change', () => {
+        data.groupId = grpSel.value
+        notifyChange()
+      })
+      if (options.disableGroupSelector) {
         grpSel.disabled = true
-      } catch (e) {}
+      }
+      grpRow.append(grpLabel)
+      grpRow.append(grpSel)
+      grid.append(grpRow)
     }
-    grpRow.append(grpLabel)
-    grpRow.append(grpSel)
     const nameRow = document.createElement('div')
     nameRow.className = 'row'
     const nameLabel = document.createElement('label')
     nameLabel.textContent = '\u540D\u79F0'
     const nameInput = document.createElement('input')
-    nameInput.value = helpers.existingItem
-      ? String(helpers.existingItem.name || '\u65B0\u9879')
-      : '\u65B0\u9879'
+    nameInput.value = data.name || ''
+    nameInput.addEventListener('input', () => {
+      data.name = nameInput.value
+      notifyChange()
+    })
     nameRow.append(nameLabel)
     nameRow.append(nameInput)
+    grid.append(nameRow)
     const iconRow = document.createElement('div')
     iconRow.className = 'row'
     const iconLabel = document.createElement('label')
     iconLabel.textContent = '\u56FE\u6807'
-    const existingIcon = helpers.existingItem
-      ? String(helpers.existingItem.icon || '')
-      : ''
+    const updateIconData = () => {
+      if (iconComp) {
+        data.icon = iconComp.getFinal()
+        notifyChange()
+      }
+    }
     const iconComp = createIconInput(
-      existingIcon,
+      data.icon || '',
       ['icon', 'favicon', 'url', 'emoji'],
       {
         labels: {
@@ -984,48 +1090,58 @@
           url: 'URL',
           emoji: 'Emoji',
         },
-        namePrefix: 'ushortcuts-item-icon-kind-',
+        namePrefix: 'ushortcuts-item-icon-kind-' + (data.id || 'new'),
+        onValueChange: updateIconData,
+        onKindChange: updateIconData,
       }
     )
     iconRow.append(iconLabel)
     iconRow.append(iconComp.el)
+    grid.append(iconRow)
+    const typeRow = document.createElement('div')
+    typeRow.className = 'row'
+    const typeLabel = document.createElement('label')
+    typeLabel.textContent = '\u7C7B\u578B'
+    const typeRadios = createSegmentedRadios(
+      data.type,
+      ['url', 'js'],
+      (v) => {
+        data.type = v
+        syncTypeUi()
+        notifyChange()
+      },
+      {
+        labels: { url: 'URL', js: 'JS' },
+        namePrefix: 'ushortcuts-item-type-' + (data.id || 'new'),
+      }
+    )
+    typeRow.append(typeLabel)
+    typeRow.append(typeRadios)
+    grid.append(typeRow)
     const urlRow = document.createElement('div')
     urlRow.className = 'row'
     const urlLabel = document.createElement('label')
     urlLabel.textContent = 'URL'
     const urlInput = document.createElement('input')
     urlInput.placeholder = 'https://...'
-    urlInput.value = helpers.existingItem
-      ? String(helpers.existingItem.data || '/')
-      : '/'
+    urlInput.value = data.type === 'url' ? data.data || '/' : '/'
+    urlInput.addEventListener('input', () => {
+      if (data.type === 'url') {
+        data.data = urlInput.value
+        notifyChange()
+      }
+    })
     urlRow.append(urlLabel)
     urlRow.append(urlInput)
+    grid.append(urlRow)
     const urlHelpRow = document.createElement('div')
     urlHelpRow.className = 'row'
     const urlHelp = document.createElement('div')
     urlHelp.className = 'field-help'
-    const uTitle = document.createElement('div')
-    uTitle.className = 'field-help-title'
-    uTitle.textContent = '\u{1F517} URL \u53D8\u91CF\u4E0E\u793A\u4F8B'
-    const uLine1 = document.createElement('div')
-    uLine1.textContent =
-      '\u53D8\u91CF\uFF1A{hostname}\u3001{hostname_without_www}\u3001{query}\u3001{selected}'
-    const uLine2 = document.createElement('div')
-    uLine2.textContent =
-      '\u793A\u4F8B\uFF1Ahttp://example.com/search?query={selected||query}'
-    const uLine3 = document.createElement('div')
-    const uLink = document.createElement('a')
-    uLink.href = 'https://github.com/utags/userscripts'
-    uLink.target = '_blank'
-    uLink.rel = 'noopener noreferrer'
-    uLink.textContent = 'https://github.com/utags/userscripts'
-    uLine3.append('\u66F4\u591A\u4F7F\u7528\u8BF4\u660E\u53C2\u8003 ')
-    uLine3.append(uLink)
-    urlHelp.append(uTitle)
-    urlHelp.append(uLine1)
-    urlHelp.append(uLine2)
-    urlHelp.append(uLine3)
+    urlHelp.innerHTML =
+      '\n    <div class="field-help-title">\u{1F517} URL \u53D8\u91CF\u4E0E\u793A\u4F8B</div>\n    <div>\u53D8\u91CF\uFF1A{hostname}\u3001{hostname_without_www}\u3001{query}\u3001{selected}</div>\n    <div>\u793A\u4F8B\uFF1Ahttp://example.com/search?query={selected||query}</div>\n    <div>\u66F4\u591A\u4F7F\u7528\u8BF4\u660E\u53C2\u8003 <a href="https://github.com/utags/userscripts" target="_blank" rel="noopener noreferrer">https://github.com/utags/userscripts</a></div>\n  '
     urlHelpRow.append(urlHelp)
+    grid.append(urlHelpRow)
     const jsRow = document.createElement('div')
     jsRow.className = 'row'
     const jsLabel = document.createElement('label')
@@ -1033,113 +1149,55 @@
     const jsInput = document.createElement('textarea')
     jsInput.placeholder =
       'console.log("hello")\n// \u6216\u8005\u7C98\u8D34\u811A\u672C\u5185\u5BB9'
-    jsInput.value =
-      helpers.existingItem && helpers.existingItem.type === 'js'
-        ? String(helpers.existingItem.data || '')
-        : ''
+    jsInput.value = data.type === 'js' ? data.data || '' : ''
+    jsInput.addEventListener('input', () => {
+      if (data.type === 'js') {
+        data.data = jsInput.value
+        notifyChange()
+      }
+    })
     jsRow.append(jsLabel)
     jsRow.append(jsInput)
+    grid.append(jsRow)
     const jsHelpRow = document.createElement('div')
     jsHelpRow.className = 'row'
     const jsHelp = document.createElement('div')
     jsHelp.className = 'field-help'
-    const jTitle = document.createElement('div')
-    jTitle.className = 'field-help-title'
-    jTitle.textContent = '\u{1F9E9} JS \u8FD4\u56DE\u4E0E\u793A\u4F8B'
-    const jLine1 = document.createElement('div')
-    jLine1.textContent =
-      'JS\uFF1A\u8FD4\u56DE\u5B57\u7B26\u4E32\u6216 {url, mode} \u5BFC\u822A'
-    const jLine2 = document.createElement('div')
-    jLine2.textContent =
-      '\u793A\u4F8B\uFF1Areturn "http://example.com/search?query={selected||query}"'
-    const jLine3 = document.createElement('div')
-    jLine3.textContent =
-      '\u793A\u4F8B\uFF1Areturn { url: "http://example.com/?q={query}", mode: "new-tab" }'
-    const jLine4 = document.createElement('div')
-    const jLink = document.createElement('a')
-    jLink.href = 'https://github.com/utags/userscripts'
-    jLink.target = '_blank'
-    jLink.rel = 'noopener noreferrer'
-    jLink.textContent = 'https://github.com/utags/userscripts'
-    jLine4.append('\u66F4\u591A\u4F7F\u7528\u8BF4\u660E\u53C2\u8003 ')
-    jLine4.append(jLink)
-    jsHelp.append(jTitle)
-    jsHelp.append(jLine1)
-    jsHelp.append(jLine2)
-    jsHelp.append(jLine3)
-    jsHelp.append(jLine4)
+    jsHelp.innerHTML =
+      '\n    <div class="field-help-title">\u{1F9E9} JS \u8FD4\u56DE\u4E0E\u793A\u4F8B</div>\n    <div>JS\uFF1A\u8FD4\u56DE\u5B57\u7B26\u4E32\u6216 {url, mode} \u5BFC\u822A</div>\n    <div>\u793A\u4F8B\uFF1Areturn "http://example.com/search?query={selected||query}"</div>\n    <div>\u793A\u4F8B\uFF1Areturn { url: "http://example.com/?q={query}", mode: "new-tab" }</div>\n    <div>\u66F4\u591A\u4F7F\u7528\u8BF4\u660E\u53C2\u8003 <a href="https://github.com/utags/userscripts" target="_blank" rel="noopener noreferrer">https://github.com/utags/userscripts</a></div>\n  '
     jsHelpRow.append(jsHelp)
-    const typeRow = document.createElement('div')
-    typeRow.className = 'row'
-    const typeLabel = document.createElement('label')
-    typeLabel.textContent = '\u7C7B\u578B'
-    let typeValue =
-      ((_a = helpers.existingItem) == null ? void 0 : _a.type) || 'url'
-    const quickRef = { el: void 0 }
-    const typeRadios = createSegmentedRadios(
-      typeValue,
-      ['url', 'js'],
-      (v) => {
-        typeValue = v
-        syncTypeUi()
-      },
-      {
-        labels: { url: 'URL', js: 'JS' },
-        namePrefix: 'ushortcuts-item-type-',
-      }
-    )
-    const syncTypeUi = () => {
-      if (typeValue === 'url') {
-        urlRow.style.display = ''
-        jsRow.style.display = 'none'
-        if (quickRef.el) quickRef.el.style.display = ''
-        urlHelpRow.style.display = ''
-        jsHelpRow.style.display = 'none'
-      } else {
-        urlRow.style.display = 'none'
-        jsRow.style.display = ''
-        if (quickRef.el) quickRef.el.style.display = 'none'
-        urlHelpRow.style.display = 'none'
-        jsHelpRow.style.display = ''
-      }
-    }
-    typeRow.append(typeLabel)
-    typeRow.append(typeRadios)
+    grid.append(jsHelpRow)
     const openRow = document.createElement('div')
     openRow.className = 'row'
     const openLabel = document.createElement('label')
     openLabel.textContent = '\u6253\u5F00\u65B9\u5F0F'
-    let openValue =
-      ((_b = helpers.existingItem) == null ? void 0 : _b.openIn) ||
-      helpers.defaultOpen ||
-      'same-tab'
-    const openRadios = createOpenModeRadios(openValue, (m) => {
-      openValue = m
+    const openRadios = createOpenModeRadios(data.openIn, (m) => {
+      data.openIn = m
+      notifyChange()
     })
     openRow.append(openLabel)
     openRow.append(openRadios)
+    grid.append(openRow)
     const visibleRow = document.createElement('div')
     visibleRow.className = 'row'
     const visibleLabel = document.createElement('label')
     visibleLabel.textContent = '\u663E\u793A\u72B6\u6001'
-    let itemState = ((_c = helpers.existingItem) == null ? void 0 : _c.hidden)
-      ? 'hidden'
-      : 'visible'
     const stateRadios = createSegmentedRadios(
-      itemState,
+      data.hidden ? 'hidden' : 'visible',
       ['visible', 'hidden'],
       (v) => {
-        itemState = v
+        data.hidden = v === 'hidden'
+        notifyChange()
       },
       {
         labels: { visible: '\u663E\u793A', hidden: '\u9690\u85CF' },
-        namePrefix: 'ushortcuts-item-state-',
+        namePrefix: 'ushortcuts-item-state-' + (data.id || 'new'),
       }
     )
     visibleRow.append(visibleLabel)
     visibleRow.append(stateRadios)
+    grid.append(visibleRow)
     const quickRow = document.createElement('div')
-    quickRef.el = quickRow
     quickRow.className = 'row'
     const addCurrentBtn = document.createElement('button')
     addCurrentBtn.className = 'btn btn-secondary'
@@ -1150,33 +1208,121 @@
       '\u4ECE\u5F53\u524D\u7F51\u9875\u91C7\u96C6\u94FE\u63A5'
     quickRow.append(addCurrentBtn)
     quickRow.append(pickLinksBtn)
-    syncTypeUi()
+    grid.append(quickRow)
     addCurrentBtn.addEventListener('click', () => {
       try {
         nameInput.value = document.title || '\u5F53\u524D\u7F51\u9875'
-        urlInput.value = location.href
+        data.name = nameInput.value
+        const currentUrl = location.href
+        if (data.type === 'url') {
+          urlInput.value = currentUrl
+          data.data = currentUrl
+        } else {
+          const urlRadio = typeRadios.querySelector('input[value="url"]')
+          if (urlRadio) {
+            urlRadio.checked = true
+            urlRadio.dispatchEvent(new Event('change'))
+          }
+          urlInput.value = currentUrl
+          data.data = currentUrl
+        }
+        notifyChange()
       } catch (e) {}
     })
     pickLinksBtn.addEventListener('click', () => {
       try {
-        pickLinkFromPage(root, {
+        pickLinkFromPage(options.root, {
           beforeStart() {
-            modal.style.display = 'none'
-            mask.remove()
+            if (options.onPickStart) options.onPickStart()
           },
           afterFinish() {
-            modal.style.display = ''
-            root.append(mask)
+            if (options.onPickEnd) options.onPickEnd()
           },
           onPicked(nm, href) {
             nameInput.value = nm
+            data.name = nm
+            const urlRadio = typeRadios.querySelector('input[value="url"]')
+            if (urlRadio) {
+              urlRadio.checked = true
+              urlRadio.dispatchEvent(new Event('change'))
+            }
             urlInput.value = href
+            data.data = href
+            notifyChange()
           },
         })
       } catch (e) {}
     })
-    const actions = document.createElement('div')
-    actions.className = 'row actions'
+    function syncTypeUi() {
+      if (data.type === 'url') {
+        urlRow.style.display = ''
+        jsRow.style.display = 'none'
+        quickRow.style.display = ''
+        urlHelpRow.style.display = ''
+        jsHelpRow.style.display = 'none'
+      } else {
+        urlRow.style.display = 'none'
+        jsRow.style.display = ''
+        quickRow.style.display = 'none'
+        urlHelpRow.style.display = 'none'
+        jsHelpRow.style.display = ''
+      }
+    }
+    syncTypeUi()
+    container.append(grid)
+  }
+  function openAddLinkModal(root, cfg, helpers) {
+    const { modal, body, actions, close, mask } = createModalFrame({
+      root,
+      title: helpers.existingItem
+        ? '\u7F16\u8F91\u94FE\u63A5'
+        : '\u6DFB\u52A0\u94FE\u63A5',
+    })
+    modal.classList.add('editor')
+    const firstGroup = (cfg.groups && cfg.groups[0]) || void 0
+    const defaultGroup =
+      helpers.defaultGroupId || (firstGroup && firstGroup.id) || ''
+    const currentGroupId = helpers.existingItem
+      ? helpers.defaultGroupId || defaultGroup
+      : defaultGroup
+    const formData = helpers.existingItem
+      ? {
+          id: helpers.existingItem.id,
+          groupId: currentGroupId,
+          name: helpers.existingItem.name || '\u65B0\u9879',
+          icon: helpers.existingItem.icon,
+          type: helpers.existingItem.type || 'url',
+          data:
+            helpers.existingItem.data ||
+            (helpers.existingItem.type === 'js' ? '' : '/'),
+          openIn:
+            helpers.existingItem.openIn || helpers.defaultOpen || 'same-tab',
+          hidden: helpers.existingItem.hidden,
+        }
+      : {
+          id: uid(),
+          groupId: defaultGroup,
+          name: '\u65B0\u9879',
+          type: 'url',
+          data: '/',
+          openIn: helpers.defaultOpen || 'same-tab',
+        }
+    const formContainer = document.createElement('div')
+    renderLinkForm(formContainer, formData, {
+      root,
+      groups: cfg.groups || [],
+      disableGroupSelector: Boolean(helpers.existingItem),
+      onChange() {},
+      onPickStart() {
+        modal.style.display = 'none'
+        mask.remove()
+      },
+      onPickEnd() {
+        modal.style.display = ''
+        root.append(mask)
+      },
+    })
+    body.append(formContainer)
     const saveBtn = document.createElement('button')
     saveBtn.className = 'btn btn-primary'
     saveBtn.textContent = helpers.existingItem ? '\u786E\u8BA4' : '\u6DFB\u52A0'
@@ -1186,61 +1332,20 @@
     const deleteBtn = document.createElement('button')
     deleteBtn.className = 'btn btn-secondary'
     deleteBtn.textContent = '\u5220\u9664'
-    const isEditableTarget2 = (t) => {
-      const el = t
-      if (!el) return false
-      const tag = el.tagName ? el.tagName.toLowerCase() : ''
-      if (tag === 'input' || tag === 'textarea' || tag === 'select') return true
-      const ce = el.isContentEditable
-      return Boolean(ce)
-    }
-    const close = () => {
-      try {
-        mask.remove()
-      } catch (e) {}
-      try {
-        document.removeEventListener('keydown', onKey, true)
-      } catch (e) {}
-    }
-    const onKey = (e) => {
-      const visible = root.contains(mask) && modal.style.display !== 'none'
-      if (!visible) return
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        close()
-        return
-      }
-      if (e.key === 'Enter') {
-        const ae = root.activeElement
-        const inModal = ae ? Boolean(modal.contains(ae)) : false
-        if (!inModal) return
-        const tag = (ae == null ? void 0 : ae.tagName)
-          ? ae.tagName.toLowerCase()
-          : ''
-        if (tag === 'textarea' || tag === 'button') return
-        e.preventDefault()
-        saveBtn.click()
-      }
-    }
-    document.addEventListener('keydown', onKey, true)
     saveBtn.addEventListener('click', () => {
-      var _a2
-      const gid = grpSel.value
+      var _a
+      const gid = formData.groupId
       const grp = (cfg.groups || []).find((g) => g.id === gid)
       if (!grp) return
-      const finalIcon = iconComp.getFinal()
-      const hiddenVal = itemState === 'hidden'
-      const proposedData =
-        typeValue === 'url' ? urlInput.value.trim() || '/' : jsInput.value
       const hasDup = hasDuplicateInGroup(
         grp,
-        typeValue,
-        proposedData,
-        (_a2 = helpers.existingItem) == null ? void 0 : _a2.id
+        formData.type,
+        formData.data,
+        (_a = helpers.existingItem) == null ? void 0 : _a.id
       )
       if (hasDup) {
         const msg =
-          typeValue === 'url'
+          formData.type === 'url'
             ? helpers.existingItem
               ? '\u8BE5\u5206\u7EC4\u5185\u5DF2\u5B58\u5728\u76F8\u540C\u7684 URL\uFF0C\u662F\u5426\u7EE7\u7EED\u4FDD\u5B58\uFF1F'
               : '\u8BE5\u5206\u7EC4\u5185\u5DF2\u5B58\u5728\u76F8\u540C\u7684 URL\uFF0C\u662F\u5426\u7EE7\u7EED\u6DFB\u52A0\uFF1F'
@@ -1252,21 +1357,21 @@
       }
       if (helpers.existingItem) {
         const it = helpers.existingItem
-        it.name = nameInput.value.trim() || '\u65B0\u9879'
-        it.icon = finalIcon
-        it.type = typeValue
-        it.data = proposedData
-        it.openIn = openValue
-        it.hidden = hiddenVal
+        it.name = formData.name
+        it.icon = formData.icon
+        it.type = formData.type
+        it.data = formData.data
+        it.openIn = formData.openIn
+        it.hidden = formData.hidden
       } else {
         const it = {
-          id: uid(),
-          name: nameInput.value.trim() || '\u65B0\u9879',
-          icon: finalIcon,
-          type: typeValue,
-          data: proposedData,
-          openIn: openValue,
-          hidden: hiddenVal ? true : void 0,
+          id: formData.id || uid(),
+          name: formData.name,
+          icon: formData.icon,
+          type: formData.type,
+          data: formData.data,
+          openIn: formData.openIn,
+          hidden: formData.hidden,
         }
         grp.items.push(it)
       }
@@ -1284,7 +1389,7 @@
         '\u662F\u5426\u5220\u9664\u6B64\u94FE\u63A5\uFF1F'
       )
       if (!ok) return
-      const gid = grpSel.value
+      const gid = formData.groupId
       const grp = (cfg.groups || []).find((g) => g.id === gid)
       if (!grp) return
       const idx = grp.items.findIndex(
@@ -1303,79 +1408,36 @@
         close()
       }
     })
-    cancelBtn.addEventListener('click', () => {
-      close()
-    })
+    cancelBtn.addEventListener('click', close)
     actions.append(saveBtn)
     actions.append(cancelBtn)
-    grid.append(grpRow)
-    grid.append(nameRow)
-    grid.append(iconRow)
-    grid.append(typeRow)
-    grid.append(urlRow)
-    grid.append(urlHelpRow)
-    grid.append(jsRow)
-    grid.append(jsHelpRow)
-    grid.append(openRow)
-    grid.append(visibleRow)
-    grid.append(quickRow)
-    modal.append(h2)
-    modal.append(grid)
-    modal.append(actions)
-    mask.append(modal)
-    root.append(mask)
     if (helpers.existingItem) {
       actions.append(deleteBtn)
     }
-    syncTypeUi()
   }
-  function openAddGroupModal(root, cfg, helpers) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m
-    for (const n of Array.from(root.querySelectorAll('.modal-mask'))) n.remove()
-    const mask = document.createElement('div')
-    mask.className = 'modal-mask'
-    try {
-      mask.style.zIndex = '2147483647'
-    } catch (e) {}
-    const modal = document.createElement('div')
-    modal.className = 'modal'
-    try {
-      const panel = root.querySelector('.ushortcuts')
-      const isDarkPanel =
-        panel == null ? void 0 : panel.classList.contains('dark')
-      const prefersDark = (() => {
-        var _a2, _b2
-        try {
-          return (_b2 =
-            (_a2 = globalThis.matchMedia) == null
-              ? void 0
-              : _a2.call(globalThis, '(prefers-color-scheme: dark)')) == null
-            ? void 0
-            : _b2.matches
-        } catch (e) {
-          return false
-        }
-      })()
-      if (isDarkPanel || prefersDark) modal.classList.add('dark')
-    } catch (e) {}
-    const h2 = document.createElement('h2')
-    h2.textContent = helpers.existingGroup
-      ? '\u7F16\u8F91\u5206\u7EC4'
-      : '\u6DFB\u52A0\u5206\u7EC4'
+  function renderGroupForm(container, data, options) {
+    var _a
     const grid = document.createElement('div')
     grid.className = 'grid'
     try {
       grid.style.gridTemplateColumns = '1fr'
     } catch (e) {}
+    const notifyChange = () => {
+      if (options.onChange) options.onChange()
+    }
     const nameRow = document.createElement('div')
     nameRow.className = 'row'
     const nameLabel = document.createElement('label')
     nameLabel.textContent = '\u7EC4\u540D'
     const nameInput = document.createElement('input')
-    nameInput.value =
-      (_b = (_a = helpers.existingGroup) == null ? void 0 : _a.name) != null
-        ? _b
-        : '\u65B0\u5206\u7EC4'
+    nameInput.value = data.name || ''
+    nameInput.addEventListener('input', () => {
+      data.name = nameInput.value
+      if (!displayToggle.checked) {
+        displayInput.value = nameInput.value
+      }
+      notifyChange()
+    })
     nameRow.append(nameLabel)
     nameRow.append(nameInput)
     const displayRow = document.createElement('div')
@@ -1392,23 +1454,25 @@
     displayCtrl.append(displayToggle)
     displayCtrl.append(displayText)
     const hasCustomDisplay =
-      typeof ((_c = helpers.existingGroup) == null
-        ? void 0
-        : _c.displayName) === 'string' &&
-      helpers.existingGroup.displayName !== helpers.existingGroup.name
+      typeof data.displayName === 'string' && data.displayName !== data.name
     displayToggle.checked = Boolean(hasCustomDisplay)
     displayInput.value = hasCustomDisplay
-      ? ((_d = helpers.existingGroup) == null ? void 0 : _d.displayName) || ''
-      : ((_e = helpers.existingGroup) == null ? void 0 : _e.name) ||
-        nameInput.value
+      ? data.displayName || ''
+      : data.name || nameInput.value
     displayInput.disabled = !displayToggle.checked
-    nameInput.addEventListener('input', () => {
-      if (!displayToggle.checked) displayInput.value = nameInput.value
-    })
-    displayToggle.addEventListener('change', () => {
-      displayInput.disabled = !displayToggle.checked
-      if (!displayToggle.checked) displayInput.value = nameInput.value
-    })
+    const updateDisplay = () => {
+      if (displayToggle.checked) {
+        data.displayName = displayInput.value
+        displayInput.disabled = false
+      } else {
+        delete data.displayName
+        displayInput.value = nameInput.value
+        displayInput.disabled = true
+      }
+      notifyChange()
+    }
+    displayInput.addEventListener('input', updateDisplay)
+    displayToggle.addEventListener('change', updateDisplay)
     displayRow.append(displayLabel)
     displayRow.append(displayInput)
     displayRow.append(displayCtrl)
@@ -1417,13 +1481,19 @@
     const iconLabel = document.createElement('label')
     iconLabel.textContent = '\u56FE\u6807'
     const iconComp = createIconInput(
-      (_g = (_f = helpers.existingGroup) == null ? void 0 : _f.icon) != null
-        ? _g
-        : 'lucide:folder',
+      data.icon || 'lucide:folder',
       ['icon', 'url', 'emoji'],
       {
         labels: { icon: '\u56FE\u6807', url: 'URL', emoji: 'Emoji' },
-        namePrefix: 'ushortcuts-group-icon-kind-',
+        namePrefix: 'ushortcuts-group-icon-kind-' + (data.id || Math.random()),
+        onValueChange() {
+          data.icon = iconComp.getFinal()
+          notifyChange()
+        },
+        onKindChange() {
+          data.icon = iconComp.getFinal()
+          notifyChange()
+        },
       }
     )
     iconRow.append(iconLabel)
@@ -1434,13 +1504,18 @@
     ruleLabel.textContent = 'URL \u89C4\u5219'
     const ta = document.createElement('textarea')
     const host = location.hostname || ''
+    const defaultMatch = ['*://' + host + '/*']
     ta.value = (
-      (_i = (_h = helpers.existingGroup) == null ? void 0 : _h.match) != null
-        ? _i
-        : helpers.defaultMatch && helpers.defaultMatch.length > 0
-          ? helpers.defaultMatch
-          : ['*://' + host + '/*']
+      data.match && data.match.length > 0 ? data.match : defaultMatch
     ).join('\n')
+    const updateMatch = () => {
+      data.match = ta.value
+        .split(/\n+/)
+        .map((v) => v.trim())
+        .filter(Boolean)
+      notifyChange()
+    }
+    ta.addEventListener('change', updateMatch)
     ruleRow.append(ruleLabel)
     ruleRow.append(ta)
     function escRe(s) {
@@ -1507,6 +1582,7 @@
     }
     tplSel.addEventListener('change', () => {
       ta.value = tplSel.value
+      updateMatch()
     })
     tplRow.append(tplLabel)
     tplRow.append(tplSel)
@@ -1514,32 +1590,29 @@
     openRow.className = 'row'
     const openLabel = document.createElement('label')
     openLabel.textContent = '\u9ED8\u8BA4\u6253\u5F00\u65B9\u5F0F'
-    let openValue =
-      ((_j = helpers.existingGroup) == null ? void 0 : _j.defaultOpen) ||
-      helpers.defaultOpen ||
-      'same-tab'
-    const openRadios = createOpenModeRadios(openValue, (m) => {
-      openValue = m
-    })
+    const openRadios = createOpenModeRadios(
+      data.defaultOpen || 'same-tab',
+      (m) => {
+        data.defaultOpen = m
+        notifyChange()
+      }
+    )
     openRow.append(openLabel)
     openRow.append(openRadios)
     const colsRow = document.createElement('div')
     colsRow.className = 'row'
     const colsLabel = document.createElement('label')
     colsLabel.textContent = '\u6BCF\u884C\u663E\u793A\u4E2A\u6570'
-    let colVal = String(
-      (_l = (_k = helpers.existingGroup) == null ? void 0 : _k.itemsPerRow) !=
-        null
-        ? _l
-        : 1
-    )
+    let colVal = String((_a = data.itemsPerRow) != null ? _a : 1)
     const colsRadios = createSegmentedRadios(
       colVal,
       ['1', '2', '3', '4', '5', '6'],
       (v) => {
         colVal = v
+        data.itemsPerRow = Number.parseInt(v, 10)
+        notifyChange()
       },
-      { namePrefix: 'ushortcuts-cols-' }
+      { namePrefix: 'ushortcuts-cols-' + (data.id || Math.random()) }
     )
     colsRow.append(colsLabel)
     colsRow.append(colsRadios)
@@ -1547,24 +1620,66 @@
     stateRow.className = 'row'
     const stateLabel = document.createElement('label')
     stateLabel.textContent = '\u5206\u7EC4\u663E\u793A\u72B6\u6001'
-    let groupState = ((_m = helpers.existingGroup) == null ? void 0 : _m.hidden)
-      ? 'hidden'
-      : 'visible'
+    let groupState = data.hidden ? 'hidden' : 'visible'
     const stateRadios = createSegmentedRadios(
       groupState,
       ['visible', 'hidden'],
       (v) => {
         groupState = v
+        data.hidden = v === 'hidden'
+        notifyChange()
       },
       {
         labels: { visible: '\u663E\u793A', hidden: '\u9690\u85CF' },
-        namePrefix: 'ushortcuts-state-',
+        namePrefix: 'ushortcuts-state-' + (data.id || Math.random()),
       }
     )
     stateRow.append(stateLabel)
     stateRow.append(stateRadios)
-    const actions = document.createElement('div')
-    actions.className = 'row actions'
+    grid.append(nameRow)
+    grid.append(displayRow)
+    grid.append(iconRow)
+    grid.append(tplRow)
+    grid.append(ruleRow)
+    grid.append(openRow)
+    grid.append(colsRow)
+    grid.append(stateRow)
+    container.append(grid)
+    return {
+      nameInput,
+    }
+  }
+  function openAddGroupModal(root, cfg, helpers) {
+    var _a, _b, _c, _d, _e, _f, _g
+    const { modal, body, actions, close } = createModalFrame({
+      root,
+      title: helpers.existingGroup
+        ? '\u7F16\u8F91\u5206\u7EC4'
+        : '\u6DFB\u52A0\u5206\u7EC4',
+    })
+    modal.classList.add('editor')
+    const initialData = {
+      name:
+        ((_a = helpers.existingGroup) == null ? void 0 : _a.name) ||
+        '\u65B0\u5206\u7EC4',
+      displayName:
+        (_b = helpers.existingGroup) == null ? void 0 : _b.displayName,
+      icon:
+        ((_c = helpers.existingGroup) == null ? void 0 : _c.icon) ||
+        'lucide:folder',
+      match: ((_d = helpers.existingGroup) == null ? void 0 : _d.match) ||
+        helpers.defaultMatch || ['*://' + (location.hostname || '') + '/*'],
+      defaultOpen:
+        ((_e = helpers.existingGroup) == null ? void 0 : _e.defaultOpen) ||
+        helpers.defaultOpen ||
+        'same-tab',
+      itemsPerRow:
+        ((_f = helpers.existingGroup) == null ? void 0 : _f.itemsPerRow) || 1,
+      hidden: (_g = helpers.existingGroup) == null ? void 0 : _g.hidden,
+    }
+    renderGroupForm(body, initialData, {
+      onChange() {},
+    })
     const saveBtn = document.createElement('button')
     saveBtn.className = 'btn btn-primary'
     saveBtn.textContent = helpers.existingGroup
@@ -1573,86 +1688,24 @@
     const cancelBtn = document.createElement('button')
     cancelBtn.className = 'btn btn-secondary'
     cancelBtn.textContent = '\u53D6\u6D88'
-    const isEditableTarget2 = (t) => {
-      const el = t
-      if (!el) return false
-      const tag = el.tagName ? el.tagName.toLowerCase() : ''
-      if (tag === 'input' || tag === 'textarea' || tag === 'select') return true
-      const ce = el.isContentEditable
-      return Boolean(ce)
-    }
-    const close = () => {
-      try {
-        mask.remove()
-      } catch (e) {}
-      try {
-        document.removeEventListener('keydown', onKey, true)
-      } catch (e) {}
-    }
-    const onKey = (e) => {
-      const visible = root.contains(mask) && modal.style.display !== 'none'
-      if (!visible) return
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        close()
-        return
-      }
-      if (e.key === 'Enter') {
-        const ae = root.activeElement
-        const inModal = ae ? Boolean(modal.contains(ae)) : false
-        if (!inModal) return
-        const tag = (ae == null ? void 0 : ae.tagName)
-          ? ae.tagName.toLowerCase()
-          : ''
-        if (tag === 'textarea' || tag === 'button') return
-        e.preventDefault()
-        saveBtn.click()
-      }
-    }
-    document.addEventListener('keydown', onKey, true)
     saveBtn.addEventListener('click', () => {
-      const nm = nameInput.value.trim()
-      if (!nm) {
-        try {
-          nameInput.focus()
-        } catch (e) {}
+      const res = initialData
+      if (!res.name) {
         return
       }
-      const toMatch = ta.value
-        .split(/\n+/)
-        .map((v) => v.trim())
-        .filter(Boolean)
-      const toCols = Math.max(1, Math.min(6, Number.parseInt(colVal, 10)))
-      const toHidden = helpers.existingGroup ? groupState === 'hidden' : false
       if (helpers.existingGroup) {
         const g = helpers.existingGroup
-        g.name = nm
-        g.icon = iconComp.getFinal() || g.icon || 'lucide:folder'
-        g.match = toMatch
-        g.defaultOpen = openValue
-        g.itemsPerRow = toCols
-        g.hidden = Boolean(toHidden)
-        if (displayToggle.checked) {
-          g.displayName = displayInput.value
-        } else {
-          try {
-            delete g.displayName
-          } catch (e) {}
-        }
+        Object.assign(g, res)
+        if (!res.displayName) delete g.displayName
       } else {
-        const g = {
-          id: uid(),
-          name: nm,
-          icon: iconComp.getFinal() || 'lucide:folder',
-          match: toMatch,
-          items: [],
-          defaultOpen: openValue,
-          itemsPerRow: toCols,
-          hidden: Boolean(toHidden),
-        }
-        if (displayToggle.checked) {
-          g.displayName = displayInput.value
-        }
+        const g = __spreadValues(
+          {
+            id: uid(),
+            items: [],
+          },
+          res
+        )
+        if (!res.displayName) delete g.displayName
         cfg.groups.push(g)
       }
       try {
@@ -1663,24 +1716,9 @@
       } catch (e) {}
       close()
     })
-    cancelBtn.addEventListener('click', () => {
-      close()
-    })
+    cancelBtn.addEventListener('click', close)
     actions.append(saveBtn)
     actions.append(cancelBtn)
-    grid.append(nameRow)
-    grid.append(displayRow)
-    grid.append(iconRow)
-    grid.append(tplRow)
-    grid.append(ruleRow)
-    grid.append(openRow)
-    grid.append(colsRow)
-    if (helpers.existingGroup) grid.append(stateRow)
-    modal.append(h2)
-    modal.append(grid)
-    modal.append(actions)
-    mask.append(modal)
-    root.append(mask)
   }
   function showDropdownMenu(root, anchor, items, rightSide) {
     for (const n of Array.from(root.querySelectorAll('.quick-add-menu')))
@@ -1737,336 +1775,109 @@
   }
   function createGroupManagerPanel(root, cfg, helpers) {
     const wrap = document.createElement('div')
-    const grpHeader = document.createElement('h2')
-    grpHeader.className = 'section-title'
-    grpHeader.textContent = '\u5206\u7EC4'
-    const grpList = document.createElement('div')
-    grpList.className = 'group-list'
-    let active = (cfg.groups || [])[0]
-    function rebuildGroupPills() {
-      clearChildren(grpList)
+    wrap.className = 'panel-split'
+    const sidebar = document.createElement('div')
+    sidebar.className = 'panel-sidebar'
+    const sidebarList = document.createElement('div')
+    sidebarList.className = 'flex-1'
+    const sidebarActions = document.createElement('div')
+    sidebarActions.className = 'sidebar-actions'
+    const content = document.createElement('div')
+    content.className = 'panel-content'
+    const contentHeader = document.createElement('div')
+    contentHeader.className = 'content-header'
+    const contentTabs = document.createElement('div')
+    contentTabs.className = 'content-tabs'
+    const contentBody = document.createElement('div')
+    contentBody.className = 'tab-pane'
+    content.append(contentHeader)
+    content.append(contentTabs)
+    content.append(contentBody)
+    let activeGroup = (cfg.groups || [])[0]
+    let activeTab = 'shortcuts'
+    let isSettingsDirty = false
+    let pendingGroupData
+    let activeLinkItem
+    let isLinkDirty = false
+    let editingLinkOriginalId
+    const savePendingSettings = () => {
+      if (pendingGroupData && activeGroup) {
+        Object.assign(activeGroup, pendingGroupData)
+        if (!activeGroup.displayName) delete activeGroup.displayName
+        if (!activeGroup.icon) delete activeGroup.icon
+        if (activeGroup.hidden === false) delete activeGroup.hidden
+        helpers.saveConfig(cfg)
+        helpers.rerender(root, cfg)
+        rebuildContentHeader()
+        rebuildSidebar()
+      }
+      isSettingsDirty = false
+      pendingGroupData = void 0
+    }
+    const checkUnsavedChanges = (callback) => {
+      if (isSettingsDirty) {
+        if (
+          globalThis.confirm(
+            '\u5F53\u524D\u5206\u7EC4\u8BBE\u7F6E\u6709\u672A\u4FDD\u5B58\u7684\u4FEE\u6539\uFF0C\u662F\u5426\u4FDD\u5B58\uFF1F\n(\u786E\u5B9A\uFF1A\u4FDD\u5B58\u5E76\u7EE7\u7EED\uFF1B\u53D6\u6D88\uFF1A\u653E\u5F03\u4FEE\u6539\u5E76\u7EE7\u7EED)'
+          )
+        ) {
+          savePendingSettings()
+        } else {
+          isSettingsDirty = false
+          pendingGroupData = void 0
+        }
+      }
+      if (isLinkDirty) {
+        if (
+          !globalThis.confirm(
+            '\u5F53\u524D\u94FE\u63A5\u7F16\u8F91\u6709\u672A\u4FDD\u5B58\u7684\u4FEE\u6539\uFF0C\u786E\u5B9A\u653E\u5F03\u4FEE\u6539\u5417\uFF1F'
+          )
+        ) {
+          return
+        }
+        activeLinkItem = void 0
+        isLinkDirty = false
+        editingLinkOriginalId = void 0
+      }
+      callback()
+    }
+    const handleGroupClick = (g) => {
+      checkUnsavedChanges(() => {
+        activeGroup = g
+        activeLinkItem = void 0
+        isLinkDirty = false
+        editingLinkOriginalId = void 0
+        rebuildSidebar()
+        rebuildContent()
+      })
+    }
+    function rebuildSidebar() {
+      clearChildren(sidebarList)
       for (const g of cfg.groups || []) {
-        const pill = document.createElement('button')
-        pill.className = 'group-pill' + (g.id === active.id ? ' active' : '')
-        pill.textContent = g.displayName || g.name
-        pill.dataset.gid = g.id
-        grpList.append(pill)
+        const item = document.createElement('div')
+        item.className =
+          'sidebar-item' + (g.id === activeGroup.id ? ' active' : '')
+        item.addEventListener('click', () => {
+          handleGroupClick(g)
+        })
+        const name = document.createElement('span')
+        name.className = 'sidebar-item-name'
+        name.textContent = g.name
+        item.append(name)
+        if (g.displayName) {
+          const desc = document.createElement('span')
+          desc.className = 'sidebar-item-desc'
+          desc.textContent = g.displayName
+          item.append(desc)
+        }
+        sidebarList.append(item)
       }
     }
-    grpList.addEventListener('click', (ev) => {
-      var _a
-      const target = ev.target
-      const btn = target.closest('.group-pill')
-      if (!btn) return
-      const pill = btn
-      const gid = ((_a = pill.dataset) == null ? void 0 : _a.gid) || ''
-      const next = (cfg.groups || []).find((gg) => gg.id === gid)
-      if (!next) return
-      active = next
-      rebuildGroupPills()
-      rebuildGroupEditor()
-    })
-    const groupEditor = document.createElement('div')
-    function rebuildGroupEditor() {
-      clearChildren(groupEditor)
-      const row1 = document.createElement('div')
-      row1.className = 'row'
-      const l1 = document.createElement('label')
-      l1.textContent = '\u7EC4\u540D'
-      const nameInput = document.createElement('input')
-      nameInput.value = active.name
-      nameInput.addEventListener('change', () => {
-        active.name = nameInput.value
-        rebuildGroupPills()
-        helpers.saveConfig(cfg)
-        helpers.rerender(root, cfg)
-      })
-      row1.append(l1)
-      row1.append(nameInput)
-      const row2 = document.createElement('div')
-      row2.className = 'row'
-      const l2 = document.createElement('label')
-      l2.textContent = '\u56FE\u6807'
-      const iconComp = createIconInput(
-        active.icon || '',
-        ['icon', 'url', 'emoji'],
-        {
-          labels: { icon: '\u56FE\u6807', url: 'URL', emoji: 'Emoji' },
-          namePrefix: 'ushortcuts-group-icon-kind-',
-          onValueChange() {
-            const v = iconComp.getFinal()
-            active.icon = v
-            helpers.saveConfig(cfg)
-            helpers.rerender(root, cfg)
-          },
-          onKindChange() {
-            const v = iconComp.getFinal()
-            active.icon = v
-            helpers.saveConfig(cfg)
-            helpers.rerender(root, cfg)
-          },
-        }
-      )
-      row2.append(l2)
-      row2.append(iconComp.el)
-      const row3 = document.createElement('div')
-      row3.className = 'row'
-      const l3 = document.createElement('label')
-      l3.textContent = 'URL \u89C4\u5219'
-      const ta = document.createElement('textarea')
-      ta.value = (active.match || []).join('\n')
-      ta.addEventListener('change', () => {
-        const grp = (cfg.groups || []).find((g) => g.id === active.id)
-        if (!grp) return
-        grp.match = ta.value
-          .split(/\n+/)
-          .map((v) => v.trim())
-          .filter(Boolean)
-        helpers.saveConfig(cfg)
-        helpers.rerender(root, cfg)
-      })
-      row3.append(l3)
-      row3.append(ta)
-      const row4 = document.createElement('div')
-      row4.className = 'row'
-      const l4 = document.createElement('label')
-      l4.textContent = '\u7EC4\u9ED8\u8BA4\u6253\u5F00\u65B9\u5F0F'
-      let grpOpen = active.defaultOpen || helpers.sitePref.defaultOpen
-      const openRadios2 = createOpenModeRadios(grpOpen, (m) => {
-        grpOpen = m
-        active.defaultOpen = m
-        helpers.saveConfig(cfg)
-      })
-      row4.append(l4)
-      row4.append(openRadios2)
-      const row5 = document.createElement('div')
-      row5.className = 'row'
-      const l5 = document.createElement('label')
-      l5.textContent = '\u6BCF\u884C\u4E2A\u6570'
-      const colsSel = document.createElement('select')
-      for (const c2 of [1, 2, 3, 4, 5, 6]) {
-        const o = document.createElement('option')
-        o.value = String(c2)
-        o.textContent = String(c2)
-        if ((active.itemsPerRow || 1) === c2) o.selected = true
-        colsSel.append(o)
-      }
-      colsSel.addEventListener('change', () => {
-        const v = Number.parseInt(colsSel.value, 10)
-        active.itemsPerRow = Number.isNaN(v) ? 1 : Math.max(1, Math.min(6, v))
-        helpers.saveConfig(cfg)
-        helpers.rerender(root, cfg)
-      })
-      row5.append(l5)
-      row5.append(colsSel)
-      const row6 = document.createElement('div')
-      row6.className = 'row'
-      const l6 = document.createElement('label')
-      l6.textContent = '\u5206\u7EC4\u663E\u793A\u72B6\u6001'
-      const visSel = document.createElement('select')
-      for (const st of ['\u663E\u793A', '\u9690\u85CF']) {
-        const o = document.createElement('option')
-        o.value = st
-        o.textContent = st
-        if ((active.hidden ? '\u9690\u85CF' : '\u663E\u793A') === st)
-          o.selected = true
-        visSel.append(o)
-      }
-      visSel.addEventListener('change', () => {
-        active.hidden = visSel.value === '\u9690\u85CF'
-        helpers.saveConfig(cfg)
-        helpers.rerender(root, cfg)
-      })
-      row6.append(l6)
-      row6.append(visSel)
-      const itemsHeader = document.createElement('h2')
-      itemsHeader.className = 'section-title'
-      itemsHeader.textContent = '\u5BFC\u822A\u9879'
-      const itemsList = document.createElement('div')
-      function rebuildItems() {
-        clearChildren(itemsList)
-        const groupId = active.id
-        for (const it of active.items || []) {
-          const row = document.createElement('div')
-          row.className = 'row item-row'
-          const n = document.createElement('input')
-          n.value = it.name
-          n.addEventListener('change', () => {
-            const grp = (cfg.groups || []).find((g) => g.id === groupId)
-            if (!grp) return
-            const item = (grp.items || []).find((x) => x.id === it.id)
-            if (!item) return
-            item.name = n.value
-            helpers.saveConfig(cfg)
-            helpers.rerender(root, cfg)
-          })
-          const iconComp2 = createIconInput(
-            it.icon || '',
-            ['icon', 'url', 'emoji'],
-            {
-              labels: { icon: '\u56FE\u6807', url: 'URL', emoji: 'Emoji' },
-              namePrefix: 'ushortcuts-item-icon-kind-',
-              placeholders: {
-                icon: 'home',
-                url: 'https://...',
-                emoji: 'emoji',
-              },
-              onValueChange() {
-                const grp = (cfg.groups || []).find((g) => g.id === groupId)
-                if (!grp) return
-                const item = (grp.items || []).find((x) => x.id === it.id)
-                if (!item) return
-                item.icon = iconComp2.getFinal()
-                helpers.saveConfig(cfg)
-                helpers.rerender(root, cfg)
-              },
-              onKindChange() {
-                const grp = (cfg.groups || []).find((g) => g.id === groupId)
-                if (!grp) return
-                const item = (grp.items || []).find((x) => x.id === it.id)
-                if (!item) return
-                item.icon = iconComp2.getFinal()
-                helpers.saveConfig(cfg)
-                helpers.rerender(root, cfg)
-              },
-            }
-          )
-          const t = document.createElement('select')
-          for (const tp of ['url', 'js']) {
-            const o = document.createElement('option')
-            o.value = tp
-            o.textContent = tp
-            if (it.type === tp) o.selected = true
-            t.append(o)
-          }
-          t.addEventListener('change', () => {
-            const grp = (cfg.groups || []).find((g) => g.id === groupId)
-            if (!grp) return
-            const item = (grp.items || []).find((x) => x.id === it.id)
-            if (!item) return
-            item.type = t.value
-            helpers.saveConfig(cfg)
-          })
-          const d = document.createElement('input')
-          d.value = it.data
-          d.addEventListener('change', () => {
-            const grp = (cfg.groups || []).find((g) => g.id === groupId)
-            if (!grp) return
-            const item = (grp.items || []).find((x) => x.id === it.id)
-            if (!item) return
-            item.data = d.value
-            helpers.saveConfig(cfg)
-            helpers.rerender(root, cfg)
-          })
-          const m = document.createElement('select')
-          for (const mm of ['same-tab', 'new-tab']) {
-            const o = document.createElement('option')
-            o.value = mm
-            o.textContent = mm
-            if (
-              (it.openIn ||
-                active.defaultOpen ||
-                helpers.sitePref.defaultOpen) === mm
-            )
-              o.selected = true
-            m.append(o)
-          }
-          m.addEventListener('change', () => {
-            const grp = (cfg.groups || []).find((g) => g.id === groupId)
-            if (!grp) return
-            const item = (grp.items || []).find((x) => x.id === it.id)
-            if (!item) return
-            item.openIn = m.value
-            helpers.saveConfig(cfg)
-          })
-          const visibleSel = document.createElement('select')
-          for (const st of ['\u663E\u793A', '\u9690\u85CF']) {
-            const o = document.createElement('option')
-            o.value = st
-            o.textContent = st
-            if ((it.hidden ? '\u9690\u85CF' : '\u663E\u793A') === st)
-              o.selected = true
-            visibleSel.append(o)
-          }
-          visibleSel.addEventListener('change', () => {
-            const grp = (cfg.groups || []).find((g) => g.id === groupId)
-            if (!grp) return
-            const item = (grp.items || []).find((x) => x.id === it.id)
-            if (!item) return
-            item.hidden = visibleSel.value === '\u9690\u85CF'
-            helpers.saveConfig(cfg)
-            helpers.rerender(root, cfg)
-          })
-          const del = document.createElement('button')
-          del.className = 'btn'
-          del.textContent = '\u5220\u9664'
-          del.addEventListener('click', () => {
-            const grp = (cfg.groups || []).find((g) => g.id === groupId)
-            if (!grp) return
-            grp.items = (grp.items || []).filter((x) => x.id !== it.id)
-            helpers.saveConfig(cfg)
-            rebuildItems()
-            helpers.rerender(root, cfg)
-          })
-          const moveToSel = document.createElement('select')
-          for (const g of cfg.groups || []) {
-            if (g.id === groupId) continue
-            const o = document.createElement('option')
-            o.value = g.id
-            o.textContent = '\u590D\u5236\u5230 ' + String(g.name)
-            moveToSel.append(o)
-          }
-          const moveBtn = document.createElement('button')
-          moveBtn.className = 'btn mini'
-          moveBtn.textContent = '\u590D\u5236\u5230\u5206\u7EC4'
-          moveBtn.addEventListener('click', () => {
-            const toId = moveToSel.value
-            if (!toId) return
-            copyItemToGroup(cfg, groupId, it.id, toId)
-            helpers.saveConfig(cfg)
-            rebuildItems()
-            helpers.rerender(root, cfg)
-          })
-          row.append(n)
-          row.append(iconComp2.el)
-          row.append(t)
-          row.append(d)
-          row.append(m)
-          row.append(visibleSel)
-          row.append(moveToSel)
-          row.append(moveBtn)
-          row.append(del)
-          itemsList.append(row)
-        }
-      }
-      const addRow = document.createElement('div')
-      addRow.className = 'row'
-      const addBtn = document.createElement('button')
-      addBtn.className = 'btn btn-secondary'
-      addBtn.textContent = '\u6DFB\u52A0\u5BFC\u822A\u9879'
-      addBtn.addEventListener('click', () => {
-        var _a
-        openAddLinkModal(root, cfg, {
-          saveConfig(c2) {
-            helpers.saveConfig(c2)
-          },
-          rerender(r, c2) {
-            helpers.rerender(r, c2)
-          },
-          defaultOpen:
-            (_a = active.defaultOpen) != null
-              ? _a
-              : helpers.sitePref.defaultOpen,
-          defaultGroupId: active.id,
-        })
-      })
-      addRow.append(addBtn)
-      const grpActions = document.createElement('div')
-      grpActions.className = 'row'
-      const addGroup = document.createElement('button')
-      addGroup.className = 'btn btn-secondary'
-      addGroup.textContent = '\u6DFB\u52A0\u5206\u7EC4'
-      addGroup.addEventListener('click', () => {
+    const addGroupBtn = document.createElement('button')
+    addGroupBtn.className = 'btn btn-secondary w-full justify-center'
+    addGroupBtn.textContent = '\u6DFB\u52A0\u5206\u7EC4'
+    addGroupBtn.addEventListener('click', () => {
+      checkUnsavedChanges(() => {
         const ng = {
           id: uid(),
           name: '\u65B0\u5206\u7EC4',
@@ -2076,38 +1887,33 @@
           defaultOpen: helpers.sitePref.defaultOpen,
         }
         cfg.groups.push(ng)
-        active = ng
+        activeGroup = ng
+        activeTab = 'settings'
         helpers.saveConfig(cfg)
-        rebuildGroupPills()
-        rebuildGroupEditor()
+        rebuildSidebar()
+        rebuildContent()
         helpers.rerender(root, cfg)
       })
-      const delGroup = document.createElement('button')
-      delGroup.className = 'btn btn-secondary'
-      delGroup.textContent = '\u5220\u9664\u5206\u7EC4'
-      delGroup.addEventListener('click', () => {
-        if ((cfg.groups || []).length <= 1) {
-          return
-        }
-        cfg.groups = (cfg.groups || []).filter((g) => g.id !== active.id)
-        active = cfg.groups[0]
-        helpers.saveConfig(cfg)
-        rebuildGroupPills()
-        rebuildGroupEditor()
-        helpers.rerender(root, cfg)
-      })
-      const delEmptyGroups = document.createElement('button')
-      delEmptyGroups.className = 'btn btn-secondary'
-      delEmptyGroups.textContent =
-        '\u5220\u9664\u6240\u6709\u7A7A\u7684\u5206\u7EC4'
-      delEmptyGroups.addEventListener('click', () => {
+    })
+    sidebarActions.append(addGroupBtn)
+    const delEmptyGroupsBtn = document.createElement('button')
+    delEmptyGroupsBtn.className =
+      'btn btn-secondary w-full justify-center text-xs'
+    delEmptyGroupsBtn.textContent = '\u6E05\u7406\u7A7A\u5206\u7EC4'
+    delEmptyGroupsBtn.addEventListener('click', () => {
+      checkUnsavedChanges(() => {
         const empties = (cfg.groups || []).filter(
           (g) => (g.items || []).length === 0
         )
         const n = empties.length
-        if (n === 0) return
+        if (n === 0) {
+          globalThis.alert('\u6CA1\u6709\u53D1\u73B0\u7A7A\u5206\u7EC4')
+          return
+        }
         const ok = globalThis.confirm(
-          '\u786E\u8BA4\u5220\u9664 ' + String(n) + ' \u4E2A\u5206\u7EC4\uFF1F'
+          '\u786E\u8BA4\u5220\u9664 ' +
+            String(n) +
+            ' \u4E2A\u7A7A\u5206\u7EC4\uFF1F'
         )
         if (!ok) return
         const kept = (cfg.groups || []).filter(
@@ -2125,95 +1931,389 @@
           kept.push(ng)
         }
         cfg.groups = kept
-        active = cfg.groups[0]
+        activeGroup = cfg.groups[0]
         helpers.saveConfig(cfg)
-        rebuildGroupPills()
-        rebuildGroupEditor()
+        rebuildSidebar()
+        rebuildContent()
         helpers.rerender(root, cfg)
       })
-      grpActions.append(addGroup)
-      grpActions.append(delGroup)
-      grpActions.append(delEmptyGroups)
-      groupEditor.append(row1)
-      groupEditor.append(row2)
-      groupEditor.append(row3)
-      groupEditor.append(row4)
-      groupEditor.append(row5)
-      groupEditor.append(row6)
-      groupEditor.append(itemsHeader)
-      groupEditor.append(itemsList)
-      groupEditor.append(addRow)
-      groupEditor.append(grpActions)
-      rebuildItems()
+    })
+    sidebarActions.append(delEmptyGroupsBtn)
+    sidebar.append(sidebarList)
+    sidebar.append(sidebarActions)
+    function rebuildContentHeader() {
+      clearChildren(contentHeader)
+      const title = document.createElement('div')
+      title.className = 'content-title'
+      title.textContent = activeGroup.name
+      contentHeader.append(title)
+      const delBtn = document.createElement('button')
+      delBtn.className = 'btn btn-secondary mini text-red-600'
+      delBtn.textContent = '\u5220\u9664\u5206\u7EC4'
+      delBtn.addEventListener('click', () => {
+        if ((cfg.groups || []).length <= 1) return
+        if (
+          !globalThis.confirm(
+            '\u786E\u8BA4\u5220\u9664\u5206\u7EC4 "' +
+              String(activeGroup.name) +
+              '" \u53CA\u5176\u6240\u6709\u5185\u5BB9\uFF1F'
+          )
+        )
+          return
+        isSettingsDirty = false
+        pendingGroupData = void 0
+        activeLinkItem = void 0
+        isLinkDirty = false
+        cfg.groups = (cfg.groups || []).filter((g) => g.id !== activeGroup.id)
+        activeGroup = cfg.groups[0]
+        helpers.saveConfig(cfg)
+        rebuildSidebar()
+        rebuildContent()
+        helpers.rerender(root, cfg)
+      })
+      if ((cfg.groups || []).length <= 1) {
+        delBtn.disabled = true
+        delBtn.style.opacity = '0.5'
+      }
+      contentHeader.append(delBtn)
     }
-    rebuildGroupPills()
-    rebuildGroupEditor()
-    wrap.append(grpHeader)
-    wrap.append(grpList)
-    wrap.append(groupEditor)
-    return wrap
-  }
-  function copyItemToGroup(cfg, fromGroupId, itemId, toGroupId) {
-    const from = (cfg.groups || []).find((g) => g.id === fromGroupId)
-    const to = (cfg.groups || []).find((g) => g.id === toGroupId)
-    if (!from || !to) return
-    const it = (from.items || []).find((x) => x.id === itemId)
-    if (!it) return
-    const dup = __spreadProps(__spreadValues({}, it), { id: uid() })
-    to.items.push(dup)
+    const handleTabClick = (k) => {
+      checkUnsavedChanges(() => {
+        activeTab = k
+        rebuildTabs()
+        rebuildTabContent()
+      })
+    }
+    function rebuildTabs() {
+      clearChildren(contentTabs)
+      const tabs = [
+        { key: 'shortcuts', label: '\u5FEB\u6377\u5BFC\u822A (Shortcuts)' },
+        { key: 'settings', label: '\u5206\u7EC4\u8BBE\u7F6E' },
+      ]
+      for (const t of tabs) {
+        const btn = document.createElement('div')
+        btn.className = 'tab-btn' + (activeTab === t.key ? ' active' : '')
+        btn.textContent = t.label
+        btn.addEventListener('click', () => {
+          handleTabClick(t.key)
+        })
+        contentTabs.append(btn)
+      }
+    }
+    function rebuildTabContent() {
+      clearChildren(contentBody)
+      if (activeTab === 'settings') {
+        renderSettingsTab(contentBody)
+      } else {
+        renderShortcutsTab(contentBody)
+      }
+    }
+    function renderSettingsTab(container) {
+      const initData = __spreadValues({}, activeGroup)
+      pendingGroupData = initData
+      if (activeGroup.match) pendingGroupData.match = [...activeGroup.match]
+      isSettingsDirty = false
+      const cancelBtn = document.createElement('button')
+      const saveBtn = document.createElement('button')
+      const formWrap = document.createElement('div')
+      renderGroupForm(formWrap, pendingGroupData, {
+        onChange() {
+          isSettingsDirty = true
+          cancelBtn.disabled = false
+          saveBtn.disabled = false
+        },
+      })
+      const actions = document.createElement('div')
+      actions.className = 'row justify-end mt-4 gap-2'
+      cancelBtn.className = 'btn btn-secondary'
+      cancelBtn.textContent = '\u53D6\u6D88'
+      cancelBtn.disabled = true
+      cancelBtn.addEventListener('click', () => {
+        if (
+          isSettingsDirty &&
+          !globalThis.confirm(
+            '\u786E\u5B9A\u653E\u5F03\u672A\u4FDD\u5B58\u7684\u4FEE\u6539\u5417\uFF1F'
+          )
+        ) {
+          return
+        }
+        isSettingsDirty = false
+        pendingGroupData = void 0
+        renderSettingsTab(container)
+      })
+      saveBtn.className = 'btn btn-primary'
+      saveBtn.textContent = '\u4FDD\u5B58\u8BBE\u7F6E'
+      saveBtn.disabled = true
+      saveBtn.addEventListener('click', () => {
+        savePendingSettings()
+        renderSettingsTab(container)
+      })
+      actions.append(cancelBtn)
+      actions.append(saveBtn)
+      clearChildren(container)
+      container.append(formWrap)
+      container.append(actions)
+    }
+    function renderShortcutsTab(container) {
+      if (activeLinkItem) {
+        renderLinkEditor(container)
+      } else {
+        renderLinkList(container)
+      }
+    }
+    function renderLinkEditor(container) {
+      if (!activeLinkItem) return
+      const formWrap = document.createElement('div')
+      const actions = document.createElement('div')
+      actions.className = 'row justify-end mt-4 gap-2'
+      const cancelBtn = document.createElement('button')
+      const saveBtn = document.createElement('button')
+      let tempMask
+      let tempModal
+      renderLinkForm(formWrap, activeLinkItem, {
+        root,
+        groups: cfg.groups || [],
+        disableGroupSelector: Boolean(editingLinkOriginalId),
+        onChange() {
+          isLinkDirty = true
+          saveBtn.disabled = false
+        },
+        onPickStart() {
+          const mask = root.querySelector('.modal-mask')
+          if (mask) {
+            tempMask = mask
+            tempModal = mask.querySelector('.modal')
+            if (tempModal) tempModal.style.display = 'none'
+            mask.remove()
+          }
+        },
+        onPickEnd() {
+          if (tempMask && tempModal) {
+            tempModal.style.display = ''
+            root.append(tempMask)
+          }
+        },
+      })
+      cancelBtn.className = 'btn btn-secondary'
+      cancelBtn.textContent = '\u53D6\u6D88'
+      cancelBtn.addEventListener('click', () => {
+        if (
+          isLinkDirty &&
+          !globalThis.confirm(
+            '\u786E\u5B9A\u653E\u5F03\u672A\u4FDD\u5B58\u7684\u4FEE\u6539\u5417\uFF1F'
+          )
+        ) {
+          return
+        }
+        activeLinkItem = void 0
+        isLinkDirty = false
+        editingLinkOriginalId = void 0
+        renderShortcutsTab(container)
+      })
+      saveBtn.className = 'btn btn-primary'
+      saveBtn.textContent = editingLinkOriginalId
+        ? '\u786E\u8BA4'
+        : '\u6DFB\u52A0'
+      saveBtn.disabled = !isLinkDirty
+      saveBtn.addEventListener('click', () => {
+        const gid = activeLinkItem.groupId
+        const grp = (cfg.groups || []).find((g) => g.id === gid)
+        if (!grp) return
+        const hasDup = hasDuplicateInGroup(
+          grp,
+          activeLinkItem.type,
+          activeLinkItem.data,
+          editingLinkOriginalId
+        )
+        if (hasDup) {
+          const msg =
+            activeLinkItem.type === 'url'
+              ? editingLinkOriginalId
+                ? '\u8BE5\u5206\u7EC4\u5185\u5DF2\u5B58\u5728\u76F8\u540C\u7684 URL\uFF0C\u662F\u5426\u7EE7\u7EED\u4FDD\u5B58\uFF1F'
+                : '\u8BE5\u5206\u7EC4\u5185\u5DF2\u5B58\u5728\u76F8\u540C\u7684 URL\uFF0C\u662F\u5426\u7EE7\u7EED\u6DFB\u52A0\uFF1F'
+              : editingLinkOriginalId
+                ? '\u8BE5\u5206\u7EC4\u5185\u5DF2\u5B58\u5728\u76F8\u540C\u7684 JS\uFF0C\u662F\u5426\u7EE7\u7EED\u4FDD\u5B58\uFF1F'
+                : '\u8BE5\u5206\u7EC4\u5185\u5DF2\u5B58\u5728\u76F8\u540C\u7684 JS\uFF0C\u662F\u5426\u7EE7\u7EED\u6DFB\u52A0\uFF1F'
+          const ok = globalThis.confirm(msg)
+          if (!ok) return
+        }
+        if (editingLinkOriginalId) {
+          const it = grp.items.find((x) => x.id === editingLinkOriginalId)
+          if (it) {
+            it.name = activeLinkItem.name
+            it.icon = activeLinkItem.icon
+            it.type = activeLinkItem.type
+            it.data = activeLinkItem.data
+            it.openIn = activeLinkItem.openIn
+            it.hidden = activeLinkItem.hidden
+          }
+        } else {
+          const it = {
+            id: activeLinkItem.id || uid(),
+            name: activeLinkItem.name,
+            icon: activeLinkItem.icon,
+            type: activeLinkItem.type,
+            data: activeLinkItem.data,
+            openIn: activeLinkItem.openIn,
+            hidden: activeLinkItem.hidden,
+          }
+          grp.items.push(it)
+        }
+        try {
+          helpers.saveConfig(cfg)
+        } catch (e) {}
+        try {
+          helpers.rerender(root, cfg)
+        } catch (e) {}
+        activeLinkItem = void 0
+        isLinkDirty = false
+        editingLinkOriginalId = void 0
+        if (grp.id !== activeGroup.id) {
+        }
+        renderShortcutsTab(container)
+      })
+      actions.append(cancelBtn)
+      actions.append(saveBtn)
+      clearChildren(container)
+      container.append(formWrap)
+      container.append(actions)
+    }
+    function renderLinkList(container) {
+      clearChildren(container)
+      const list = document.createElement('div')
+      list.className = 'shortcut-list'
+      const grp = activeGroup
+      const addRow = document.createElement('div')
+      addRow.className = 'mb-3'
+      const addBtn = document.createElement('button')
+      addBtn.className = 'btn btn-primary w-full justify-center'
+      addBtn.textContent = '+ \u6DFB\u52A0\u5FEB\u6377\u5BFC\u822A'
+      addBtn.addEventListener('click', () => {
+        var _a
+        activeLinkItem = {
+          id: uid(),
+          groupId: activeGroup.id,
+          name: '\u65B0\u9879',
+          type: 'url',
+          data: '/',
+          openIn:
+            (_a = activeGroup.defaultOpen) != null
+              ? _a
+              : helpers.sitePref.defaultOpen,
+        }
+        isLinkDirty = false
+        editingLinkOriginalId = void 0
+        renderShortcutsTab(container)
+      })
+      addRow.append(addBtn)
+      container.append(addRow)
+      for (const it of grp.items || []) {
+        const itemEl = document.createElement('div')
+        itemEl.className = 'shortcut-item group'
+        if (it.hidden) itemEl.classList.add('is-hidden')
+        const iconEl = document.createElement('div')
+        iconEl.className = 'shortcut-icon'
+        setIcon(iconEl, it.icon || 'lucide:link')
+        itemEl.append(iconEl)
+        const info = document.createElement('div')
+        info.className = 'shortcut-info'
+        const name = document.createElement('div')
+        name.className = 'shortcut-name'
+        name.textContent = it.name
+        info.append(name)
+        const meta = document.createElement('div')
+        meta.className = 'shortcut-meta'
+        meta.textContent =
+          (it.type === 'js' ? 'JS' : 'URL') +
+          ' \u2022 ' +
+          String(it.openIn || '\u9ED8\u8BA4')
+        if (it.hidden) meta.textContent += ' \u2022 \u5DF2\u9690\u85CF'
+        info.append(meta)
+        itemEl.append(info)
+        const actions = document.createElement('div')
+        actions.className = 'shortcut-actions'
+        const editBtn = document.createElement('button')
+        editBtn.className = 'icon-btn'
+        setIcon(editBtn, 'lucide:edit-3', '\u7F16\u8F91')
+        editBtn.addEventListener('click', () => {
+          activeLinkItem = {
+            id: it.id,
+            groupId: activeGroup.id,
+            name: it.name,
+            icon: it.icon,
+            type: it.type,
+            data: it.data,
+            openIn: it.openIn,
+            hidden: it.hidden,
+          }
+          isLinkDirty = false
+          editingLinkOriginalId = it.id
+          renderShortcutsTab(container)
+        })
+        actions.append(editBtn)
+        const hideBtn = document.createElement('button')
+        hideBtn.className = 'icon-btn'
+        setIcon(
+          hideBtn,
+          it.hidden ? 'lucide:eye' : 'lucide:eye-off',
+          it.hidden ? '\u663E\u793A' : '\u9690\u85CF'
+        )
+        hideBtn.addEventListener('click', () => {
+          it.hidden = !it.hidden
+          helpers.saveConfig(cfg)
+          rebuildTabContent()
+          helpers.rerender(root, cfg)
+        })
+        actions.append(hideBtn)
+        const delBtn = document.createElement('button')
+        delBtn.className = 'icon-btn text-danger'
+        setIcon(delBtn, 'lucide:trash-2', '\u5220\u9664')
+        delBtn.addEventListener('click', () => {
+          if (
+            !globalThis.confirm(
+              '\u786E\u5B9A\u5220\u9664 "' + String(it.name) + '" \u5417\uFF1F'
+            )
+          )
+            return
+          grp.items = (grp.items || []).filter((x) => x.id !== it.id)
+          helpers.saveConfig(cfg)
+          rebuildTabContent()
+          helpers.rerender(root, cfg)
+        })
+        actions.append(delBtn)
+        itemEl.append(actions)
+        list.append(itemEl)
+      }
+      container.append(list)
+    }
+    function rebuildContent() {
+      rebuildContentHeader()
+      rebuildTabs()
+      rebuildTabContent()
+    }
+    rebuildSidebar()
+    rebuildContent()
+    wrap.append(sidebar)
+    wrap.append(content)
+    return { el: wrap, checkUnsavedChanges }
   }
   function openEditorModal(root, cfg, helpers) {
-    for (const n of Array.from(root.querySelectorAll('.modal-mask'))) n.remove()
-    const mask = document.createElement('div')
-    mask.className = 'modal-mask'
-    try {
-      mask.style.zIndex = '2147483647'
-    } catch (e) {}
-    const modal = document.createElement('div')
-    modal.className = 'modal editor'
-    const h2 = document.createElement('h2')
-    h2.textContent = '\u5FEB\u901F\u5BFC\u822A\u8BBE\u7F6E'
-    let tab = 'groups'
-    const tabs = createSegmentedRadios(
-      tab,
-      ['settings', 'groups'],
-      (v) => {
-        tab = v
-        syncUi()
-      },
-      {
-        labels: { settings: '\u8BBE\u7F6E', groups: '\u5206\u7EC4' },
-        namePrefix: 'ushortcuts-editor-tabs-',
-      }
-    )
-    const settingsWrap = document.createElement('div')
-    const groupsWrap = document.createElement('div')
-    const groupsPanel = createGroupManagerPanel(root, cfg, {
-      saveConfig: helpers.saveConfig,
-      rerender: helpers.rerender,
-      sitePref: helpers.sitePref,
+    const { modal, body, actions, close } = createModalFrame({
+      root,
+      title: '\u5206\u7EC4\u7BA1\u7406',
     })
-    groupsWrap.append(groupsPanel)
-    const actions = document.createElement('div')
-    actions.className = 'row'
+    modal.classList.add('editor')
+    const groupsPanel = createGroupManagerPanel(root, cfg, helpers)
+    body.append(groupsPanel.el)
     const closeBtn = document.createElement('button')
     closeBtn.className = 'btn btn-secondary'
     closeBtn.textContent = '\u5173\u95ED'
     closeBtn.addEventListener('click', () => {
-      mask.remove()
+      groupsPanel.checkUnsavedChanges(() => {
+        close()
+      })
     })
     actions.append(closeBtn)
-    const syncUi = () => {
-      settingsWrap.style.display = tab === 'settings' ? '' : 'none'
-      groupsWrap.style.display = tab === 'groups' ? '' : 'none'
-    }
-    syncUi()
-    modal.append(h2)
-    modal.append(settingsWrap)
-    modal.append(groupsWrap)
-    modal.append(actions)
-    mask.append(modal)
-    root.append(mask)
   }
   function deepMergeReplaceArrays(target, source) {
     if (target === null || typeof target !== 'object') return source
@@ -3470,14 +3570,14 @@
             ;(async () => {
               try {
                 const existing = document.querySelector(
-                  '[data-ushortcuts-host="ushortcuts"]'
+                  '[data-ushortcuts-host="utags-shortcuts"]'
                 )
                 const root =
                   existing instanceof HTMLElement && existing.shadowRoot
                     ? existing.shadowRoot
                     : (() => {
                         const host = document.createElement('div')
-                        host.dataset.ushortcutsHost = 'ushortcuts'
+                        host.dataset.ushortcutsHost = 'utags-shortcuts'
                         const r = host.attachShadow({ mode: 'open' })
                         const style = document.createElement('style')
                         style.textContent = style_default
@@ -4707,10 +4807,36 @@
           }
         })
       })
+      const manageGroupsBtn = document.createElement('button')
+      manageGroupsBtn.className = 'btn mini'
+      manageGroupsBtn.textContent = '\u7BA1\u7406\u5206\u7EC4'
+      manageGroupsBtn.addEventListener('click', () => {
+        openEditorModal(root, cfg, {
+          saveConfig(c2) {
+            void saveConfig(c2)
+          },
+          rerender(r, c2) {
+            rerender(r, c2)
+          },
+          sitePref: {
+            defaultOpen: settings.defaultOpen || OPEN_DEFAULT,
+          },
+          updateThemeUI,
+          edgeDefaults: {
+            width: EDGE_DEFAULT_WIDTH,
+            height: EDGE_DEFAULT_HEIGHT,
+            opacity: EDGE_DEFAULT_OPACITY,
+            colorLight: EDGE_DEFAULT_COLOR_LIGHT,
+            colorDark: EDGE_DEFAULT_COLOR_DARK,
+          },
+          tempOpenGetter: () => tempOpen,
+        })
+      })
       rightActions.append(showHiddenGroupsLabel)
       rightActions.append(showHiddenItemsLabel)
       rightActions.append(expandAllBtn)
       rightActions.append(collapseAllBtn)
+      rightActions.append(manageGroupsBtn)
     }
     rightActions.append(settingsBtn)
     if ((settings.layoutMode || LAYOUT_DEFAULT) !== 'sidebar')
@@ -4783,7 +4909,12 @@
       if (!pinnedFlag && !suppressCollapse) scheduleAutoCollapse(root, cfg)
     })
     place(wrapper, cfg)
-    root.append(wrapper)
+    const mask = root.querySelector('.modal-mask')
+    if (mask) {
+      mask.before(wrapper)
+    } else {
+      root.append(wrapper)
+    }
   }
   function openQuickAddMenu(root, cfg, anchor) {
     suppressCollapse = true
@@ -5022,6 +5153,23 @@
     } catch (e) {}
     tempOpen = false
     rerender(root, cfg)
+  }
+  function updateThemeUI(root, cfg) {
+    const wrapper = root.querySelector('.ushortcuts')
+    if (!wrapper) return
+    wrapper.classList.toggle('dark', isDarkTheme(cfg))
+    const curTheme = settings.theme || THEME_DEFAULT
+    const map = {
+      系统: 'system',
+      浅色: 'light',
+      深色: 'dark',
+    }
+    const btns = wrapper.querySelectorAll('.theme-btn')
+    for (const b of Array.from(btns)) {
+      const key = b.title
+      const val = map[key] || ''
+      b.classList.toggle('active', val === curTheme)
+    }
   }
   function registerUrlChangeListener(root, cfg) {
     let last = location.href
