@@ -672,6 +672,9 @@
     try {
       mask.style.zIndex = '2147483647'
     } catch (e) {}
+    mask.addEventListener('keydown', (e) => {
+      e.stopPropagation()
+    })
     const modal = document.createElement('div')
     modal.className = 'modal'
     modal.style.overscrollBehavior = 'contain'
@@ -739,6 +742,11 @@
       if (e.key === 'Escape') {
         e.preventDefault()
         close()
+        return
+      }
+      if (!e.composedPath().includes(root)) {
+        e.preventDefault()
+        e.stopPropagation()
         return
       }
       if (e.key === 'Tab') {

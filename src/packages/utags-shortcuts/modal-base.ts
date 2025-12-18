@@ -21,6 +21,11 @@ export function createModalFrame(options: ModalOptions) {
     ;(mask.style as any).zIndex = '2147483647'
   } catch {}
 
+  // Stop bubbling to prevent page shortcuts
+  mask.addEventListener('keydown', (e) => {
+    e.stopPropagation()
+  })
+
   const modal = document.createElement('div')
   modal.className = 'modal'
   // Prevent scroll chaining to body when modal scroll hits boundary
@@ -101,6 +106,13 @@ export function createModalFrame(options: ModalOptions) {
     if (e.key === 'Escape') {
       e.preventDefault()
       close()
+      return
+    }
+
+    // Block events from outside the modal (e.g. page body)
+    if (!e.composedPath().includes(root)) {
+      e.preventDefault()
+      e.stopPropagation()
       return
     }
 
