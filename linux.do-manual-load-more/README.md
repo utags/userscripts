@@ -2,7 +2,7 @@
 
 一个用于 LINUX.DO 论坛的油猴脚本，提供手动加载更多话题的功能，具有现代化的用户界面和完善的错误处理机制。
 
-![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-08-14-15-07-39.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-08-14-15-07-39.png)
 
 ## 功能特性
 

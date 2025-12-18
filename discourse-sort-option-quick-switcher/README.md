@@ -4,7 +4,7 @@ Quickly switch Discourse topic list sorting via menu commands by updating URL pa
 
 [中文版](https://github.com/utags/userscripts/blob/main/discourse-sort-option-quick-switcher/README.zh-CN.md)
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-11-06-15-17-11.png)
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-11-06-15-17-11.png)
 
 ## Features
 

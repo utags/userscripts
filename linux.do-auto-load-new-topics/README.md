@@ -2,7 +2,7 @@
 
 一个智能的用户脚本，用于自动加载 Linux.DO 论坛的新话题，无需手动点击"显示更多"按钮。
 
-![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-08-14-14-42-52.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-08-14-14-42-52.png)
 
 ## 功能特性
 

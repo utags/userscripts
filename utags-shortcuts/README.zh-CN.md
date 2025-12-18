@@ -4,6 +4,14 @@
 
 [English Version](https://github.com/utags/userscripts/blob/main/utags-shortcuts/README.md)
 
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-22-38-53.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-23-07-10.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-23-17-50.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-23-09-19.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-23-12-29.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-23-21-42.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-23-23-36.png)
+
 ## 核心功能
 
 - **按站点智能分组**：根据当前访问的网站自动显示相关的导航组。你可以配置特定分组仅在特定的域名或 URL 模式下显示。

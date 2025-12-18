@@ -4,6 +4,14 @@
 
 [中文文档](https://github.com/utags/userscripts/blob/main/utags-shortcuts/README.zh-CN.md)
 
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-22-38-53.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-23-07-10.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-23-17-50.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-23-09-19.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-23-12-29.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-23-21-42.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-18-23-23-36.png)
+
 ## Key Features
 
 - **Per-Site Grouping**: Automatically displays relevant navigation groups based on the website you are currently visiting. Configure groups to appear on specific domains or URL patterns.

@@ -4,7 +4,7 @@
 
 [English](https://github.com/utags/userscripts/blob/main/discourse-prevent-jump-on-reply/README.md)
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-05-22-27-09.png)
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-05-22-27-09.png)
 
 ## 功能
 

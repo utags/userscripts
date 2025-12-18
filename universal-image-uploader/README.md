@@ -4,17 +4,17 @@ A user script that lets you paste, drag, or select images and batch-upload them 
 
 [中文版](https://github.com/utags/userscripts/blob/main/universal-image-uploader/README.zh-CN.md)
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-10-22-21-21-49.png)
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-10-22-21-21-49.png)
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-10-22-21-12-14.png)
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-10-22-21-12-14.png)
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-10-22-21-08-06.png)
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-10-22-21-08-06.png)
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-10-22-21-06-32.png)
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-10-22-21-06-32.png)
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-10-22-21-09-00.png)
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-10-22-21-09-00.png)
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-10-22-21-09-33.png)
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-10-22-21-09-33.png)
 
 ## Features (MVP)
 

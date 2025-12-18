@@ -2,7 +2,7 @@
 
 A powerful user script that brings seamless topic navigation, effective current topic highlighting, and quick navigation to previous/next topics in Discourse forums. Browse your favorite forums with enhanced speed and efficiency.
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-30-08-15-02.gif)
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-30-08-15-02.gif)
 
 ## Features
 

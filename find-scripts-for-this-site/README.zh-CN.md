@@ -4,9 +4,9 @@
 
 [English Version](https://github.com/utags/userscripts/blob/main/find-scripts-for-this-site/README.md)
 
-![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-25-19-48-03.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-25-19-48-03.png)
 
-![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-16-09-57-35.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-16-09-57-35.png)
 
 ## 功能特性
 

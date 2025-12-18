@@ -4,7 +4,7 @@
 
 [English Version](https://github.com/utags/userscripts/blob/main/discourse-sort-option-quick-switcher/README.md)
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-11-06-15-17-47.png)
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-11-06-15-17-47.png)
 
 ## 功能特点
 

@@ -4,9 +4,9 @@ A user script to quickly find scripts for the current site across multiple repos
 
 [中文文档](https://github.com/utags/userscripts/blob/main/find-scripts-for-this-site/README.zh-CN.md)
 
-![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-25-19-47-18.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-25-19-47-18.png)
 
-![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-16-09-57-11.png)
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-16-09-57-11.png)
 
 ## Features
 

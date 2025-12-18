@@ -2,7 +2,7 @@
 
 一款强大的用户脚本，为 Discourse 论坛带来无缝话题导航、当前话题高亮显示和上一个/下一个话题的快速导航功能。让您以更快的速度和更高的效率浏览您喜爱的论坛。
 
-![screencapture](https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-30-08-15-02.gif)
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/2025-09-30-08-15-02.gif)
 
 ## 功能特点
 
