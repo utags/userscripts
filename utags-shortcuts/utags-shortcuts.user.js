@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.10
+// @version              0.1.11
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -3333,47 +3333,43 @@
         }
       } catch (e) {}
       const g = {
-        id: uid(),
+        id: 'default_group',
         name: '\u9ED8\u8BA4\u7EC4',
         icon: 'lucide:folder',
         match: ['*'],
         defaultOpen: OPEN_DEFAULT,
         items: [
           {
-            id: uid(),
+            id: 'default_home',
             name: '\u9996\u9875',
             icon: 'lucide:home',
             type: 'url',
             data: '/',
             openIn: OPEN_DEFAULT,
-            hidden: false,
           },
           {
-            id: uid(),
+            id: 'default_google',
             name: 'Google \u641C\u7D22',
             icon: 'favicon',
             type: 'url',
             data: 'https://www.google.com/search?q={selected||query}',
             openIn: 'new-tab',
-            hidden: false,
           },
           {
-            id: uid(),
+            id: 'default_gemini',
             name: 'Gemini',
             icon: 'favicon',
             type: 'url',
             data: 'https://gemini.google.com/app',
             openIn: 'new-tab',
-            hidden: false,
           },
           {
-            id: uid(),
+            id: 'default_site_search',
             name: '\u7AD9\u5185\u641C\u7D22',
             icon: 'favicon',
             type: 'url',
             data: 'https://www.google.com/search?q=site:{hostname}%20{selected||query}',
             openIn: 'new-tab',
-            hidden: false,
           },
         ],
         collapsed: false,
@@ -3381,7 +3377,7 @@
         hidden: false,
       }
       const readLater = {
-        id: uid(),
+        id: 'read_later_group',
         name: '\u7A0D\u540E\u9605\u8BFB',
         icon: 'lucide:clock',
         match: ['*'],
@@ -3389,49 +3385,210 @@
         items: [],
       }
       const community = {
-        id: uid(),
+        id: 'community_group',
         name: '\u793E\u533A',
         icon: 'lucide:users',
         match: ['*'],
         defaultOpen: 'new-tab',
         items: [
           {
-            id: uid(),
+            id: 'community_v2ex',
             name: 'V2EX',
             icon: 'favicon',
             type: 'url',
             data: 'https://www.v2ex.com/',
             openIn: 'new-tab',
-            hidden: false,
           },
           {
-            id: uid(),
+            id: 'community_linuxdo',
             name: 'LINUX DO',
             icon: 'favicon',
             type: 'url',
             data: 'https://linux.do/',
             openIn: 'new-tab',
-            hidden: false,
           },
           {
-            id: uid(),
+            id: 'community_2libra',
             name: '2Libra',
             icon: 'favicon',
             type: 'url',
             data: 'https://2libra.com/?ref=utags-shortcuts',
             openIn: 'new-tab',
-            hidden: false,
           },
           {
-            id: uid(),
+            id: 'community_appinn',
             name: '\u5C0F\u4F17\u8F6F\u4EF6',
             icon: 'favicon',
             type: 'url',
             data: 'https://meta.appinn.net/',
             openIn: 'new-tab',
-            hidden: false,
           },
         ],
+      }
+      const v2ex = {
+        id: 'jyuf521d',
+        name: 'V2EX',
+        icon: 'url:https://www.v2ex.com/favicon.ico',
+        match: [
+          '*://www.v2ex.com/*',
+          '*://v2ex.com/*',
+          '*://*.v2ex.com/*',
+          '*://global.v2ex.co/*',
+        ],
+        defaultOpen: 'same-tab',
+        items: [
+          {
+            id: 'rexmfgc5',
+            name: '\u6700\u70ED',
+            icon: '\u{1F525}',
+            type: 'url',
+            data: '/?tab=hot',
+            openIn: 'same-tab',
+          },
+          {
+            id: '9hbsfrw1',
+            name: '\u521B\u610F',
+            icon: '\u{1F4A1}',
+            type: 'url',
+            data: '/?tab=creative',
+            openIn: 'same-tab',
+          },
+          {
+            id: 'zr14ffbp',
+            name: '\u5168\u90E8',
+            icon: 'lucide:link',
+            type: 'url',
+            data: '/?tab=all',
+            openIn: 'same-tab',
+          },
+          {
+            id: 'v0uxrv30',
+            name: '\u5168\u7AD9\u6700\u8FD1\u66F4\u65B0\u5217\u8868',
+            icon: 'lucide:link',
+            type: 'url',
+            data: '/changes',
+            openIn: 'same-tab',
+          },
+          {
+            id: 'w08vm9vt',
+            name: '\u6C34\u6DF1\u706B\u70ED',
+            icon: 'lucide:link',
+            type: 'url',
+            data: '/go/flamewar',
+            openIn: 'same-tab',
+          },
+          {
+            id: 'evev9l6r',
+            name: '\u63D0\u9192',
+            icon: 'lucide:bell',
+            type: 'url',
+            data: '/notifications',
+            openIn: 'same-tab',
+          },
+        ],
+      }
+      const linuxdo = {
+        id: '2h898oy9',
+        name: 'L\u7AD9',
+        icon: 'url:https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Flinux.do%26size%3D64',
+        match: ['*://linux.do/*'],
+        defaultOpen: 'same-tab',
+        items: [
+          {
+            id: 'fq7s1vg6',
+            name: '\u6700\u65B0\u8BDD\u9898',
+            type: 'url',
+            data: 'https://linux.do/latest',
+            openIn: 'same-tab',
+          },
+          {
+            id: 'empa8f6o',
+            name: '\u521B\u5EFA\u65E5\u671F\u6392\u5E8F',
+            type: 'url',
+            data: '?ascending=false&order=created',
+            openIn: 'same-tab',
+            icon: 'lucide:calendar-arrow-down',
+          },
+          {
+            id: 'ghjguteh',
+            name: '\u672A\u8BFB\uFF08Unread\uFF09',
+            type: 'url',
+            data: 'https://linux.do/unread',
+            openIn: 'same-tab',
+            icon: 'lucide:book-plus',
+          },
+          {
+            id: 'fiahbsfb',
+            name: '\u59CB\u7687',
+            type: 'url',
+            data: 'https://linux.do/u/neo/activity',
+            openIn: 'same-tab',
+            icon: 'lucide:crown',
+          },
+          {
+            id: 'v7xfwc1x',
+            name: '\u5FEB\u95EE\u5FEB\u7B54',
+            type: 'url',
+            data: 'https://linux.do/tag/%E5%BF%AB%E9%97%AE%E5%BF%AB%E7%AD%94',
+            openIn: 'same-tab',
+            icon: 'lucide:circle-question-mark',
+          },
+          {
+            id: '03v787o2',
+            name: '\u7CBE\u534E\u795E\u5E16',
+            type: 'url',
+            data: 'https://linux.do/tag/%E7%B2%BE%E5%8D%8E%E7%A5%9E%E5%B8%96',
+            openIn: 'same-tab',
+            icon: 'lucide:thumbs-up',
+          },
+          {
+            id: '0eybi3bv',
+            name: 'leaderbooard',
+            type: 'url',
+            data: 'https://linux.do/leaderboard',
+            openIn: 'new-tab',
+            icon: 'lucide:trophy',
+          },
+          {
+            id: 'oy4c2de9',
+            name: 'Connect',
+            type: 'url',
+            data: 'https://connect.linux.do/',
+            openIn: 'new-tab',
+          },
+          {
+            id: 'tt9yac9m',
+            name: 'IDC Flare',
+            type: 'url',
+            data: 'https://idcflare.com/',
+            openIn: 'new-tab',
+          },
+          {
+            id: 'vt4y2688',
+            name: 'Challenge',
+            type: 'url',
+            data: 'https://linux.do/challenge',
+            openIn: 'new-tab',
+            icon: 'lucide:swords',
+          },
+          {
+            id: '20p30jnz',
+            name: '\u5206\u53D1\u7AD9',
+            type: 'url',
+            data: 'https://cdk.linux.do/',
+            openIn: 'new-tab',
+            icon: 'lucide:ticket-check',
+          },
+          {
+            id: 'q1df8ev8',
+            name: '\u793E\u533A\u5B50\u7CFB\u7EDF\u548C\u5143\u5B87\u5B99',
+            type: 'url',
+            data: 'https://linux.do/pub/resources',
+            openIn: 'new-tab',
+            icon: 'lucide:infinity',
+          },
+        ],
+        itemsPerRow: 2,
       }
       const _2libra_1 = {
         id: 'k10czcms',
@@ -3446,13 +3603,14 @@
             icon: 'favicon',
             type: 'url',
             data: 'https://2libra.com/auth/signup/1AeoTgXc',
+            openIn: 'same-tab',
           },
         ],
       }
       const _2libra_2 = {
         id: 'k20czcms',
         name: '2libra',
-        icon: 'lucide:folder',
+        icon: 'url:https://2libra.com/favicon.ico',
         match: ['*://2libra.com/*'],
         defaultOpen: 'same-tab',
         items: [
@@ -3475,10 +3633,10 @@
           {
             id: 'svoiq3sz',
             name: '\u8FD1\u671F\u70ED\u8BAE',
+            icon: '\u{1F525}',
             type: 'url',
             data: 'https://2libra.com/post/hot/recent',
             openIn: 'same-tab',
-            icon: '\u{1F525}',
           },
           {
             id: 'aupy1kcr',
@@ -3486,16 +3644,14 @@
             type: 'url',
             data: 'https://2libra.com/post/latest',
             openIn: 'same-tab',
-            hidden: false,
           },
           {
             id: 'pivybx9n',
             name: '\u901A\u77E5',
+            icon: 'lucide:bell',
             type: 'url',
             data: 'https://2libra.com/notifications',
             openIn: 'same-tab',
-            hidden: false,
-            icon: 'lucide:bell',
           },
           {
             id: 'q0s43wxr',
@@ -3531,7 +3687,16 @@
         ],
       }
       return {
-        groups: [g, readLater, community, _2libra_1, _2libra_2, _2libra_3],
+        groups: [
+          g,
+          readLater,
+          community,
+          v2ex,
+          linuxdo,
+          _2libra_1,
+          _2libra_2,
+          _2libra_3,
+        ],
       }
     }
     async save(cfg) {
