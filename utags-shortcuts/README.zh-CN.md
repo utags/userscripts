@@ -103,7 +103,7 @@
 
 ### 🔍 Find Scripts For This Site - 查找适用于当前网站的脚本
 
-- **链接**：[GitHub](https://github.com/utags/userscripts/raw/main/find-scripts-for-this-site/find-scripts-for-this-site.user.js) · [Greasy Fork](https://greasyfork.org/scripts/550659-find-scripts-for-this-site) · [ScriptCat](https://scriptcat.org/script-show-page/4276)
+- **链接**：[Greasy Fork](https://greasyfork.org/scripts/550659-find-scripts-for-this-site) · [ScriptCat](https://scriptcat.org/script-show-page/4276) · [GitHub](https://github.com/utags/userscripts/raw/main/find-scripts-for-this-site/find-scripts-for-this-site.user.js)
 - **功能**：一键在多个仓库搜索脚本
 - **亮点**：设置面板、实时同步、智能顶级域名提取
 - **支持网站**：所有网站

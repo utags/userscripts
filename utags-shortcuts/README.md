@@ -103,7 +103,7 @@ Access the settings panel to customize:
 
 ### 🔍 Find Scripts For This Site
 
-- **Link**: [GitHub](https://github.com/utags/userscripts/raw/main/find-scripts-for-this-site/find-scripts-for-this-site.user.js) · [Greasy Fork](https://greasyfork.org/scripts/550659-find-scripts-for-this-site) · [ScriptCat](https://scriptcat.org/script-show-page/4276)
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/550659-find-scripts-for-this-site) · [ScriptCat](https://scriptcat.org/script-show-page/4276) · [GitHub](https://github.com/utags/userscripts/raw/main/find-scripts-for-this-site/find-scripts-for-this-site.user.js)
 - **Features**: Quickly find scripts for the current site across multiple repositories
 - **Highlights**: Settings dialog, real-time sync, smart domain extraction
 - **Supported Sites**: All websites

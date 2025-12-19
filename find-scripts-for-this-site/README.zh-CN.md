@@ -88,19 +88,19 @@
 
 ### 🧰 UTags Advanced Filter
 
-- **链接**：[Greasy Fork](https://greasyfork.org/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/en/script-show-page/4653) · [GitHub Raw](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
+- **链接**：[Greasy Fork](https://greasyfork.org/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/en/script-show-page/4653) · [GitHub](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
 - **功能**：支持在 GreasyFork 实时过滤与隐藏脚本
 - **亮点**：同时提供用户脚本与浏览器扩展两个版本
 - **支持网站**：Greasy Fork
 - **描述**：支持在 GreasyFork 实时过滤与隐藏脚本的工具，提供用户脚本和浏览器扩展两种版本。
 
-### 🔄 Discourse 话题快捷切换器
+### ⚡ UTags 快捷导航 (UTags Shortcuts)
 
-- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/550982-discourse-topic-quick-switcher)
-- **功能**：在 Discourse 论坛中快速导航切换主题
-- **亮点**：键盘快捷键、导航按钮、带语言选项的设置对话框
-- **支持网站**：所有基于 Discourse 的论坛，包括 Discourse Meta、LINUX.DO 等
-- **描述**：通过便捷的主题切换和可自定义设置，增强 Discourse 论坛中的导航体验
+- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/558485-utags-shortcuts) · [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/4910) · [GitHub](https://github.com/utags/userscripts/raw/main/utags-shortcuts/utags-shortcuts.user.js)
+- **功能**：按站点分组、自定义图标、悬浮球或侧边栏导航面板
+- **亮点**：悬浮/侧边栏模式、支持链接与脚本、可视化编辑、快捷键支持
+- **支持网站**：所有网站
+- **描述**：一款功能强大的用户脚本，提供便捷的快捷导航面板，帮助你高效管理常用链接与自动化脚本，提升浏览体验
 
 ### 🔗 链接助手
 
@@ -109,6 +109,14 @@
 - **亮点**：支持自定义规则，解析 Markdown 和 BBCode 格式，将图片链接转换为图片标签
 - **支持网站**：适用于所有网站，包括谷歌、YouTube、GitHub、V2EX 等
 - **描述**：增强链接浏览体验，自动处理各种链接格式，使网页浏览更加便捷
+
+### 🖼️ 通用图片上传助手 (Universal Image Uploader)
+
+- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/553341-universal-image-uploader) · [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/4467) · [GitHub](https://github.com/utags/userscripts/raw/main/universal-image-uploader/universal-image-uploader.user.js)
+- **功能**：粘贴/拖拽/选择图片批量上传到 Imgur/Tikolu/MJJ.Today/Appinn
+- **亮点**：自动复制为 Markdown/HTML/BBCode/链接，支持站点按钮与本地历史，兼容单页应用 (SPA)
+- **支持网站**：所有网站
+- **描述**：在任意网站上粘贴、拖拽或选择图片，批量上传到图床，并按需自动复制为多种格式，支持本地历史记录以便快速复用
 
 ## 许可证
 
