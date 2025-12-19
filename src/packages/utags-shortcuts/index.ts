@@ -1,18 +1,22 @@
 import { clearChildren, renderIcon, setIcon } from '../../utils/dom'
 import { uid } from '../../utils/uid'
 import { createOpenModeRadios } from './segmented-radios'
-import { resolveUrlTemplate } from '../../utils/url-template'
 import styleText from 'css:./style.css'
 import { openAddLinkModal } from './add-link-modal'
-import { getFaviconUrl } from '../../utils/favicon'
 import { openAddGroupModal } from './add-group-modal'
 import { showDropdownMenu } from './dropdown'
 import { openEditorModal } from './editor-modal-tabs'
 import {
-  CONFIG_KEY,
   openSettingsPanel,
   createUshortcutsSettingsStore,
 } from './settings-panel'
+import {
+  CONFIG_KEY,
+  shortcutsStore,
+  type ShortcutsConfig,
+  type ShortcutsGroup,
+  type ShortcutsItem,
+} from './store'
 import {
   getValue,
   setValue,
@@ -24,6 +28,7 @@ import {
   addCurrentPageLinkToGroup,
   pickLinkFromPageAndAdd,
 } from './add-link-actions'
+import { resolveTargetUrl, resolveIcon } from './utils'
 
 type OpenMode = 'same-tab' | 'new-tab'
 type Position =
@@ -40,32 +45,6 @@ type Position =
   | 'bottom-center'
   | 'bottom-right'
 type ItemType = 'url' | 'js'
-
-type ShortcutsItem = {
-  id: string
-  name: string
-  icon?: string
-  type: ItemType
-  data: string
-  openIn?: OpenMode
-  hidden?: boolean
-}
-
-type ShortcutsGroup = {
-  id: string
-  name: string
-  icon?: string
-  match: string[]
-  defaultOpen?: OpenMode
-  items: ShortcutsItem[]
-  collapsed?: boolean
-  itemsPerRow?: number
-  hidden?: boolean
-}
-
-type ShortcutsConfig = {
-  groups: ShortcutsGroup[]
-}
 
 const EDGE_DEFAULT_WIDTH = 3
 const EDGE_DEFAULT_HEIGHT = 60
@@ -84,7 +63,7 @@ const SIDEBAR_SIDE_DEFAULT: 'left' | 'right' = 'right'
 
 function ensureGlobalStyles() {
   try {
-    const existed = document.head.querySelector(
+    const existed = document.querySelector(
       'style[data-ushortcuts-style="sidebar"]'
     )
     if (existed) return
@@ -95,13 +74,12 @@ function ensureGlobalStyles() {
 html[data-utags-shortcuts-sidebar="left-open"] body { width: calc(100% - 360px) !important; margin-left: 360px !important; margin-right: 0 !important; }
 html[data-utags-shortcuts-sidebar="right-open"] body { width: calc(100% - 360px) !important; margin-right: 360px !important; margin-left: 0 !important; }
 `
-    document.head.append(style)
+    ;(document.head || document.documentElement).append(style)
   } catch {}
 }
 
 const store = createUshortcutsSettingsStore()
 let settings: any = {}
-let lastSaved = ''
 let tempOpen = false
 let tempClosed = false
 let menuIds: any[] = []
@@ -123,9 +101,10 @@ function matchPattern(url: string, pattern: string) {
     }
 
     const esc: string = t
-      .replaceAll(/[.+^${}()|[\]\\]/g, '\\$&')
+      .replaceAll(/[.+?^${}()|[\]\\]/g, '\\$&')
       .replaceAll('*', '.*')
     const re = new RegExp('^' + esc + '$')
+    // console.log('matchPattern', url, pattern, re)
     return re.test(url)
   } catch {
     return false
@@ -153,10 +132,7 @@ function openItem(
 ) {
   const mode: OpenMode = it.openIn || group.defaultOpen || settings.defaultOpen
   if (it.type === 'url') {
-    const url = new URL(
-      resolveUrlTemplate(String(it.data || '/')),
-      location.href
-    ).href
+    const url = resolveTargetUrl(it.data)
     const finalMode: OpenMode = opts?.forceNewTab ? 'new-tab' : mode
     if (finalMode === 'new-tab') {
       window.open(url, '_blank', 'noopener')
@@ -194,10 +170,7 @@ function openItem(
           : ''
       if (!raw) return
       try {
-        const url = new URL(
-          resolveUrlTemplate(String(raw).trim()),
-          location.href
-        ).href
+        const url = resolveTargetUrl(raw)
         const overrideMode =
           d && typeof d.__ushortcuts_mode__ === 'string'
             ? (d.__ushortcuts_mode__ as OpenMode)
@@ -221,92 +194,11 @@ function openItem(
 }
 
 async function loadConfig(): Promise<ShortcutsConfig> {
-  try {
-    const v = await getValue<string>(CONFIG_KEY, '')
-    if (v) {
-      const raw = JSON.parse(String(v) || '{}')
-      const host = location.hostname || ''
-      const ensureGroup = (gg: any): ShortcutsGroup => ({
-        id: String(gg?.id || uid()),
-        name: String(gg?.name || '默认组'),
-        icon: String(gg?.icon || 'lucide:folder'),
-        match: Array.isArray(gg?.match) ? gg.match : ['*'],
-        defaultOpen: gg?.defaultOpen === 'new-tab' ? 'new-tab' : 'same-tab',
-        items: Array.isArray(gg?.items) ? gg.items : [],
-        collapsed: Boolean(gg?.collapsed),
-        itemsPerRow: Number.isFinite(gg?.itemsPerRow) ? gg.itemsPerRow : 1,
-        hidden: Boolean(gg?.hidden),
-      })
-
-      const groupsArr: ShortcutsGroup[] = Array.isArray(raw?.groups)
-        ? raw.groups.map((x: any) => ensureGroup(x))
-        : []
-      if (groupsArr.length === 0) {
-        const g: ShortcutsGroup = ensureGroup({})
-        g.items = [
-          {
-            id: uid(),
-            name: '首页',
-            icon: 'lucide:home',
-            type: 'url',
-            data: '/',
-            openIn: OPEN_DEFAULT,
-            hidden: false,
-          },
-        ]
-        groupsArr.push(g)
-      }
-
-      const cfg: ShortcutsConfig = {
-        groups: groupsArr,
-      }
-      return cfg
-    }
-  } catch {}
-
-  const host = location.hostname || ''
-  const g: ShortcutsGroup = {
-    id: uid(),
-    name: '默认组',
-    icon: 'lucide:folder',
-    match: ['*'],
-    defaultOpen: OPEN_DEFAULT,
-    items: [
-      {
-        id: uid(),
-        name: '首页',
-        icon: 'lucide:home',
-        type: 'url',
-        data: '/',
-        openIn: OPEN_DEFAULT,
-        hidden: false,
-      },
-      {
-        id: uid(),
-        name: '站内搜索',
-        icon: 'favicon',
-        type: 'url',
-        data: 'https://www.google.com/search?q=site:{hostname}%20{selected||query}',
-        openIn: 'new-tab',
-        hidden: false,
-      },
-    ],
-    collapsed: false,
-    itemsPerRow: 1,
-    hidden: false,
-  }
-  return {
-    groups: [g],
-  }
+  return shortcutsStore.load()
 }
 
 async function saveConfig(cfg: ShortcutsConfig) {
-  try {
-    const s = JSON.stringify(cfg)
-    if (s === lastSaved) return
-    lastSaved = s
-    await setValue(CONFIG_KEY, s)
-  } catch {}
+  return shortcutsStore.save(cfg)
 }
 
 function createRoot() {
@@ -631,10 +523,7 @@ function renderShortcutsItem(
       e.stopImmediatePropagation()
     })
   } else if (it.type === 'url') {
-    const url = new URL(
-      resolveUrlTemplate(String(it.data || '/')),
-      location.href
-    ).href
+    const url = resolveTargetUrl(it.data)
     // This is not the final URL, just for mouse over to show the full URL
     a.href = url
 
@@ -666,21 +555,7 @@ function renderShortcutsItem(
   }
 
   {
-    const rawIcon = String(it.icon || '')
-    let iconStr = rawIcon
-    if (rawIcon.startsWith('favicon')) {
-      const param = rawIcon.split(':')[1]
-      const sizeNum = param ? Number.parseInt(param, 10) : 64
-      const size: 16 | 32 | 64 = sizeNum === 32 ? 32 : sizeNum === 64 ? 64 : 64
-      const targetUrl =
-        it.type === 'url'
-          ? new URL(resolveUrlTemplate(String(it.data || '/')), location.href)
-              .href
-          : location.href
-      try {
-        iconStr = 'url:' + getFaviconUrl(targetUrl, size)
-      } catch {}
-    }
+    const iconStr = resolveIcon(it.icon, it.type, it.data)
 
     setIcon(a as HTMLElement, iconStr)
   }
@@ -777,6 +652,7 @@ function renderGroupSection(
   title.className = 'title'
   setIcon(title, g.icon || 'lucide:folder')
   const nameSpan = document.createElement('span')
+  nameSpan.className = 'title-text'
   nameSpan.textContent = (g as any).displayName || g.name
   title.append(nameSpan)
   header.append(title)

@@ -13,9 +13,9 @@ import { openEditorModal } from './editor-modal-tabs'
 import styleText from 'css:./style.css'
 import { uid } from '../../utils/uid'
 import { importJson } from '../../utils/import-json'
+import { shortcutsStore } from './store'
 
 const SETTINGS_KEY = 'settings'
-export const CONFIG_KEY = 'ushortcuts'
 
 const POSITION_OPTIONS = [
   'right-top',
@@ -343,8 +343,7 @@ export function openSettingsPanel(store: Store): void {
 
               let raw: any = {}
               try {
-                const s = await getValue(CONFIG_KEY, '')
-                raw = s ? JSON.parse(String(s) || '{}') || {} : {}
+                raw = await shortcutsStore.load()
               } catch {}
 
               if (!Array.isArray(raw.groups) || raw.groups.length === 0) {
@@ -377,7 +376,7 @@ export function openSettingsPanel(store: Store): void {
               openEditorModal(root, raw, {
                 async saveConfig(cfg) {
                   try {
-                    await setValue(CONFIG_KEY, JSON.stringify(cfg))
+                    await shortcutsStore.save(cfg)
                   } catch {}
                 },
                 rerender() {
@@ -428,8 +427,11 @@ export function openSettingsPanel(store: Store): void {
         case 'exportShortcutsDataJson': {
           ;(async () => {
             try {
-              const s = await getValue(CONFIG_KEY, '')
-              const raw = s ? JSON.parse(String(s) || '{}') || {} : {}
+              let raw = {}
+              try {
+                raw = await shortcutsStore.load()
+              } catch {}
+
               const date = new Date()
               const timestamp = `${date.getFullYear()}${String(
                 date.getMonth() + 1
@@ -501,14 +503,11 @@ export function openSettingsPanel(store: Store): void {
             validate: (data: any) => data && Array.isArray(data.groups),
             errorMessage: '无效的导航数据文件（缺少 groups 字段）',
             async onSuccess(obj) {
-              const existing = await getValue(CONFIG_KEY, '')
-              const existingObj = existing
-                ? JSON.parse(String(existing) || '{}') || {}
-                : {}
+              const existingObj = await shortcutsStore.load()
               // Deep merge (arrays replaced).
               const merged = deepMergeReplaceArrays(existingObj, obj)
 
-              await setValue(CONFIG_KEY, JSON.stringify(merged))
+              await shortcutsStore.save(merged)
             },
           })
 
@@ -539,7 +538,7 @@ export function openSettingsPanel(store: Store): void {
           if (!ok) break
           ;(async () => {
             try {
-              await setValue(CONFIG_KEY, JSON.stringify({}))
+              await shortcutsStore.save({ groups: [] })
             } catch {}
           })()
 

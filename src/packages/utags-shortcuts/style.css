@@ -201,7 +201,11 @@ div {
 }
 
 .title {
-  @apply flex items-center gap-1.5 font-semibold text-gray-800;
+  @apply flex items-center gap-1.5 font-semibold text-gray-800 min-w-0;
+}
+
+.title-text {
+  @apply truncate;
 }
 
 .ushortcuts.dark .title {
@@ -764,7 +768,7 @@ textarea:disabled {
 }
 
 .sidebar-item {
-  @apply px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors text-left;
+  @apply px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors text-left flex gap-2 items-center;
 }
 .ushortcuts.dark .sidebar-item,
 .modal.dark .sidebar-item {

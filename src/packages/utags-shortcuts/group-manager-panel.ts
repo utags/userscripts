@@ -1,5 +1,6 @@
 import { uid } from '../../utils/uid'
 import { clearChildren, setIcon } from '../../utils/dom'
+import { resolveTargetUrl, resolveIcon } from './utils'
 import { renderGroupForm, type GroupFormData } from './group-form'
 import { renderLinkForm, type LinkFormData } from './link-form'
 import { hasDuplicateInGroup } from './add-link-actions'
@@ -123,16 +124,25 @@ export function createGroupManagerPanel(
         handleGroupClick(g)
       })
 
-      const name = document.createElement('span')
+      const iconEl = document.createElement('div')
+      iconEl.className = 'shortcut-icon'
+      setIcon(iconEl, g.icon || 'lucide:folder')
+      item.append(iconEl)
+
+      const info = document.createElement('div')
+      info.className = 'flex-1 min-w-0'
+      item.append(info)
+
+      const name = document.createElement('div')
       name.className = 'sidebar-item-name'
       name.textContent = g.name
-      item.append(name)
+      info.append(name)
 
       if (g.displayName) {
-        const desc = document.createElement('span')
+        const desc = document.createElement('div')
         desc.className = 'sidebar-item-desc'
         desc.textContent = g.displayName
-        item.append(desc)
+        info.append(desc)
       }
 
       sidebarList.append(item)
@@ -532,7 +542,12 @@ export function createGroupManagerPanel(
       // Icon
       const iconEl = document.createElement('div')
       iconEl.className = 'shortcut-icon'
-      setIcon(iconEl, it.icon || 'lucide:link')
+      {
+        const iconStr = resolveIcon(it.icon, it.type, it.data, 'lucide:link')
+
+        setIcon(iconEl, iconStr)
+      }
+
       itemEl.append(iconEl)
 
       // Info
