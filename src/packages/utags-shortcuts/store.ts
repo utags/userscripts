@@ -181,15 +181,17 @@ export class ShortcutsStore {
         },
       ],
     }
-    const _2libra: ShortcutsGroup = {
-      id: uid(),
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const _2libra_1: ShortcutsGroup = {
+      id: 'k10czcms',
       name: '2Libra 邀请码',
       icon: 'url:https://2libra.com/favicon.ico',
       match: ['https://2libra.com/?ref=utags-shortcuts'],
       defaultOpen: 'same-tab',
       items: [
         {
-          id: uid(),
+          id: '1AeoTgXc',
           name: '注册后额外获得 1,000 金币',
           icon: 'favicon',
           type: 'url',
@@ -198,8 +200,93 @@ export class ShortcutsStore {
       ],
     }
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const _2libra_2: ShortcutsGroup = {
+      id: 'k20czcms',
+      name: '2libra',
+      icon: 'lucide:folder',
+      match: ['*://2libra.com/*'],
+      defaultOpen: 'same-tab',
+      items: [
+        {
+          id: 'zijgxywv',
+          name: '首页',
+          icon: 'favicon',
+          type: 'url',
+          data: '/',
+          openIn: 'same-tab',
+        },
+        {
+          id: 'g3p7kbzm',
+          name: '今日热议',
+          icon: '🔥',
+          type: 'url',
+          data: 'https://2libra.com/post/hot/today',
+          openIn: 'same-tab',
+        },
+        {
+          id: 'svoiq3sz',
+          name: '近期热议',
+          type: 'url',
+          data: 'https://2libra.com/post/hot/recent',
+          openIn: 'same-tab',
+          icon: '🔥',
+        },
+        {
+          id: 'aupy1kcr',
+          name: '新发表',
+          type: 'url',
+          data: 'https://2libra.com/post/latest',
+          openIn: 'same-tab',
+          hidden: false,
+        },
+        {
+          id: 'pivybx9n',
+          name: '通知',
+          type: 'url',
+          data: 'https://2libra.com/notifications',
+          openIn: 'same-tab',
+          hidden: false,
+          icon: 'lucide:bell',
+        },
+        {
+          id: 'q0s43wxr',
+          name: '金币',
+          icon: 'lucide:bitcoin',
+          type: 'url',
+          data: 'https://2libra.com/coins',
+          openIn: 'same-tab',
+        },
+      ],
+      itemsPerRow: 2,
+    }
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const _2libra_3: ShortcutsGroup = {
+      id: '204999q7',
+      name: '主题',
+      icon: 'lucide:messages-square',
+      match: [
+        '!*://2libra.com/post/hot/*',
+        '!*://2libra.com/post/latest',
+        '*://2libra.com/post/*',
+        '*://2libra.com/post-flat/*',
+      ],
+      defaultOpen: 'same-tab',
+      items: [
+        {
+          id: '5bwly4kb',
+          name: '切换评论模式',
+          icon: 'lucide:refresh-cw',
+          type: 'js',
+          data: "return location.pathname.includes('/post/') ? location.pathname.replace('/post/', '/post-flat/') : location.pathname.replace('/post-flat/', '/post/')",
+          openIn: 'same-tab',
+        },
+      ],
+    }
+
     return {
-      groups: [g, readLater, community, _2libra],
+      groups: [g, readLater, community, _2libra_1, _2libra_2, _2libra_3],
     }
   }
 

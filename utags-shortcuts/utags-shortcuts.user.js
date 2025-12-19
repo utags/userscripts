@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.9
+// @version              0.1.10
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -3433,15 +3433,15 @@
           },
         ],
       }
-      const _2libra = {
-        id: uid(),
+      const _2libra_1 = {
+        id: 'k10czcms',
         name: '2Libra \u9080\u8BF7\u7801',
         icon: 'url:https://2libra.com/favicon.ico',
         match: ['https://2libra.com/?ref=utags-shortcuts'],
         defaultOpen: 'same-tab',
         items: [
           {
-            id: uid(),
+            id: '1AeoTgXc',
             name: '\u6CE8\u518C\u540E\u989D\u5916\u83B7\u5F97 1,000 \u91D1\u5E01',
             icon: 'favicon',
             type: 'url',
@@ -3449,8 +3449,89 @@
           },
         ],
       }
+      const _2libra_2 = {
+        id: 'k20czcms',
+        name: '2libra',
+        icon: 'lucide:folder',
+        match: ['*://2libra.com/*'],
+        defaultOpen: 'same-tab',
+        items: [
+          {
+            id: 'zijgxywv',
+            name: '\u9996\u9875',
+            icon: 'favicon',
+            type: 'url',
+            data: '/',
+            openIn: 'same-tab',
+          },
+          {
+            id: 'g3p7kbzm',
+            name: '\u4ECA\u65E5\u70ED\u8BAE',
+            icon: '\u{1F525}',
+            type: 'url',
+            data: 'https://2libra.com/post/hot/today',
+            openIn: 'same-tab',
+          },
+          {
+            id: 'svoiq3sz',
+            name: '\u8FD1\u671F\u70ED\u8BAE',
+            type: 'url',
+            data: 'https://2libra.com/post/hot/recent',
+            openIn: 'same-tab',
+            icon: '\u{1F525}',
+          },
+          {
+            id: 'aupy1kcr',
+            name: '\u65B0\u53D1\u8868',
+            type: 'url',
+            data: 'https://2libra.com/post/latest',
+            openIn: 'same-tab',
+            hidden: false,
+          },
+          {
+            id: 'pivybx9n',
+            name: '\u901A\u77E5',
+            type: 'url',
+            data: 'https://2libra.com/notifications',
+            openIn: 'same-tab',
+            hidden: false,
+            icon: 'lucide:bell',
+          },
+          {
+            id: 'q0s43wxr',
+            name: '\u91D1\u5E01',
+            icon: 'lucide:bitcoin',
+            type: 'url',
+            data: 'https://2libra.com/coins',
+            openIn: 'same-tab',
+          },
+        ],
+        itemsPerRow: 2,
+      }
+      const _2libra_3 = {
+        id: '204999q7',
+        name: '\u4E3B\u9898',
+        icon: 'lucide:messages-square',
+        match: [
+          '!*://2libra.com/post/hot/*',
+          '!*://2libra.com/post/latest',
+          '*://2libra.com/post/*',
+          '*://2libra.com/post-flat/*',
+        ],
+        defaultOpen: 'same-tab',
+        items: [
+          {
+            id: '5bwly4kb',
+            name: '\u5207\u6362\u8BC4\u8BBA\u6A21\u5F0F',
+            icon: 'lucide:refresh-cw',
+            type: 'js',
+            data: "return location.pathname.includes('/post/') ? location.pathname.replace('/post/', '/post-flat/') : location.pathname.replace('/post-flat/', '/post/')",
+            openIn: 'same-tab',
+          },
+        ],
+      }
       return {
-        groups: [g, readLater, community, _2libra],
+        groups: [g, readLater, community, _2libra_1, _2libra_2, _2libra_3],
       }
     }
     async save(cfg) {
