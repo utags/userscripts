@@ -1498,11 +1498,11 @@ function registerMenus(root: ShadowRoot, cfg: ShortcutsConfig) {
     menuIds = []
 
     const text = settings.enabled
-      ? '🚫 禁用当前网站快速导航'
-      : '✅ 启用当前网站快速导航'
+      ? '🚫 禁用当前网站快捷导航'
+      : '✅ 启用当前网站快捷导航'
 
     menuIds.push(
-      registerMenu('🧭 打开快速导航面板', () => {
+      registerMenu('🧭 打开快捷导航面板', () => {
         if (settings.enabled === false) {
           const ok = globalThis.confirm('当前网站已禁用，是否启用并打开面板？')
           if (ok) {
@@ -1516,7 +1516,7 @@ function registerMenus(root: ShadowRoot, cfg: ShortcutsConfig) {
         tempOpen = true
         rerender(root, cfg)
       }),
-      registerMenu('⚙️ 设置快速导航', () => {
+      registerMenu('⚙️ 设置', () => {
         openSettingsPanel(store)
       }),
       registerMenu(text, () => {

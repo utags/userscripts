@@ -78,7 +78,7 @@ const COMMON_SETTINGS_FIELDS: Field[] = [
       { value: 'light', label: '浅色' },
       { value: 'dark', label: '深色' },
     ],
-    help: '站点级主题偏好',
+    help: '导航面板主题偏好',
   },
 ]
 
@@ -174,7 +174,7 @@ export function createUshortcutsSettingsStore() {
 export function openSettingsPanel(store: Store): void {
   const schema: PanelSchema = {
     type: 'tabs',
-    title: '快速导航设置',
+    title: '快捷导航设置',
     tabs: [
       {
         id: 'global',
@@ -207,7 +207,7 @@ export function openSettingsPanel(store: Store): void {
       },
       {
         id: 'site',
-        title: '站点设置',
+        title: '当前网站设置',
         groups: [
           {
             id: 'site-basic',
@@ -233,8 +233,8 @@ export function openSettingsPanel(store: Store): void {
                 type: 'action',
                 key: 'site-reset',
                 label: '重置',
-                actions: [{ id: 'resetSite', text: '重置站点设置' }],
-                help: '恢复当前站点设置为默认值',
+                actions: [{ id: 'resetSite', text: '重置当前网站设置' }],
+                help: '恢复当前网站设置为默认值',
               },
             ] as Field[],
           },
@@ -548,7 +548,7 @@ export function openSettingsPanel(store: Store): void {
 
         case 'resetGlobal': {
           const ok = globalThis.confirm(
-            '确认要重置全局设置吗？（不影响站点设置）'
+            '确认要重置全局设置吗？（不影响当前网站设置）'
           )
           if (!ok) break
           ;(async () => {
@@ -561,7 +561,7 @@ export function openSettingsPanel(store: Store): void {
         }
 
         case 'resetSite': {
-          const ok = globalThis.confirm('确认要重置当前站点设置吗？')
+          const ok = globalThis.confirm('确认要重置当前网站设置吗？')
           if (!ok) break
           ;(async () => {
             try {
