@@ -34,9 +34,23 @@ export function showDropdownMenu(
     menu.append(btn)
   }
 
+  menu.style.visibility = 'hidden'
+  root.append(menu)
+
   const r = anchor.getBoundingClientRect()
+  const menuHeight = menu.offsetHeight
+  const windowHeight = window.innerHeight
+
+  let top = Math.round(r.bottom + 6)
+  // Check if it overflows the bottom edge
+  if (top + menuHeight > windowHeight) {
+    const topAbove = Math.round(r.top - 6 - menuHeight)
+    if (topAbove > 0) {
+      top = topAbove
+    }
+  }
+
   menu.style.position = 'fixed'
-  const top = Math.round(r.bottom + 6)
   if (rightSide) {
     const right = Math.round(window.innerWidth - r.right)
     menu.style.top = `${top}px`
@@ -47,7 +61,7 @@ export function showDropdownMenu(
     menu.style.left = `${left}px`
   }
 
-  root.append(menu)
+  menu.style.visibility = ''
 
   setTimeout(() => {
     const onOutside = () => {

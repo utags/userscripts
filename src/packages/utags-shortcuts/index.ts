@@ -572,9 +572,6 @@ function renderShortcutsItem(
     setIcon(a as HTMLElement, iconStr)
   }
 
-  const t = document.createElement('span')
-  t.textContent = it.name
-  a.append(t)
   if (isEditing) {
     const set = selectedItemsByGroup.get(g.id) || new Set<string>()
     selectedItemsByGroup.set(g.id, set)
@@ -596,6 +593,18 @@ function renderShortcutsItem(
     })
     wrap.append(sel)
   }
+
+  const t = document.createElement('span')
+  t.textContent = it.name
+  t.className = 'title-text'
+  const style = g.displayStyle || 'icon-title'
+  const isIconOnly = style === 'icon-only' && !isEditing
+  if (isIconOnly) {
+    // Add tooltip on hover if icon-only mode
+    a.title = it.name
+  }
+
+  a.append(t)
 
   wrap.append(a)
   if (isEditing) {
@@ -967,7 +976,26 @@ function renderGroupSection(
 
   const items = document.createElement('div')
   items.className = 'items'
-  items.style.setProperty('--cols', String(isEditing ? 1 : g.itemsPerRow || 1))
+  const style = g.displayStyle || 'icon-title'
+  const isIconOnly = style === 'icon-only' && !isEditing
+  const isTitleOnly = style === 'title-only' && !isEditing
+
+  if (isIconOnly) {
+    items.classList.add('mode-icon-only')
+    if (g.iconSize) items.classList.add(`size-${g.iconSize}`)
+    const iconCols = g.iconItemsPerRow || 0
+    if (iconCols > 0) {
+      items.classList.add('layout-grid')
+      items.style.setProperty('--cols', String(iconCols))
+    }
+  } else {
+    if (isTitleOnly) items.classList.add('mode-title-only')
+    items.style.setProperty(
+      '--cols',
+      String(isEditing ? 1 : g.itemsPerRow || 1)
+    )
+  }
+
   items.style.display = g.collapsed ? 'none' : ''
   let visibleCount = 0
   const defOpen = (settings.defaultOpen || OPEN_DEFAULT) as
@@ -989,14 +1017,17 @@ function renderGroupSection(
     items.append(wrap)
   }
 
-  items.style.setProperty(
-    '--cols',
-    String(
-      isEditing
-        ? 1
-        : Math.max(1, Math.min(g.itemsPerRow || 1, visibleCount || 1))
+  if (!isIconOnly) {
+    items.style.setProperty(
+      '--cols',
+      String(
+        isEditing
+          ? 1
+          : Math.max(1, Math.min(g.itemsPerRow || 1, visibleCount || 1))
+      )
     )
-  )
+  }
+
   if (visibleCount === 0) {
     const msg = document.createElement('div')
     msg.className = 'empty-msg'

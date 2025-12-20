@@ -30,6 +30,9 @@ export function openAddGroupModal(
       helpers.existingGroup?.defaultOpen || helpers.defaultOpen || 'same-tab',
     itemsPerRow: helpers.existingGroup?.itemsPerRow || 1,
     hidden: helpers.existingGroup?.hidden,
+    displayStyle: helpers.existingGroup?.displayStyle || 'icon-title',
+    iconSize: helpers.existingGroup?.iconSize || 'medium',
+    iconItemsPerRow: helpers.existingGroup?.iconItemsPerRow || 0,
   }
 
   // Render form

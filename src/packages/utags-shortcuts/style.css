@@ -276,7 +276,7 @@ div {
 }
 
 .icon {
-  @apply inline-flex items-center justify-center w-4 h-4 overflow-hidden whitespace-nowrap leading-none flex-none;
+  @apply inline-flex items-center justify-center w-4 h-4 overflow-hidden whitespace-nowrap leading-none flex-none rounded-[4px];
 }
 
 .collapsed-tab {
@@ -353,6 +353,16 @@ div {
   @apply ring-1 ring-blue-500;
 }
 
+.segmented-compact {
+  @apply gap-0.5 px-0.5;
+}
+
+.segmented.segmented-compact label.seg-item {
+  @apply min-w-[40px];
+}
+.segmented-compact .seg-text {
+  @apply px-1.5;
+}
 .row label {
   @apply w-[120px] text-gray-500;
 }
@@ -919,4 +929,71 @@ textarea:disabled {
 }
 .shortcut-actions .icon-btn {
   @apply w-7 h-7;
+}
+
+/* Icon Only Mode */
+.items.mode-icon-only {
+  @apply flex flex-wrap gap-1.5;
+  display: flex; /* Ensure override */
+  grid-template-columns: none;
+}
+
+.items.mode-icon-only.layout-grid {
+  @apply grid;
+  display: grid; /* Ensure override */
+  grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
+}
+
+.items.mode-icon-only .item {
+  @apply w-auto justify-center rounded-lg p-1.5 shadow-xs;
+}
+
+.items.mode-icon-only .title-text {
+  @apply hidden;
+}
+
+/* Sizes */
+.items.mode-icon-only.size-small .item {
+  @apply p-1;
+}
+.items.mode-icon-only.size-small .item .icon {
+  @apply w-4 h-4;
+}
+
+.items.mode-icon-only.size-medium .item {
+  @apply p-1.5;
+}
+.items.mode-icon-only.size-medium .item .icon {
+  @apply w-5 h-5;
+}
+
+.items.mode-icon-only.size-large .item {
+  @apply p-2;
+}
+.items.mode-icon-only.size-large .item .icon {
+  @apply w-8 h-8;
+}
+
+/* Ensure SVG/Img scale */
+.items.mode-icon-only .item .icon svg,
+.items.mode-icon-only .item .icon img {
+  @apply w-full h-full;
+}
+
+/* Title Only Mode */
+.items.mode-title-only .icon {
+  @apply hidden;
+}
+
+.dropdown-menu {
+  @apply fixed z-[2147483647] bg-white border border-gray-200 rounded-lg shadow-xl py-1 min-w-[120px] font-sans text-[13px];
+}
+.ushortcuts.dark .dropdown-menu {
+  @apply bg-gray-900 border-gray-700 shadow-black/40;
+}
+.dropdown-item {
+  @apply flex items-center gap-2 px-3 py-1.5 text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors duration-150;
+}
+.ushortcuts.dark .dropdown-item {
+  @apply text-gray-200 hover:bg-gray-800;
 }

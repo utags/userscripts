@@ -10,6 +10,9 @@ export type GroupFormData = {
   defaultOpen?: 'same-tab' | 'new-tab'
   itemsPerRow?: number
   hidden?: boolean
+  displayStyle?: 'icon-title' | 'icon-only' | 'title-only'
+  iconSize?: 'small' | 'medium' | 'large'
+  iconItemsPerRow?: number
 }
 
 export function renderGroupForm(
@@ -237,6 +240,93 @@ export function renderGroupForm(
   colsRow.append(colsLabel)
   colsRow.append(colsRadios)
 
+  // Display Style
+  const displayStyleRow = document.createElement('div')
+  displayStyleRow.className = 'row'
+  const displayStyleLabel = document.createElement('label')
+  displayStyleLabel.textContent = '显示风格'
+  const displayStyleRadios = createSegmentedRadios(
+    data.displayStyle || 'icon-title',
+    ['icon-title', 'icon-only', 'title-only'] as const,
+    (v) => {
+      data.displayStyle = v
+      updateVisibility()
+      notifyChange()
+    },
+    {
+      labels: {
+        'icon-title': '图标+标题',
+        'icon-only': '仅图标',
+        'title-only': '仅标题',
+      },
+      namePrefix: 'ushortcuts-display-style-' + (data.id || Math.random()),
+    }
+  )
+  displayStyleRow.append(displayStyleLabel)
+  displayStyleRow.append(displayStyleRadios)
+
+  // Icon Items Per Row (Only visible if icon-only)
+  const iconColsRow = document.createElement('div')
+  iconColsRow.className = 'row'
+
+  const iconColsLabel = document.createElement('label')
+  iconColsLabel.textContent = '每行图标数'
+  const iconColVal = String(data.iconItemsPerRow || 0) as
+    | '0'
+    | '1'
+    | '2'
+    | '3'
+    | '4'
+    | '5'
+    | '6'
+    | '7'
+    | '8'
+    | '9'
+    | '10'
+  const iconColsRadios = createSegmentedRadios(
+    iconColVal === '0' ? 'Auto' : iconColVal,
+    ['Auto', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const,
+    (v) => {
+      data.iconItemsPerRow = v === 'Auto' ? 0 : Number.parseInt(v, 10)
+      notifyChange()
+    },
+    { namePrefix: 'ushortcuts-icon-cols-' + (data.id || Math.random()) }
+  )
+  iconColsRadios.classList.add('segmented-compact')
+  iconColsRow.append(iconColsLabel)
+  iconColsRow.append(iconColsRadios)
+
+  // Icon Size (Only visible if icon-only)
+  const iconSizeRow = document.createElement('div')
+  iconSizeRow.className = 'row'
+
+  const iconSizeLabel = document.createElement('label')
+  iconSizeLabel.textContent = '图标大小'
+  const iconSizeRadios = createSegmentedRadios(
+    data.iconSize || 'medium',
+    ['small', 'medium', 'large'] as const,
+    (v) => {
+      data.iconSize = v
+      notifyChange()
+    },
+    {
+      labels: { small: '小', medium: '中', large: '大' },
+      namePrefix: 'ushortcuts-icon-size-' + (data.id || Math.random()),
+    }
+  )
+  iconSizeRow.append(iconSizeLabel)
+  iconSizeRow.append(iconSizeRadios)
+
+  const updateVisibility = () => {
+    const style = data.displayStyle || 'icon-title'
+    const isIconOnly = style === 'icon-only'
+    colsRow.style.display = isIconOnly ? 'none' : ''
+    iconColsRow.style.display = isIconOnly ? '' : 'none'
+    iconSizeRow.style.display = isIconOnly ? '' : 'none'
+  }
+
+  updateVisibility()
+
   // Visibility
   const stateRow = document.createElement('div')
   stateRow.className = 'row'
@@ -266,6 +356,9 @@ export function renderGroupForm(
   grid.append(ruleRow)
   grid.append(openRow)
   grid.append(colsRow)
+  grid.append(displayStyleRow)
+  grid.append(iconColsRow)
+  grid.append(iconSizeRow)
   grid.append(stateRow)
 
   container.append(grid)

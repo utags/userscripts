@@ -85,6 +85,11 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.1.16
+
+- Added group display style options: "Icon+Title", "Icon Only", and "Title Only".
+- Improved "Icons Per Row" setting UX.
+
 ### v0.1.14
 
 - Support dragging and dropping links from the web page to groups.

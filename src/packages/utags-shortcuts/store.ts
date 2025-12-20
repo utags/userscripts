@@ -27,6 +27,9 @@ export type ShortcutsGroup = {
   itemsPerRow?: number
   hidden?: boolean
   displayName?: string
+  displayStyle?: 'icon-title' | 'icon-only' | 'title-only'
+  iconSize?: 'small' | 'medium' | 'large'
+  iconItemsPerRow?: number
 }
 
 export type ShortcutsConfig = {
@@ -52,6 +55,21 @@ export class ShortcutsStore {
           itemsPerRow: Number.isFinite(gg?.itemsPerRow) ? gg.itemsPerRow : 1,
           hidden: Boolean(gg?.hidden),
           displayName: gg?.displayName ? String(gg.displayName) : undefined,
+          displayStyle:
+            gg?.displayStyle === 'icon-only' ||
+            gg?.displayStyle === 'title-only' ||
+            gg?.displayStyle === 'icon-title'
+              ? gg.displayStyle
+              : 'icon-title',
+          iconSize:
+            gg?.iconSize === 'small' ||
+            gg?.iconSize === 'medium' ||
+            gg?.iconSize === 'large'
+              ? gg.iconSize
+              : 'medium',
+          iconItemsPerRow: Number.isFinite(gg?.iconItemsPerRow)
+            ? gg.iconItemsPerRow
+            : 0,
         })
 
         const groupsArr: ShortcutsGroup[] = Array.isArray(raw?.groups)
