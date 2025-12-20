@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.12
+// @version              0.1.13
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -3298,7 +3298,7 @@
       } catch (e) {}
       const g = {
         id: 'default_group',
-        name: '\u9ED8\u8BA4\u7EC4',
+        name: '\u5E38\u7528',
         icon: 'lucide:folder',
         match: ['*'],
         defaultOpen: OPEN_DEFAULT,
@@ -3398,7 +3398,7 @@
         ],
       }
       const github = {
-        id: 'auuiqiax',
+        id: 'github_repo',
         name: 'GitHub Repo',
         icon: 'url:https://github.com/favicon.ico',
         match: [
@@ -3411,7 +3411,7 @@
             id: 'nkv2f0hp',
             name: 'Home',
             type: 'url',
-            data: 'https://github.com/{p:1||t:utags}/{p:2||utags}',
+            data: 'https://github.com/{p:1||t:utags}/{p:2||t:utags}',
             openIn: 'same-tab',
             icon: 'lucide:home',
           },
@@ -3419,20 +3419,20 @@
             id: 'mw2j0leg',
             name: 'Issues',
             type: 'url',
-            data: 'https://github.com/{p:1||t:utags}/{p:2||utags}/issues',
+            data: 'https://github.com/{p:1||t:utags}/{p:2||t:utags}/issues',
             openIn: 'same-tab',
           },
           {
             id: 'tuonitkh',
             name: 'Pull requests',
             type: 'url',
-            data: 'https://github.com/{p:1||t:utags}/{p:2||utags}/pulls',
+            data: 'https://github.com/{p:1||t:utags}/{p:2||t:utags}/pulls',
             openIn: 'same-tab',
           },
         ],
       }
       const v2ex = {
-        id: 'jyuf521d',
+        id: 'v2ex_group',
         name: 'V2EX',
         icon: 'url:https://www.v2ex.com/favicon.ico',
         match: [
@@ -3502,7 +3502,7 @@
         ],
       }
       const linuxdo = {
-        id: '2h898oy9',
+        id: 'linuxdo_group',
         name: 'L\u7AD9',
         icon: 'url:https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Flinux.do%26size%3D64',
         match: ['*://linux.do/*'],
@@ -3621,7 +3621,7 @@
         itemsPerRow: 2,
       }
       const _2libra_1 = {
-        id: 'k10czcms',
+        id: '2libra_1',
         name: '2Libra \u9080\u8BF7\u7801',
         icon: 'url:https://2libra.com/favicon.ico',
         match: ['https://2libra.com/?ref=utags-shortcuts'],
@@ -3638,7 +3638,7 @@
         ],
       }
       const _2libra_2 = {
-        id: 'k20czcms',
+        id: '2libra_2',
         name: '2libra',
         icon: 'url:https://2libra.com/favicon.ico',
         match: ['*://2libra.com/*'],
@@ -3649,7 +3649,14 @@
             name: '\u9996\u9875',
             icon: 'favicon',
             type: 'url',
-            data: '/',
+            data: 'https://2libra.com/',
+            openIn: 'same-tab',
+          },
+          {
+            id: 'aupy1kcr',
+            name: '\u65B0\u53D1\u8868',
+            type: 'url',
+            data: 'https://2libra.com/post/latest',
             openIn: 'same-tab',
           },
           {
@@ -3666,13 +3673,6 @@
             icon: '\u{1F525}',
             type: 'url',
             data: 'https://2libra.com/post/hot/recent',
-            openIn: 'same-tab',
-          },
-          {
-            id: 'aupy1kcr',
-            name: '\u65B0\u53D1\u8868',
-            type: 'url',
-            data: 'https://2libra.com/post/latest',
             openIn: 'same-tab',
           },
           {
@@ -3703,7 +3703,7 @@
         itemsPerRow: 2,
       }
       const _2libra_3 = {
-        id: '204999q7',
+        id: '2libra_3',
         name: '\u4E3B\u9898',
         icon: 'lucide:messages-square',
         match: [

@@ -83,7 +83,7 @@ export class ShortcutsStore {
     // Use fixed IDs to prevent duplicate data when importing backup data after reinstalling the script.
     const g: ShortcutsGroup = {
       id: 'default_group',
-      name: '默认组',
+      name: '常用',
       icon: 'lucide:folder',
       match: ['*'],
       defaultOpen: OPEN_DEFAULT,
@@ -184,7 +184,7 @@ export class ShortcutsStore {
     }
 
     const github: ShortcutsGroup = {
-      id: 'auuiqiax',
+      id: 'github_repo',
       name: 'GitHub Repo',
       icon: 'url:https://github.com/favicon.ico',
       match: [
@@ -197,7 +197,7 @@ export class ShortcutsStore {
           id: 'nkv2f0hp',
           name: 'Home',
           type: 'url',
-          data: 'https://github.com/{p:1||t:utags}/{p:2||utags}',
+          data: 'https://github.com/{p:1||t:utags}/{p:2||t:utags}',
           openIn: 'same-tab',
           icon: 'lucide:home',
         },
@@ -205,21 +205,21 @@ export class ShortcutsStore {
           id: 'mw2j0leg',
           name: 'Issues',
           type: 'url',
-          data: 'https://github.com/{p:1||t:utags}/{p:2||utags}/issues',
+          data: 'https://github.com/{p:1||t:utags}/{p:2||t:utags}/issues',
           openIn: 'same-tab',
         },
         {
           id: 'tuonitkh',
           name: 'Pull requests',
           type: 'url',
-          data: 'https://github.com/{p:1||t:utags}/{p:2||utags}/pulls',
+          data: 'https://github.com/{p:1||t:utags}/{p:2||t:utags}/pulls',
           openIn: 'same-tab',
         },
       ],
     }
 
     const v2ex: ShortcutsGroup = {
-      id: 'jyuf521d',
+      id: 'v2ex_group',
       name: 'V2EX',
       icon: 'url:https://www.v2ex.com/favicon.ico',
       match: [
@@ -290,7 +290,7 @@ export class ShortcutsStore {
     }
 
     const linuxdo: ShortcutsGroup = {
-      id: '2h898oy9',
+      id: 'linuxdo_group',
       name: 'L站',
       icon: 'url:https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Flinux.do%26size%3D64',
       match: ['*://linux.do/*'],
@@ -412,7 +412,7 @@ export class ShortcutsStore {
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const _2libra_1: ShortcutsGroup = {
-      id: 'k10czcms',
+      id: '2libra_1',
       name: '2Libra 邀请码',
       icon: 'url:https://2libra.com/favicon.ico',
       match: ['https://2libra.com/?ref=utags-shortcuts'],
@@ -431,7 +431,7 @@ export class ShortcutsStore {
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const _2libra_2: ShortcutsGroup = {
-      id: 'k20czcms',
+      id: '2libra_2',
       name: '2libra',
       icon: 'url:https://2libra.com/favicon.ico',
       match: ['*://2libra.com/*'],
@@ -442,7 +442,14 @@ export class ShortcutsStore {
           name: '首页',
           icon: 'favicon',
           type: 'url',
-          data: '/',
+          data: 'https://2libra.com/',
+          openIn: 'same-tab',
+        },
+        {
+          id: 'aupy1kcr',
+          name: '新发表',
+          type: 'url',
+          data: 'https://2libra.com/post/latest',
           openIn: 'same-tab',
         },
         {
@@ -459,13 +466,6 @@ export class ShortcutsStore {
           icon: '🔥',
           type: 'url',
           data: 'https://2libra.com/post/hot/recent',
-          openIn: 'same-tab',
-        },
-        {
-          id: 'aupy1kcr',
-          name: '新发表',
-          type: 'url',
-          data: 'https://2libra.com/post/latest',
           openIn: 'same-tab',
         },
         {
@@ -498,7 +498,7 @@ export class ShortcutsStore {
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const _2libra_3: ShortcutsGroup = {
-      id: '204999q7',
+      id: '2libra_3',
       name: '主题',
       icon: 'lucide:messages-square',
       match: [
