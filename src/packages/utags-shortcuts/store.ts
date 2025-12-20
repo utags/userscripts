@@ -101,7 +101,7 @@ export class ShortcutsStore {
           name: 'Google 搜索',
           icon: 'favicon',
           type: 'url',
-          data: 'https://www.google.com/search?q={selected||query}',
+          data: 'https://www.google.com/search?q={selected||query||t:utags}',
           openIn: 'new-tab',
         },
         {
@@ -118,6 +118,14 @@ export class ShortcutsStore {
           icon: 'favicon',
           type: 'url',
           data: 'https://www.google.com/search?q=site:{hostname}%20{selected||query}',
+          openIn: 'new-tab',
+        },
+        {
+          id: 'default_greasyfork_search',
+          name: '搜索本站的油猴脚本',
+          icon: 'favicon',
+          type: 'url',
+          data: 'https://greasyfork.org/scripts/by-site/{hostname}?filter_locale=0',
           openIn: 'new-tab',
         },
       ],
@@ -171,6 +179,41 @@ export class ShortcutsStore {
           type: 'url',
           data: 'https://meta.appinn.net/',
           openIn: 'new-tab',
+        },
+      ],
+    }
+
+    const github: ShortcutsGroup = {
+      id: 'auuiqiax',
+      name: 'GitHub Repo',
+      icon: 'url:https://github.com/favicon.ico',
+      match: [
+        '!/https://github\\.com/(topics|collections|trending|resources)/.*/',
+        '/https://github\\.com/\\w+/\\w+(/.*)?$/',
+      ],
+      defaultOpen: 'same-tab',
+      items: [
+        {
+          id: 'nkv2f0hp',
+          name: 'Home',
+          type: 'url',
+          data: 'https://github.com/{p:1||t:utags}/{p:2||utags}',
+          openIn: 'same-tab',
+          icon: 'lucide:home',
+        },
+        {
+          id: 'mw2j0leg',
+          name: 'Issues',
+          type: 'url',
+          data: 'https://github.com/{p:1||t:utags}/{p:2||utags}/issues',
+          openIn: 'same-tab',
+        },
+        {
+          id: 'tuonitkh',
+          name: 'Pull requests',
+          type: 'url',
+          data: 'https://github.com/{p:1||t:utags}/{p:2||utags}/pulls',
+          openIn: 'same-tab',
         },
       ],
     }
@@ -235,6 +278,14 @@ export class ShortcutsStore {
           data: '/notifications',
           openIn: 'same-tab',
         },
+        {
+          id: 'v2ex_search',
+          name: 'Google 搜索选中的文本',
+          icon: 'favicon',
+          type: 'url',
+          data: 'https://www.google.com/search?q=site:v2ex.com%20{selected||query}',
+          openIn: 'new-tab',
+        },
       ],
     }
 
@@ -294,6 +345,22 @@ export class ShortcutsStore {
           icon: 'lucide:thumbs-up',
         },
         {
+          id: 'linuxdo_search',
+          name: '搜索选中的文本',
+          icon: 'lucide:search',
+          type: 'url',
+          data: 'https://linux.do/search?q={selected||query||te:默认值}%20order%3Alatest',
+          openIn: 'new-tab',
+        },
+        {
+          id: 'linuxdo_google_search',
+          name: 'Google 搜索选中的文本',
+          icon: 'favicon',
+          type: 'url',
+          data: 'https://www.google.com/search?q=site:linux.do%20{selected||query}',
+          openIn: 'new-tab',
+        },
+        {
           id: '0eybi3bv',
           name: 'leaderbooard',
           type: 'url',
@@ -319,8 +386,8 @@ export class ShortcutsStore {
           id: 'vt4y2688',
           name: 'Challenge',
           type: 'url',
-          data: 'https://linux.do/challenge',
-          openIn: 'new-tab',
+          data: 'https://linux.do/challenge?redirect={current_url_encoded}',
+          openIn: 'same-tab',
           icon: 'lucide:swords',
         },
         {
@@ -417,6 +484,14 @@ export class ShortcutsStore {
           data: 'https://2libra.com/coins',
           openIn: 'same-tab',
         },
+        {
+          id: '2libra_search',
+          name: 'Google 搜索选中的文本',
+          icon: 'favicon',
+          type: 'url',
+          data: 'https://www.google.com/search?q=site:2libra.com%20{selected||query}',
+          openIn: 'new-tab',
+        },
       ],
       itemsPerRow: 2,
     }
@@ -445,16 +520,50 @@ export class ShortcutsStore {
       ],
     }
 
+    const other: ShortcutsGroup = {
+      id: 'other',
+      name: '其他',
+      icon: 'lucide:hand-heart',
+      match: ['*'],
+      defaultOpen: 'new-tab',
+      collapsed: true,
+      items: [
+        {
+          id: 'issues',
+          name: '问题反馈',
+          type: 'url',
+          data: 'https://github.com/utags/userscripts/issues',
+          icon: 'lucide:bug',
+        },
+        {
+          id: 'project',
+          name: '项目地址',
+          type: 'url',
+          data: 'https://github.com/utags/userscripts',
+          icon: 'lucide:github',
+        },
+        {
+          id: 'more-scripts',
+          name: '更多脚本',
+          type: 'url',
+          data: 'https://greasyfork.org/users/1030884-pipecraft?sort=total_installs',
+          icon: 'lucide:package',
+        },
+      ],
+    }
+
     return {
       groups: [
         g,
         readLater,
         community,
+        github,
         v2ex,
         linuxdo,
         _2libra_1,
         _2libra_2,
         _2libra_3,
+        other,
       ],
     }
   }

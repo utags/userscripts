@@ -67,6 +67,22 @@ Access the settings panel to customize:
 - **Appearance**: Adjust the size, opacity, and color of the edge trigger strip.
 - **Hotkey**: Customize the toggle shortcut.
 
+## Supported Variables
+
+You can use the following variables in the URL field. They will be replaced with the corresponding values from the current page:
+
+- `{hostname}`: Current hostname (e.g., `www.google.com`).
+- `{hostname_without_www}`: Hostname without `www.` prefix (e.g., `google.com`).
+- `{current_url}`: Full URL of the current page.
+- `{current_url_encoded}`: URL-encoded full URL.
+- `{query}`: Search keywords extracted from URL parameters (automatically detects `q`, `query`, `kw`, `wd`, `keyword`, `p`, `s`, `term`).
+- `{selected}`: Currently selected text on the page.
+- `{q:param}`: Value of the specified query parameter (e.g., `{q:id}` for `?id=123`).
+- `{p:n}`: The n-th path segment of the URL (e.g., `{p:1}` gets `foo` from `/foo/bar`).
+- `{t:text}`: Returns the text directly (e.g., `{t:hello}`).
+- `{te:text}`: Returns the URL-encoded text (e.g., `{te:hello world}` returns `hello%20world`).
+- **Fallback**: Use `||` to define a fallback value (e.g., `{selected||query||t:default}`).
+
 ## Changelog
 
 ### v0.1.6

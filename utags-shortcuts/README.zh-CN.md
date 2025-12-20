@@ -67,6 +67,22 @@
 - **外观样式**：调整边缘触条的大小、透明度和颜色。
 - **快捷键**：自定义唤起面板的快捷键。
 
+## 支持的变量
+
+你可以在链接（URL）字段中使用以下变量，它们会被自动替换为当前页面的对应值：
+
+- `{hostname}`: 当前主机名（例如 `www.baidu.com`）。
+- `{hostname_without_www}`: 去除 `www.` 的主机名（例如 `baidu.com`）。
+- `{current_url}`: 当前页面的完整 URL。
+- `{current_url_encoded}`: 经过 URL 编码的完整 URL。
+- `{query}`: 从 URL 参数中提取的搜索关键词（自动检测 `q`, `query`, `kw`, `wd`, `keyword`, `p`, `s`, `term`）。
+- `{selected}`: 页面上当前选中的文本。
+- `{q:param}`: 指定查询参数的值（例如 `{q:id}` 获取 `?id=123` 中的 `123`）。
+- `{p:n}`: URL 路径中的第 n 个片段（例如 `{p:1}` 获取 `/foo/bar` 中的 `foo`）。
+- `{t:text}`: 直接返回文本（例如 `{t:hello}`）。
+- `{te:text}`: 返回 URL 编码后的文本（例如 `{te:hello world}` 返回 `hello%20world`）。
+- **回退机制**: 使用 `||` 定义回退值（例如 `{selected||query||t:default}`）。
+
 ## 更新日志
 
 ### v0.1.6

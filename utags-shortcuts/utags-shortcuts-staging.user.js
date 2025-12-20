@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.11
+// @version              0.1.12
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -1657,6 +1657,12 @@
     }, 0)
   }
   function resolveUrlTemplate(s) {
+    const l = globalThis.location || {}
+    const href = l.href || ''
+    let u
+    try {
+      u = new URL(href)
+    } catch (e) {}
     const re = /{([^}]+)}/g
     return String(s || '').replaceAll(re, (_, body) => {
       var _a
@@ -1666,23 +1672,15 @@
         .filter(Boolean)
       const resolvers = {
         hostname() {
-          var _a2
-          return (
-            ((_a2 = globalThis.location) == null ? void 0 : _a2.hostname) || ''
-          )
+          return l.hostname || ''
         },
         hostname_without_www() {
-          var _a2
-          const h =
-            ((_a2 = globalThis.location) == null ? void 0 : _a2.hostname) || ''
+          const h = l.hostname || ''
           return h.startsWith('www.') ? h.slice(4) : h
         },
         query() {
-          var _a2
           try {
-            const href =
-              ((_a2 = globalThis.location) == null ? void 0 : _a2.href) || ''
-            const u = new URL(href)
+            if (!u) return ''
             return (
               u.searchParams.get('query') ||
               u.searchParams.get('q') ||
@@ -1697,65 +1695,11 @@
           } catch (e) {}
           return ''
         },
-        kw() {
-          var _a2
-          try {
-            const href =
-              ((_a2 = globalThis.location) == null ? void 0 : _a2.href) || ''
-            const u = new URL(href)
-            return u.searchParams.get('kw') || ''
-          } catch (e) {}
-          return ''
+        current_url() {
+          return href
         },
-        wd() {
-          var _a2
-          try {
-            const href =
-              ((_a2 = globalThis.location) == null ? void 0 : _a2.href) || ''
-            const u = new URL(href)
-            return u.searchParams.get('wd') || ''
-          } catch (e) {}
-          return ''
-        },
-        keyword() {
-          var _a2
-          try {
-            const href =
-              ((_a2 = globalThis.location) == null ? void 0 : _a2.href) || ''
-            const u = new URL(href)
-            return u.searchParams.get('keyword') || ''
-          } catch (e) {}
-          return ''
-        },
-        p() {
-          var _a2
-          try {
-            const href =
-              ((_a2 = globalThis.location) == null ? void 0 : _a2.href) || ''
-            const u = new URL(href)
-            return u.searchParams.get('p') || ''
-          } catch (e) {}
-          return ''
-        },
-        s() {
-          var _a2
-          try {
-            const href =
-              ((_a2 = globalThis.location) == null ? void 0 : _a2.href) || ''
-            const u = new URL(href)
-            return u.searchParams.get('s') || ''
-          } catch (e) {}
-          return ''
-        },
-        term() {
-          var _a2
-          try {
-            const href =
-              ((_a2 = globalThis.location) == null ? void 0 : _a2.href) || ''
-            const u = new URL(href)
-            return u.searchParams.get('term') || ''
-          } catch (e) {}
-          return ''
+        current_url_encoded() {
+          return encodeURIComponent(href)
         },
         selected() {
           var _a2, _b
@@ -1773,9 +1717,29 @@
         },
       }
       for (const p of parts) {
-        const v = String(
+        let v = String(
           ((_a = resolvers[p]) == null ? void 0 : _a.call(resolvers)) || ''
         ).trim()
+        if (v) return v
+        if (p.startsWith('q:')) {
+          const key = p.slice(2)
+          try {
+            v = (u == null ? void 0 : u.searchParams.get(key)) || ''
+          } catch (e) {}
+        } else if (p.startsWith('p:')) {
+          const index = Number.parseInt(p.slice(2), 10)
+          if (!Number.isNaN(index) && index > 0) {
+            try {
+              const pathname = (u == null ? void 0 : u.pathname) || ''
+              const segments = pathname.split('/').filter(Boolean)
+              v = segments[index - 1] || ''
+            } catch (e) {}
+          }
+        } else if (p.startsWith('te:')) {
+          v = encodeURIComponent(p.slice(3))
+        } else if (p.startsWith('t:')) {
+          v = p.slice(2)
+        }
         if (v) return v
       }
       return ''
@@ -3352,7 +3316,7 @@
             name: 'Google \u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.google.com/search?q={selected||query}',
+            data: 'https://www.google.com/search?q={selected||query||t:utags}',
             openIn: 'new-tab',
           },
           {
@@ -3369,6 +3333,14 @@
             icon: 'favicon',
             type: 'url',
             data: 'https://www.google.com/search?q=site:{hostname}%20{selected||query}',
+            openIn: 'new-tab',
+          },
+          {
+            id: 'default_greasyfork_search',
+            name: '\u641C\u7D22\u672C\u7AD9\u7684\u6CB9\u7334\u811A\u672C',
+            icon: 'favicon',
+            type: 'url',
+            data: 'https://greasyfork.org/scripts/by-site/{hostname}?filter_locale=0',
             openIn: 'new-tab',
           },
         ],
@@ -3422,6 +3394,40 @@
             type: 'url',
             data: 'https://meta.appinn.net/',
             openIn: 'new-tab',
+          },
+        ],
+      }
+      const github = {
+        id: 'auuiqiax',
+        name: 'GitHub Repo',
+        icon: 'url:https://github.com/favicon.ico',
+        match: [
+          '!/https://github\\.com/(topics|collections|trending|resources)/.*/',
+          '/https://github\\.com/\\w+/\\w+(/.*)?$/',
+        ],
+        defaultOpen: 'same-tab',
+        items: [
+          {
+            id: 'nkv2f0hp',
+            name: 'Home',
+            type: 'url',
+            data: 'https://github.com/{p:1||t:utags}/{p:2||utags}',
+            openIn: 'same-tab',
+            icon: 'lucide:home',
+          },
+          {
+            id: 'mw2j0leg',
+            name: 'Issues',
+            type: 'url',
+            data: 'https://github.com/{p:1||t:utags}/{p:2||utags}/issues',
+            openIn: 'same-tab',
+          },
+          {
+            id: 'tuonitkh',
+            name: 'Pull requests',
+            type: 'url',
+            data: 'https://github.com/{p:1||t:utags}/{p:2||utags}/pulls',
+            openIn: 'same-tab',
           },
         ],
       }
@@ -3485,6 +3491,14 @@
             data: '/notifications',
             openIn: 'same-tab',
           },
+          {
+            id: 'v2ex_search',
+            name: 'Google \u641C\u7D22\u9009\u4E2D\u7684\u6587\u672C',
+            icon: 'favicon',
+            type: 'url',
+            data: 'https://www.google.com/search?q=site:v2ex.com%20{selected||query}',
+            openIn: 'new-tab',
+          },
         ],
       }
       const linuxdo = {
@@ -3542,6 +3556,22 @@
             icon: 'lucide:thumbs-up',
           },
           {
+            id: 'linuxdo_search',
+            name: '\u641C\u7D22\u9009\u4E2D\u7684\u6587\u672C',
+            icon: 'lucide:search',
+            type: 'url',
+            data: 'https://linux.do/search?q={selected||query||te:\u9ED8\u8BA4\u503C}%20order%3Alatest',
+            openIn: 'new-tab',
+          },
+          {
+            id: 'linuxdo_google_search',
+            name: 'Google \u641C\u7D22\u9009\u4E2D\u7684\u6587\u672C',
+            icon: 'favicon',
+            type: 'url',
+            data: 'https://www.google.com/search?q=site:linux.do%20{selected||query}',
+            openIn: 'new-tab',
+          },
+          {
             id: '0eybi3bv',
             name: 'leaderbooard',
             type: 'url',
@@ -3567,8 +3597,8 @@
             id: 'vt4y2688',
             name: 'Challenge',
             type: 'url',
-            data: 'https://linux.do/challenge',
-            openIn: 'new-tab',
+            data: 'https://linux.do/challenge?redirect={current_url_encoded}',
+            openIn: 'same-tab',
             icon: 'lucide:swords',
           },
           {
@@ -3661,6 +3691,14 @@
             data: 'https://2libra.com/coins',
             openIn: 'same-tab',
           },
+          {
+            id: '2libra_search',
+            name: 'Google \u641C\u7D22\u9009\u4E2D\u7684\u6587\u672C',
+            icon: 'favicon',
+            type: 'url',
+            data: 'https://www.google.com/search?q=site:2libra.com%20{selected||query}',
+            openIn: 'new-tab',
+          },
         ],
         itemsPerRow: 2,
       }
@@ -3686,16 +3724,49 @@
           },
         ],
       }
+      const other = {
+        id: 'other',
+        name: '\u5176\u4ED6',
+        icon: 'lucide:hand-heart',
+        match: ['*'],
+        defaultOpen: 'new-tab',
+        collapsed: true,
+        items: [
+          {
+            id: 'issues',
+            name: '\u95EE\u9898\u53CD\u9988',
+            type: 'url',
+            data: 'https://github.com/utags/userscripts/issues',
+            icon: 'lucide:bug',
+          },
+          {
+            id: 'project',
+            name: '\u9879\u76EE\u5730\u5740',
+            type: 'url',
+            data: 'https://github.com/utags/userscripts',
+            icon: 'lucide:github',
+          },
+          {
+            id: 'more-scripts',
+            name: '\u66F4\u591A\u811A\u672C',
+            type: 'url',
+            data: 'https://greasyfork.org/users/1030884-pipecraft?sort=total_installs',
+            icon: 'lucide:package',
+          },
+        ],
+      }
       return {
         groups: [
           g,
           readLater,
           community,
+          github,
           v2ex,
           linuxdo,
           _2libra_1,
           _2libra_2,
           _2libra_3,
+          other,
         ],
       }
     }
