@@ -27,6 +27,7 @@ import {
 import {
   addCurrentPageLinkToGroup,
   pickLinkFromPageAndAdd,
+  hasDuplicateInGroup,
 } from './add-link-actions'
 import { resolveTargetUrl, resolveIcon } from './utils'
 
@@ -88,6 +89,7 @@ let showHiddenGroups = false
 let showHiddenItems = false
 const editingGroups = new Set<string>()
 const selectedItemsByGroup = new Map<string, Set<string>>()
+let draggingItem: { groupId: string; itemId: string } | undefined
 
 function matchPattern(url: string, pattern: string) {
   try {
@@ -516,6 +518,16 @@ function renderShortcutsItem(
   if (it.hidden) (wrap as HTMLElement).classList.add('is-hidden')
   const a = document.createElement('a')
   a.className = 'item'
+  a.draggable = true
+  a.addEventListener('dragstart', (e) => {
+    draggingItem = { groupId: g.id, itemId: it.id }
+    e.dataTransfer?.setData('text/plain', it.data)
+    e.dataTransfer?.setData('text/uri-list', it.data)
+  })
+  a.addEventListener('dragend', () => {
+    draggingItem = undefined
+  })
+
   if (isEditing) {
     a.href = '#'
     a.addEventListener('click', (e) => {
@@ -631,6 +643,73 @@ function renderShortcutsItem(
   return wrap
 }
 
+async function handleDropOnGroup(
+  e: DragEvent,
+  g: ShortcutsGroup,
+  cfg: ShortcutsConfig,
+  root: ShadowRoot,
+  section: HTMLElement
+) {
+  e.preventDefault()
+  section.classList.remove('drag-over')
+
+  let url =
+    e.dataTransfer?.getData('text/uri-list') ||
+    e.dataTransfer?.getData('text/plain')
+  if (url) {
+    url = url.split('\n')[0].trim()
+  }
+
+  if (
+    !url ||
+    (!(url.startsWith('http://') || url.startsWith('https://')) &&
+      !url.startsWith('/'))
+  )
+    return
+
+  if (hasDuplicateInGroup(g, 'url', url)) {
+    const ok = globalThis.confirm('该分组内已存在相同的 URL，是否继续添加？')
+    if (!ok) return
+  }
+
+  let name = ''
+  const html = e.dataTransfer?.getData('text/html')
+  if (html) {
+    try {
+      const doc = new DOMParser().parseFromString(html, 'text/html')
+      const a = doc.querySelector('a')
+      if (a && a.textContent) {
+        name = a.textContent.trim()
+      }
+    } catch {}
+  }
+
+  if (!name) {
+    try {
+      const u = new URL(url)
+      name = u.hostname
+    } catch {
+      name = 'New Link'
+    }
+  }
+
+  const newItem: ShortcutsItem = {
+    id: uid(),
+    name: name || 'New Link',
+    type: 'url',
+    data: url,
+    openIn: (g.defaultOpen ??
+      (settings.defaultOpen || OPEN_DEFAULT)) as OpenMode,
+    icon: 'favicon',
+  }
+
+  g.items.push(newItem)
+  if (g.collapsed) g.collapsed = false
+
+  await saveConfig(cfg)
+  rerender(root, cfg)
+}
+
 function renderGroupSection(
   root: ShadowRoot,
   cfg: ShortcutsConfig,
@@ -646,6 +725,20 @@ function renderGroupSection(
   section.className = 'section'
   ;(section as HTMLElement).dataset.gid = g.id
   if (g.hidden) (section as HTMLElement).classList.add('is-hidden')
+
+  section.addEventListener('dragover', (e) => {
+    if (draggingItem && draggingItem.groupId === g.id) return
+    e.preventDefault()
+    section.classList.add('drag-over')
+  })
+  section.addEventListener('dragleave', () => {
+    section.classList.remove('drag-over')
+  })
+  section.addEventListener('drop', (e) => {
+    if (draggingItem && draggingItem.groupId === g.id) return
+    void handleDropOnGroup(e, g, cfg, root, section)
+  })
+
   const header = document.createElement('div')
   header.className = 'header'
   const title = document.createElement('div')

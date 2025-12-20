@@ -166,6 +166,13 @@ div {
   @apply mb-0;
 }
 
+.section.drag-over {
+  @apply bg-blue-50 ring-2 ring-blue-500 rounded-lg;
+}
+.ushortcuts.dark .section.drag-over {
+  @apply bg-blue-900/30 ring-blue-400;
+}
+
 .icon-btn {
   @apply w-6 h-6 p-0 rounded-md flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150;
 }

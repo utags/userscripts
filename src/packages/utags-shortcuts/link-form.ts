@@ -158,9 +158,12 @@ export function renderLinkForm(
   urlHelp.className = 'field-help'
   urlHelp.innerHTML = `
     <div class="field-help-title">🔗 URL 变量与示例</div>
-    <div>变量：{hostname}、{hostname_without_www}、{query}、{selected}</div>
-    <div>示例：http://example.com/search?query={selected||query}</div>
-    <div>更多使用说明参考 <a href="https://github.com/utags/userscripts" target="_blank" rel="noopener noreferrer">https://github.com/utags/userscripts</a></div>
+    <div><b>基础变量：</b>{hostname}、{current_url}、{query}、{selected}</div>
+    <div><b>高级变量：</b>{q:key} (查询参数)、{p:index} (路径片段)</div>
+    <div><b>常量文本：</b>{t:text} (原样)、{te:text} (编码)</div>
+    <div><b>组合逻辑：</b>{selected||q:wd||t:默认值} (按顺序取非空值)</div>
+    <div><b>示例：</b>https://google.com/search?q={selected}</div>
+    <div>更多说明参考 <a href="https://greasyfork.org/scripts/558485-utags-shortcuts" target="_blank" rel="noopener noreferrer">GreasyFork</a></div>
   `
   urlHelpRow.append(urlHelp)
   grid.append(urlHelpRow)

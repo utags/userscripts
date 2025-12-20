@@ -85,6 +85,14 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.1.14
+
+- Support dragging and dropping links from the web page to groups.
+
+### v0.1.12
+
+- Support more URL variables: `{q:param}`, `{p:n}`, `{t:text}`, `{te:text}`.
+
 ### v0.1.6
 
 - Added sidebar mode.

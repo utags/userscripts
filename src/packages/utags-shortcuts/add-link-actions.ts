@@ -46,7 +46,7 @@ export function addCurrentPageLinkToGroup(
   const it = {
     id: uid(),
     name: String(nm || href),
-    icon: undefined as string | undefined,
+    icon: 'favicon',
     type: 'url',
     data: String(href || '/'),
     openIn: openMode,
@@ -89,7 +89,7 @@ export function pickLinkFromPageAndAdd(
       const it = {
         id: uid(),
         name: nm,
-        icon: undefined as string | undefined,
+        icon: 'favicon',
         type: 'url',
         data: href,
         openIn: openMode,
