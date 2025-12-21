@@ -1,0 +1,23 @@
+/* Wrap GitHub username */
+a[data-hovercard-url][data-utags-replaced] {
+  &::before {
+    content: attr(data-utags);
+  }
+  span {
+    display: none;
+  }
+}
+
+:not(#a):not(#b):not(#c) {
+  /* Hide utags button */
+  a[data-hovercard-url][data-utags-replaced]:not(:hover) + ul:not(:hover) {
+    display: none !important;
+  }
+
+  /* Hide utags */
+  a[data-hovercard-url][data-utags-replaced]
+    + ul
+    .utags_text_tag:not(.utags_captain_tag2) {
+    display: none !important;
+  }
+}
