@@ -4,10 +4,6 @@
   all: initial;
 }
 
-div {
-  line-height: normal;
-}
-
 .ushortcuts {
   @apply fixed z-[2147483647] font-sans text-[13px] text-gray-900;
 }

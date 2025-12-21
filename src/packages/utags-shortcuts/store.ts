@@ -159,6 +159,79 @@ export class ShortcutsStore {
       defaultOpen: 'new-tab',
       items: [],
     }
+    const searchGroup: ShortcutsGroup = {
+      id: 'search_group',
+      name: '搜索',
+      icon: 'lucide:search',
+      match: [
+        '!https://www.google.com/search*',
+        '!https://*.bing.com/search*',
+        '!https://www.baidu.com/s?*',
+        '!https://www.duckduckgo.com/*',
+        '*',
+      ],
+      defaultOpen: 'new-tab',
+      collapsed: false,
+      itemsPerRow: 2,
+      items: [
+        {
+          id: 'google_search',
+          name: 'Google 搜索选中的文本',
+          icon: 'favicon',
+          type: 'url',
+          data: 'https://www.google.com/search?q={selected||query||t:utags}',
+        },
+        {
+          id: 'google_site_search',
+          name: 'Google 站内搜索',
+          icon: 'favicon',
+          type: 'url',
+          data: 'https://www.google.com/search?q=site:{hostname}%20{selected||query}',
+        },
+        {
+          id: 'bing_search',
+          name: 'Bing 搜索选中的文本',
+          icon: 'favicon',
+          type: 'url',
+          data: 'https://www.bing.com/search?q={selected||query||t:utags}',
+        },
+        {
+          id: 'bing_site_search',
+          name: 'Bing 站内搜索',
+          icon: 'favicon',
+          type: 'url',
+          data: 'https://www.bing.com/search?q=site:{hostname}%20{selected||query}',
+        },
+        {
+          id: 'baidu_search',
+          name: 'Baidu 搜索选中的文本',
+          icon: 'favicon',
+          type: 'url',
+          data: 'https://www.baidu.com/s?wd={selected||query||t:utags}',
+        },
+        {
+          id: 'baidu_site_search',
+          name: 'Baidu 站内搜索',
+          icon: 'favicon',
+          type: 'url',
+          data: 'https://www.baidu.com/s?wd=site:{hostname}%20{selected||query}',
+        },
+        {
+          id: 'duckduckgo_search',
+          name: 'DuckDuckGo 搜索选中的文本',
+          icon: 'favicon',
+          type: 'url',
+          data: 'https://www.duckduckgo.com/?q={selected||query||t:utags}&ia=web',
+        },
+        {
+          id: 'duckduckgo_site_search',
+          name: 'DuckDuckGo 站内搜索',
+          icon: 'favicon',
+          type: 'url',
+          data: 'https://www.duckduckgo.com/?q=site:{hostname}%20{selected||query}&ia=web',
+        },
+      ],
+    }
     const community: ShortcutsGroup = {
       id: 'community_group',
       name: '社区',
@@ -287,6 +360,7 @@ export class ShortcutsStore {
           type: 'url',
           data: '/go/flamewar',
           openIn: 'same-tab',
+          hidden: true,
         },
         {
           id: 'evev9l6r',
@@ -574,6 +648,7 @@ export class ShortcutsStore {
       groups: [
         g,
         readLater,
+        searchGroup,
         community,
         github,
         v2ex,

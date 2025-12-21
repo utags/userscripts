@@ -8,6 +8,21 @@ import * as sass from 'sass'
 
 import twPropsUnconditional from '../postcss/plugins/tw-properties-unconditional.mjs'
 
+// Convert rem to px to avoid font-size inheritance issue
+// issue 1: baidu.com - html: {font-size: 100px}
+const remToPxPlugin = () => ({
+  postcssPlugin: 'rem-to-px',
+  Declaration(decl) {
+    if (decl.value.includes('rem')) {
+      decl.value = decl.value.replaceAll(
+        /(-?[\d.]+)rem/g,
+        (_, p1) => `${Number.parseFloat(p1) * 16}px`
+      )
+    }
+  },
+})
+remToPxPlugin.postcss = true
+
 const EMOJI_LIST = [
   //
   '⚽️',
@@ -68,6 +83,7 @@ const schemeImportPlugin = ({ compressCss }) => ({
           tailwind({
             base: pkgDir,
           }),
+          remToPxPlugin(),
           twPropsUnconditional(),
           autoprefixer(),
         ]
