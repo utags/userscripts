@@ -1230,6 +1230,13 @@ function renderPanel(root: ShadowRoot, cfg: ShortcutsConfig, animIn: boolean) {
   wrapper.className = 'ushortcuts' + (isDarkTheme(cfg) ? ' dark' : '')
   const panel = document.createElement('div')
   panel.className = 'panel'
+  if (
+    settings.panelBackgroundColor &&
+    settings.panelBackgroundColor !== 'default'
+  ) {
+    panel.style.backgroundColor = settings.panelBackgroundColor
+  }
+
   if (settings.layoutMode === 'sidebar') {
     try {
       panel.style.height = '100vh'
@@ -1365,7 +1372,16 @@ function openQuickAddMenu(
 
 let lastCollapsed = true
 let suppressCollapse = false
+let pendingUpdate = false
+
 function rerender(root: ShadowRoot, cfg: ShortcutsConfig) {
+  if (document.visibilityState !== 'visible') {
+    pendingUpdate = true
+    return
+  }
+
+  pendingUpdate = false
+
   suppressCollapse = true
   let sx = 0
   let sy = 0
@@ -1727,7 +1743,9 @@ function main() {
 
     try {
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') rerender(root, cfg)
+        if (document.visibilityState === 'visible' && pendingUpdate) {
+          rerender(root, cfg)
+        }
       })
     } catch {}
 

@@ -818,6 +818,7 @@
         ((_a = globalThis.location) == null ? void 0 : _a.hostname) || 'unknown'
       )
     }
+    let beforeSetHook
     function updateCache(obj) {
       if (isSupportSitePref) {
         const rootObj = isObject(obj) ? obj : {}
@@ -891,16 +892,18 @@
         } catch (e) {}
         if (!isObject(obj)) obj = {}
         let isGlobalPref = false
-        let key
-        let value
-        let values
+        let values = {}
         if (typeof args[0] === 'string') {
-          key = args[0]
-          value = args[1]
+          values[args[0]] = args[1]
           isGlobalPref = Boolean(args[2])
         } else {
-          values = args[0]
+          values = __spreadValues({}, args[0])
           isGlobalPref = Boolean(args[1])
+        }
+        if (beforeSetHook) {
+          try {
+            values = await beforeSetHook(values, isGlobalPref)
+          } catch (e) {}
         }
         let target
         let global
@@ -913,17 +916,15 @@
           target = obj
         }
         const isSitePref = isSupportSitePref && !isGlobalPref
-        const apply = (key2, value2) => {
-          if (isSitePref && key2 in global) {
-            const normalized = normalizeToDefaultType(value2, defaults[key2])
-            target[key2] = normalized
+        const apply = (key, value) => {
+          if (isSitePref && key in global) {
+            const normalized = normalizeToDefaultType(value, defaults[key])
+            target[key] = normalized
             return
           }
-          setOrDelete(target, key2, value2, defaults[key2])
+          setOrDelete(target, key, value, defaults[key])
         }
-        if (key !== void 0) {
-          apply(key, value)
-        } else if (values) {
+        if (values) {
           for (const k of Object.keys(values)) {
             const v = values[k]
             apply(k, v)
@@ -960,6 +961,9 @@
       },
       onChange(cb) {
         changeCbs.push(cb)
+      },
+      onBeforeSet(cb) {
+        beforeSetHook = cb
       },
     }
   }

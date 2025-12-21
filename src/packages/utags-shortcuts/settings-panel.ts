@@ -38,6 +38,7 @@ const DEFAULTS = {
   position: 'right-top',
   defaultOpen: 'same-tab',
   theme: 'system',
+  panelBackgroundColor: 'default',
   pinned: false,
   enabled: true,
   layoutMode: 'floating',
@@ -79,6 +80,20 @@ const COMMON_SETTINGS_FIELDS: Field[] = [
       { value: 'dark', label: '深色' },
     ],
     help: '导航面板主题偏好',
+  },
+  {
+    type: 'radio',
+    key: 'panelBackgroundColor',
+    label: '面板背景',
+    options: [
+      { value: 'default', label: '默认' },
+      { value: '#ffffff', label: '纯白' },
+      { value: '#fdf6e3', label: '暖色' },
+      { value: '#f0f9eb', label: '护眼' },
+      { value: '#1f2937', label: '暗色' },
+      { value: '#000000', label: '纯黑' },
+    ],
+    help: '自定义导航面板背景颜色',
   },
 ]
 
@@ -172,6 +187,24 @@ export function createUshortcutsSettingsStore() {
 }
 
 export function openSettingsPanel(store: Store): void {
+  store.onBeforeSet(async (values) => {
+    if ('panelBackgroundColor' in values) {
+      const v = values.panelBackgroundColor as string
+      if (['#ffffff', '#fdf6e3', '#f0f9eb'].includes(v)) {
+        values.theme = 'light'
+      } else if (['#1f2937', '#000000'].includes(v)) {
+        values.theme = 'dark'
+      }
+    }
+
+    // Avoid resetting if we just set it above
+    if ('theme' in values && !('panelBackgroundColor' in values)) {
+      values.panelBackgroundColor = 'default'
+    }
+
+    return values
+  })
+
   const schema: PanelSchema = {
     type: 'tabs',
     title: '快捷导航设置',

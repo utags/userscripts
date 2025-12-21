@@ -338,13 +338,6 @@ describe('createSettingsStore', () => {
       await store.set('count', 1)
 
       // The implementation of createSettingsStore registers a GM listener
-      // When GM listener fires, it calls the internal listeners.
-      // Since we mocked GM.addValueChangeListener, we need to manually trigger the callback passed to it
-      // OR we rely on the fact that `set` updates the cache and *could* trigger listeners if implemented that way.
-      // Looking at the code:
-      // set() calls setValue().
-      // It DOES NOT directly call listeners. It relies on addValueChangeListener callback.
-
       // We need to simulate GM event
       expect(gm.addValueChangeListener).toHaveBeenCalled()
       const calls = vi.mocked(gm.addValueChangeListener).mock.calls
@@ -362,6 +355,75 @@ describe('createSettingsStore', () => {
       } else {
         throw new Error('GM listener not registered')
       }
+    })
+  })
+
+  describe('beforeSetHook', () => {
+    it('should modify values before setting', async () => {
+      const store = createSettingsStore(rootKey, defaults)
+      store.onBeforeSet((values) => {
+        if ('count' in values) {
+          values.count = (values.count as number) * 2
+        }
+
+        return values
+      })
+
+      await store.set('count', 10)
+      expect(await store.get('count')).toBe(20)
+    })
+
+    it('should allow adding new keys in hook', async () => {
+      const store = createSettingsStore(rootKey, defaults)
+      store.onBeforeSet((values) => {
+        if ('count' in values) {
+          values.theme = 'dark'
+        }
+
+        return values
+      })
+
+      await store.set('count', 10)
+      expect(await store.get('count')).toBe(10)
+      expect(await store.get('theme')).toBe('dark')
+    })
+
+    it('should pass correct isGlobalPref flag', async () => {
+      const store = createSettingsStore(rootKey, defaults, true)
+      const hook = vi.fn((v) => v)
+      store.onBeforeSet(hook)
+
+      await store.set('count', 10, true)
+      expect(hook).toHaveBeenLastCalledWith({ count: 10 }, true)
+
+      await store.set('count', 20, false)
+      expect(hook).toHaveBeenLastCalledWith({ count: 20 }, false)
+    })
+
+    it('should handle async hook', async () => {
+      const store = createSettingsStore(rootKey, defaults)
+      store.onBeforeSet(async (values) => {
+        // eslint-disable-next-line no-promise-executor-return
+        await new Promise((resolve) => setTimeout(resolve, 1))
+        if ('count' in values) {
+          values.count = 999
+        }
+
+        return values
+      })
+
+      await store.set('count', 10)
+      expect(await store.get('count')).toBe(999)
+    })
+
+    it('should ignore hook error and use original values', async () => {
+      const store = createSettingsStore(rootKey, defaults)
+      store.onBeforeSet(() => {
+        throw new Error('Hook failed')
+      })
+
+      await store.set('count', 10)
+      expect(await store.get('count')).toBe(10)
     })
   })
 })

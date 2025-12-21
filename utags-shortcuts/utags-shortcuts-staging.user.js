@@ -3135,6 +3135,7 @@
         ((_a = globalThis.location) == null ? void 0 : _a.hostname) || 'unknown'
       )
     }
+    let beforeSetHook
     function updateCache(obj) {
       if (isSupportSitePref) {
         const rootObj = isObject(obj) ? obj : {}
@@ -3208,16 +3209,18 @@
         } catch (e) {}
         if (!isObject(obj)) obj = {}
         let isGlobalPref = false
-        let key
-        let value
-        let values
+        let values = {}
         if (typeof args[0] === 'string') {
-          key = args[0]
-          value = args[1]
+          values[args[0]] = args[1]
           isGlobalPref = Boolean(args[2])
         } else {
-          values = args[0]
+          values = __spreadValues({}, args[0])
           isGlobalPref = Boolean(args[1])
+        }
+        if (beforeSetHook) {
+          try {
+            values = await beforeSetHook(values, isGlobalPref)
+          } catch (e) {}
         }
         let target
         let global
@@ -3230,17 +3233,15 @@
           target = obj
         }
         const isSitePref = isSupportSitePref && !isGlobalPref
-        const apply = (key2, value2) => {
-          if (isSitePref && key2 in global) {
-            const normalized = normalizeToDefaultType(value2, defaults[key2])
-            target[key2] = normalized
+        const apply = (key, value) => {
+          if (isSitePref && key in global) {
+            const normalized = normalizeToDefaultType(value, defaults[key])
+            target[key] = normalized
             return
           }
-          setOrDelete(target, key2, value2, defaults[key2])
+          setOrDelete(target, key, value, defaults[key])
         }
-        if (key !== void 0) {
-          apply(key, value)
-        } else if (values) {
+        if (values) {
           for (const k of Object.keys(values)) {
             const v = values[k]
             apply(k, v)
@@ -3277,6 +3278,9 @@
       },
       onChange(cb) {
         changeCbs.push(cb)
+      },
+      onBeforeSet(cb) {
+        beforeSetHook = cb
       },
     }
   }
@@ -3906,6 +3910,7 @@
     position: 'right-top',
     defaultOpen: 'same-tab',
     theme: 'system',
+    panelBackgroundColor: 'default',
     pinned: false,
     enabled: true,
     layoutMode: 'floating',
@@ -3946,6 +3951,20 @@
         { value: 'dark', label: '\u6DF1\u8272' },
       ],
       help: '\u5BFC\u822A\u9762\u677F\u4E3B\u9898\u504F\u597D',
+    },
+    {
+      type: 'radio',
+      key: 'panelBackgroundColor',
+      label: '\u9762\u677F\u80CC\u666F',
+      options: [
+        { value: 'default', label: '\u9ED8\u8BA4' },
+        { value: '#ffffff', label: '\u7EAF\u767D' },
+        { value: '#fdf6e3', label: '\u6696\u8272' },
+        { value: '#f0f9eb', label: '\u62A4\u773C' },
+        { value: '#1f2937', label: '\u6697\u8272' },
+        { value: '#000000', label: '\u7EAF\u9ED1' },
+      ],
+      help: '\u81EA\u5B9A\u4E49\u5BFC\u822A\u9762\u677F\u80CC\u666F\u989C\u8272',
     },
   ]
   var EDGE_SETTINGS_FIELDS = [
@@ -4036,6 +4055,20 @@
     return createSettingsStore(SETTINGS_KEY, DEFAULTS, true)
   }
   function openSettingsPanel2(store2) {
+    store2.onBeforeSet(async (values) => {
+      if ('panelBackgroundColor' in values) {
+        const v = values.panelBackgroundColor
+        if (['#ffffff', '#fdf6e3', '#f0f9eb'].includes(v)) {
+          values.theme = 'light'
+        } else if (['#1f2937', '#000000'].includes(v)) {
+          values.theme = 'dark'
+        }
+      }
+      if ('theme' in values && !('panelBackgroundColor' in values)) {
+        values.panelBackgroundColor = 'default'
+      }
+      return values
+    })
     const schema = {
       type: 'tabs',
       title: '\u5FEB\u6377\u5BFC\u822A\u8BBE\u7F6E',
@@ -5515,6 +5548,12 @@
     wrapper.className = 'ushortcuts' + (isDarkTheme(cfg) ? ' dark' : '')
     const panel = document.createElement('div')
     panel.className = 'panel'
+    if (
+      settings.panelBackgroundColor &&
+      settings.panelBackgroundColor !== 'default'
+    ) {
+      panel.style.backgroundColor = settings.panelBackgroundColor
+    }
     if (settings.layoutMode === 'sidebar') {
       try {
         panel.style.height = '100vh'
@@ -5618,8 +5657,14 @@
   }
   var lastCollapsed = true
   var suppressCollapse = false
+  var pendingUpdate = false
   function rerender(root, cfg) {
     var _a, _b, _c
+    if (document.visibilityState !== 'visible') {
+      pendingUpdate = true
+      return
+    }
+    pendingUpdate = false
     suppressCollapse = true
     let sx = 0
     let sy = 0
@@ -5927,7 +5972,9 @@
       } catch (e) {}
       try {
         document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') rerender(root, cfg)
+          if (document.visibilityState === 'visible' && pendingUpdate) {
+            rerender(root, cfg)
+          }
         })
       } catch (e) {}
       updateState()

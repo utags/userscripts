@@ -99,6 +99,12 @@ export type Store = {
   ): Promise<void>
   reset(isGlobalPref?: boolean): Promise<void>
   defaults(): Record<string, unknown>
+  onBeforeSet(
+    cb: (
+      values: Record<string, unknown>,
+      isGlobalPref: boolean
+    ) => Promise<Record<string, unknown>> | Record<string, unknown>
+  ): void
 }
 
 function isObject(item: unknown): item is Record<string, unknown> {
@@ -889,6 +895,13 @@ export function createSettingsStore(
 
   const getHostname = () => globalThis.location?.hostname || 'unknown'
 
+  let beforeSetHook:
+    | ((
+        values: Record<string, unknown>,
+        isGlobalPref: boolean
+      ) => Promise<Record<string, unknown>> | Record<string, unknown>)
+    | undefined
+
   function updateCache(obj: unknown) {
     if (isSupportSitePref) {
       const rootObj = (isObject(obj) ? obj : {}) as Record<
@@ -984,17 +997,20 @@ export function createSettingsStore(
       if (!isObject(obj)) obj = {}
 
       let isGlobalPref = false
-      let key: string | undefined
-      let value: unknown | undefined
-      let values: Record<string, unknown> | undefined
+      let values: Record<string, unknown> = {}
 
       if (typeof args[0] === 'string') {
-        key = args[0]
-        value = args[1]
+        values[args[0]] = args[1]
         isGlobalPref = Boolean(args[2])
       } else {
-        values = args[0]
+        values = { ...args[0] }
         isGlobalPref = Boolean(args[1])
+      }
+
+      if (beforeSetHook) {
+        try {
+          values = await beforeSetHook(values, isGlobalPref)
+        } catch {}
       }
 
       let target: Record<string, unknown>
@@ -1020,9 +1036,7 @@ export function createSettingsStore(
         setOrDelete(target, key, value, defaults[key])
       }
 
-      if (key !== undefined) {
-        apply(key, value)
-      } else if (values) {
+      if (values) {
         for (const k of Object.keys(values)) {
           const v = values[k]
           apply(k, v)
@@ -1067,6 +1081,9 @@ export function createSettingsStore(
     },
     onChange(cb) {
       changeCbs.push(cb)
+    },
+    onBeforeSet(cb) {
+      beforeSetHook = cb
     },
   }
 }
