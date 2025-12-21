@@ -73,8 +73,11 @@
 
 - `{hostname}`: 当前主机名（例如 `www.baidu.com`）。
 - `{hostname_without_www}`: 去除 `www.` 的主机名（例如 `baidu.com`）。
+- `{hostname_top_level}`: 从当前 URL 提取的顶级域名（例如 `baidu.com`, `bbc.co.uk`）。
 - `{current_url}`: 当前页面的完整 URL。
 - `{current_url_encoded}`: 经过 URL 编码的完整 URL。
+- `{current_title}`: 当前页面的标题。
+- `{current_title_encoded}`: 经过 URL 编码的当前页面标题。
 - `{query}`: 从 URL 参数中提取的搜索关键词（自动检测 `q`, `query`, `kw`, `wd`, `keyword`, `p`, `s`, `term`）。
 - `{selected}`: 页面上当前选中的文本。
 - `{q:param}`: 指定查询参数的值（例如 `{q:id}` 获取 `?id=123` 中的 `123`）。

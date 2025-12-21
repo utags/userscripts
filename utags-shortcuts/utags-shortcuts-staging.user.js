@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.17
+// @version              0.1.18
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -1022,7 +1022,7 @@
     const urlHelp = document.createElement('div')
     urlHelp.className = 'field-help'
     urlHelp.innerHTML =
-      '\n    <div class="field-help-title">\u{1F517} URL \u53D8\u91CF\u4E0E\u793A\u4F8B</div>\n    <div><b>\u57FA\u7840\u53D8\u91CF\uFF1A</b>{hostname}\u3001{current_url}\u3001{query}\u3001{selected}</div>\n    <div><b>\u9AD8\u7EA7\u53D8\u91CF\uFF1A</b>{q:key} (\u67E5\u8BE2\u53C2\u6570)\u3001{p:index} (\u8DEF\u5F84\u7247\u6BB5)</div>\n    <div><b>\u5E38\u91CF\u6587\u672C\uFF1A</b>{t:text} (\u539F\u6837)\u3001{te:text} (\u7F16\u7801)</div>\n    <div><b>\u7EC4\u5408\u903B\u8F91\uFF1A</b>{selected||q:wd||t:\u9ED8\u8BA4\u503C} (\u6309\u987A\u5E8F\u53D6\u975E\u7A7A\u503C)</div>\n    <div><b>\u793A\u4F8B\uFF1A</b>https://google.com/search?q={selected}</div>\n    <div>\u66F4\u591A\u8BF4\u660E\u53C2\u8003 <a href="https://greasyfork.org/scripts/558485-utags-shortcuts" target="_blank" rel="noopener noreferrer">GreasyFork</a></div>\n  '
+      '\n    <div class="field-help-title">\u{1F517} URL \u53D8\u91CF\u4E0E\u793A\u4F8B</div>\n    <div><b>\u57FA\u7840\u53D8\u91CF\uFF1A</b>{hostname}\u3001{current_url}\u3001{current_title}\u3001{query}\u3001{selected}</div>\n    <div><b>\u9AD8\u7EA7\u53D8\u91CF\uFF1A</b>{q:key} (\u67E5\u8BE2\u53C2\u6570)\u3001{p:index} (\u8DEF\u5F84\u7247\u6BB5)</div>\n    <div><b>\u5E38\u91CF\u6587\u672C\uFF1A</b>{t:text} (\u539F\u6837)\u3001{te:text} (\u7F16\u7801)</div>\n    <div><b>\u7EC4\u5408\u903B\u8F91\uFF1A</b>{selected||q:wd||t:\u9ED8\u8BA4\u503C} (\u6309\u987A\u5E8F\u53D6\u975E\u7A7A\u503C)</div>\n    <div><b>\u793A\u4F8B\uFF1A</b>https://google.com/search?q={selected}</div>\n    <div>\u66F4\u591A\u8BF4\u660E\u53C2\u8003 <a href="https://greasyfork.org/scripts/558485-utags-shortcuts" target="_blank" rel="noopener noreferrer">GreasyFork</a></div>\n  '
     urlHelpRow.append(urlHelp)
     grid.append(urlHelpRow)
     const jsRow = document.createElement('div')
@@ -1744,6 +1744,44 @@
       )
     }, 0)
   }
+  function extractDomain(url) {
+    var _a
+    try {
+      let hostname
+      if (url) {
+        try {
+          hostname = new URL(url).hostname
+        } catch (e) {
+          hostname = url
+        }
+      } else {
+        hostname = globalThis.location.hostname
+      }
+      let domain = hostname.replace(/^www\./, '')
+      const parts = domain.split('.')
+      if (parts.length > 2) {
+        const secondLevelDomains = [
+          'co',
+          'com',
+          'org',
+          'net',
+          'edu',
+          'gov',
+          'mil',
+        ]
+        const thirdLevelDomain = parts[parts.length - 2]
+        domain =
+          parts.length > 2 && secondLevelDomains.includes(thirdLevelDomain)
+            ? parts.slice(-3).join('.')
+            : parts.slice(-2).join('.')
+      }
+      return domain
+    } catch (e) {
+      return (
+        url || ((_a = globalThis.location) == null ? void 0 : _a.hostname) || ''
+      )
+    }
+  }
   function resolveUrlTemplate(s) {
     const l = globalThis.location || {}
     const href = l.href || ''
@@ -1765,6 +1803,9 @@
         hostname_without_www() {
           const h = l.hostname || ''
           return h.startsWith('www.') ? h.slice(4) : h
+        },
+        hostname_top_level() {
+          return extractDomain(href)
         },
         query() {
           try {
@@ -1788,6 +1829,12 @@
         },
         current_url_encoded() {
           return encodeURIComponent(href)
+        },
+        current_title() {
+          return document.title || ''
+        },
+        current_title_encoded() {
+          return encodeURIComponent(document.title || '')
         },
         selected() {
           var _a2, _b
@@ -3425,7 +3472,7 @@
             name: 'Google \u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.google.com/search?q={selected||query||t:utags}',
+            data: 'https://www.google.com/search?q={selected||current_title||t:utags}',
             openIn: 'new-tab',
           },
           {
@@ -3441,7 +3488,7 @@
             name: '\u7AD9\u5185\u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.google.com/search?q=site:{hostname}%20{selected||query}',
+            data: 'https://www.google.com/search?q=site:{hostname_without_www}%20{selected||current_title}',
             openIn: 'new-tab',
           },
           {
@@ -3449,7 +3496,7 @@
             name: '\u641C\u7D22\u672C\u7AD9\u7684\u6CB9\u7334\u811A\u672C',
             icon: 'favicon',
             type: 'url',
-            data: 'https://greasyfork.org/scripts/by-site/{hostname}?filter_locale=0',
+            data: 'https://greasyfork.org/scripts/by-site/{hostname_top_level}?filter_locale=0',
             openIn: 'new-tab',
           },
         ],
@@ -3474,67 +3521,107 @@
           '!https://*.bing.com/search*',
           '!https://www.baidu.com/s?*',
           '!https://www.duckduckgo.com/*',
+          '!https://duckduckgo.com/*',
           '*',
         ],
         defaultOpen: 'new-tab',
         collapsed: false,
-        itemsPerRow: 2,
+        itemsPerRow: 1,
         items: [
           {
             id: 'google_search',
-            name: 'Google \u641C\u7D22\u9009\u4E2D\u7684\u6587\u672C',
+            name: 'Google \u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.google.com/search?q={selected||query||t:utags}',
+            data: 'https://www.google.com/search?q={selected||current_title||t:utags}',
           },
           {
             id: 'google_site_search',
             name: 'Google \u7AD9\u5185\u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.google.com/search?q=site:{hostname}%20{selected||query}',
+            data: 'https://www.google.com/search?q=site:{hostname_without_www}%20{selected||current_title}',
           },
           {
             id: 'bing_search',
-            name: 'Bing \u641C\u7D22\u9009\u4E2D\u7684\u6587\u672C',
+            name: 'Bing \u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.bing.com/search?q={selected||query||t:utags}',
-          },
-          {
-            id: 'bing_site_search',
-            name: 'Bing \u7AD9\u5185\u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.bing.com/search?q=site:{hostname}%20{selected||query}',
+            data: 'https://www.bing.com/search?q={selected||current_title||t:utags}',
           },
           {
             id: 'baidu_search',
-            name: 'Baidu \u641C\u7D22\u9009\u4E2D\u7684\u6587\u672C',
+            name: 'Baidu \u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.baidu.com/s?wd={selected||query||t:utags}',
+            data: 'https://www.baidu.com/s?wd={selected||current_title||t:utags}',
           },
           {
             id: 'baidu_site_search',
             name: 'Baidu \u7AD9\u5185\u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.baidu.com/s?wd=site:{hostname}%20{selected||query}',
+            data: 'https://www.baidu.com/s?wd=site:{hostname_without_www}%20{selected||current_title}',
           },
           {
             id: 'duckduckgo_search',
-            name: 'DuckDuckGo \u641C\u7D22\u9009\u4E2D\u7684\u6587\u672C',
+            name: 'DuckDuckGo \u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.duckduckgo.com/?q={selected||query||t:utags}&ia=web',
+            data: 'https://duckduckgo.com/?q={selected||current_title||t:utags}&ia=web',
           },
           {
             id: 'duckduckgo_site_search',
             name: 'DuckDuckGo \u7AD9\u5185\u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.duckduckgo.com/?q=site:{hostname}%20{selected||query}&ia=web',
+            data: 'https://duckduckgo.com/?q=site:{hostname_without_www}%20{selected||current_title}&ia=web',
+          },
+        ],
+      }
+      const searchSwitchGroup = {
+        id: 'search_switch_group',
+        name: '\u641C\u7D22\u5207\u6362',
+        displayName: '\u641C\u7D22\u5207\u6362',
+        icon: 'lucide:search',
+        match: [
+          'https://www.google.com/search*',
+          'https://*.bing.com/search*',
+          'https://www.baidu.com/s?*',
+          'https://www.duckduckgo.com/*',
+          'https://duckduckgo.com/*',
+        ],
+        defaultOpen: 'new-tab',
+        collapsed: false,
+        itemsPerRow: 1,
+        items: [
+          {
+            id: 'google_search',
+            name: 'Google \u641C\u7D22',
+            icon: 'favicon',
+            type: 'url',
+            data: 'https://www.google.com/search?q={selected||query||t:utags}',
+          },
+          {
+            id: 'bing_search',
+            name: 'Bing \u641C\u7D22',
+            icon: 'favicon',
+            type: 'url',
+            data: 'https://www.bing.com/search?q={selected||query||t:utags}',
+          },
+          {
+            id: 'baidu_search',
+            name: 'Baidu \u641C\u7D22',
+            icon: 'favicon',
+            type: 'url',
+            data: 'https://www.baidu.com/s?wd={selected||query||t:utags}',
+          },
+          {
+            id: 'duckduckgo_search',
+            name: 'DuckDuckGo \u641C\u7D22',
+            icon: 'favicon',
+            type: 'url',
+            data: 'https://duckduckgo.com/?q={selected||query||t:utags}&ia=web',
           },
         ],
       }
@@ -3676,10 +3763,10 @@
           },
           {
             id: 'v2ex_search',
-            name: 'Google \u641C\u7D22\u9009\u4E2D\u7684\u6587\u672C',
+            name: 'Google \u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.google.com/search?q=site:v2ex.com%20{selected||query}',
+            data: 'https://www.google.com/search?q=site:v2ex.com%20{selected||current_title}',
             openIn: 'new-tab',
           },
         ],
@@ -3740,18 +3827,18 @@
           },
           {
             id: 'linuxdo_search',
-            name: '\u641C\u7D22\u9009\u4E2D\u7684\u6587\u672C',
+            name: '\u641C\u7D22',
             icon: 'lucide:search',
             type: 'url',
-            data: 'https://linux.do/search?q={selected||query||te:\u9ED8\u8BA4\u503C}%20order%3Alatest',
+            data: 'https://linux.do/search?q={selected||current_title||t:\u9ED8\u8BA4\u503C}%20order%3Alatest',
             openIn: 'new-tab',
           },
           {
             id: 'linuxdo_google_search',
-            name: 'Google \u641C\u7D22\u9009\u4E2D\u7684\u6587\u672C',
+            name: 'Google \u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.google.com/search?q=site:linux.do%20{selected||query}',
+            data: 'https://www.google.com/search?q=site:linux.do%20{selected||current_title}',
             openIn: 'new-tab',
           },
           {
@@ -3876,10 +3963,10 @@
           },
           {
             id: '2libra_search',
-            name: 'Google \u641C\u7D22\u9009\u4E2D\u7684\u6587\u672C',
+            name: 'Google \u641C\u7D22',
             icon: 'favicon',
             type: 'url',
-            data: 'https://www.google.com/search?q=site:2libra.com%20{selected||query}',
+            data: 'https://www.google.com/search?q=site:2libra.com%20{selected||current_title}',
             openIn: 'new-tab',
           },
         ],
@@ -3943,6 +4030,7 @@
           g,
           readLater,
           searchGroup,
+          searchSwitchGroup,
           community,
           github,
           v2ex,
@@ -4690,7 +4778,6 @@
     return shortcutsStore.save(cfg)
   }
   function createRoot() {
-    console.log('createRoot')
     const existing = document.querySelector(
       '[data-ushortcuts-host="utags-shortcuts"]'
     )
@@ -6023,7 +6110,6 @@
     void (async () => {
       const cfg = await loadConfig()
       settings = await store.getAll()
-      console.log('settings initial', settings)
       const updateState = () => {
         rerender(root, cfg)
         registerMenus(root, cfg)
@@ -6031,7 +6117,6 @@
       }
       store.onChange(async () => {
         settings = await store.getAll()
-        console.log('settings onChange', settings)
         updateState()
       })
       ensureGlobalStyles()

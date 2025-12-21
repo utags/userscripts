@@ -73,8 +73,11 @@ You can use the following variables in the URL field. They will be replaced with
 
 - `{hostname}`: Current hostname (e.g., `www.google.com`).
 - `{hostname_without_www}`: Hostname without `www.` prefix (e.g., `google.com`).
+- `{hostname_top_level}`: Top-level domain extracted from current URL (e.g., `google.com`, `bbc.co.uk`).
 - `{current_url}`: Full URL of the current page.
 - `{current_url_encoded}`: URL-encoded full URL.
+- `{current_title}`: Title of the current page.
+- `{current_title_encoded}`: URL-encoded title of the current page.
 - `{query}`: Search keywords extracted from URL parameters (automatically detects `q`, `query`, `kw`, `wd`, `keyword`, `p`, `s`, `term`).
 - `{selected}`: Currently selected text on the page.
 - `{q:param}`: Value of the specified query parameter (e.g., `{q:id}` for `?id=123`).

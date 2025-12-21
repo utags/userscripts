@@ -24,6 +24,13 @@ describe('resolveUrlTemplate', () => {
     expect(resolveUrlTemplate(s)).toBe('https://example.com/')
   })
 
+  it('replaces hostname_top_level', () => {
+    const s = 'https://{hostname_top_level}/'
+    expect(resolveUrlTemplate(s)).toBe('https://example.com/')
+    ;(globalThis as any).location.href = 'https://sub.domain.co.uk/path'
+    expect(resolveUrlTemplate(s)).toBe('https://domain.co.uk/')
+  })
+
   it('replaces current_url', () => {
     const s = 'link: {current_url}'
     expect(resolveUrlTemplate(s)).toBe(
@@ -38,6 +45,20 @@ describe('resolveUrlTemplate', () => {
         encodeURIComponent(
           'https://www.example.com/search?q=hello&foo=bar&query=hi'
         )
+    )
+  })
+
+  it('replaces current_title', () => {
+    const s = 'title: {current_title}'
+    document.title = 'Test Page'
+    expect(resolveUrlTemplate(s)).toBe('title: Test Page')
+  })
+
+  it('replaces current_title_encoded', () => {
+    const s = 'title: {current_title_encoded}'
+    document.title = 'Test & Page'
+    expect(resolveUrlTemplate(s)).toBe(
+      'title: ' + encodeURIComponent('Test & Page')
     )
   })
 

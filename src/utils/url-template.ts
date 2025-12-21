@@ -1,3 +1,5 @@
+import { extractDomain } from './url'
+
 export function resolveUrlTemplate(s: string): string {
   const l = (globalThis as any).location || {}
   const href = l.href || ''
@@ -20,6 +22,9 @@ export function resolveUrlTemplate(s: string): string {
       hostname_without_www() {
         const h = l.hostname || ''
         return h.startsWith('www.') ? h.slice(4) : h
+      },
+      hostname_top_level() {
+        return extractDomain(href)
       },
       query() {
         try {
@@ -44,6 +49,12 @@ export function resolveUrlTemplate(s: string): string {
       },
       current_url_encoded() {
         return encodeURIComponent(href)
+      },
+      current_title() {
+        return document.title || ''
+      },
+      current_title_encoded() {
+        return encodeURIComponent(document.title || '')
       },
       selected() {
         try {

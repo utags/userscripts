@@ -6,6 +6,8 @@ import {
   type PanelSchema,
 } from '../../common/settings'
 
+import { extractDomain } from '../../utils/url'
+
 type RepoConfig = {
   id: string
   name: string
@@ -228,45 +230,6 @@ function detectLanguage(): string {
 function debugLog(message: string, data: unknown = null): void {
   if (CONFIG.DEBUG) {
     console.log(`[Find Scripts] ${message}`, data || '')
-  }
-}
-
-/**
- * Extract the top-level domain from the current URL
- * @returns {string} The top-level domain
- */
-function extractDomain(): string {
-  try {
-    const hostname = globalThis.location.hostname
-    // Remove 'www.' if present
-    let domain = hostname.replace(/^www\./, '')
-
-    // Extract the top-level domain (e.g., example.com from sub.example.com)
-    const parts = domain.split('.')
-    if (parts.length > 2) {
-      // Handle special cases like co.uk, com.au, etc.
-      const secondLevelDomains = [
-        'co',
-        'com',
-        'org',
-        'net',
-        'edu',
-        'gov',
-        'mil',
-      ]
-      const thirdLevelDomain = parts[parts.length - 2]
-
-      domain =
-        parts.length > 3 && secondLevelDomains.includes(thirdLevelDomain)
-          ? parts.slice(-3).join('.')
-          : parts.slice(-2).join('.')
-    }
-
-    debugLog('Extracted domain:', domain)
-    return domain
-  } catch (error) {
-    debugLog('Error extracting domain:', error)
-    return globalThis.location.hostname // Fallback to full hostname
   }
 }
 

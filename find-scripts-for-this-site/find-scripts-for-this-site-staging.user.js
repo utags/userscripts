@@ -967,6 +967,44 @@
       },
     }
   }
+  function extractDomain(url) {
+    var _a
+    try {
+      let hostname
+      if (url) {
+        try {
+          hostname = new URL(url).hostname
+        } catch (e) {
+          hostname = url
+        }
+      } else {
+        hostname = globalThis.location.hostname
+      }
+      let domain = hostname.replace(/^www\./, '')
+      const parts = domain.split('.')
+      if (parts.length > 2) {
+        const secondLevelDomains = [
+          'co',
+          'com',
+          'org',
+          'net',
+          'edu',
+          'gov',
+          'mil',
+        ]
+        const thirdLevelDomain = parts[parts.length - 2]
+        domain =
+          parts.length > 2 && secondLevelDomains.includes(thirdLevelDomain)
+            ? parts.slice(-3).join('.')
+            : parts.slice(-2).join('.')
+      }
+      return domain
+    } catch (e) {
+      return (
+        url || ((_a = globalThis.location) == null ? void 0 : _a.hostname) || ''
+      )
+    }
+  }
   var CONFIG = {
     REPOSITORIES: [
       {
@@ -1167,34 +1205,6 @@
   function debugLog(message, data = null) {
     if (CONFIG.DEBUG) {
       console.log('[Find Scripts] '.concat(message), data || '')
-    }
-  }
-  function extractDomain() {
-    try {
-      const hostname = globalThis.location.hostname
-      let domain = hostname.replace(/^www\./, '')
-      const parts = domain.split('.')
-      if (parts.length > 2) {
-        const secondLevelDomains = [
-          'co',
-          'com',
-          'org',
-          'net',
-          'edu',
-          'gov',
-          'mil',
-        ]
-        const thirdLevelDomain = parts[parts.length - 2]
-        domain =
-          parts.length > 3 && secondLevelDomains.includes(thirdLevelDomain)
-            ? parts.slice(-3).join('.')
-            : parts.slice(-2).join('.')
-      }
-      debugLog('Extracted domain:', domain)
-      return domain
-    } catch (error) {
-      debugLog('Error extracting domain:', error)
-      return globalThis.location.hostname
     }
   }
   function getLocalizedMenuText(repo, isKeywordSearch = false) {

@@ -204,7 +204,6 @@ async function saveConfig(cfg: ShortcutsConfig) {
 }
 
 function createRoot() {
-  console.log('createRoot')
   const existing = document.querySelector(
     '[data-ushortcuts-host="utags-shortcuts"]'
   )
@@ -1714,7 +1713,6 @@ function main() {
   void (async () => {
     const cfg = await loadConfig()
     settings = await store.getAll()
-    console.log('settings initial', settings)
 
     const updateState = () => {
       rerender(root, cfg)
@@ -1724,7 +1722,6 @@ function main() {
 
     store.onChange(async () => {
       settings = await store.getAll()
-      console.log('settings onChange', settings)
       updateState()
     })
 
