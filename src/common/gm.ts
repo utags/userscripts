@@ -161,13 +161,13 @@ export async function xmlHttpRequestWithFallback(options: {
   }
 }
 
-export function addStyle(css: string): void {
+export function addStyle(css: string): HTMLStyleElement {
   if (typeof GM_addStyle === 'function') {
-    GM_addStyle(css)
-    return
+    return GM_addStyle(css)
   }
 
   const style = document.createElement('style')
   style.textContent = css
   document.head.append(style)
+  return style
 }

@@ -42,7 +42,7 @@ declare const GM: {
 
 declare function GM_getValue<T = unknown>(key: string, defaultValue: T): any
 declare function GM_setValue(key: string, value: any): void
-declare function GM_addStyle(css: string): void
+declare function GM_addStyle(css: string): HTMLStyleElement
 declare function GM_openInTab(
   url: string,
   options?: { active?: boolean; insert?: boolean }

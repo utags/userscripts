@@ -28,6 +28,7 @@ import {
   registerMenu,
   unregisterMenu,
   addValueChangeListener,
+  addStyle,
 } from '../../common/gm'
 import {
   addCurrentPageLinkToGroup,
@@ -74,13 +75,12 @@ function ensureGlobalStyles() {
     )
     if (existed) return
 
-    const style = document.createElement('style')
-    style.dataset.ushortcutsStyle = 'sidebar'
-    style.textContent = `
+    const styleContent = `
 html[data-utags-shortcuts-sidebar="left-open"] body { width: calc(100% - 360px) !important; margin-left: 360px !important; margin-right: 0 !important; }
 html[data-utags-shortcuts-sidebar="right-open"] body { width: calc(100% - 360px) !important; margin-right: 360px !important; margin-left: 0 !important; }
 `
-    ;(document.head || document.documentElement).append(style)
+    const style = addStyle(styleContent)
+    style.dataset.ushortcutsStyle = 'sidebar'
   } catch {}
 }
 
@@ -104,6 +104,7 @@ function matchPattern(url: string, pattern: string) {
       const body = t.slice(1, last)
       const flags = t.slice(last + 1)
       const re = new RegExp(body, flags)
+      // console.log('matchPattern', url, pattern, re)
       return re.test(url)
     }
 

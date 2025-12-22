@@ -53,6 +53,7 @@ A user script to quickly find scripts for the current site across multiple repos
 
 ### v0.3.x
 
+- Fixed an issue where styles could not be injected on websites with strict CSP (Content Security Policy).
 - Settings panel UI improvements
 
 ### v0.2.4

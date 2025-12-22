@@ -304,6 +304,20 @@ export function caretRangeFromPoint(x: number, y: number): Range | undefined {
   return r
 }
 
+export function addStyleToShadow(shadowRoot: ShadowRoot, css: string): void {
+  try {
+    if (shadowRoot.adoptedStyleSheets) {
+      const sheet = new CSSStyleSheet()
+      sheet.replaceSync(css)
+      shadowRoot.adoptedStyleSheets = [...shadowRoot.adoptedStyleSheets, sheet]
+      return
+    }
+  } catch {}
+
+  const s = c('style', { text: css })
+  shadowRoot.append(s)
+}
+
 function camelToKebab(str: string) {
   return str.replaceAll(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)
 }
@@ -334,8 +348,7 @@ export function ensureShadowRoot(options: {
   const root = host.attachShadow({ mode: 'open' })
 
   if (options.style) {
-    const s = c('style', { text: options.style })
-    root.append(s)
+    addStyleToShadow(root, options.style)
   }
 
   doc.documentElement.append(host)

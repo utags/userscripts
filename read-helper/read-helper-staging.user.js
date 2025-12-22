@@ -214,6 +214,21 @@
       : doc.createRange()
     return r
   }
+  function addStyleToShadow(shadowRoot, css) {
+    try {
+      if (shadowRoot.adoptedStyleSheets) {
+        const sheet = new CSSStyleSheet()
+        sheet.replaceSync(css)
+        shadowRoot.adoptedStyleSheets = [
+          ...shadowRoot.adoptedStyleSheets,
+          sheet,
+        ]
+        return
+      }
+    } catch (e) {}
+    const s = c('style', { text: css })
+    shadowRoot.append(s)
+  }
   function camelToKebab(str) {
     return str.replaceAll(/[A-Z]/g, (letter) =>
       '-'.concat(letter.toLowerCase())
@@ -236,8 +251,7 @@
     const host = c('div', { dataset: { [key]: val } })
     const root = host.attachShadow({ mode: 'open' })
     if (options.style) {
-      const s = c('style', { text: options.style })
-      root.append(s)
+      addStyleToShadow(root, options.style)
     }
     doc.documentElement.append(host)
     return { host, root, existed: false }

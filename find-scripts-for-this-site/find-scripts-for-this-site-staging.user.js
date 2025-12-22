@@ -11,7 +11,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.3.3
+// @version              0.3.4
 // @description          Find userscripts for the current website from popular script repositories
 // @description:zh-CN    查找适用于当前网站的用户脚本，支持多个脚本仓库
 // @description:zh-TW    查找適用於當前網站的用戶腳本，支持多個腳本倉庫
@@ -146,6 +146,21 @@
   var defaultFavicon64 = encodeURIComponent(
     'https://wsrv.nl/?w=64&h=64&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
   )
+  function addStyleToShadow(shadowRoot, css) {
+    try {
+      if (shadowRoot.adoptedStyleSheets) {
+        const sheet = new CSSStyleSheet()
+        sheet.replaceSync(css)
+        shadowRoot.adoptedStyleSheets = [
+          ...shadowRoot.adoptedStyleSheets,
+          sheet,
+        ]
+        return
+      }
+    } catch (e) {}
+    const s = c('style', { text: css })
+    shadowRoot.append(s)
+  }
   function camelToKebab(str) {
     return str.replaceAll(/[A-Z]/g, (letter) =>
       '-'.concat(letter.toLowerCase())
@@ -168,8 +183,7 @@
     const host = c('div', { dataset: { [key]: val } })
     const root = host.attachShadow({ mode: 'open' })
     if (options.style) {
-      const s = c('style', { text: options.style })
-      root.append(s)
+      addStyleToShadow(root, options.style)
     }
     doc.documentElement.append(host)
     return { host, root, existed: false }
