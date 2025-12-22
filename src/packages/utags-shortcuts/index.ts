@@ -1,4 +1,9 @@
-import { clearChildren, renderIcon, setIcon } from '../../utils/dom'
+import {
+  clearChildren,
+  ensureShadowRoot,
+  renderIcon,
+  setIcon,
+} from '../../utils/dom'
 import { uid } from '../../utils/uid'
 import { createOpenModeRadios } from './segmented-radios'
 import styleText from 'css:./style.css'
@@ -204,22 +209,11 @@ async function saveConfig(cfg: ShortcutsConfig) {
 }
 
 function createRoot() {
-  const existing = document.querySelector(
-    '[data-ushortcuts-host="utags-shortcuts"]'
-  )
-  if (existing instanceof HTMLElement) {
-    const root = (existing as any).shadowRoot as ShadowRoot
-    return { host: existing, root }
-  }
-
-  const host = document.createElement('div')
-  host.dataset.ushortcutsHost = 'utags-shortcuts'
-
-  const root = host.attachShadow({ mode: 'open' })
-  const style = document.createElement('style')
-  style.textContent = styleText
-  root.append(style)
-  document.documentElement.append(host)
+  const { host, root } = ensureShadowRoot({
+    hostId: 'utags-shortcuts',
+    hostDatasetKey: 'ushortcutsHost',
+    style: styleText,
+  })
   return { host, root }
 }
 

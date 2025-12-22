@@ -77,16 +77,18 @@
 - `{current_url}`: 当前页面的完整 URL。
 - `{current_url_encoded}`: 经过 URL 编码的完整 URL。
 - `{current_title}`: 当前页面的标题。
-- `{current_title_encoded}`: 经过 URL 编码的当前页面标题。
 - `{query}`: 从 URL 参数中提取的搜索关键词（自动检测 `q`, `query`, `kw`, `wd`, `keyword`, `p`, `s`, `term`）。
 - `{selected}`: 页面上当前选中的文本。
 - `{q:param}`: 指定查询参数的值（例如 `{q:id}` 获取 `?id=123` 中的 `123`）。
 - `{p:n}`: URL 路径中的第 n 个片段（例如 `{p:1}` 获取 `/foo/bar` 中的 `foo`）。
 - `{t:text}`: 直接返回文本（例如 `{t:hello}`）。
-- `{te:text}`: 返回 URL 编码后的文本（例如 `{te:hello world}` 返回 `hello%20world`）。
 - **回退机制**: 使用 `||` 定义回退值（例如 `{selected||query||t:default}`）。
 
 ## 更新日志
+
+### v0.1.19
+
+- 优化导入数据功能
 
 ### v0.1.16
 

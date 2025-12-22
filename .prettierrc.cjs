@@ -10,4 +10,13 @@ module.exports = {
   trailingComma: 'es5',
   bracketSpacing: true,
   bracketSameLine: true,
+  overrides: [
+    {
+      files: 'packages/extension/src/messages/*.ts',
+      options: {
+        printWidth: 9999,
+      },
+    },
+    { files: '*.json', options: { parser: 'json-stringify' } },
+  ],
 }

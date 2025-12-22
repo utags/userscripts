@@ -3,7 +3,7 @@
  */
 export function importJson<T = any>(options: {
   validate?: (data: any) => boolean
-  onSuccess: (data: T) => Promise<void> | void
+  onSuccess: (data: T) => Promise<void | boolean> | void | boolean
   confirmMessage?: string
   errorMessage?: string
 }) {
@@ -14,13 +14,21 @@ export function importJson<T = any>(options: {
     errorMessage = '导入的数据格式不正确',
   } = options
 
-  const ok = globalThis.confirm(confirmMessage)
-  if (!ok) return
+  if (confirmMessage) {
+    const ok = globalThis.confirm(confirmMessage)
+    if (!ok) return
+  }
 
   const fileInput = document.createElement('input')
   fileInput.type = 'file'
   fileInput.accept = 'application/json'
   fileInput.style.display = 'none'
+
+  const cleanup = () => {
+    fileInput.removeEventListener('change', onChange)
+    fileInput.removeEventListener('cancel', cleanup)
+    fileInput.remove()
+  }
 
   const onChange = async () => {
     try {
@@ -40,18 +48,20 @@ export function importJson<T = any>(options: {
         return
       }
 
-      await onSuccess(obj)
-      alert('导入完成')
+      const result = await onSuccess(obj)
+      if (result !== false) {
+        alert('导入完成')
+      }
     } catch (error) {
       console.error(error)
       alert('导入失败')
     } finally {
-      fileInput.removeEventListener('change', onChange)
-      fileInput.remove()
+      cleanup()
     }
   }
 
   fileInput.addEventListener('change', onChange)
+  fileInput.addEventListener('cancel', cleanup)
   document.documentElement.append(fileInput)
   fileInput.click()
 }

@@ -77,16 +77,18 @@ You can use the following variables in the URL field. They will be replaced with
 - `{current_url}`: Full URL of the current page.
 - `{current_url_encoded}`: URL-encoded full URL.
 - `{current_title}`: Title of the current page.
-- `{current_title_encoded}`: URL-encoded title of the current page.
 - `{query}`: Search keywords extracted from URL parameters (automatically detects `q`, `query`, `kw`, `wd`, `keyword`, `p`, `s`, `term`).
 - `{selected}`: Currently selected text on the page.
 - `{q:param}`: Value of the specified query parameter (e.g., `{q:id}` for `?id=123`).
 - `{p:n}`: The n-th path segment of the URL (e.g., `{p:1}` gets `foo` from `/foo/bar`).
 - `{t:text}`: Returns the text directly (e.g., `{t:hello}`).
-- `{te:text}`: Returns the URL-encoded text (e.g., `{te:hello world}` returns `hello%20world`).
 - **Fallback**: Use `||` to define a fallback value (e.g., `{selected||query||t:default}`).
 
 ## Changelog
+
+### v0.1.19
+
+- Optimized data import functionality
 
 ### v0.1.16
 

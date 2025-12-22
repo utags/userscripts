@@ -1,7 +1,9 @@
+import { win } from '../globals/win'
+import { doc } from '../globals/doc'
 import { extractDomain } from './url'
 
 export function resolveUrlTemplate(s: string): string {
-  const l = (globalThis as any).location || {}
+  const l = win.location || {}
   const href = l.href || ''
   let u: URL | undefined
   try {
@@ -26,19 +28,32 @@ export function resolveUrlTemplate(s: string): string {
       hostname_top_level() {
         return extractDomain(href)
       },
+      // text:
+      // - Yandex
+      // - https://translate.google.com/
+      // word:
+      // - https://image.baidu.com/search/index?tn=baiduimage&word=
+      // search_query:
+      // - https://www.youtube.com/results?search_query=
+      // qw:
+      // - https://tieba.baidu.com/f/search/res?ie=utf-8&qw=
       query() {
         try {
           if (!u) return ''
-          return (
+          return encodeURIComponent(
             u.searchParams.get('query') ||
-            u.searchParams.get('q') ||
-            u.searchParams.get('kw') ||
-            u.searchParams.get('wd') ||
-            u.searchParams.get('keyword') ||
-            u.searchParams.get('p') ||
-            u.searchParams.get('s') ||
-            u.searchParams.get('term') ||
-            ''
+              u.searchParams.get('q') ||
+              u.searchParams.get('kw') ||
+              u.searchParams.get('wd') ||
+              u.searchParams.get('keyword') ||
+              u.searchParams.get('p') ||
+              u.searchParams.get('s') ||
+              u.searchParams.get('term') ||
+              u.searchParams.get('text') ||
+              u.searchParams.get('word') ||
+              u.searchParams.get('search_query') ||
+              u.searchParams.get('qw') ||
+              ''
           )
         } catch {}
 
@@ -51,14 +66,11 @@ export function resolveUrlTemplate(s: string): string {
         return encodeURIComponent(href)
       },
       current_title() {
-        return document.title || ''
-      },
-      current_title_encoded() {
-        return encodeURIComponent(document.title || '')
+        return encodeURIComponent(doc.title || '')
       },
       selected() {
         try {
-          return (globalThis.getSelection?.() || undefined)?.toString() || ''
+          return encodeURIComponent((win.getSelection() || '').toString())
         } catch {}
 
         return ''
@@ -72,7 +84,7 @@ export function resolveUrlTemplate(s: string): string {
       if (p.startsWith('q:')) {
         const key = p.slice(2)
         try {
-          v = u?.searchParams.get(key) || ''
+          v = encodeURIComponent(u?.searchParams.get(key) || '')
         } catch {}
       } else if (p.startsWith('p:')) {
         const index = Number.parseInt(p.slice(2), 10)
@@ -80,13 +92,11 @@ export function resolveUrlTemplate(s: string): string {
           try {
             const pathname = u?.pathname || ''
             const segments = pathname.split('/').filter(Boolean)
-            v = segments[index - 1] || ''
+            v = encodeURIComponent(segments[index - 1] || '')
           } catch {}
         }
-      } else if (p.startsWith('te:')) {
-        v = encodeURIComponent(p.slice(3))
       } else if (p.startsWith('t:')) {
-        v = p.slice(2)
+        v = encodeURIComponent(p.slice(2))
       }
 
       if (v) return v

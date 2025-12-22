@@ -51,11 +51,13 @@ describe('resolveUrlTemplate', () => {
   it('replaces current_title', () => {
     const s = 'title: {current_title}'
     document.title = 'Test Page'
-    expect(resolveUrlTemplate(s)).toBe('title: Test Page')
+    expect(resolveUrlTemplate(s)).toBe(
+      'title: ' + encodeURIComponent('Test Page')
+    )
   })
 
-  it('replaces current_title_encoded', () => {
-    const s = 'title: {current_title_encoded}'
+  it('replaces current_title', () => {
+    const s = 'title: {current_title}'
     document.title = 'Test & Page'
     expect(resolveUrlTemplate(s)).toBe(
       'title: ' + encodeURIComponent('Test & Page')
@@ -144,13 +146,13 @@ describe('resolveUrlTemplate', () => {
     expect(resolveUrlTemplate('{q:missing||p:1}')).toBe('path')
   })
 
-  it('supports static text resolvers (t:text, te:text)', () => {
+  it('supports static text resolvers (t:text)', () => {
     expect(resolveUrlTemplate('{t:hello}')).toBe('hello')
-    expect(resolveUrlTemplate('{te:hello world}')).toBe('hello%20world')
+    expect(resolveUrlTemplate('{t:hello world}')).toBe('hello%20world')
     // fallback usage
     ;(globalThis as any).location.href = 'https://x.test/'
     expect(resolveUrlTemplate('{q:missing||t:default}')).toBe('default')
-    expect(resolveUrlTemplate('{p:10||te:default value}')).toBe(
+    expect(resolveUrlTemplate('{p:10||t:default value}')).toBe(
       'default%20value'
     )
   })

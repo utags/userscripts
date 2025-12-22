@@ -1,4 +1,5 @@
 import { c } from '../../utils/c'
+import { ensureShadowRoot } from '../../utils/dom'
 import { normalizeToDefaultType, setOrDelete } from '../../utils/obj'
 import styleText from 'css:./style.css'
 import { getValue, setValue, addValueChangeListener } from '../gm'
@@ -293,7 +294,12 @@ export function openSettingsPanel(
   store: Store,
   options?: PanelOptions
 ): void {
-  const { host, root, existed } = ensureHostAndRoot(options)
+  const { host, root, existed } = ensureShadowRoot({
+    hostId: options?.hostDatasetValue || 'settings',
+    hostDatasetKey: options?.hostDatasetKey || 'userHost',
+    style: styleText.concat(options?.styleText || ''),
+    moveToEnd: true,
+  })
 
   currentHost = host
 
@@ -303,11 +309,6 @@ export function openSettingsPanel(
     global: Record<string, unknown>
     site: Record<string, unknown>
   } = { global: {}, site: {} }
-
-  const styleTag = c('style', {
-    text: styleText.concat(options?.styleText || ''),
-  })
-  root.append(styleTag)
 
   const wrap = c('div', { className: 'user-settings' })
   applyThemeStyles(wrap, options?.theme)
@@ -430,46 +431,6 @@ export function openSettingsPanel(
         break
       }
     }
-  }
-
-  function sanitizeDatasetKey(rawKey: string): string {
-    let out = ''
-    for (const ch of rawKey) {
-      const code = ch.codePointAt(0) || 0
-      out += code >= 65 && code <= 90 ? '-' + ch.toLowerCase() : ch
-    }
-
-    return out
-  }
-
-  function ensureHostAndRoot(options?: PanelOptions): {
-    host: HTMLDivElement
-    root: ShadowRoot
-    existed: boolean
-  } {
-    const keySan = sanitizeDatasetKey(options?.hostDatasetKey || 'usrHost')
-    const sel = `[data-${keySan}="${options?.hostDatasetValue || 'settings'}"]`
-    const existing = document.querySelector(sel)
-
-    let root: ShadowRoot
-    let hostEl: HTMLDivElement
-    if (existing instanceof HTMLDivElement && existing.shadowRoot) {
-      hostEl = existing
-      root = existing.shadowRoot
-      try {
-        document.documentElement.append(hostEl)
-      } catch {}
-
-      return { host: hostEl, root, existed: true }
-    }
-
-    const key = options?.hostDatasetKey || 'userHost'
-    const val = options?.hostDatasetValue || 'settings'
-    hostEl = c('div', { dataset: { [key]: val } })
-    root = hostEl.attachShadow({ mode: 'open' })
-    document.documentElement.append(hostEl)
-
-    return { host: hostEl, root, existed: false }
   }
 
   function applyThemeStyles(wrap: HTMLElement, theme?: PanelOptions['theme']) {

@@ -1,5 +1,7 @@
 import { getWrappedIconUrl } from './favicon'
 import { xmlHttpRequest } from '../common/gm'
+import { doc } from '../globals/doc'
+import { c } from './c'
 
 export function clearChildren(el: Node & ParentNode) {
   try {
@@ -46,8 +48,7 @@ export function querySelectorAllDeep(
 const iconCache = new Map<string, string>()
 
 export function renderIcon(s?: string) {
-  const span = document.createElement('span')
-  span.className = 'icon'
+  const span = c('span', { className: 'icon' })
   let t = String(s || '').trim()
   if (!t) t = 'lucide:link'
   if (t.startsWith('lucide:')) {
@@ -66,11 +67,10 @@ export function renderIcon(s?: string) {
     try {
       const svg = t.slice(4)
       const url = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
-      const img = document.createElement('img')
-      img.width = 16
-      img.height = 16
-      img.style.objectFit = 'contain'
-      img.src = url
+      const img = c('img', {
+        attrs: { width: '16', height: '16', src: url },
+        style: { objectFit: 'contain' },
+      })
       clearChildren(span)
       span.append(img)
     } catch {}
@@ -101,12 +101,11 @@ function injectLucideIcon(container: HTMLElement, name: string) {
   try {
     const cached = iconCache.get(name)
     if (cached) {
-      const img = document.createElement('img')
-      img.width = 16
-      img.height = 16
-      img.style.objectFit = 'contain'
-      img.className = 'lucide-icon'
-      img.src = cached
+      const img = c('img', {
+        className: 'lucide-icon',
+        attrs: { width: '16', height: '16', src: cached },
+        style: { objectFit: 'contain' },
+      })
       clearChildren(container)
       container.append(img)
       return
@@ -138,12 +137,11 @@ function injectLucideIcon(container: HTMLElement, name: string) {
               const dataUrl =
                 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
               iconCache.set(name, dataUrl)
-              const img = document.createElement('img')
-              img.width = 16
-              img.height = 16
-              img.style.objectFit = 'contain'
-              img.className = 'lucide-icon'
-              img.src = dataUrl
+              const img = c('img', {
+                className: 'lucide-icon',
+                attrs: { width: '16', height: '16', src: dataUrl },
+                style: { objectFit: 'contain' },
+              })
               clearChildren(container)
               container.append(img)
               // Remember this CDN for next time
@@ -179,12 +177,15 @@ function injectImageAsData(container: HTMLElement, url: string) {
           if (!blob) return
           const reader = new FileReader()
           reader.addEventListener('load', () => {
-            const img = document.createElement('img')
-            img.width = 16
-            img.height = 16
-            img.style.objectFit = 'contain'
-            // eslint-disable-next-line @typescript-eslint/no-base-to-string
-            img.src = String(reader.result || '')
+            const img = c('img', {
+              attrs: {
+                width: '16',
+                height: '16',
+                // eslint-disable-next-line @typescript-eslint/no-base-to-string
+                src: String(reader.result || ''),
+              },
+              style: { objectFit: 'contain' },
+            })
             clearChildren(container)
             container.append(img)
           })
@@ -213,7 +214,7 @@ export function isElementVisible(el: Element | undefined): boolean {
     const cs = globalThis.getComputedStyle(cur)
     if (cs.display === 'none') return false
     if (cs.visibility === 'hidden') return false
-    if (he !== document.body && he.parentElement && he.offsetParent === null)
+    if (he !== doc.body && he.parentElement && he.offsetParent === null)
       return false
 
     cur = (cur.parentElement || undefined) as Element | undefined
@@ -261,13 +262,13 @@ export function closestBlockElement(node: Node): Element {
   let el =
     node.nodeType === Node.ELEMENT_NODE
       ? (node as Element)
-      : node.parentElement || document.body
-  while (el && el !== document.body) {
+      : node.parentElement || doc.body
+  while (el && el !== doc.body) {
     if (isBlockElement(el)) return el
-    el = el.parentElement || document.body
+    el = el.parentElement || doc.body
   }
 
-  return document.body
+  return doc.body
 }
 
 export function hasNestedBlock(root: Element, t: Text): boolean {
@@ -290,7 +291,7 @@ export function caretRangeFromPoint(x: number, y: number): Range | undefined {
   if (typeof anyDoc.caretPositionFromPoint === 'function') {
     const pos = anyDoc.caretPositionFromPoint(x, y)
     if (pos && pos.offsetNode !== undefined && pos.offsetNode !== null) {
-      const r = document.createRange()
+      const r = doc.createRange()
       r.setStart(pos.offsetNode, pos.offset)
       r.collapse(true)
       return r
@@ -299,8 +300,44 @@ export function caretRangeFromPoint(x: number, y: number): Range | undefined {
 
   const sel = globalThis.getSelection()
   if (!sel) return undefined
-  const r = sel.rangeCount
-    ? sel.getRangeAt(0).cloneRange()
-    : document.createRange()
+  const r = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : doc.createRange()
   return r
+}
+
+function camelToKebab(str: string) {
+  return str.replaceAll(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)
+}
+
+export function ensureShadowRoot(options: {
+  hostId: string
+  hostDatasetKey?: string
+  style?: string
+  moveToEnd?: boolean
+}): { host: HTMLDivElement; root: ShadowRoot; existed: boolean } {
+  const key = options.hostDatasetKey || 'userscriptHost'
+  const val = options.hostId
+  const attrKey = camelToKebab(key)
+  const sel = `[data-${attrKey}="${val}"]`
+
+  const existing = doc.querySelector(sel)
+  if (existing instanceof HTMLDivElement && existing.shadowRoot) {
+    if (!existing.isConnected || options.moveToEnd) {
+      try {
+        doc.documentElement.append(existing)
+      } catch {}
+    }
+
+    return { host: existing, root: existing.shadowRoot, existed: true }
+  }
+
+  const host = c('div', { dataset: { [key]: val } })
+  const root = host.attachShadow({ mode: 'open' })
+
+  if (options.style) {
+    const s = c('style', { text: options.style })
+    root.append(s)
+  }
+
+  doc.documentElement.append(host)
+  return { host, root, existed: false }
 }

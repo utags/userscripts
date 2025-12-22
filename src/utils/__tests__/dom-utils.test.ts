@@ -7,6 +7,7 @@ import {
   isElementVisible,
   hasNestedBlock,
   caretRangeFromPoint,
+  ensureShadowRoot,
 } from '../dom'
 
 describe('dom utils', () => {
@@ -112,5 +113,44 @@ describe('dom utils', () => {
     expect(got).toBeDefined()
     expect(got!.startContainer).toBe(span.firstChild)
     expect(got!.startOffset).toBe(1)
+  })
+
+  it('ensureShadowRoot creates or reuses host', () => {
+    // 1. Create new
+    const { host, root, existed } = ensureShadowRoot({
+      hostId: 'test-host',
+      hostDatasetKey: 'myHost',
+      style: '.foo { color: red; }',
+    })
+    expect(document.documentElement.contains(host)).toBe(true)
+    expect(host.dataset.myHost).toBe('test-host')
+    expect(host.shadowRoot).toBe(root)
+    expect(existed).toBe(false)
+    expect(root.querySelector('style')?.textContent).toContain('.foo')
+
+    // 2. Reuse existing
+    const {
+      host: h2,
+      root: r2,
+      existed: e2,
+    } = ensureShadowRoot({
+      hostId: 'test-host',
+      hostDatasetKey: 'myHost',
+    })
+    expect(h2).toBe(host)
+    expect(r2).toBe(root)
+    expect(e2).toBe(true)
+
+    // 3. Move to end
+    const other = document.createElement('div')
+    document.documentElement.append(other)
+    expect(document.documentElement.lastElementChild).toBe(other)
+
+    ensureShadowRoot({
+      hostId: 'test-host',
+      hostDatasetKey: 'myHost',
+      moveToEnd: true,
+    })
+    expect(document.documentElement.lastElementChild).toBe(host)
   })
 })

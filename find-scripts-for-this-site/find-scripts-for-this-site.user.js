@@ -11,7 +11,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.3.2
+// @version              0.3.3
 // @description          Find userscripts for the current website from popular script repositories
 // @description:zh-CN    查找适用于当前网站的用户脚本，支持多个脚本仓库
 // @description:zh-TW    查找適用於當前網站的用戶腳本，支持多個腳本倉庫
@@ -109,8 +109,9 @@
     }
     return 0
   }
+  var doc = document
   function c(tag, opts) {
-    const el = document.createElement(tag)
+    const el = doc.createElement(tag)
     if (!opts) return el
     if (opts.className) el.className = opts.className
     if (opts.classes) for (const cls of opts.classes) el.classList.add(cls)
@@ -130,11 +131,48 @@
       el.checked = opts.checked
     if (opts.children) {
       for (const ch of opts.children) {
-        if (typeof ch === 'string') el.append(document.createTextNode(ch))
+        if (typeof ch === 'string') el.append(doc.createTextNode(ch))
         else el.append(ch)
       }
     }
     return el
+  }
+  var defaultFavicon16 = encodeURIComponent(
+    'https://wsrv.nl/?w=16&h=16&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
+  )
+  var defaultFavicon32 = encodeURIComponent(
+    'https://wsrv.nl/?w=32&h=32&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
+  )
+  var defaultFavicon64 = encodeURIComponent(
+    'https://wsrv.nl/?w=64&h=64&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
+  )
+  function camelToKebab(str) {
+    return str.replaceAll(/[A-Z]/g, (letter) =>
+      '-'.concat(letter.toLowerCase())
+    )
+  }
+  function ensureShadowRoot(options) {
+    const key = options.hostDatasetKey || 'userscriptHost'
+    const val = options.hostId
+    const attrKey = camelToKebab(key)
+    const sel = '[data-'.concat(attrKey, '="').concat(val, '"]')
+    const existing = doc.querySelector(sel)
+    if (existing instanceof HTMLDivElement && existing.shadowRoot) {
+      if (!existing.isConnected || options.moveToEnd) {
+        try {
+          doc.documentElement.append(existing)
+        } catch (e) {}
+      }
+      return { host: existing, root: existing.shadowRoot, existed: true }
+    }
+    const host = c('div', { dataset: { [key]: val } })
+    const root = host.attachShadow({ mode: 'open' })
+    if (options.style) {
+      const s = c('style', { text: options.style })
+      root.append(s)
+    }
+    doc.documentElement.append(host)
+    return { host, root, existed: false }
   }
   var normalizeToDefaultType = (val, dv) => {
     const t2 = typeof dv
@@ -291,16 +329,19 @@
     return { row }
   }
   function openSettingsPanel(schema, store, options) {
-    const { host, root, existed } = ensureHostAndRoot(options)
+    const { host, root, existed } = ensureShadowRoot({
+      hostId:
+        (options == null ? void 0 : options.hostDatasetValue) || 'settings',
+      hostDatasetKey:
+        (options == null ? void 0 : options.hostDatasetKey) || 'userHost',
+      style: style_default.concat(
+        (options == null ? void 0 : options.styleText) || ''
+      ),
+      moveToEnd: true,
+    })
     currentHost = host
     if (existed) return
     let lastValues = { global: {}, site: {} }
-    const styleTag = c('style', {
-      text: style_default.concat(
-        (options == null ? void 0 : options.styleText) || ''
-      ),
-    })
-    root.append(styleTag)
     const wrap = c('div', { className: 'user-settings' })
     applyThemeStyles(wrap, options == null ? void 0 : options.theme)
     const panel = c('div', { className: 'panel' })
@@ -406,44 +447,6 @@
           break
         }
       }
-    }
-    function sanitizeDatasetKey(rawKey) {
-      let out = ''
-      for (const ch of rawKey) {
-        const code = ch.codePointAt(0) || 0
-        out += code >= 65 && code <= 90 ? '-' + ch.toLowerCase() : ch
-      }
-      return out
-    }
-    function ensureHostAndRoot(options2) {
-      const keySan = sanitizeDatasetKey(
-        (options2 == null ? void 0 : options2.hostDatasetKey) || 'usrHost'
-      )
-      const sel = '[data-'
-        .concat(keySan, '="')
-        .concat(
-          (options2 == null ? void 0 : options2.hostDatasetValue) || 'settings',
-          '"]'
-        )
-      const existing = document.querySelector(sel)
-      let root2
-      let hostEl
-      if (existing instanceof HTMLDivElement && existing.shadowRoot) {
-        hostEl = existing
-        root2 = existing.shadowRoot
-        try {
-          document.documentElement.append(hostEl)
-        } catch (e) {}
-        return { host: hostEl, root: root2, existed: true }
-      }
-      const key =
-        (options2 == null ? void 0 : options2.hostDatasetKey) || 'userHost'
-      const val =
-        (options2 == null ? void 0 : options2.hostDatasetValue) || 'settings'
-      hostEl = c('div', { dataset: { [key]: val } })
-      root2 = hostEl.attachShadow({ mode: 'open' })
-      document.documentElement.append(hostEl)
-      return { host: hostEl, root: root2, existed: false }
     }
     function applyThemeStyles(wrap2, theme) {
       if (!theme) return
@@ -967,8 +970,8 @@
       },
     }
   }
+  var win = globalThis
   function extractDomain(url) {
-    var _a
     try {
       let hostname
       if (url) {
@@ -978,7 +981,7 @@
           hostname = url
         }
       } else {
-        hostname = globalThis.location.hostname
+        hostname = win.location.hostname
       }
       let domain = hostname.replace(/^www\./, '')
       const parts = domain.split('.')
@@ -1000,9 +1003,7 @@
       }
       return domain
     } catch (e) {
-      return (
-        url || ((_a = globalThis.location) == null ? void 0 : _a.hostname) || ''
-      )
+      return url || win.location.hostname || ''
     }
   }
   var CONFIG = {

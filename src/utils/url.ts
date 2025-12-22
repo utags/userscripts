@@ -1,3 +1,5 @@
+import { win } from '../globals/win'
+
 /**
  * Extract the top-level domain from a URL or the current location
  * @param url The URL to extract the domain from (optional, defaults to current location)
@@ -14,7 +16,7 @@ export function extractDomain(url?: string): string {
         hostname = url // Assume it's already a hostname if URL parsing fails
       }
     } else {
-      hostname = globalThis.location.hostname
+      hostname = win.location.hostname
     }
 
     // Remove 'www.' if present
@@ -43,6 +45,6 @@ export function extractDomain(url?: string): string {
 
     return domain
   } catch {
-    return url || globalThis.location?.hostname || '' // Fallback
+    return url || win.location.hostname || '' // Fallback
   }
 }

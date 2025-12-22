@@ -91,6 +91,34 @@
     }
     return 0
   }
+  var doc = document
+  function c(tag, opts) {
+    const el = doc.createElement(tag)
+    if (!opts) return el
+    if (opts.className) el.className = opts.className
+    if (opts.classes) for (const cls of opts.classes) el.classList.add(cls)
+    if (opts.dataset)
+      for (const k of Object.keys(opts.dataset)) el.dataset[k] = opts.dataset[k]
+    if (opts.attrs)
+      for (const k of Object.keys(opts.attrs)) el.setAttribute(k, opts.attrs[k])
+    if (opts.style)
+      for (const k of Object.keys(opts.style)) el.style[k] = opts.style[k]
+    if ('text' in opts) el.textContent = opts.text || ''
+    if (opts.type && 'type' in el) el.type = opts.type
+    if ('value' in opts && 'value' in el) el.value = opts.value || ''
+    if (opts.rows && 'rows' in el) el.rows = opts.rows
+    if (opts.placeholder && 'placeholder' in el)
+      el.placeholder = opts.placeholder
+    if (typeof opts.checked === 'boolean' && 'checked' in el)
+      el.checked = opts.checked
+    if (opts.children) {
+      for (const ch of opts.children) {
+        if (typeof ch === 'string') el.append(doc.createTextNode(ch))
+        else el.append(ch)
+      }
+    }
+    return el
+  }
   function isElementVisible(el) {
     if (!el) return true
     try {
@@ -108,7 +136,7 @@
       const cs = globalThis.getComputedStyle(cur)
       if (cs.display === 'none') return false
       if (cs.visibility === 'hidden') return false
-      if (he !== document.body && he.parentElement && he.offsetParent === null)
+      if (he !== doc.body && he.parentElement && he.offsetParent === null)
         return false
       cur = cur.parentElement || void 0
     }
@@ -149,12 +177,12 @@
     let el =
       node.nodeType === Node.ELEMENT_NODE
         ? node
-        : node.parentElement || document.body
-    while (el && el !== document.body) {
+        : node.parentElement || doc.body
+    while (el && el !== doc.body) {
       if (isBlockElement(el)) return el
-      el = el.parentElement || document.body
+      el = el.parentElement || doc.body
     }
-    return document.body
+    return doc.body
   }
   function hasNestedBlock(root, t) {
     let el = t.parentElement || void 0
@@ -173,7 +201,7 @@
     if (typeof anyDoc.caretPositionFromPoint === 'function') {
       const pos = anyDoc.caretPositionFromPoint(x, y)
       if (pos && pos.offsetNode !== void 0 && pos.offsetNode !== null) {
-        const r2 = document.createRange()
+        const r2 = doc.createRange()
         r2.setStart(pos.offsetNode, pos.offset)
         r2.collapse(true)
         return r2
@@ -183,40 +211,41 @@
     if (!sel) return void 0
     const r = sel.rangeCount
       ? sel.getRangeAt(0).cloneRange()
-      : document.createRange()
+      : doc.createRange()
     return r
   }
-  function c(tag, opts) {
-    const el = document.createElement(tag)
-    if (!opts) return el
-    if (opts.className) el.className = opts.className
-    if (opts.classes) for (const cls of opts.classes) el.classList.add(cls)
-    if (opts.dataset)
-      for (const k of Object.keys(opts.dataset)) el.dataset[k] = opts.dataset[k]
-    if (opts.attrs)
-      for (const k of Object.keys(opts.attrs)) el.setAttribute(k, opts.attrs[k])
-    if (opts.style)
-      for (const k of Object.keys(opts.style)) el.style[k] = opts.style[k]
-    if ('text' in opts) el.textContent = opts.text || ''
-    if (opts.type && 'type' in el) el.type = opts.type
-    if ('value' in opts && 'value' in el) el.value = opts.value || ''
-    if (opts.rows && 'rows' in el) el.rows = opts.rows
-    if (opts.placeholder && 'placeholder' in el)
-      el.placeholder = opts.placeholder
-    if (typeof opts.checked === 'boolean' && 'checked' in el)
-      el.checked = opts.checked
-    if (opts.children) {
-      for (const ch of opts.children) {
-        if (typeof ch === 'string') el.append(document.createTextNode(ch))
-        else el.append(ch)
+  function camelToKebab(str) {
+    return str.replaceAll(/[A-Z]/g, (letter) =>
+      '-'.concat(letter.toLowerCase())
+    )
+  }
+  function ensureShadowRoot(options) {
+    const key = options.hostDatasetKey || 'userscriptHost'
+    const val = options.hostId
+    const attrKey = camelToKebab(key)
+    const sel = '[data-'.concat(attrKey, '="').concat(val, '"]')
+    const existing = doc.querySelector(sel)
+    if (existing instanceof HTMLDivElement && existing.shadowRoot) {
+      if (!existing.isConnected || options.moveToEnd) {
+        try {
+          doc.documentElement.append(existing)
+        } catch (e) {}
       }
+      return { host: existing, root: existing.shadowRoot, existed: true }
     }
-    return el
+    const host = c('div', { dataset: { [key]: val } })
+    const root = host.attachShadow({ mode: 'open' })
+    if (options.style) {
+      const s = c('style', { text: options.style })
+      root.append(s)
+    }
+    doc.documentElement.append(host)
+    return { host, root, existed: false }
   }
   function buildTextIndex(root) {
     const nodes = []
     const texts = []
-    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+    const tw = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT)
     while (tw.nextNode()) {
       const t = tw.currentNode
       if (hasNestedBlock(root, t)) continue
@@ -317,14 +346,14 @@
   }
   function rangeForParagraph(caret) {
     const block = closestBlockElement(caret.startContainer)
-    const r = document.createRange()
+    const r = doc.createRange()
     r.selectNodeContents(block)
     return r
   }
   function rangeForLine(caret) {
     const block = closestBlockElement(caret.startContainer)
     const caretRect = caret.getBoundingClientRect()
-    const r = document.createRange()
+    const r = doc.createRange()
     r.selectNodeContents(block)
     const rects = Array.from(r.getClientRects())
     let pick
@@ -336,7 +365,7 @@
     }
     if (!pick) return void 0
     if (pick.width <= 2) return void 0
-    const out = document.createRange()
+    const out = doc.createRange()
     out.setStart(block, 0)
     out.setEnd(block, block.childNodes.length)
     out.__singleLineRect = pick
@@ -392,7 +421,7 @@
     const startPos = mapIndexToPosition(sAdj, idx)
     const endPos = mapIndexToPosition(eAdj, idx)
     if (!startPos || !endPos) return void 0
-    const r = document.createRange()
+    const r = doc.createRange()
     r.setStart(startPos.node, startPos.offset)
     r.setEnd(endPos.node, endPos.offset)
     return r
@@ -580,16 +609,19 @@
     return { row }
   }
   function openSettingsPanel(schema, store2, options) {
-    const { host, root, existed } = ensureHostAndRoot(options)
+    const { host, root, existed } = ensureShadowRoot({
+      hostId:
+        (options == null ? void 0 : options.hostDatasetValue) || 'settings',
+      hostDatasetKey:
+        (options == null ? void 0 : options.hostDatasetKey) || 'userHost',
+      style: style_default.concat(
+        (options == null ? void 0 : options.styleText) || ''
+      ),
+      moveToEnd: true,
+    })
     currentHost = host
     if (existed) return
     let lastValues = { global: {}, site: {} }
-    const styleTag = c('style', {
-      text: style_default.concat(
-        (options == null ? void 0 : options.styleText) || ''
-      ),
-    })
-    root.append(styleTag)
     const wrap = c('div', { className: 'user-settings' })
     applyThemeStyles(wrap, options == null ? void 0 : options.theme)
     const panel = c('div', { className: 'panel' })
@@ -695,44 +727,6 @@
           break
         }
       }
-    }
-    function sanitizeDatasetKey(rawKey) {
-      let out = ''
-      for (const ch of rawKey) {
-        const code = ch.codePointAt(0) || 0
-        out += code >= 65 && code <= 90 ? '-' + ch.toLowerCase() : ch
-      }
-      return out
-    }
-    function ensureHostAndRoot(options2) {
-      const keySan = sanitizeDatasetKey(
-        (options2 == null ? void 0 : options2.hostDatasetKey) || 'usrHost'
-      )
-      const sel = '[data-'
-        .concat(keySan, '="')
-        .concat(
-          (options2 == null ? void 0 : options2.hostDatasetValue) || 'settings',
-          '"]'
-        )
-      const existing = document.querySelector(sel)
-      let root2
-      let hostEl
-      if (existing instanceof HTMLDivElement && existing.shadowRoot) {
-        hostEl = existing
-        root2 = existing.shadowRoot
-        try {
-          document.documentElement.append(hostEl)
-        } catch (e) {}
-        return { host: hostEl, root: root2, existed: true }
-      }
-      const key =
-        (options2 == null ? void 0 : options2.hostDatasetKey) || 'userHost'
-      const val =
-        (options2 == null ? void 0 : options2.hostDatasetValue) || 'settings'
-      hostEl = c('div', { dataset: { [key]: val } })
-      root2 = hostEl.attachShadow({ mode: 'open' })
-      document.documentElement.append(hostEl)
-      return { host: hostEl, root: root2, existed: false }
     }
     function applyThemeStyles(wrap2, theme) {
       if (!theme) return

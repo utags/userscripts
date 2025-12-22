@@ -1,3 +1,5 @@
+import { doc } from '../globals/doc'
+
 export function c<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   opts?: {
@@ -15,7 +17,7 @@ export function c<K extends keyof HTMLElementTagNameMap>(
     children?: Array<Node | string>
   }
 ): HTMLElementTagNameMap[K] {
-  const el = document.createElement(tag)
+  const el = doc.createElement(tag)
   if (!opts) return el
   if (opts.className) (el as any).className = opts.className
   if (opts.classes)
@@ -40,8 +42,7 @@ export function c<K extends keyof HTMLElementTagNameMap>(
     (el as any).checked = opts.checked
   if (opts.children) {
     for (const ch of opts.children) {
-      if (typeof ch === 'string')
-        (el as any).append(document.createTextNode(ch))
+      if (typeof ch === 'string') (el as any).append(doc.createTextNode(ch))
       else (el as any).append(ch)
     }
   }

@@ -1,3 +1,4 @@
+import { doc } from '../globals/doc'
 import {
   closestBlockElement,
   hasNestedBlock,
@@ -15,7 +16,7 @@ export type TextIndex = {
 export function buildTextIndex(root: Element): TextIndex {
   const nodes: Text[] = []
   const texts: string[] = []
-  const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  const tw = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT)
   while (tw.nextNode()) {
     const t = tw.currentNode as Text
     if (hasNestedBlock(root, t)) continue
@@ -155,7 +156,7 @@ export function findNextBoundary(
 
 export function rangeForParagraph(caret: Range): Range {
   const block = closestBlockElement(caret.startContainer)
-  const r = document.createRange()
+  const r = doc.createRange()
   r.selectNodeContents(block)
   return r
 }
@@ -163,7 +164,7 @@ export function rangeForParagraph(caret: Range): Range {
 export function rangeForLine(caret: Range): Range | undefined {
   const block = closestBlockElement(caret.startContainer)
   const caretRect = caret.getBoundingClientRect()
-  const r = document.createRange()
+  const r = doc.createRange()
   r.selectNodeContents(block)
   const rects = Array.from(r.getClientRects())
   let pick: DOMRect | undefined
@@ -176,7 +177,7 @@ export function rangeForLine(caret: Range): Range | undefined {
 
   if (!pick) return undefined
   if (pick.width <= 2) return undefined
-  const out = document.createRange()
+  const out = doc.createRange()
   out.setStart(block, 0)
   out.setEnd(block, block.childNodes.length)
   ;(out as any).__singleLineRect = pick
@@ -239,7 +240,7 @@ export function rangeForText(
   const startPos = mapIndexToPosition(sAdj, idx)
   const endPos = mapIndexToPosition(eAdj, idx)
   if (!startPos || !endPos) return undefined
-  const r = document.createRange()
+  const r = doc.createRange()
   r.setStart(startPos.node, startPos.offset)
   r.setEnd(endPos.node, endPos.offset)
   return r

@@ -993,3 +993,51 @@ textarea:disabled {
 .ushortcuts.dark .dropdown-item {
   @apply text-gray-200 hover:bg-gray-800;
 }
+
+.merge-options {
+  @apply flex flex-col gap-3 py-4;
+}
+
+.merge-option {
+  @apply relative flex items-start gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer transition-all duration-200 hover:border-blue-500 hover:bg-blue-50/50 hover:shadow-md active:scale-[0.98];
+}
+
+.ushortcuts.dark .merge-option {
+  @apply border-gray-700 hover:bg-blue-900/20 hover:border-blue-400;
+}
+
+.merge-icon {
+  @apply flex-none p-2 rounded-lg bg-gray-100 text-gray-500 transition-colors;
+}
+
+.ushortcuts.dark .merge-icon {
+  @apply bg-gray-800 text-gray-400;
+}
+
+.merge-option:hover .merge-icon {
+  @apply bg-blue-100 text-blue-600;
+}
+
+.ushortcuts.dark .merge-option:hover .merge-icon {
+  @apply bg-blue-900/40 text-blue-400;
+}
+
+.merge-content {
+  @apply flex flex-col gap-1 min-w-0;
+}
+
+.merge-option strong {
+  @apply text-base font-semibold text-gray-900;
+}
+
+.ushortcuts.dark .merge-option strong {
+  @apply text-gray-100;
+}
+
+.merge-option span {
+  @apply text-sm text-gray-500 leading-relaxed;
+}
+
+.ushortcuts.dark .merge-option span {
+  @apply text-gray-400;
+}

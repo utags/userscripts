@@ -1,4 +1,5 @@
 import { deepMergeReplaceArrays } from '../../utils/obj'
+import { ensureShadowRoot, setIcon } from '../../utils/dom'
 import {
   createSettingsStore,
   openSettingsPanel as openPanel,
@@ -13,7 +14,9 @@ import { openEditorModal } from './editor-modal-tabs'
 import styleText from 'css:./style.css'
 import { uid } from '../../utils/uid'
 import { importJson } from '../../utils/import-json'
-import { shortcutsStore } from './store'
+import { shortcutsStore, type ShortcutsConfig } from './store'
+import { mergeGroupsOverwrite, mergeGroupsMerge } from './merge-utils'
+import { createModalFrame } from './modal-base'
 
 const SETTINGS_KEY = 'settings'
 
@@ -184,6 +187,15 @@ const EDGE_SETTINGS_FIELDS: Field[] = [
 
 export function createUshortcutsSettingsStore() {
   return createSettingsStore(SETTINGS_KEY, DEFAULTS, true)
+}
+
+function getShadowRoot() {
+  const { root } = ensureShadowRoot({
+    hostId: 'utags-shortcuts',
+    hostDatasetKey: 'ushortcutsHost',
+    style: styleText,
+  })
+  return root
 }
 
 export function openSettingsPanel(store: Store): void {
@@ -357,22 +369,7 @@ export function openSettingsPanel(store: Store): void {
         case 'openGroupManager': {
           ;(async () => {
             try {
-              const existing = document.querySelector(
-                '[data-ushortcuts-host="utags-shortcuts"]'
-              )
-              const root =
-                existing instanceof HTMLElement && existing.shadowRoot
-                  ? existing.shadowRoot
-                  : (() => {
-                      const host = document.createElement('div')
-                      host.dataset.ushortcutsHost = 'utags-shortcuts'
-                      const r = host.attachShadow({ mode: 'open' })
-                      const style = document.createElement('style')
-                      style.textContent = styleText
-                      r.append(style)
-                      document.documentElement.append(host)
-                      return r
-                    })()
+              const root = getShadowRoot()
 
               let raw: any = {}
               try {
@@ -535,11 +532,97 @@ export function openSettingsPanel(store: Store): void {
           importJson({
             validate: (data: any) => data && Array.isArray(data.groups),
             errorMessage: '无效的导航数据文件（缺少 groups 字段）',
+            confirmMessage: '',
             async onSuccess(obj) {
               const existingObj = await shortcutsStore.load()
-              // Deep merge (arrays replaced).
-              const merged = deepMergeReplaceArrays(existingObj, obj)
 
+              const root = getShadowRoot()
+
+              const mode = await new Promise<'overwrite' | 'merge' | undefined>(
+                (resolve) => {
+                  const { body, actions, close } = createModalFrame({
+                    title: '选择合并模式',
+                    root,
+                    onClose() {
+                      resolve(undefined)
+                    },
+                  })
+
+                  closeSettingsPanel()
+
+                  const container = document.createElement('div')
+                  container.className = 'merge-options'
+
+                  // Overwrite Option
+                  const btnOverwrite = document.createElement('div')
+                  btnOverwrite.className = 'merge-option'
+
+                  const iconOverwrite = document.createElement('div')
+                  iconOverwrite.className = 'merge-icon'
+                  setIcon(iconOverwrite, 'lucide:file-warning') // Warning icon implies destructive/replacement
+
+                  const contentOverwrite = document.createElement('div')
+                  contentOverwrite.className = 'merge-content'
+
+                  const titleOverwrite = document.createElement('strong')
+                  titleOverwrite.textContent = '覆盖模式'
+                  const descOverwrite = document.createElement('span')
+                  descOverwrite.textContent =
+                    '保留所有分组。若分组 ID 相同，使用导入文件中的导航项列表（完全替换）。'
+
+                  contentOverwrite.append(titleOverwrite, descOverwrite)
+                  btnOverwrite.append(iconOverwrite, contentOverwrite)
+
+                  btnOverwrite.addEventListener('click', () => {
+                    resolve('overwrite')
+                    close()
+                  })
+
+                  // Merge Option
+                  const btnMerge = document.createElement('div')
+                  btnMerge.className = 'merge-option'
+
+                  const iconMerge = document.createElement('div')
+                  iconMerge.className = 'merge-icon'
+                  setIcon(iconMerge, 'lucide:git-merge')
+
+                  const contentMerge = document.createElement('div')
+                  contentMerge.className = 'merge-content'
+
+                  const titleMerge = document.createElement('strong')
+                  titleMerge.textContent = '合并模式'
+                  const descMerge = document.createElement('span')
+                  descMerge.textContent =
+                    '保留所有分组。若分组 ID 相同，合并导航项（若 ID 相同则使用导入的数据）。'
+
+                  contentMerge.append(titleMerge, descMerge)
+                  btnMerge.append(iconMerge, contentMerge)
+
+                  btnMerge.addEventListener('click', () => {
+                    resolve('merge')
+                    close()
+                  })
+
+                  container.append(btnMerge, btnOverwrite)
+                  body.append(container)
+
+                  const btnCancel = document.createElement('button')
+                  btnCancel.className = 'btn btn-secondary'
+                  btnCancel.textContent = '取消'
+                  btnCancel.addEventListener('click', () => {
+                    resolve(undefined)
+                    close()
+                  })
+                  actions.append(btnCancel)
+                }
+              )
+
+              if (!mode) return false
+
+              const merged: ShortcutsConfig =
+                mode === 'overwrite'
+                  ? mergeGroupsOverwrite(existingObj, obj)
+                  : mergeGroupsMerge(existingObj, obj)
               await shortcutsStore.save(merged)
             },
           })
