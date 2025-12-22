@@ -9,7 +9,7 @@ import {
   type PanelSchema,
   type Store,
 } from '../../common/settings'
-import { getValue, setValue } from '../../common/gm'
+import { getValue, setValue, xmlHttpRequestWithFallback } from '../../common/gm'
 import { openEditorModal } from './editor-modal-tabs'
 import styleText from 'css:./style.css'
 import { uid } from '../../utils/uid'
@@ -311,12 +311,27 @@ export function openSettingsPanel(store: Store): void {
               },
               {
                 type: 'action',
-                key: 'export-import',
+                key: 'import-data',
                 label: '数据导入',
                 actions: [
                   { id: 'importShortcutsDataJson', text: '从 JSON 文件导入' },
+                  { id: 'importShortcutsDataUrl', text: '从 URL 导入' },
+                  { id: 'importShortcutsDataText', text: '粘贴文本导入' },
                 ],
-                help: '导入之前导出的文件',
+                renderHelp(el) {
+                  el.append('导入之前导出的文件。')
+                  el.append(document.createElement('br'))
+                  const span = document.createElement('span')
+                  span.textContent = '从 '
+                  const a = document.createElement('a')
+                  a.href = 'https://github.com/utags/utags-shared-shortcuts'
+                  a.target = '_blank'
+                  a.rel = 'noopener noreferrer'
+                  a.textContent = 'utags-shared-shortcuts'
+                  span.append(a, ' 发现更多 shortcuts')
+                  el.append(span)
+                },
+                layout: 'vertical',
               },
               {
                 type: 'action',
@@ -365,7 +380,257 @@ export function openSettingsPanel(store: Store): void {
       toggleOnBg: '#111827',
     },
     onAction({ actionId }) {
+      const handleImportSuccess = async (data: any): Promise<boolean> => {
+        let obj = data
+        if (!Array.isArray(obj.groups) && Array.isArray(obj.items)) {
+          obj = { groups: [obj] }
+        }
+
+        const existingObj = await shortcutsStore.load()
+        const root = getShadowRoot()
+
+        const mode = await new Promise<'overwrite' | 'merge' | undefined>(
+          (resolve) => {
+            const { body, actions, close } = createModalFrame({
+              title: '选择合并模式',
+              root,
+              onClose() {
+                resolve(undefined)
+              },
+            })
+
+            closeSettingsPanel()
+
+            const container = document.createElement('div')
+            container.className = 'merge-options'
+
+            // Overwrite Option
+            const btnOverwrite = document.createElement('div')
+            btnOverwrite.className = 'merge-option'
+
+            const iconOverwrite = document.createElement('div')
+            iconOverwrite.className = 'merge-icon'
+            setIcon(iconOverwrite, 'lucide:file-warning')
+
+            const contentOverwrite = document.createElement('div')
+            contentOverwrite.className = 'merge-content'
+
+            const titleOverwrite = document.createElement('strong')
+            titleOverwrite.textContent = '覆盖模式'
+            const descOverwrite = document.createElement('span')
+            descOverwrite.textContent =
+              '保留所有分组。若分组 ID 相同，使用导入文件中的导航项列表（完全替换）。'
+
+            contentOverwrite.append(titleOverwrite, descOverwrite)
+            btnOverwrite.append(iconOverwrite, contentOverwrite)
+
+            btnOverwrite.addEventListener('click', () => {
+              resolve('overwrite')
+              close()
+            })
+
+            // Merge Option
+            const btnMerge = document.createElement('div')
+            btnMerge.className = 'merge-option'
+
+            const iconMerge = document.createElement('div')
+            iconMerge.className = 'merge-icon'
+            setIcon(iconMerge, 'lucide:git-merge')
+
+            const contentMerge = document.createElement('div')
+            contentMerge.className = 'merge-content'
+
+            const titleMerge = document.createElement('strong')
+            titleMerge.textContent = '合并模式'
+            const descMerge = document.createElement('span')
+            descMerge.textContent =
+              '保留所有分组。若分组 ID 相同，合并导航项（若 ID 相同则使用导入的数据）。'
+
+            contentMerge.append(titleMerge, descMerge)
+            btnMerge.append(iconMerge, contentMerge)
+
+            btnMerge.addEventListener('click', () => {
+              resolve('merge')
+              close()
+            })
+
+            container.append(btnMerge, btnOverwrite)
+            body.append(container)
+
+            const btnCancel = document.createElement('button')
+            btnCancel.className = 'btn btn-secondary'
+            btnCancel.textContent = '取消'
+            btnCancel.addEventListener('click', () => {
+              resolve(undefined)
+              close()
+            })
+            actions.append(btnCancel)
+          }
+        )
+
+        if (!mode) return false
+
+        const merged: ShortcutsConfig =
+          mode === 'overwrite'
+            ? mergeGroupsOverwrite(existingObj, obj)
+            : mergeGroupsMerge(existingObj, obj)
+        await shortcutsStore.save(merged)
+        return true
+      }
+
       switch (actionId) {
+        case 'importShortcutsDataUrl': {
+          closeSettingsPanel()
+
+          const root = getShadowRoot()
+          const { body, actions, close } = createModalFrame({
+            title: '从 URL 导入',
+            root,
+          })
+
+          const input = document.createElement('input')
+          input.type = 'url'
+          input.className = 'form-input'
+          input.placeholder = 'https://example.com/shortcuts.json'
+          input.style.width = '100%'
+          input.style.marginBottom = '10px'
+          input.style.padding = '8px'
+          input.style.border = '1px solid #ccc'
+          input.style.borderRadius = '4px'
+
+          setTimeout(() => {
+            input.focus()
+          }, 100)
+
+          body.append(input)
+
+          const btnImport = document.createElement('button')
+          btnImport.className = 'btn btn-primary'
+          btnImport.textContent = '导入'
+
+          const btnCancel = document.createElement('button')
+          btnCancel.className = 'btn btn-secondary'
+          btnCancel.textContent = '取消'
+
+          const doImport = () => {
+            const url = input.value.trim()
+            if (!url) return
+
+            btnImport.disabled = true
+            btnImport.textContent = '下载中...'
+
+            void xmlHttpRequestWithFallback({
+              method: 'GET',
+              url,
+              async onload(res) {
+                try {
+                  const data = JSON.parse(res.responseText)
+                  if (
+                    data &&
+                    (Array.isArray(data.groups) || Array.isArray(data.items))
+                  ) {
+                    close()
+                    const ok = await handleImportSuccess(data)
+                    if (ok) {
+                      globalThis.alert('导入成功')
+                    }
+                  } else {
+                    globalThis.alert(
+                      '无效的导航数据文件（缺少 groups 或 items 字段）'
+                    )
+                    btnImport.disabled = false
+                    btnImport.textContent = '导入'
+                  }
+                } catch {
+                  globalThis.alert('JSON 解析失败')
+                  btnImport.disabled = false
+                  btnImport.textContent = '导入'
+                }
+              },
+              onerror() {
+                globalThis.alert('请求失败')
+                btnImport.disabled = false
+                btnImport.textContent = '导入'
+              },
+            })
+          }
+
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') doImport()
+          })
+
+          btnImport.addEventListener('click', doImport)
+          btnCancel.addEventListener('click', close)
+
+          actions.append(btnImport, btnCancel)
+          break
+        }
+
+        case 'importShortcutsDataText': {
+          closeSettingsPanel()
+
+          const root = getShadowRoot()
+          const { body, actions, close } = createModalFrame({
+            title: '粘贴文本导入',
+            root,
+          })
+
+          const textarea = document.createElement('textarea')
+          textarea.className = 'form-textarea'
+          textarea.placeholder = '请在此粘贴 JSON 内容...'
+          textarea.style.width = '100%'
+          textarea.style.height = '200px'
+          textarea.style.marginBottom = '10px'
+          textarea.style.padding = '8px'
+          textarea.style.border = '1px solid #ccc'
+          textarea.style.borderRadius = '4px'
+
+          setTimeout(() => {
+            textarea.focus()
+          }, 100)
+
+          body.append(textarea)
+
+          const btnImport = document.createElement('button')
+          btnImport.className = 'btn btn-primary'
+          btnImport.textContent = '导入'
+
+          const btnCancel = document.createElement('button')
+          btnCancel.className = 'btn btn-secondary'
+          btnCancel.textContent = '取消'
+
+          const doImport = async () => {
+            const text = textarea.value.trim()
+            if (!text) return
+
+            try {
+              const data = JSON.parse(text)
+              if (
+                data &&
+                (Array.isArray(data.groups) || Array.isArray(data.items))
+              ) {
+                close()
+                const ok = await handleImportSuccess(data)
+                if (ok) {
+                  globalThis.alert('导入成功')
+                }
+              } else {
+                globalThis.alert(
+                  '无效的导航数据文件（缺少 groups 或 items 字段）'
+                )
+              }
+            } catch {
+              globalThis.alert('JSON 解析失败')
+            }
+          }
+
+          btnImport.addEventListener('click', doImport)
+          btnCancel.addEventListener('click', close)
+
+          actions.append(btnImport, btnCancel)
+          break
+        }
+
         case 'openGroupManager': {
           ;(async () => {
             try {
@@ -530,100 +795,12 @@ export function openSettingsPanel(store: Store): void {
 
         case 'importShortcutsDataJson': {
           importJson({
-            validate: (data: any) => data && Array.isArray(data.groups),
-            errorMessage: '无效的导航数据文件（缺少 groups 字段）',
+            validate: (data: any) =>
+              data && (Array.isArray(data.groups) || Array.isArray(data.items)),
+            errorMessage: '无效的导航数据文件（缺少 groups 或 items 字段）',
             confirmMessage: '',
-            async onSuccess(obj) {
-              const existingObj = await shortcutsStore.load()
-
-              const root = getShadowRoot()
-
-              const mode = await new Promise<'overwrite' | 'merge' | undefined>(
-                (resolve) => {
-                  const { body, actions, close } = createModalFrame({
-                    title: '选择合并模式',
-                    root,
-                    onClose() {
-                      resolve(undefined)
-                    },
-                  })
-
-                  closeSettingsPanel()
-
-                  const container = document.createElement('div')
-                  container.className = 'merge-options'
-
-                  // Overwrite Option
-                  const btnOverwrite = document.createElement('div')
-                  btnOverwrite.className = 'merge-option'
-
-                  const iconOverwrite = document.createElement('div')
-                  iconOverwrite.className = 'merge-icon'
-                  setIcon(iconOverwrite, 'lucide:file-warning') // Warning icon implies destructive/replacement
-
-                  const contentOverwrite = document.createElement('div')
-                  contentOverwrite.className = 'merge-content'
-
-                  const titleOverwrite = document.createElement('strong')
-                  titleOverwrite.textContent = '覆盖模式'
-                  const descOverwrite = document.createElement('span')
-                  descOverwrite.textContent =
-                    '保留所有分组。若分组 ID 相同，使用导入文件中的导航项列表（完全替换）。'
-
-                  contentOverwrite.append(titleOverwrite, descOverwrite)
-                  btnOverwrite.append(iconOverwrite, contentOverwrite)
-
-                  btnOverwrite.addEventListener('click', () => {
-                    resolve('overwrite')
-                    close()
-                  })
-
-                  // Merge Option
-                  const btnMerge = document.createElement('div')
-                  btnMerge.className = 'merge-option'
-
-                  const iconMerge = document.createElement('div')
-                  iconMerge.className = 'merge-icon'
-                  setIcon(iconMerge, 'lucide:git-merge')
-
-                  const contentMerge = document.createElement('div')
-                  contentMerge.className = 'merge-content'
-
-                  const titleMerge = document.createElement('strong')
-                  titleMerge.textContent = '合并模式'
-                  const descMerge = document.createElement('span')
-                  descMerge.textContent =
-                    '保留所有分组。若分组 ID 相同，合并导航项（若 ID 相同则使用导入的数据）。'
-
-                  contentMerge.append(titleMerge, descMerge)
-                  btnMerge.append(iconMerge, contentMerge)
-
-                  btnMerge.addEventListener('click', () => {
-                    resolve('merge')
-                    close()
-                  })
-
-                  container.append(btnMerge, btnOverwrite)
-                  body.append(container)
-
-                  const btnCancel = document.createElement('button')
-                  btnCancel.className = 'btn btn-secondary'
-                  btnCancel.textContent = '取消'
-                  btnCancel.addEventListener('click', () => {
-                    resolve(undefined)
-                    close()
-                  })
-                  actions.append(btnCancel)
-                }
-              )
-
-              if (!mode) return false
-
-              const merged: ShortcutsConfig =
-                mode === 'overwrite'
-                  ? mergeGroupsOverwrite(existingObj, obj)
-                  : mergeGroupsMerge(existingObj, obj)
-              await shortcutsStore.save(merged)
+            async onSuccess(data) {
+              await handleImportSuccess(data)
             },
           })
 

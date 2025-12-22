@@ -86,9 +86,9 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
-### v0.1.19
+### v0.1.20
 
-- Optimized data import functionality
+- Optimized data import functionality: Added support for importing from URL and pasting text
 
 ### v0.1.16
 

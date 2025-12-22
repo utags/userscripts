@@ -58,7 +58,9 @@ type FieldAction = {
   label: string
   actions: Array<{ id: string; text: string; kind?: 'danger' }>
   help?: string
+  renderHelp?: (el: HTMLElement) => void
   isSitePref?: boolean
+  layout?: 'vertical'
 }
 export type Field =
   | FieldToggle
@@ -154,6 +156,7 @@ type BaseFieldRowOptions = {
   label: string
   key: string
   help?: string
+  renderHelp?: (el: HTMLElement) => void
   isSitePref?: boolean
 }
 
@@ -161,13 +164,17 @@ function createFieldRow(
   opts: BaseFieldRowOptions,
   content: HTMLElement | HTMLElement[]
 ) {
-  const row = c('div', { className: 'row' })
+  const row = c('div', { className: 'row', dataset: { key: opts.key } })
   const labWrap = c('div', { className: 'label-wrap' })
   const lab = c('label', { text: opts.label })
   labWrap.append(lab)
 
   if (opts.help) {
     labWrap.append(c('div', { className: 'field-help', text: opts.help }))
+  } else if (opts.renderHelp) {
+    const helpEl = c('div', { className: 'field-help' })
+    opts.renderHelp(helpEl)
+    labWrap.append(helpEl)
   }
 
   const val = c('div', { className: 'value-wrap' })
@@ -273,9 +280,12 @@ function createSelectRow(
 function createActionRow(
   opts: BaseFieldRowOptions & {
     actions: Array<{ id: string; text: string; kind?: 'danger' }>
+    layout?: 'vertical'
   }
 ) {
-  const act = c('div', { className: 'seg' })
+  const act = c('div', {
+    className: `seg${opts.layout === 'vertical' ? ' vertical' : ''}`,
+  })
   for (const a of opts.actions) {
     const b = c('button', {
       className: `btn action-btn${a.kind === 'danger' ? ' btn-danger' : ''}`,
@@ -426,6 +436,8 @@ export function openSettingsPanel(
           key: f.key,
           actions: f.actions,
           help: f.help,
+          renderHelp: f.renderHelp,
+          layout: f.layout,
         })
         container.append(row)
         break

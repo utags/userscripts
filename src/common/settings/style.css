@@ -239,6 +239,10 @@
   flex-wrap: wrap;
 }
 
+.user-settings .seg.vertical {
+  @apply flex-col items-end;
+}
+
 .user-settings .seg-btn {
   @apply px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer select-none;
 }
@@ -271,6 +275,13 @@
   @apply text-gray-400 text-[11px];
 }
 
+.user-settings .field-help a {
+  @apply text-blue-600 hover:text-blue-700;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 2px;
+}
+
 @media (prefers-color-scheme: dark) {
   .user-settings .panel {
     @apply bg-gray-800 rounded-b-xl text-gray-100;
@@ -301,6 +312,9 @@
   }
   .user-settings .field-help {
     @apply text-gray-400;
+  }
+  .user-settings .field-help a {
+    @apply text-blue-400 hover:text-blue-300;
   }
   .user-settings .group {
     @apply bg-gray-700;
