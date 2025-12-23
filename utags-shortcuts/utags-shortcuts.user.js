@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.2.0
+// @version              0.2.1
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -387,6 +387,20 @@
   }
   function injectImageAsData(container, url) {
     try {
+      const cached = iconCache.get(url)
+      if (cached) {
+        const img = c('img', {
+          attrs: {
+            width: '16',
+            height: '16',
+            src: cached,
+          },
+          style: { objectFit: 'contain' },
+        })
+        clearChildren(container)
+        container.append(img)
+        return
+      }
       xmlHttpRequest({
         method: 'GET',
         url,
@@ -397,11 +411,13 @@
             if (!blob) return
             const reader = new FileReader()
             reader.addEventListener('load', () => {
+              const result = String(reader.result || '')
+              iconCache.set(url, result)
               const img = c('img', {
                 attrs: {
                   width: '16',
                   height: '16',
-                  src: String(reader.result || ''),
+                  src: result,
                 },
                 style: { objectFit: 'contain' },
               })

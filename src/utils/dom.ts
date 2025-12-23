@@ -167,6 +167,21 @@ function injectLucideIcon(container: HTMLElement, name: string) {
 
 function injectImageAsData(container: HTMLElement, url: string) {
   try {
+    const cached = iconCache.get(url)
+    if (cached) {
+      const img = c('img', {
+        attrs: {
+          width: '16',
+          height: '16',
+          src: cached,
+        },
+        style: { objectFit: 'contain' },
+      })
+      clearChildren(container)
+      container.append(img)
+      return
+    }
+
     xmlHttpRequest({
       method: 'GET',
       url,
@@ -177,12 +192,14 @@ function injectImageAsData(container: HTMLElement, url: string) {
           if (!blob) return
           const reader = new FileReader()
           reader.addEventListener('load', () => {
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
+            const result = String(reader.result || '')
+            iconCache.set(url, result)
             const img = c('img', {
               attrs: {
                 width: '16',
                 height: '16',
-                // eslint-disable-next-line @typescript-eslint/no-base-to-string
-                src: String(reader.result || ''),
+                src: result,
               },
               style: { objectFit: 'contain' },
             })

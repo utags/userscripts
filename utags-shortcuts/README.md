@@ -89,6 +89,10 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.2.1
+
+- Implemented image caching mechanism to prevent redundant network requests and improve rendering performance for icons.
+
 ### v0.2.0
 
 - **Iframe Mode**: The sidebar now runs in an isolated iframe environment by default, improving compatibility and stability across different websites.
