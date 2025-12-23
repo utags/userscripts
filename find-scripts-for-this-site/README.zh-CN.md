@@ -95,6 +95,8 @@
 - **支持网站**：Greasy Fork
 - **描述**：支持在 GreasyFork 实时过滤与隐藏脚本的工具，提供用户脚本和浏览器扩展两种版本。
 
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/utags-advanced-filter/refs/heads/main/assets/screenshot-2025-11-23-08-31-00.png)
+
 ### ⚡ UTags 快捷导航 (UTags Shortcuts)
 
 - **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/558485-utags-shortcuts) · [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/4910) · [GitHub](https://github.com/utags/userscripts/raw/main/utags-shortcuts/utags-shortcuts.user.js)
@@ -102,6 +104,9 @@
 - **亮点**：悬浮/侧边栏模式、支持链接与脚本、可视化编辑、快捷键支持
 - **支持网站**：所有网站
 - **描述**：一款功能强大的用户脚本，提供便捷的快捷导航面板，帮助你高效管理常用链接与自动化脚本，提升浏览体验
+- **提示**：导入 [用户脚本预设](https://raw.githubusercontent.com/utags/utags-shared-shortcuts/main/zh-CN/collections/plugin_groups.json) 后，也可实现本脚本的查找功能
+
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-23-14-48-43.png)
 
 ### 🔗 链接助手
 

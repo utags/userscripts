@@ -97,6 +97,8 @@ A user script to quickly find scripts for the current site across multiple repos
 - **Supported Sites**: Greasy Fork
 - **Description**: A tool that supports real-time filtering and hiding on GreasyFork, available in userscript and browser extension versions
 
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/utags-advanced-filter/refs/heads/main/assets/screenshot-2025-11-23-08-31-00.png)
+
 ### ⚡ UTags Shortcuts
 
 - **Link**: [Greasy Fork](https://greasyfork.org/scripts/558485-utags-shortcuts) · [ScriptCat](https://scriptcat.org/script-show-page/4910) · [GitHub](https://github.com/utags/userscripts/raw/main/utags-shortcuts/utags-shortcuts.user.js)
@@ -104,6 +106,9 @@ A user script to quickly find scripts for the current site across multiple repos
 - **Highlights**: Floating/Sidebar modes, URL/JS script support, visual editor, keyboard shortcuts
 - **Supported Sites**: All websites
 - **Description**: A powerful userscript that streamlines your browsing workflow with a customizable navigation panel for quick access to favorite links and scripts
+- **Tip**: You can also achieve the functionality of this script by importing [Userscript Presets](https://raw.githubusercontent.com/utags/utags-shared-shortcuts/main/en/collections/plugin_groups.json)
+
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-23-14-48-43.png)
 
 ### 🔗 Links Helper
 
