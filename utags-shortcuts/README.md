@@ -89,6 +89,16 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.2.0
+
+- **Iframe Mode**: The sidebar now runs in an isolated iframe environment by default, improving compatibility and stability across different websites.
+  - Automatically handles CSP (Content Security Policy) restrictions.
+  - Ensures styles and scripts don't conflict with the host page.
+  - Supports cross-origin navigation: External links open in the top frame, while homologous links load within the iframe.
+  - Maintains state synchronization (URL, title, favicon) between the iframe and the main window.
+- Optimized keyboard event handling for better compatibility with other scripts.
+- Improved SPA (Single Page Application) support with dynamic title monitoring.
+
 ### v0.1.22
 
 - Automatically imports built-in shortcuts from remote source upon initialization.

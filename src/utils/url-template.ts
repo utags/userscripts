@@ -70,7 +70,19 @@ export function resolveUrlTemplate(s: string): string {
       },
       selected() {
         try {
-          return encodeURIComponent((win.getSelection() || '').toString())
+          let text = (win.getSelection() || '').toString()
+          if (!text) {
+            const iframe = doc.querySelector<HTMLIFrameElement>(
+              'iframe[name="utags-shortcuts-iframe"]'
+            )
+            if (iframe?.contentWindow) {
+              try {
+                text = (iframe.contentWindow.getSelection() || '').toString()
+              } catch {}
+            }
+          }
+
+          return encodeURIComponent(text)
         } catch {}
 
         return ''

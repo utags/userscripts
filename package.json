@@ -30,28 +30,28 @@
     "browser-extension-settings": "^0.7.1",
     "browser-extension-storage": "^0.1.2",
     "browser-extension-utils": "^0.2.2",
-    "tailwindcss": "^4.1.17"
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.6.2",
-    "@tailwindcss/postcss": "^4.1.17",
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/chrome": "^0.1.31",
     "@types/jsdom": "^27.0.0",
-    "@types/node": "^25.0.0",
-    "@vitest/coverage-v8": "^4.0.15",
-    "@vitest/ui": "^4.0.15",
-    "autoprefixer": "^10.4.20",
+    "@types/node": "^25.0.3",
+    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/ui": "^4.0.16",
+    "autoprefixer": "^10.4.23",
     "cssnano": "^7.1.2",
-    "esbuild": "^0.27.1",
+    "esbuild": "^0.27.2",
     "http-server": "^14.1.1",
     "jsdom": "^27.3.0",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.4.49",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.1",
-    "sass": "^1.96.0",
+    "sass": "^1.97.1",
     "typescript": "^5.2.2",
-    "vitest": "^4.0.14",
+    "vitest": "^4.0.16",
     "xo": "^1.2.3"
   }
 }

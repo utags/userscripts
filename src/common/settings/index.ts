@@ -10,6 +10,7 @@ type FieldToggle = {
   key: string
   label: string
   help?: string
+  renderHelp?: (el: HTMLElement) => void
   isSitePref?: boolean
 }
 type FieldInput = {
@@ -352,6 +353,7 @@ export function openSettingsPanel(
           label: f.label,
           key: f.key,
           help: f.help,
+          renderHelp: f.renderHelp,
           isSitePref: f.isSitePref,
         })
         appendAndFill(container, row, f.key, () => {

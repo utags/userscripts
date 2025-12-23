@@ -46,6 +46,7 @@ const DEFAULTS = {
   enabled: true,
   layoutMode: 'floating',
   sidebarSide: 'right',
+  sidebarUseIframe: false,
   edgeWidth: 3,
   edgeHeight: 60,
   edgeOpacity: 0.6,
@@ -109,6 +110,22 @@ const EDGE_SETTINGS_FIELDS: Field[] = [
       { value: 'floating', label: '悬浮' },
       { value: 'sidebar', label: '侧边栏' },
     ],
+  },
+  {
+    type: 'toggle',
+    key: 'sidebarUseIframe',
+    label: '侧边栏使用 iframe 加载',
+    renderHelp(el) {
+      el.append(
+        '启用后，在侧边栏模式下，使用 iframe 加载页面，避免遮挡内容。部分网站因安全策略不支持 iframe，将自动回退到普通模式。如有问题请反馈：'
+      )
+      const a = document.createElement('a')
+      a.href = 'https://github.com/utags/userscripts/issues'
+      a.target = '_blank'
+      a.rel = 'noopener noreferrer'
+      a.textContent = 'utags/userscripts/issues'
+      el.append(a)
+    },
   },
   { type: 'toggle', key: 'pinned', label: '固定面板' },
   {

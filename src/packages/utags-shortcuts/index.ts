@@ -35,7 +35,14 @@ import {
   pickLinkFromPageAndAdd,
   hasDuplicateInGroup,
 } from './add-link-actions'
-import { resolveTargetUrl, resolveIcon } from './utils'
+import { resolveTargetUrl, resolveIcon, isEditableTarget } from './utils'
+import {
+  checkAndEnableIframeMode,
+  initIframeChild,
+  isIframeModeDisabled,
+  updateIframeLayout,
+  updateIframeUrl,
+} from './iframe-mode'
 
 type OpenMode = 'same-tab' | 'new-tab'
 type Position =
@@ -84,8 +91,12 @@ html[data-utags-shortcuts-sidebar="right-open"] body { width: calc(100% - 360px)
   } catch {}
 }
 
+void checkAndEnableIframeMode()
+initIframeChild()
+
 const store = createUshortcutsSettingsStore()
 let settings: any = {}
+let isIframeMode = false
 let tempOpen = false
 let tempClosed = false
 let menuIds: any[] = []
@@ -139,13 +150,30 @@ function openItem(
   opts?: { forceNewTab?: boolean }
 ) {
   const mode: OpenMode = it.openIn || group.defaultOpen || settings.defaultOpen
+
+  const navigate = (url: string) => {
+    if (isIframeMode) {
+      try {
+        const currentOrigin = location.origin
+        const targetOrigin = new URL(url, location.href).origin
+        if (currentOrigin === targetOrigin && updateIframeUrl(url)) {
+          return
+        }
+      } catch {}
+
+      location.assign(url)
+    } else {
+      location.assign(url)
+    }
+  }
+
   if (it.type === 'url') {
     const url = resolveTargetUrl(it.data)
     const finalMode: OpenMode = opts?.forceNewTab ? 'new-tab' : mode
     if (finalMode === 'new-tab') {
       window.open(url, '_blank', 'noopener')
     } else {
-      location.assign(url)
+      navigate(url)
     }
 
     return
@@ -187,7 +215,7 @@ function openItem(
           ? 'new-tab'
           : overrideMode || mode
         if (finalMode === 'new-tab') window.open(url, '_blank', 'noopener')
-        else location.assign(url)
+        else navigate(url)
       } catch {}
     }
 
@@ -210,6 +238,17 @@ async function saveConfig(cfg: ShortcutsConfig) {
 }
 
 function createRoot() {
+  if (globalThis.self !== globalThis.top) {
+    // Return a dummy root or handle this gracefully.
+    // In iframe mode or any other iframe (ads, etc.), we don't want to render the shortcuts panel.
+    // However, the caller expects { host, root }.
+    // We can create a hidden host.
+    const host = document.createElement('div')
+    host.style.display = 'none'
+    const root = host.attachShadow({ mode: 'open' })
+    return { host, root }
+  }
+
   const { host, root } = ensureShadowRoot({
     hostId: 'utags-shortcuts',
     hostDatasetKey: 'ushortcutsHost',
@@ -458,19 +497,19 @@ function parseHotkeySpec(spec: string) {
   }
 }
 
-function isEditableTarget(t: EventTarget | undefined) {
-  const el = t as HTMLElement | undefined
-  if (!el) return false
-  const tag = el.tagName ? el.tagName.toLowerCase() : ''
-  if (tag === 'input' || tag === 'textarea' || tag === 'select') return true
-  const ce = (el as any).isContentEditable as boolean | undefined
-  return Boolean(ce)
-}
-
 function registerHotkeys(root: ShadowRoot, cfg: ShortcutsConfig) {
-  document.addEventListener('keydown', (e) => {
-    if (e.defaultPrevented) return
-    if (isEditableTarget((e as any).target || undefined)) return
+  const check = (
+    e:
+      | KeyboardEvent
+      | {
+          code: string
+          ctrlKey: boolean
+          metaKey: boolean
+          altKey: boolean
+          shiftKey: boolean
+          preventDefault: () => void
+        }
+  ) => {
     const spec = settings.hotkey || HOTKEY_DEFAULT
     const p = parseHotkeySpec(spec)
     if (!p) return
@@ -492,6 +531,12 @@ function registerHotkeys(root: ShadowRoot, cfg: ShortcutsConfig) {
       tempOpen = true
       rerender(root, cfg)
     }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.defaultPrevented) return
+    if (isEditableTarget((e as any).target || undefined)) return
+    check(e)
   })
 }
 
@@ -1398,6 +1443,10 @@ function rerender(root: ShadowRoot, cfg: ShortcutsConfig) {
     lastCollapsed = true
     suppressCollapse = false
     try {
+      if (isIframeMode) {
+        updateIframeLayout(false)
+      }
+
       delete (document.documentElement as any).dataset.utagsShortcutsSidebar
     } catch {}
 
@@ -1448,6 +1497,10 @@ function rerender(root: ShadowRoot, cfg: ShortcutsConfig) {
     lastCollapsed = true
     suppressCollapse = false
     try {
+      if (isIframeMode) {
+        updateIframeLayout(false)
+      }
+
       delete (document.documentElement as any).dataset.utagsShortcutsSidebar
     } catch {}
 
@@ -1651,6 +1704,13 @@ function registerUrlChangeListener(root: ShadowRoot, cfg: ShortcutsConfig) {
 }
 
 function updateSidebarClass() {
+  if (isIframeMode) {
+    updateIframeLayout(
+      settings.enabled !== false && settings.layoutMode === 'sidebar'
+    )
+    return
+  }
+
   try {
     if (settings.enabled !== false && settings.layoutMode === 'sidebar') {
       ensureGlobalStyles()
@@ -1704,10 +1764,15 @@ function main() {
     if (de && de.dataset) de.dataset.utagsShortcuts = '1'
   } catch {}
 
+  if (globalThis.self !== globalThis.top) {
+    return
+  }
+
   const { root } = createRoot()
   void (async () => {
     const cfg = await loadConfig()
     settings = await store.getAll()
+    isIframeMode = settings.sidebarUseIframe && !isIframeModeDisabled()
 
     const updateState = () => {
       rerender(root, cfg)
@@ -1717,6 +1782,7 @@ function main() {
 
     store.onChange(async () => {
       settings = await store.getAll()
+      isIframeMode = settings.sidebarUseIframe && !isIframeModeDisabled()
       updateState()
     })
 

@@ -32,3 +32,12 @@ export function resolveIcon(
 
   return iconStr
 }
+
+export function isEditableTarget(t: EventTarget | undefined) {
+  const el = t as HTMLElement | undefined
+  if (!el) return false
+  const tag = el.tagName ? el.tagName.toLowerCase() : ''
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return true
+  const ce = (el as any).isContentEditable as boolean | undefined
+  return Boolean(ce)
+}
