@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.21
+// @version              0.1.22
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -3426,6 +3426,69 @@
     document.documentElement.append(fileInput)
     fileInput.click()
   }
+  function mergeGroupsOverwrite(existing, imported) {
+    const mergedGroups = [...(existing.groups || [])]
+    const existingGroupMap = new Map(mergedGroups.map((g, i) => [g.id, i]))
+    for (const importedGroup of imported.groups || []) {
+      if (existingGroupMap.has(importedGroup.id)) {
+        const index = existingGroupMap.get(importedGroup.id)
+        mergedGroups[index] = importedGroup
+      } else {
+        mergedGroups.push(importedGroup)
+      }
+    }
+    return { groups: mergedGroups }
+  }
+  function mergeGroupsMerge(existing, imported) {
+    const mergedGroups = [...(existing.groups || [])]
+    const existingGroupMap = new Map(mergedGroups.map((g, i) => [g.id, i]))
+    for (const importedGroup of imported.groups || []) {
+      if (existingGroupMap.has(importedGroup.id)) {
+        const index = existingGroupMap.get(importedGroup.id)
+        const existingGroup = mergedGroups[index]
+        const newGroup = __spreadProps(
+          __spreadValues(__spreadValues({}, existingGroup), importedGroup),
+          {
+            items: mergeItems(
+              existingGroup.items || [],
+              importedGroup.items || []
+            ),
+          }
+        )
+        mergedGroups[index] = newGroup
+      } else {
+        mergedGroups.push(importedGroup)
+      }
+    }
+    return { groups: mergedGroups }
+  }
+  function mergeItems(existingItems, importedItems) {
+    const mergedItems = [...existingItems]
+    const existingItemMap = new Map(mergedItems.map((item, i) => [item.id, i]))
+    for (const importedItem of importedItems) {
+      if (existingItemMap.has(importedItem.id)) {
+        const index = existingItemMap.get(importedItem.id)
+        mergedItems[index] = importedItem
+      } else {
+        mergedItems.push(importedItem)
+      }
+    }
+    return mergedItems
+  }
+  async function importAndSave(store2, data, mode, existingData) {
+    let obj = data
+    if (!Array.isArray(obj.groups) && Array.isArray(obj.items)) {
+      obj = { groups: [obj] }
+    }
+    const existingObj =
+      existingData != null ? existingData : await store2.load()
+    const merged =
+      mode === 'overwrite'
+        ? mergeGroupsOverwrite(existingObj, obj)
+        : mergeGroupsMerge(existingObj, obj)
+    await store2.save(merged)
+    return merged
+  }
   var CONFIG_KEY = 'ushortcuts'
   var OPEN_DEFAULT = 'same-tab'
   var ShortcutsStore = class {
@@ -3483,8 +3546,8 @@
             ? raw.groups.map((x) => ensureGroup(x))
             : []
           if (groupsArr.length === 0) {
-            const g2 = ensureGroup({})
-            g2.items = [
+            const g = ensureGroup({})
+            g.items = [
               {
                 id: uid(),
                 name: '\u9996\u9875',
@@ -3495,7 +3558,7 @@
                 hidden: false,
               },
             ]
-            groupsArr.push(g2)
+            groupsArr.push(g)
           }
           const cfg = {
             groups: groupsArr,
@@ -3503,594 +3566,39 @@
           return cfg
         }
       } catch (e) {}
-      const g = {
-        id: 'default_group',
-        name: '\u5E38\u7528',
-        icon: 'lucide:folder',
-        match: ['*'],
-        defaultOpen: OPEN_DEFAULT,
-        items: [
-          {
-            id: 'default_home',
-            name: '\u9996\u9875',
-            icon: 'lucide:home',
-            type: 'url',
-            data: '/',
-            openIn: OPEN_DEFAULT,
-          },
-          {
-            id: 'default_google',
-            name: 'Google \u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.google.com/search?q={selected||current_title||t:utags}',
-            openIn: 'new-tab',
-          },
-          {
-            id: 'default_gemini',
-            name: 'Gemini',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://gemini.google.com/app',
-            openIn: 'new-tab',
-          },
-          {
-            id: 'default_site_search',
-            name: '\u7AD9\u5185\u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.google.com/search?q=site:{hostname_without_www}%20{selected||current_title}',
-            openIn: 'new-tab',
-          },
-          {
-            id: 'default_greasyfork_search',
-            name: '\u641C\u7D22\u672C\u7AD9\u7684\u6CB9\u7334\u811A\u672C',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://greasyfork.org/scripts/by-site/{hostname_top_level}?filter_locale=0',
-            openIn: 'new-tab',
-          },
-        ],
-        collapsed: false,
-        itemsPerRow: 1,
-        hidden: false,
-      }
-      const readLater = {
-        id: 'read_later_group',
-        name: '\u7A0D\u540E\u9605\u8BFB',
-        icon: 'lucide:clock',
-        match: ['*'],
-        defaultOpen: 'new-tab',
-        items: [],
-      }
-      const searchGroup = {
-        id: 'search_group',
-        name: '\u641C\u7D22',
-        icon: 'lucide:search',
-        match: [
-          '!https://www.google.com/search*',
-          '!https://*.bing.com/search*',
-          '!https://www.baidu.com/s?*',
-          '!https://www.duckduckgo.com/*',
-          '!https://duckduckgo.com/*',
-          '*',
-        ],
-        defaultOpen: 'new-tab',
-        collapsed: false,
-        itemsPerRow: 1,
-        items: [
-          {
-            id: 'google_search',
-            name: 'Google \u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.google.com/search?q={selected||current_title||t:utags}',
-          },
-          {
-            id: 'google_site_search',
-            name: 'Google \u7AD9\u5185\u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.google.com/search?q=site:{hostname_without_www}%20{selected||current_title}',
-          },
-          {
-            id: 'bing_search',
-            name: 'Bing \u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.bing.com/search?q={selected||current_title||t:utags}',
-          },
-          {
-            id: 'baidu_search',
-            name: 'Baidu \u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.baidu.com/s?wd={selected||current_title||t:utags}',
-          },
-          {
-            id: 'baidu_site_search',
-            name: 'Baidu \u7AD9\u5185\u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.baidu.com/s?wd=site:{hostname_without_www}%20{selected||current_title}',
-          },
-          {
-            id: 'duckduckgo_search',
-            name: 'DuckDuckGo \u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://duckduckgo.com/?q={selected||current_title||t:utags}&ia=web',
-          },
-          {
-            id: 'duckduckgo_site_search',
-            name: 'DuckDuckGo \u7AD9\u5185\u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://duckduckgo.com/?q=site:{hostname_without_www}%20{selected||current_title}&ia=web',
-          },
-        ],
-      }
-      const searchSwitchGroup = {
-        id: 'search_switch_group',
-        name: '\u641C\u7D22\u5207\u6362',
-        displayName: '\u641C\u7D22\u5207\u6362',
-        icon: 'lucide:search',
-        match: [
-          'https://www.google.com/search*',
-          'https://*.bing.com/search*',
-          'https://www.baidu.com/s?*',
-          'https://www.duckduckgo.com/*',
-          'https://duckduckgo.com/*',
-        ],
-        defaultOpen: 'new-tab',
-        collapsed: false,
-        itemsPerRow: 1,
-        items: [
-          {
-            id: 'google_search',
-            name: 'Google \u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.google.com/search?q={selected||query||t:utags}',
-          },
-          {
-            id: 'bing_search',
-            name: 'Bing \u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.bing.com/search?q={selected||query||t:utags}',
-          },
-          {
-            id: 'baidu_search',
-            name: 'Baidu \u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.baidu.com/s?wd={selected||query||t:utags}',
-          },
-          {
-            id: 'duckduckgo_search',
-            name: 'DuckDuckGo \u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://duckduckgo.com/?q={selected||query||t:utags}&ia=web',
-          },
-        ],
-      }
-      const community = {
-        id: 'community_group',
-        name: '\u793E\u533A',
-        icon: 'lucide:users',
-        match: ['*'],
-        defaultOpen: 'new-tab',
-        items: [
-          {
-            id: 'community_v2ex',
-            name: 'V2EX',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.v2ex.com/',
-            openIn: 'new-tab',
-          },
-          {
-            id: 'community_linuxdo',
-            name: 'LINUX DO',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://linux.do/',
-            openIn: 'new-tab',
-          },
-          {
-            id: 'community_2libra',
-            name: '2Libra',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://2libra.com/?ref=utags-shortcuts',
-            openIn: 'new-tab',
-          },
-          {
-            id: 'community_appinn',
-            name: '\u5C0F\u4F17\u8F6F\u4EF6',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://meta.appinn.net/',
-            openIn: 'new-tab',
-          },
-        ],
-      }
-      const github = {
-        id: 'github_repo',
-        name: 'GitHub Repo',
-        icon: 'url:https://github.com/favicon.ico',
-        match: [
-          '!/https://github\\.com/(topics|collections|trending|resources)/.*/',
-          '/https://github\\.com/\\w+/\\w+(/.*)?$/',
-        ],
-        defaultOpen: 'same-tab',
-        items: [
-          {
-            id: 'nkv2f0hp',
-            name: 'Home',
-            type: 'url',
-            data: 'https://github.com/{p:1||t:utags}/{p:2||t:utags}',
-            openIn: 'same-tab',
-            icon: 'lucide:home',
-          },
-          {
-            id: 'mw2j0leg',
-            name: 'Issues',
-            type: 'url',
-            data: 'https://github.com/{p:1||t:utags}/{p:2||t:utags}/issues',
-            openIn: 'same-tab',
-          },
-          {
-            id: 'tuonitkh',
-            name: 'Pull requests',
-            type: 'url',
-            data: 'https://github.com/{p:1||t:utags}/{p:2||t:utags}/pulls',
-            openIn: 'same-tab',
-          },
-        ],
-      }
-      const v2ex = {
-        id: 'v2ex_group',
-        name: 'V2EX',
-        icon: 'url:https://www.v2ex.com/favicon.ico',
-        match: [
-          '*://www.v2ex.com/*',
-          '*://v2ex.com/*',
-          '*://*.v2ex.com/*',
-          '*://global.v2ex.co/*',
-        ],
-        defaultOpen: 'same-tab',
-        items: [
-          {
-            id: 'rexmfgc5',
-            name: '\u6700\u70ED',
-            icon: '\u{1F525}',
-            type: 'url',
-            data: '/?tab=hot',
-            openIn: 'same-tab',
-          },
-          {
-            id: '9hbsfrw1',
-            name: '\u521B\u610F',
-            icon: '\u{1F4A1}',
-            type: 'url',
-            data: '/?tab=creative',
-            openIn: 'same-tab',
-          },
-          {
-            id: 'zr14ffbp',
-            name: '\u5168\u90E8',
-            icon: 'lucide:link',
-            type: 'url',
-            data: '/?tab=all',
-            openIn: 'same-tab',
-          },
-          {
-            id: 'v0uxrv30',
-            name: '\u5168\u7AD9\u6700\u8FD1\u66F4\u65B0\u5217\u8868',
-            icon: 'lucide:link',
-            type: 'url',
-            data: '/changes',
-            openIn: 'same-tab',
-          },
-          {
-            id: 'w08vm9vt',
-            name: '\u6C34\u6DF1\u706B\u70ED',
-            icon: 'lucide:link',
-            type: 'url',
-            data: '/go/flamewar',
-            openIn: 'same-tab',
-            hidden: true,
-          },
-          {
-            id: 'evev9l6r',
-            name: '\u63D0\u9192',
-            icon: 'lucide:bell',
-            type: 'url',
-            data: '/notifications',
-            openIn: 'same-tab',
-          },
-          {
-            id: 'v2ex_search',
-            name: 'Google \u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.google.com/search?q=site:v2ex.com%20{selected||current_title}',
-            openIn: 'new-tab',
-          },
-        ],
-      }
-      const linuxdo = {
-        id: 'linuxdo_group',
-        name: 'L\u7AD9',
-        icon: 'url:https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Flinux.do%26size%3D64',
-        match: ['*://linux.do/*'],
-        defaultOpen: 'same-tab',
-        items: [
-          {
-            id: 'fq7s1vg6',
-            name: '\u6700\u65B0\u8BDD\u9898',
-            type: 'url',
-            data: 'https://linux.do/latest',
-            openIn: 'same-tab',
-          },
-          {
-            id: 'empa8f6o',
-            name: '\u521B\u5EFA\u65E5\u671F\u6392\u5E8F',
-            type: 'url',
-            data: '?ascending=false&order=created',
-            openIn: 'same-tab',
-            icon: 'lucide:calendar-arrow-down',
-          },
-          {
-            id: 'ghjguteh',
-            name: '\u672A\u8BFB\uFF08Unread\uFF09',
-            type: 'url',
-            data: 'https://linux.do/unread',
-            openIn: 'same-tab',
-            icon: 'lucide:book-plus',
-          },
-          {
-            id: 'fiahbsfb',
-            name: '\u59CB\u7687',
-            type: 'url',
-            data: 'https://linux.do/u/neo/activity',
-            openIn: 'same-tab',
-            icon: 'lucide:crown',
-          },
-          {
-            id: 'v7xfwc1x',
-            name: '\u5FEB\u95EE\u5FEB\u7B54',
-            type: 'url',
-            data: 'https://linux.do/tag/%E5%BF%AB%E9%97%AE%E5%BF%AB%E7%AD%94',
-            openIn: 'same-tab',
-            icon: 'lucide:circle-question-mark',
-          },
-          {
-            id: '03v787o2',
-            name: '\u7CBE\u534E\u795E\u5E16',
-            type: 'url',
-            data: 'https://linux.do/tag/%E7%B2%BE%E5%8D%8E%E7%A5%9E%E5%B8%96',
-            openIn: 'same-tab',
-            icon: 'lucide:thumbs-up',
-          },
-          {
-            id: 'linuxdo_search',
-            name: '\u641C\u7D22',
-            icon: 'lucide:search',
-            type: 'url',
-            data: 'https://linux.do/search?q={selected||current_title||t:\u9ED8\u8BA4\u503C}%20order%3Alatest',
-            openIn: 'new-tab',
-          },
-          {
-            id: 'linuxdo_google_search',
-            name: 'Google \u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.google.com/search?q=site:linux.do%20{selected||current_title}',
-            openIn: 'new-tab',
-          },
-          {
-            id: '0eybi3bv',
-            name: 'leaderbooard',
-            type: 'url',
-            data: 'https://linux.do/leaderboard',
-            openIn: 'new-tab',
-            icon: 'lucide:trophy',
-          },
-          {
-            id: 'oy4c2de9',
-            name: 'Connect',
-            type: 'url',
-            data: 'https://connect.linux.do/',
-            openIn: 'new-tab',
-          },
-          {
-            id: 'tt9yac9m',
-            name: 'IDC Flare',
-            type: 'url',
-            data: 'https://idcflare.com/',
-            openIn: 'new-tab',
-          },
-          {
-            id: 'vt4y2688',
-            name: 'Challenge',
-            type: 'url',
-            data: 'https://linux.do/challenge?redirect={current_url_encoded}',
-            openIn: 'same-tab',
-            icon: 'lucide:swords',
-          },
-          {
-            id: '20p30jnz',
-            name: '\u5206\u53D1\u7AD9',
-            type: 'url',
-            data: 'https://cdk.linux.do/',
-            openIn: 'new-tab',
-            icon: 'lucide:ticket-check',
-          },
-          {
-            id: 'q1df8ev8',
-            name: '\u793E\u533A\u5B50\u7CFB\u7EDF\u548C\u5143\u5B87\u5B99',
-            type: 'url',
-            data: 'https://linux.do/pub/resources',
-            openIn: 'new-tab',
-            icon: 'lucide:infinity',
-          },
-        ],
-        itemsPerRow: 2,
-      }
-      const _2libra_1 = {
-        id: '2libra_1',
-        name: '2Libra \u9080\u8BF7\u7801',
-        icon: 'url:https://2libra.com/favicon.ico',
-        match: ['https://2libra.com/?ref=utags-shortcuts'],
-        defaultOpen: 'same-tab',
-        items: [
-          {
-            id: '1AeoTgXc',
-            name: '\u6CE8\u518C\u540E\u989D\u5916\u83B7\u5F97 1,000 \u91D1\u5E01',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://2libra.com/auth/signup/1AeoTgXc',
-            openIn: 'same-tab',
-          },
-        ],
-      }
-      const _2libra_2 = {
-        id: '2libra_2',
-        name: '2libra',
-        icon: 'url:https://2libra.com/favicon.ico',
-        match: ['*://2libra.com/*'],
-        defaultOpen: 'same-tab',
-        items: [
-          {
-            id: 'zijgxywv',
-            name: '\u9996\u9875',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://2libra.com/',
-            openIn: 'same-tab',
-          },
-          {
-            id: 'aupy1kcr',
-            name: '\u65B0\u53D1\u8868',
-            type: 'url',
-            data: 'https://2libra.com/post/latest',
-            openIn: 'same-tab',
-          },
-          {
-            id: 'g3p7kbzm',
-            name: '\u4ECA\u65E5\u70ED\u8BAE',
-            icon: '\u{1F525}',
-            type: 'url',
-            data: 'https://2libra.com/post/hot/today',
-            openIn: 'same-tab',
-          },
-          {
-            id: 'svoiq3sz',
-            name: '\u8FD1\u671F\u70ED\u8BAE',
-            icon: '\u{1F525}',
-            type: 'url',
-            data: 'https://2libra.com/post/hot/recent',
-            openIn: 'same-tab',
-          },
-          {
-            id: 'pivybx9n',
-            name: '\u901A\u77E5',
-            icon: 'lucide:bell',
-            type: 'url',
-            data: 'https://2libra.com/notifications',
-            openIn: 'same-tab',
-          },
-          {
-            id: 'q0s43wxr',
-            name: '\u91D1\u5E01',
-            icon: 'lucide:bitcoin',
-            type: 'url',
-            data: 'https://2libra.com/coins',
-            openIn: 'same-tab',
-          },
-          {
-            id: '2libra_search',
-            name: 'Google \u641C\u7D22',
-            icon: 'favicon',
-            type: 'url',
-            data: 'https://www.google.com/search?q=site:2libra.com%20{selected||current_title}',
-            openIn: 'new-tab',
-          },
-        ],
-        itemsPerRow: 2,
-      }
-      const _2libra_3 = {
-        id: '2libra_3',
-        name: '\u4E3B\u9898',
-        icon: 'lucide:messages-square',
-        match: [
-          '!*://2libra.com/post/hot/*',
-          '!*://2libra.com/post/latest',
-          '*://2libra.com/post/*',
-          '*://2libra.com/post-flat/*',
-        ],
-        defaultOpen: 'same-tab',
-        items: [
-          {
-            id: '5bwly4kb',
-            name: '\u5207\u6362\u8BC4\u8BBA\u6A21\u5F0F',
-            icon: 'lucide:refresh-cw',
-            type: 'js',
-            data: "return location.pathname.includes('/post/') ? location.pathname.replace('/post/', '/post-flat/') : location.pathname.replace('/post-flat/', '/post/')",
-            openIn: 'same-tab',
-          },
-        ],
-      }
-      const other = {
-        id: 'other',
-        name: '\u5176\u4ED6',
-        icon: 'lucide:hand-heart',
-        match: ['*'],
-        defaultOpen: 'new-tab',
-        collapsed: true,
-        items: [
-          {
-            id: 'issues',
-            name: '\u95EE\u9898\u53CD\u9988',
-            type: 'url',
-            data: 'https://github.com/utags/userscripts/issues',
-            icon: 'lucide:bug',
-          },
-          {
-            id: 'project',
-            name: '\u9879\u76EE\u5730\u5740',
-            type: 'url',
-            data: 'https://github.com/utags/userscripts',
-            icon: 'lucide:github',
-          },
-          {
-            id: 'more-scripts',
-            name: '\u66F4\u591A\u811A\u672C',
-            type: 'url',
-            data: 'https://greasyfork.org/users/1030884-pipecraft?sort=total_installs',
-            icon: 'lucide:package',
-          },
-        ],
-      }
+      void (async () => {
+        try {
+          const data = await new Promise((resolve, reject) => {
+            void xmlHttpRequestWithFallback({
+              url: 'https://raw.githubusercontent.com/utags/utags-shared-shortcuts/main/zh-CN/collections/builtin_groups.json',
+              method: 'GET',
+              onload(response) {
+                if (response.status === 200 && response.responseText) {
+                  try {
+                    resolve(JSON.parse(response.responseText))
+                  } catch (error) {
+                    reject(
+                      error instanceof Error ? error : new Error(String(error))
+                    )
+                  }
+                } else {
+                  reject(new Error('Fetch failed '.concat(response.status)))
+                }
+              },
+              onerror(error) {
+                reject(
+                  error instanceof Error ? error : new Error(String(error))
+                )
+              },
+            })
+          })
+          await importAndSave(this, data, 'merge', { groups: [] })
+        } catch (error) {
+          console.error('Failed to init shortcuts', error)
+        }
+      })()
       return {
-        groups: [
-          g,
-          readLater,
-          searchGroup,
-          searchSwitchGroup,
-          community,
-          github,
-          v2ex,
-          linuxdo,
-          _2libra_1,
-          _2libra_2,
-          _2libra_3,
-          other,
-        ],
+        groups: [],
       }
     }
     async save(cfg) {
@@ -4103,55 +3611,6 @@
     }
   }
   var shortcutsStore = new ShortcutsStore()
-  function mergeGroupsOverwrite(existing, imported) {
-    const mergedGroups = [...(existing.groups || [])]
-    const existingGroupMap = new Map(mergedGroups.map((g, i) => [g.id, i]))
-    for (const importedGroup of imported.groups || []) {
-      if (existingGroupMap.has(importedGroup.id)) {
-        const index = existingGroupMap.get(importedGroup.id)
-        mergedGroups[index] = importedGroup
-      } else {
-        mergedGroups.push(importedGroup)
-      }
-    }
-    return { groups: mergedGroups }
-  }
-  function mergeGroupsMerge(existing, imported) {
-    const mergedGroups = [...(existing.groups || [])]
-    const existingGroupMap = new Map(mergedGroups.map((g, i) => [g.id, i]))
-    for (const importedGroup of imported.groups || []) {
-      if (existingGroupMap.has(importedGroup.id)) {
-        const index = existingGroupMap.get(importedGroup.id)
-        const existingGroup = mergedGroups[index]
-        const newGroup = __spreadProps(
-          __spreadValues(__spreadValues({}, existingGroup), importedGroup),
-          {
-            items: mergeItems(
-              existingGroup.items || [],
-              importedGroup.items || []
-            ),
-          }
-        )
-        mergedGroups[index] = newGroup
-      } else {
-        mergedGroups.push(importedGroup)
-      }
-    }
-    return { groups: mergedGroups }
-  }
-  function mergeItems(existingItems, importedItems) {
-    const mergedItems = [...existingItems]
-    const existingItemMap = new Map(mergedItems.map((item, i) => [item.id, i]))
-    for (const importedItem of importedItems) {
-      if (existingItemMap.has(importedItem.id)) {
-        const index = existingItemMap.get(importedItem.id)
-        mergedItems[index] = importedItem
-      } else {
-        mergedItems.push(importedItem)
-      }
-    }
-    return mergedItems
-  }
   var SETTINGS_KEY = 'settings'
   var POSITION_OPTIONS = [
     'right-top',
@@ -4546,11 +4005,6 @@
       },
       onAction({ actionId }) {
         const handleImportSuccess = async (data) => {
-          let obj = data
-          if (!Array.isArray(obj.groups) && Array.isArray(obj.items)) {
-            obj = { groups: [obj] }
-          }
-          const existingObj = await shortcutsStore.load()
           const root = getShadowRoot()
           const mode = await new Promise((resolve) => {
             const { body, actions, close } = createModalFrame({
@@ -4611,11 +4065,7 @@
             actions.append(btnCancel)
           })
           if (!mode) return false
-          const merged =
-            mode === 'overwrite'
-              ? mergeGroupsOverwrite(existingObj, obj)
-              : mergeGroupsMerge(existingObj, obj)
-          await shortcutsStore.save(merged)
+          await importAndSave(shortcutsStore, data, mode)
           return true
         }
         switch (actionId) {

@@ -15,8 +15,8 @@ import styleText from 'css:./style.css'
 import { uid } from '../../utils/uid'
 import { importJson } from '../../utils/import-json'
 import { shortcutsStore, type ShortcutsConfig } from './store'
-import { mergeGroupsOverwrite, mergeGroupsMerge } from './merge-utils'
 import { createModalFrame } from './modal-base'
+import { importAndSave } from './importer'
 
 const SETTINGS_KEY = 'settings'
 
@@ -381,12 +381,6 @@ export function openSettingsPanel(store: Store): void {
     },
     onAction({ actionId }) {
       const handleImportSuccess = async (data: any): Promise<boolean> => {
-        let obj = data
-        if (!Array.isArray(obj.groups) && Array.isArray(obj.items)) {
-          obj = { groups: [obj] }
-        }
-
-        const existingObj = await shortcutsStore.load()
         const root = getShadowRoot()
 
         const mode = await new Promise<'overwrite' | 'merge' | undefined>(
@@ -470,11 +464,7 @@ export function openSettingsPanel(store: Store): void {
 
         if (!mode) return false
 
-        const merged: ShortcutsConfig =
-          mode === 'overwrite'
-            ? mergeGroupsOverwrite(existingObj, obj)
-            : mergeGroupsMerge(existingObj, obj)
-        await shortcutsStore.save(merged)
+        await importAndSave(shortcutsStore, data, mode)
         return true
       }
 

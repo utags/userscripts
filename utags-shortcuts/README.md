@@ -89,6 +89,10 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.1.22
+
+- Automatically imports built-in shortcuts from remote source upon initialization.
+
 ### v0.1.21
 
 - Fixed an issue where styles could not be injected on websites with strict CSP (Content Security Policy).
