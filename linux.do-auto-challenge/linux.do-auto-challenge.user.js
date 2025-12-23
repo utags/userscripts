@@ -4,12 +4,11 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.2.0
+// @version              0.2.1
 // @description          Automatically redirects to the challenge page when CloudFlare protection fails, improving browsing experience on linux.do
 // @description:zh-CN    当 CloudFlare 5秒盾检测失败时，自动跳转到 challenge 页面，提升 linux.do 的浏览体验
 // @author               Pipecraft
 // @license              MIT
-// @noframes
 // @match                https://linux.do/*
 // @icon                 https://www.google.com/s2/favicons?sz=64&domain=linux.do
 // @grant                GM_registerMenuCommand

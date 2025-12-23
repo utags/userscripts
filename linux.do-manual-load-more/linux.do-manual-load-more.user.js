@@ -4,12 +4,11 @@
 // @namespace            https://www.pipecraft.net/
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.1
+// @version              0.1.2
 // @description          Load more topics manually with enhanced UI and error handling.
 // @description:zh-CN    手动加载更多话题，具有增强的用户界面和错误处理。
 // @author               Pipecraft
 // @license              MIT
-// @noframes
 // @match                https://linux.do/*
 // @icon                 https://www.google.com/s2/favicons?sz=64&domain=linux.do
 // @grant                none

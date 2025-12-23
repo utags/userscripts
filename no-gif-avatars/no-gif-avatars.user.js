@@ -4,12 +4,11 @@
 // @namespace            https://www.pipecraft.net/
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.1
+// @version              0.1.2
 // @description          Convert GIF avatars into static images with enhanced performance and error handling
 // @description:zh-CN    将动图头像转换为静态图片，具有增强的性能和错误处理。
 // @author               Pipecraft
 // @license              MIT
-// @noframes
 // @match                https://linux.do/*
 // @match                https://www.nodeloc.com/*
 // @icon                 https://www.google.com/s2/favicons?sz=64&domain=github.com

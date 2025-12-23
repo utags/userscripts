@@ -1,56 +1,46 @@
-# LINUX.DO CloudFlare 5秒盾自动跳转
+## More Useful Scripts
 
-## 简介
+### 🏷️ UTags - Add User Tags to Links
 
-这个用户脚本能在 linux.do 网站上当 CloudFlare 5秒盾检测失败时，自动跳转到 challenge 页面，提升浏览体验，无需手动干预。
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/460718-utags-add-usertags-to-links)
+- **Features**: Add custom tags and notes to user, post, video and other links
+- **Highlights**: Support special tag filtering (like spam, block, clickbait, etc.), data export/import, auto-mark viewed posts
+- **Supported Sites**: V2EX, X(Twitter), Reddit, GitHub, Bilibili, Zhihu, Linux.do, Youtube and 50+ websites
+- **Description**: Super useful tag management tool for adding tags to forum users or posts, making it easy to identify or block low-quality content
 
-## 功能特点
+### 🧰 UTags Advanced Filter
 
-- 自动检测 CloudFlare 保护失败状态
-- 立即重定向到 challenge 页面
-- 提供手动触发 Challenge 跳转的菜单选项
-- 提升 linux.do 的浏览体验
-- 轻量级且高效的实现
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/en/script-show-page/4653) · [GitHub](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
+- **Features**: Real-time filtering and hiding of scripts on GreasyFork
+- **Highlights**: Available as both a userscript and a browser extension
+- **Supported Sites**: Greasy Fork
+- **Description**: A tool that supports real-time filtering and hiding on GreasyFork, available in userscript and browser extension versions
 
-## 安装方法
+### ⚡ UTags Shortcuts
 
-1. 确保您的浏览器已安装用户脚本管理器：
-   - [Tampermonkey](https://www.tampermonkey.net/)（推荐）
-   - [Violentmonkey](https://violentmonkey.github.io/)
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/558485-utags-shortcuts) · [ScriptCat](https://scriptcat.org/script-show-page/4910) · [GitHub](https://github.com/utags/userscripts/raw/main/utags-shortcuts/utags-shortcuts.user.js)
+- **Features**: Per-site grouping, icon support, floating or sidebar navigation panel
+- **Highlights**: Floating/Sidebar modes, URL/JS script support, visual editor, keyboard shortcuts
+- **Supported Sites**: All websites
+- **Description**: A powerful userscript that streamlines your browsing workflow with a customizable navigation panel for quick access to favorite links and scripts
 
-2. 安装此脚本：
-   - 点击 [这里](https://github.com/utags/userscripts/raw/main/linux.do-auto-challenge/linux.do-auto-challenge.user.js) 从 GitHub 安装脚本
-   - 点击 [这里](https://greasyfork.org/zh-CN/scripts/552218-linux-do-cloudflare-challenge-bypass) 从 Greasy Fork 安装脚本
-   - 点击 [这里](https://scriptcat.org/zh-CN/script-show-page/4373) 从 ScriptCat 安装脚本
+### 🔗 Links Helper
 
-## 工作原理
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/464541-links-helper)
+- **Features**: Open third-party website links in new tabs, parse text links into hyperlinks
+- **Highlights**: Support custom rules, parse Markdown and BBCode formats, convert image links to image tags
+- **Supported Sites**: Universal for all websites, including Google, YouTube, GitHub, V2EX, etc.
+- **Description**: Enhance link browsing experience, automatically process various link formats for more convenient web browsing
 
-该脚本监控页面中的 CloudFlare 错误消息。当它在对话框中检测到特定的错误文本时，会自动重定向到 challenge 页面，这有助于绕过 CloudFlare 保护。
+### 🔍 Find Scripts For This Site
 
-## 更新日志
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/550659-find-scripts-for-this-site) · [ScriptCat](https://scriptcat.org/script-show-page/4276) · [GitHub](https://github.com/utags/userscripts/raw/main/find-scripts-for-this-site/find-scripts-for-this-site.user.js)
+- **Features**: Quickly find scripts for the current site across multiple repositories
+- **Highlights**: Settings dialog, real-time sync, smart domain extraction
+- **Supported Sites**: All websites
+- **Description**: A user script to quickly find scripts for the current site across multiple repositories, now with a settings dialog and real-time sync across tabs
 
-### v0.2.1
-
-- 删除 `@noframes` 声明，兼容 utags-shortcuts 在 iframe 模式下运行
-
-### v0.2.0 (2025-10-11)
-
-- 添加手动触发 Challenge 跳转的菜单选项
-- 优化用户体验，提供更直观的操作方式
-- 更新脚本权限，支持菜单命令功能
-
-### v0.1.1 (2025-10-11)
-
-- 优化脚本结构，提高代码可维护性
-- 添加错误处理和日志记录功能
-- 改进检测逻辑，只检查带有 dialog-body 类的元素
-- 创建 isChallengePage 函数，提高代码一致性
-
-### v0.1.0 (2025-10-11)
-
-- 首次发布
-- 实现基本的 CloudFlare 失败检测功能
-- 自动跳转到 challenge 页面
+---
 
 ## 更多实用脚本
 
@@ -105,16 +95,3 @@
 - **亮点**：键盘快捷键、导航按钮、带语言选项的设置对话框
 - **支持网站**：所有基于 Discourse 的论坛，包括 Discourse Meta、LINUX.DO 等
 - **描述**：通过便捷的主题切换和可自定义设置，增强 Discourse 论坛中的导航体验
-
-## 许可证
-
-MIT License - 详见 [LICENSE](https://github.com/utags/userscripts/blob/main/LICENSE) 文件
-
-## 贡献
-
-欢迎贡献！请随时提交拉取请求。
-
-## 相关链接
-
-- [项目主页](https://github.com/utags/userscripts)
-- [问题反馈](https://github.com/utags/userscripts/issues)

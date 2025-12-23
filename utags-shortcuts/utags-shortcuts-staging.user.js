@@ -2748,6 +2748,9 @@
     return { row }
   }
   function openSettingsPanel(schema, store2, options) {
+    if (globalThis.self !== globalThis.top) {
+      return
+    }
     const { host, root, existed } = ensureShadowRoot({
       hostId:
         (options == null ? void 0 : options.hostDatasetValue) || 'settings',

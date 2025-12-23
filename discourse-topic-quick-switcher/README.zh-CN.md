@@ -164,6 +164,24 @@
 - **支持网站**：V2EX、X(Twitter)、Reddit、GitHub、哔哩哔哩、知乎、Linux.do、Youtube 等 50+ 网站
 - **描述**：超级实用的标签管理工具，可为论坛用户或帖子添加标签，轻松识别或屏蔽低质量内容
 
+### 🧰 UTags Advanced Filter
+
+- **链接**：[Greasy Fork](https://greasyfork.org/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/en/script-show-page/4653) · [GitHub](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
+- **功能**：支持在 GreasyFork 实时过滤与隐藏脚本
+- **亮点**：同时提供用户脚本与浏览器扩展两个版本
+- **支持网站**：Greasy Fork
+- **描述**：支持在 GreasyFork 实时过滤与隐藏脚本的工具，提供用户脚本和浏览器扩展两种版本。
+
+![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/utags-advanced-filter/refs/heads/main/assets/screenshot-2025-11-23-08-31-00.png)
+
+### ⚡ UTags 快捷导航 (UTags Shortcuts)
+
+- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/558485-utags-shortcuts) · [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/4910) · [GitHub](https://github.com/utags/userscripts/raw/main/utags-shortcuts/utags-shortcuts.user.js)
+- **功能**：按站点分组、自定义图标、悬浮球或侧边栏导航面板
+- **亮点**：悬浮/侧边栏模式、支持链接与脚本、可视化编辑、快捷键支持
+- **支持网站**：所有网站
+- **描述**：一款功能强大的用户脚本，提供便捷的快捷导航面板，帮助你高效管理常用链接与自动化脚本，提升浏览体验
+
 ### 🔗 链接助手
 
 - **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/464541-links-helper)

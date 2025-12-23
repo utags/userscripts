@@ -305,6 +305,10 @@ export function openSettingsPanel(
   store: Store,
   options?: PanelOptions
 ): void {
+  if (globalThis.self !== globalThis.top) {
+    return
+  }
+
   const { host, root, existed } = ensureShadowRoot({
     hostId: options?.hostDatasetValue || 'settings',
     hostDatasetKey: options?.hostDatasetKey || 'userHost',
