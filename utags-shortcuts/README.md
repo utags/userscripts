@@ -89,6 +89,15 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.2.5
+
+- **Refined SPA Navigation in Iframe Mode**: Improved the navigation logic by using message passing between parent and iframe, ensuring proper SPA routing handling (e.g. Next.js, Vue Router) instead of forcing a reload.
+- **Improved SPA Support in Iframe Mode**: Fixed an issue where navigation in Single Page Applications (SPAs) within the sidebar might not correctly update the iframe support status.
+- **Enhanced Stability**: Refactored the iframe detection logic to better handle infinite reload loops and improve overall stability.
+- Improved SPA (Single Page Application) navigation experience: Added a loading progress bar at the top of the page when navigating in Iframe mode or via Next.js router.
+- Optimized image loading: Enabled lazy loading for all icons and images to improve initial page load performance.
+- Refactored internal code: Extracted image generation logic into a factory method for better maintainability.
+
 ### v0.2.3
 
 - Improved panel collapse behavior: the panel now stays expanded when the mouse leaves the window or hovers over the scrollbar.

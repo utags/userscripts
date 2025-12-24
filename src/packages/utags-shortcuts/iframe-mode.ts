@@ -2,9 +2,28 @@ import { createUshortcutsSettingsStore } from './settings-panel'
 import { isTopFrame } from '../../utils/is-top-frame'
 import { isSameOrigin } from '../../utils/url'
 import { isEditableTarget } from './utils'
+import { ProgressBar } from '../../common/progress-bar'
+import { navigateUrl } from '../../utils/navigate'
 
 const DISABLE_IFRAME_KEY = 'utags_iframe_mode_disabled'
 const CHECK_IFRAME_KEY = 'utags_iframe_mode_checking'
+
+// SessionStorage keys for infinite reload detection and support verification
+const RELOAD_COUNT_KEY = 'utags_iframe_reload_count'
+const LAST_LOAD_TIME_KEY = 'utags_iframe_last_load_time'
+const LAST_LOAD_URL_KEY = 'utags_iframe_last_load_url'
+const LAST_CLICK_URL_KEY = 'utags_iframe_last_click_url'
+const SUPPORTED_KEY = 'utags_iframe_supported'
+
+const isSupported = () => sessionStorage.getItem(SUPPORTED_KEY) === '1'
+
+// Helper to clear all detection-related storage keys
+function clearDetectionStorage() {
+  sessionStorage.removeItem(RELOAD_COUNT_KEY)
+  sessionStorage.removeItem(LAST_LOAD_URL_KEY)
+  sessionStorage.removeItem(LAST_LOAD_TIME_KEY)
+  sessionStorage.removeItem(LAST_CLICK_URL_KEY)
+}
 
 const BLACKLIST_DOMAINS = new Set([
   'mail.google.com',
@@ -23,6 +42,8 @@ const BLACKLIST_URL_PATTERNS = new Set([
   /^https:\/\/www\.google\.com\/.*[&?]udm=50/,
   /^https:\/\/(.+\.)?stackexchange\.com\//,
 ])
+
+let progressBar: ProgressBar | undefined
 
 export function isIframeModeDisabled() {
   if (BLACKLIST_DOMAINS.has(location.host)) {
@@ -97,8 +118,7 @@ function enableIframeMode(side: 'left' | 'right') {
   newBody.style.cssText =
     'height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden;'
 
-  // Start checking iframes, set as 1 to prevent reloading infinite loop
-  localStorage.setItem(CHECK_IFRAME_KEY, '1')
+  progressBar = new ProgressBar()
 
   const iframe = document.createElement('iframe')
   iframe.src = currentUrl
@@ -122,6 +142,8 @@ function enableIframeMode(side: 'left' | 'right') {
   // Since it's same-origin, we can access contentWindow
   // But we need to wait for it to load
   iframe.addEventListener('load', () => {
+    progressBar?.finish()
+
     try {
       if (!isChildReady) {
         // If loaded but script not ready, wait a bit more (e.g. for document-idle scripts)
@@ -172,8 +194,22 @@ function enableIframeMode(side: 'left' | 'right') {
         break
       }
 
+      case 'USHORTCUTS_IFRAME_FAILED': {
+        console.warn('[utags] Iframe mode failed:', data.reason)
+        localStorage.setItem(DISABLE_IFRAME_KEY, '1')
+        localStorage.setItem(CHECK_IFRAME_KEY, '4')
+        location.reload()
+        break
+      }
+
       case 'USHORTCUTS_URL_CHANGE': {
         syncState(data.url, data.title)
+        progressBar?.finish()
+        break
+      }
+
+      case 'USHORTCUTS_LOADING_START': {
+        progressBar?.start()
         break
       }
 
@@ -214,8 +250,9 @@ export function updateIframeUrl(url: string) {
   const iframe = document.querySelector<HTMLIFrameElement>(
     'iframe[name="utags-shortcuts-iframe"]'
   )
-  if (iframe) {
-    iframe.src = url
+  if (iframe && iframe.contentWindow) {
+    progressBar?.start()
+    iframe.contentWindow.postMessage({ type: 'USHORTCUTS_NAVIGATE', url }, '*')
     return true
   }
 
@@ -244,11 +281,23 @@ export function initIframeChild() {
   // Check if we are inside the managed iframe
   if ((globalThis as any).name !== 'utags-shortcuts-iframe') return
 
+  // Capture initial state before detection logic modifies it
+  const initialLoadUrl = sessionStorage.getItem(LAST_LOAD_URL_KEY)
+
+  // Check for infinite reload loop (e.g. site detects iframe and reloads itself)
+  if (!detectInfiniteReload()) return
+
   // Notify parent that we are ready
   globalThis.parent.postMessage({ type: 'USHORTCUTS_IFRAME_READY' }, '*')
 
+  // Verify support on initial load
+  verifyIframeSupport(initialLoadUrl ?? undefined)
+
   // 1. Notify parent about URL changes
   const notify = () => {
+    // Verify support on navigation (SPA)
+    verifyIframeSupport()
+
     globalThis.parent.postMessage(
       {
         type: 'USHORTCUTS_URL_CHANGE',
@@ -305,6 +354,9 @@ export function initIframeChild() {
 
   globalThis.addEventListener('popstate', notify)
   globalThis.addEventListener('hashchange', notify)
+  globalThis.addEventListener('beforeunload', () => {
+    globalThis.parent.postMessage({ type: 'USHORTCUTS_LOADING_START' }, '*')
+  })
 
   // 2. Intercept link clicks
   document.addEventListener(
@@ -318,6 +370,11 @@ export function initIframeChild() {
         // Internal link: let it proceed in iframe
         // (Browser default behavior or SPA router will handle it)
         // We just need to make sure we notify parent if URL changes (handled by hooks above)
+        if (!isSupported()) {
+          sessionStorage.setItem(LAST_CLICK_URL_KEY, target.href)
+        }
+
+        globalThis.parent.postMessage({ type: 'USHORTCUTS_LOADING_START' }, '*')
       } else {
         // External link: open in top frame
         if (target.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey)
@@ -350,4 +407,84 @@ export function initIframeChild() {
       '*'
     )
   })
+  // 4. Handle messages from parent
+  globalThis.addEventListener('message', (e) => {
+    if (e.source !== globalThis.parent) return
+    const data = e.data
+    if (!data || !data.type) return
+
+    if (data.type === 'USHORTCUTS_NAVIGATE') {
+      navigateUrl(data.url)
+    }
+  })
+}
+
+function detectInfiniteReload() {
+  try {
+    if (isSupported()) return true
+
+    const now = Date.now()
+    const lastLoadTime = Number.parseInt(
+      sessionStorage.getItem(LAST_LOAD_TIME_KEY) || '0',
+      10
+    )
+    const lastLoadUrl = sessionStorage.getItem(LAST_LOAD_URL_KEY)
+    let reloadCount = Number.parseInt(
+      sessionStorage.getItem(RELOAD_COUNT_KEY) || '0',
+      10
+    )
+
+    if (
+      now - lastLoadTime < 5000 &&
+      (!lastLoadUrl || lastLoadUrl === location.href)
+    ) {
+      reloadCount++
+    } else {
+      reloadCount = 1
+    }
+
+    sessionStorage.setItem(LAST_LOAD_TIME_KEY, now.toString())
+    sessionStorage.setItem(LAST_LOAD_URL_KEY, location.href)
+    sessionStorage.setItem(RELOAD_COUNT_KEY, reloadCount.toString())
+
+    if (reloadCount > 3) {
+      clearDetectionStorage()
+      // Infinite reload detected
+      globalThis.parent.postMessage(
+        { type: 'USHORTCUTS_IFRAME_FAILED', reason: 'infinite_reload' },
+        '*'
+      )
+      // Stop further execution
+      return false
+    }
+
+    return true
+  } catch {
+    return true
+  }
+}
+
+function verifyIframeSupport(previousUrl?: string) {
+  try {
+    if (isSupported()) return
+
+    // Use provided previousUrl (for initial load check) or fetch from storage (for SPA nav check)
+    // Note: On initial load, storage has just been updated to current URL by detectInfiniteReload,
+    // so we must use the captured previousUrl.
+    const lastLoadUrl =
+      previousUrl === undefined
+        ? sessionStorage.getItem(LAST_LOAD_URL_KEY)
+        : previousUrl
+
+    const lastClickUrl = sessionStorage.getItem(LAST_CLICK_URL_KEY)
+
+    if (
+      lastLoadUrl &&
+      lastLoadUrl !== location.href &&
+      lastClickUrl === location.href
+    ) {
+      sessionStorage.setItem(SUPPORTED_KEY, '1')
+      clearDetectionStorage()
+    }
+  } catch {}
 }

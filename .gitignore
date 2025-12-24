@@ -10,3 +10,6 @@
 discourse-topic-quick-switcher/*.html
 universal-image-uploader/*.html
 greasyfork-script-list-in-discussions
+
+## css files in root
+*.css

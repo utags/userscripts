@@ -3,6 +3,14 @@ import { xmlHttpRequest } from '../common/gm'
 import { doc } from '../globals/doc'
 import { c } from './c'
 
+function createIconImage(src: string, className?: string) {
+  return c('img', {
+    className,
+    attrs: { width: '16', height: '16', src, loading: 'lazy' },
+    style: { objectFit: 'contain' },
+  })
+}
+
 export function clearChildren(el: Node & ParentNode) {
   try {
     ;(el as any).textContent = ''
@@ -67,10 +75,7 @@ export function renderIcon(s?: string) {
     try {
       const svg = t.slice(4)
       const url = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
-      const img = c('img', {
-        attrs: { width: '16', height: '16', src: url },
-        style: { objectFit: 'contain' },
-      })
+      const img = createIconImage(url)
       clearChildren(span)
       span.append(img)
     } catch {}
@@ -101,11 +106,7 @@ function injectLucideIcon(container: HTMLElement, name: string) {
   try {
     const cached = iconCache.get(name)
     if (cached) {
-      const img = c('img', {
-        className: 'lucide-icon',
-        attrs: { width: '16', height: '16', src: cached },
-        style: { objectFit: 'contain' },
-      })
+      const img = createIconImage(cached, 'lucide-icon')
       clearChildren(container)
       container.append(img)
       return
@@ -137,11 +138,7 @@ function injectLucideIcon(container: HTMLElement, name: string) {
               const dataUrl =
                 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
               iconCache.set(name, dataUrl)
-              const img = c('img', {
-                className: 'lucide-icon',
-                attrs: { width: '16', height: '16', src: dataUrl },
-                style: { objectFit: 'contain' },
-              })
+              const img = createIconImage(dataUrl, 'lucide-icon')
               clearChildren(container)
               container.append(img)
               // Remember this CDN for next time
@@ -169,14 +166,7 @@ function injectImageAsData(container: HTMLElement, url: string) {
   try {
     const cached = iconCache.get(url)
     if (cached) {
-      const img = c('img', {
-        attrs: {
-          width: '16',
-          height: '16',
-          src: cached,
-        },
-        style: { objectFit: 'contain' },
-      })
+      const img = createIconImage(cached)
       clearChildren(container)
       container.append(img)
       return
@@ -195,14 +185,7 @@ function injectImageAsData(container: HTMLElement, url: string) {
             // eslint-disable-next-line @typescript-eslint/no-base-to-string
             const result = String(reader.result || '')
             iconCache.set(url, result)
-            const img = c('img', {
-              attrs: {
-                width: '16',
-                height: '16',
-                src: result,
-              },
-              style: { objectFit: 'contain' },
-            })
+            const img = createIconImage(result)
             clearChildren(container)
             container.append(img)
           })

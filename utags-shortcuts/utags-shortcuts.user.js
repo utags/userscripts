@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.2.4
+// @version              0.2.5
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -243,6 +243,13 @@
     }
     return el
   }
+  function createIconImage(src, className) {
+    return c('img', {
+      className,
+      attrs: { width: '16', height: '16', src, loading: 'lazy' },
+      style: { objectFit: 'contain' },
+    })
+  }
   function clearChildren(el) {
     try {
       el.textContent = ''
@@ -297,10 +304,7 @@
         const svg = t.slice(4)
         const url =
           'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
-        const img = c('img', {
-          attrs: { width: '16', height: '16', src: url },
-          style: { objectFit: 'contain' },
-        })
+        const img = createIconImage(url)
         clearChildren(span)
         span.append(img)
       } catch (e) {}
@@ -326,11 +330,7 @@
     try {
       const cached = iconCache.get(name)
       if (cached) {
-        const img = c('img', {
-          className: 'lucide-icon',
-          attrs: { width: '16', height: '16', src: cached },
-          style: { objectFit: 'contain' },
-        })
+        const img = createIconImage(cached, 'lucide-icon')
         clearChildren(container)
         container.append(img)
         return
@@ -360,11 +360,7 @@
                 const dataUrl =
                   'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
                 iconCache.set(name, dataUrl)
-                const img = c('img', {
-                  className: 'lucide-icon',
-                  attrs: { width: '16', height: '16', src: dataUrl },
-                  style: { objectFit: 'contain' },
-                })
+                const img = createIconImage(dataUrl, 'lucide-icon')
                 clearChildren(container)
                 container.append(img)
                 lastSuccessfulCdnIndex = cdnIndex
@@ -389,14 +385,7 @@
     try {
       const cached = iconCache.get(url)
       if (cached) {
-        const img = c('img', {
-          attrs: {
-            width: '16',
-            height: '16',
-            src: cached,
-          },
-          style: { objectFit: 'contain' },
-        })
+        const img = createIconImage(cached)
         clearChildren(container)
         container.append(img)
         return
@@ -413,14 +402,7 @@
             reader.addEventListener('load', () => {
               const result = String(reader.result || '')
               iconCache.set(url, result)
-              const img = c('img', {
-                attrs: {
-                  width: '16',
-                  height: '16',
-                  src: result,
-                },
-                style: { objectFit: 'contain' },
-              })
+              const img = createIconImage(result)
               clearChildren(container)
               container.append(img)
             })
@@ -4504,6 +4486,39 @@
       },
     })
   }
+  var ProgressBar = class {
+    constructor() {
+      this.el = document.createElement('div')
+      this.el.style.cssText =
+        '\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 0%;\n      height: 3px;\n      background: #0969da;\n      z-index: 2147483647;\n      transition: width 0.2s, opacity 0.2s;\n      opacity: 0;\n      pointer-events: none;\n    '
+      document.body.append(this.el)
+    }
+    start() {
+      this.el.style.transition = 'width 0.2s, opacity 0.2s'
+      this.el.style.opacity = '1'
+      this.el.style.width = '0%'
+      void this.el.getBoundingClientRect()
+      this.el.style.width = '30%'
+      if (this.timer) clearInterval(this.timer)
+      this.timer = setInterval(() => {
+        const w = Number.parseFloat(this.el.style.width) || 0
+        if (w < 90) {
+          this.el.style.width = w + (90 - w) * 0.1 + '%'
+        }
+      }, 200)
+    }
+    finish() {
+      if (this.timer) clearInterval(this.timer)
+      this.el.style.width = '100%'
+      setTimeout(() => {
+        this.el.style.opacity = '0'
+        setTimeout(() => {
+          this.el.style.width = '0%'
+        }, 200)
+      }, 200)
+    }
+  }
+  var progressBar
   function isVueApp() {
     return false
   }
@@ -4518,6 +4533,10 @@
     return rules.some((rule) => url.includes(rule))
   }
   function navigateUrl(url) {
+    if (!progressBar) {
+      progressBar = new ProgressBar()
+    }
+    progressBar.start()
     try {
       if (isSameOrigin(url) && !isForceLocationAssign(url)) {
         if (
@@ -4541,6 +4560,9 @@
             s.remove()
             if (document.documentElement.dataset[key] === '1') {
               delete document.documentElement.dataset[key]
+              setTimeout(() => {
+                progressBar == null ? void 0 : progressBar.finish()
+              }, 800)
               return
             }
           } catch (e) {}
@@ -4549,6 +4571,9 @@
         if (isSpa()) {
           win.history.pushState(null, '', url)
           win.dispatchEvent(new PopStateEvent('popstate'))
+          setTimeout(() => {
+            progressBar == null ? void 0 : progressBar.finish()
+          }, 800)
           return
         }
       }
@@ -4557,6 +4582,18 @@
   }
   var DISABLE_IFRAME_KEY = 'utags_iframe_mode_disabled'
   var CHECK_IFRAME_KEY = 'utags_iframe_mode_checking'
+  var RELOAD_COUNT_KEY = 'utags_iframe_reload_count'
+  var LAST_LOAD_TIME_KEY = 'utags_iframe_last_load_time'
+  var LAST_LOAD_URL_KEY = 'utags_iframe_last_load_url'
+  var LAST_CLICK_URL_KEY = 'utags_iframe_last_click_url'
+  var SUPPORTED_KEY = 'utags_iframe_supported'
+  var isSupported = () => sessionStorage.getItem(SUPPORTED_KEY) === '1'
+  function clearDetectionStorage() {
+    sessionStorage.removeItem(RELOAD_COUNT_KEY)
+    sessionStorage.removeItem(LAST_LOAD_URL_KEY)
+    sessionStorage.removeItem(LAST_LOAD_TIME_KEY)
+    sessionStorage.removeItem(LAST_CLICK_URL_KEY)
+  }
   var BLACKLIST_DOMAINS = /* @__PURE__ */ new Set([
     'mail.google.com',
     'gemini.google.com',
@@ -4574,6 +4611,7 @@
     /^https:\/\/www\.google\.com\/.*[&?]udm=50/,
     /^https:\/\/(.+\.)?stackexchange\.com\//,
   ])
+  var progressBar2
   function isIframeModeDisabled() {
     if (BLACKLIST_DOMAINS.has(location.host)) {
       return true
@@ -4623,7 +4661,7 @@
       'height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden;'
     newBody.style.cssText =
       'height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden;'
-    localStorage.setItem(CHECK_IFRAME_KEY, '1')
+    progressBar2 = new ProgressBar()
     const iframe = document.createElement('iframe')
     iframe.src = currentUrl
     iframe.style.cssText =
@@ -4636,6 +4674,7 @@
     let isChildReady = false
     let failTimer
     iframe.addEventListener('load', () => {
+      progressBar2 == null ? void 0 : progressBar2.finish()
       try {
         if (!isChildReady) {
           failTimer = setTimeout(() => {
@@ -4675,8 +4714,20 @@
           if (failTimer) clearTimeout(failTimer)
           break
         }
+        case 'USHORTCUTS_IFRAME_FAILED': {
+          console.warn('[utags] Iframe mode failed:', data.reason)
+          localStorage.setItem(DISABLE_IFRAME_KEY, '1')
+          localStorage.setItem(CHECK_IFRAME_KEY, '4')
+          location.reload()
+          break
+        }
         case 'USHORTCUTS_URL_CHANGE': {
           syncState(data.url, data.title)
+          progressBar2 == null ? void 0 : progressBar2.finish()
+          break
+        }
+        case 'USHORTCUTS_LOADING_START': {
+          progressBar2 == null ? void 0 : progressBar2.start()
           break
         }
         case 'USHORTCUTS_FORWARD_KEYDOWN': {
@@ -4712,8 +4763,12 @@
     const iframe = document.querySelector(
       'iframe[name="utags-shortcuts-iframe"]'
     )
-    if (iframe) {
-      iframe.src = url
+    if (iframe && iframe.contentWindow) {
+      progressBar2 == null ? void 0 : progressBar2.start()
+      iframe.contentWindow.postMessage(
+        { type: 'USHORTCUTS_NAVIGATE', url },
+        '*'
+      )
       return true
     }
     return false
@@ -4735,8 +4790,12 @@
   }
   function initIframeChild() {
     if (globalThis.name !== 'utags-shortcuts-iframe') return
+    const initialLoadUrl = sessionStorage.getItem(LAST_LOAD_URL_KEY)
+    if (!detectInfiniteReload()) return
     globalThis.parent.postMessage({ type: 'USHORTCUTS_IFRAME_READY' }, '*')
+    verifyIframeSupport(initialLoadUrl != null ? initialLoadUrl : void 0)
     const notify = () => {
+      verifyIframeSupport()
       globalThis.parent.postMessage(
         {
           type: 'USHORTCUTS_URL_CHANGE',
@@ -4783,12 +4842,22 @@
     }
     globalThis.addEventListener('popstate', notify)
     globalThis.addEventListener('hashchange', notify)
+    globalThis.addEventListener('beforeunload', () => {
+      globalThis.parent.postMessage({ type: 'USHORTCUTS_LOADING_START' }, '*')
+    })
     document.addEventListener(
       'click',
       (e) => {
         const target = e.target.closest('a')
         if (!target || !target.href) return
         if (isSameOrigin(target.href)) {
+          if (!isSupported()) {
+            sessionStorage.setItem(LAST_CLICK_URL_KEY, target.href)
+          }
+          globalThis.parent.postMessage(
+            { type: 'USHORTCUTS_LOADING_START' },
+            '*'
+          )
         } else {
           if (
             target.target === '_blank' ||
@@ -4821,6 +4890,69 @@
         '*'
       )
     })
+    globalThis.addEventListener('message', (e) => {
+      if (e.source !== globalThis.parent) return
+      const data = e.data
+      if (!data || !data.type) return
+      if (data.type === 'USHORTCUTS_NAVIGATE') {
+        navigateUrl(data.url)
+      }
+    })
+  }
+  function detectInfiniteReload() {
+    try {
+      if (isSupported()) return true
+      const now = Date.now()
+      const lastLoadTime = Number.parseInt(
+        sessionStorage.getItem(LAST_LOAD_TIME_KEY) || '0',
+        10
+      )
+      const lastLoadUrl = sessionStorage.getItem(LAST_LOAD_URL_KEY)
+      let reloadCount = Number.parseInt(
+        sessionStorage.getItem(RELOAD_COUNT_KEY) || '0',
+        10
+      )
+      if (
+        now - lastLoadTime < 5e3 &&
+        (!lastLoadUrl || lastLoadUrl === location.href)
+      ) {
+        reloadCount++
+      } else {
+        reloadCount = 1
+      }
+      sessionStorage.setItem(LAST_LOAD_TIME_KEY, now.toString())
+      sessionStorage.setItem(LAST_LOAD_URL_KEY, location.href)
+      sessionStorage.setItem(RELOAD_COUNT_KEY, reloadCount.toString())
+      if (reloadCount > 3) {
+        clearDetectionStorage()
+        globalThis.parent.postMessage(
+          { type: 'USHORTCUTS_IFRAME_FAILED', reason: 'infinite_reload' },
+          '*'
+        )
+        return false
+      }
+      return true
+    } catch (e) {
+      return true
+    }
+  }
+  function verifyIframeSupport(previousUrl) {
+    try {
+      if (isSupported()) return
+      const lastLoadUrl =
+        previousUrl === void 0
+          ? sessionStorage.getItem(LAST_LOAD_URL_KEY)
+          : previousUrl
+      const lastClickUrl = sessionStorage.getItem(LAST_CLICK_URL_KEY)
+      if (
+        lastLoadUrl &&
+        lastLoadUrl !== location.href &&
+        lastClickUrl === location.href
+      ) {
+        sessionStorage.setItem(SUPPORTED_KEY, '1')
+        clearDetectionStorage()
+      }
+    } catch (e) {}
   }
   var EDGE_DEFAULT_WIDTH = 3
   var EDGE_DEFAULT_HEIGHT = 60

@@ -1,6 +1,9 @@
 import { doc } from '../globals/doc'
 import { win } from '../globals/win'
+import { ProgressBar } from '../common/progress-bar'
 import { isSameOrigin } from './url'
+
+let progressBar: ProgressBar | undefined
 
 function isVueApp() {
   // Vue does not work pushState
@@ -38,6 +41,12 @@ function isForceLocationAssign(url: string) {
 }
 
 export function navigateUrl(url: string) {
+  if (!progressBar) {
+    progressBar = new ProgressBar()
+  }
+
+  progressBar.start()
+
   try {
     if (isSameOrigin(url) && !isForceLocationAssign(url)) {
       if (
@@ -63,6 +72,9 @@ export function navigateUrl(url: string) {
           if (document.documentElement.dataset[key] === '1') {
             // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
             delete document.documentElement.dataset[key]
+            setTimeout(() => {
+              progressBar?.finish()
+            }, 800)
             return
           }
         } catch {}
@@ -78,6 +90,9 @@ export function navigateUrl(url: string) {
       if (isSpa()) {
         win.history.pushState(null, '', url)
         win.dispatchEvent(new PopStateEvent('popstate'))
+        setTimeout(() => {
+          progressBar?.finish()
+        }, 800)
         return
       }
     }
