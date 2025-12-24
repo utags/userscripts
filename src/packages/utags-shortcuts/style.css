@@ -118,28 +118,28 @@
 }
 
 .anim-in-left {
-  animation: ushortcuts-slide-in-left 200ms ease-out;
+  animation: ushortcuts-slide-in-left 100ms ease-out;
 }
 .anim-in-right {
-  animation: ushortcuts-slide-in-right 200ms ease-out;
+  animation: ushortcuts-slide-in-right 100ms ease-out;
 }
 .anim-in-top {
-  animation: ushortcuts-slide-in-top 200ms ease-out;
+  animation: ushortcuts-slide-in-top 100ms ease-out;
 }
 .anim-in-bottom {
-  animation: ushortcuts-slide-in-bottom 200ms ease-out;
+  animation: ushortcuts-slide-in-bottom 100ms ease-out;
 }
 .anim-out-left {
-  animation: ushortcuts-slide-out-left 180ms ease-in forwards;
+  animation: ushortcuts-slide-out-left 80ms ease-in forwards;
 }
 .anim-out-right {
-  animation: ushortcuts-slide-out-right 180ms ease-in forwards;
+  animation: ushortcuts-slide-out-right 80ms ease-in forwards;
 }
 .anim-out-top {
-  animation: ushortcuts-slide-out-top 180ms ease-in forwards;
+  animation: ushortcuts-slide-out-top 80ms ease-in forwards;
 }
 .anim-out-bottom {
-  animation: ushortcuts-slide-out-bottom 180ms ease-in forwards;
+  animation: ushortcuts-slide-out-bottom 80ms ease-in forwards;
 }
 
 .header {

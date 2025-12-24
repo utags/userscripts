@@ -467,6 +467,10 @@
     skipButtons: true,
     skipLinks: true,
   }
+  var win = globalThis
+  function isTopFrame() {
+    return win.self === win.top
+  }
   var normalizeToDefaultType = (val, dv) => {
     const t = typeof dv
     if (t === 'number') {
@@ -628,7 +632,7 @@
     return { row }
   }
   function openSettingsPanel(schema, store2, options) {
-    if (globalThis.self !== globalThis.top) {
+    if (!isTopFrame()) {
       return
     }
     const { host, root, existed } = ensureShadowRoot({

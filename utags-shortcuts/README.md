@@ -89,6 +89,10 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.2.3
+
+- Improved panel collapse behavior: the panel now stays expanded when the mouse leaves the window or hovers over the scrollbar.
+
 ### v0.2.2
 
 - Optimized the rendering logic of the panel to reduce UI flickering during state updates.

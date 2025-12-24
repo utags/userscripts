@@ -8,13 +8,20 @@ export function showDropdownMenu(
   root: ShadowRoot,
   anchor: HTMLElement,
   items: DropdownItem[],
-  rightSide: boolean
+  options: { rightSide: boolean; onClose?: () => void }
 ) {
   for (const n of Array.from(root.querySelectorAll('.quick-add-menu')))
     n.remove()
   const menu = document.createElement('div')
   menu.className = 'quick-add-menu'
   menu.setAttribute('role', 'menu')
+
+  const cleanup = () => {
+    for (const n of Array.from(root.querySelectorAll('.quick-add-menu')))
+      n.remove()
+    if (options.onClose) options.onClose()
+  }
+
   for (const it of items) {
     const btn = document.createElement('button')
     btn.className = 'quick-add-item'
@@ -27,8 +34,7 @@ export function showDropdownMenu(
       try {
         it.onClick(e)
       } finally {
-        for (const n of Array.from(root.querySelectorAll('.quick-add-menu')))
-          n.remove()
+        cleanup()
       }
     })
     menu.append(btn)
@@ -51,7 +57,7 @@ export function showDropdownMenu(
   }
 
   menu.style.position = 'fixed'
-  if (rightSide) {
+  if (options.rightSide) {
     const right = Math.round(window.innerWidth - r.right)
     menu.style.top = `${top}px`
     menu.style.right = `${right}px`
@@ -65,8 +71,7 @@ export function showDropdownMenu(
 
   setTimeout(() => {
     const onOutside = () => {
-      for (const n of Array.from(root.querySelectorAll('.quick-add-menu')))
-        n.remove()
+      cleanup()
     }
 
     root.addEventListener('click', onOutside, { once: true })

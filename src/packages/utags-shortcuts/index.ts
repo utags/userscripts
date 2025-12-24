@@ -858,6 +858,7 @@ function renderGroupSection(
     setIcon(addLinkBtn, 'lucide:plus', '添加链接到此分组')
     addLinkBtn.addEventListener('click', (e) => {
       e.stopPropagation()
+      suppressCollapse = true
       showDropdownMenu(
         root,
         addLinkBtn,
@@ -926,7 +927,12 @@ function renderGroupSection(
             },
           },
         ],
-        groupMenuRightSide
+        {
+          rightSide: groupMenuRightSide,
+          onClose() {
+            suppressCollapse = false
+          },
+        }
       )
     })
 
@@ -948,6 +954,7 @@ function renderGroupSection(
     setIcon(editBtn, 'lucide:edit-3', '编辑')
     editBtn.addEventListener('click', (ev) => {
       ev.stopPropagation()
+      suppressCollapse = true
       showDropdownMenu(
         root,
         editBtn,
@@ -981,7 +988,12 @@ function renderGroupSection(
             },
           },
         ],
-        editMenuRightSide
+        {
+          rightSide: editMenuRightSide,
+          onClose() {
+            suppressCollapse = false
+          },
+        }
       )
     })
 
@@ -1318,7 +1330,11 @@ function renderPanel(root: ShadowRoot, cfg: ShortcutsConfig, animIn: boolean) {
       if (collapseTimer) clearTimeout(collapseTimer)
     } catch {}
   })
-  wrapper.addEventListener('mouseleave', () => {
+  wrapper.addEventListener('mouseleave', (e) => {
+    // If relatedTarget is null, the mouse has left the window (or moved to a UI part that doesn't trigger events, like scrollbar).
+    // In this case, we keep the panel expanded as per user request.
+    if (!e.relatedTarget || e.relatedTarget === document.documentElement) return
+
     const pinnedFlag =
       (settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
         ? true
@@ -1367,7 +1383,6 @@ function openQuickAddMenu(
         icon: 'lucide:folder',
         label: '添加分组',
         onClick() {
-          suppressCollapse = false
           openAddGroupModal(root, cfg, {
             saveConfig(c) {
               void saveConfig(c)
@@ -1384,7 +1399,6 @@ function openQuickAddMenu(
         icon: 'lucide:link',
         label: '添加链接',
         onClick() {
-          suppressCollapse = false
           const matched = currentGroups(cfg)
           openAddLinkModal(root, cfg, {
             saveConfig(c) {
@@ -1401,7 +1415,12 @@ function openQuickAddMenu(
         },
       },
     ],
-    rightSide
+    {
+      rightSide,
+      onClose() {
+        suppressCollapse = false
+      },
+    }
   )
 }
 
@@ -1474,13 +1493,6 @@ function rerender(root: ShadowRoot, cfg: ShortcutsConfig) {
         tab.addEventListener('mouseenter', () => {
           tempOpen = true
           rerender(root, cfg)
-        })
-        tab.addEventListener('mouseleave', () => {
-          const pinnedFlag =
-            (settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
-              ? true
-              : Boolean(settings.pinned)
-          if (!pinnedFlag && !suppressCollapse) scheduleAutoCollapse(root, cfg)
         })
         nextNodes.push(tab)
       }
@@ -1622,7 +1634,7 @@ function scheduleAutoCollapse(root: ShadowRoot, cfg: ShortcutsConfig) {
   if (collapseTimer) clearTimeout(collapseTimer)
   collapseTimer = setTimeout(() => {
     collapseWithAnim(root, cfg)
-  }, 500) as unknown as number
+  }, 10) as unknown as number
 }
 
 function collapseWithAnim(root: ShadowRoot, cfg: ShortcutsConfig) {
