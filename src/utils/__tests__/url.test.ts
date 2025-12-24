@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { extractDomain } from '../url'
+import { extractDomain, isSameOrigin } from '../url'
 
 describe('extractDomain', () => {
   beforeEach(() => {
@@ -51,5 +51,35 @@ describe('extractDomain', () => {
       writable: true,
     })
     expect(extractDomain(undefined)).toBe('fallback.com')
+  })
+})
+
+describe('isSameOrigin', () => {
+  beforeEach(() => {
+    Object.defineProperty(globalThis, 'location', {
+      value: {
+        href: 'https://example.com/base',
+        hostname: 'example.com',
+      },
+      writable: true,
+    })
+  })
+
+  it('returns true for same-origin absolute URL', () => {
+    expect(isSameOrigin('https://example.com/other')).toBe(true)
+  })
+
+  it('returns true for relative URL', () => {
+    expect(isSameOrigin('/path')).toBe(true)
+    expect(isSameOrigin('path')).toBe(true)
+  })
+
+  it('returns false for different origin', () => {
+    expect(isSameOrigin('https://other.com/')).toBe(false)
+  })
+
+  it('supports custom baseHref', () => {
+    expect(isSameOrigin('https://a.com/x', 'https://a.com/y')).toBe(true)
+    expect(isSameOrigin('https://b.com/x', 'https://a.com/y')).toBe(false)
   })
 })

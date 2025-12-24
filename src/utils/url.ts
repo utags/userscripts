@@ -48,3 +48,14 @@ export function extractDomain(url?: string): string {
     return url || win.location.hostname || '' // Fallback
   }
 }
+
+export function isSameOrigin(url: string, baseHref?: string): boolean {
+  try {
+    const base = baseHref ?? win.location.href
+    const target = new URL(url, base)
+    const baseUrl = new URL(base)
+    return target.origin === baseUrl.origin
+  } catch {
+    return false
+  }
+}

@@ -1,8 +1,10 @@
 import { createUshortcutsSettingsStore } from './settings-panel'
 import { isTopFrame } from '../../utils/is-top-frame'
+import { isSameOrigin } from '../../utils/url'
 import { isEditableTarget } from './utils'
 
 const DISABLE_IFRAME_KEY = 'utags_iframe_mode_disabled'
+const CHECK_IFRAME_KEY = 'utags_iframe_mode_checking'
 
 const BLACKLIST_DOMAINS = new Set([
   'mail.google.com',
@@ -14,9 +16,12 @@ const BLACKLIST_DOMAINS = new Set([
   'pro.x.com',
   'www.facebook.com',
   'www.instagram.com',
+  'stackoverflow.com',
+  'superuser.com',
 ])
 const BLACKLIST_URL_PATTERNS = new Set([
-  /https:\/\/www\.google\.com\/.*[&?]udm=50/,
+  /^https:\/\/www\.google\.com\/.*[&?]udm=50/,
+  /^https:\/\/(.+\.)?stackexchange\.com\//,
 ])
 
 export function isIframeModeDisabled() {
@@ -28,7 +33,10 @@ export function isIframeModeDisabled() {
     return true
   }
 
-  return Boolean(localStorage.getItem(DISABLE_IFRAME_KEY))
+  return (
+    Boolean(localStorage.getItem(DISABLE_IFRAME_KEY)) ||
+    Boolean(localStorage.getItem(CHECK_IFRAME_KEY))
+  )
 }
 
 export async function checkAndEnableIframeMode() {
@@ -89,6 +97,9 @@ function enableIframeMode(side: 'left' | 'right') {
   newBody.style.cssText =
     'height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden;'
 
+  // Start checking iframes, set as 1 to prevent reloading infinite loop
+  localStorage.setItem(CHECK_IFRAME_KEY, '1')
+
   const iframe = document.createElement('iframe')
   iframe.src = currentUrl
   iframe.style.cssText = `
@@ -121,6 +132,7 @@ function enableIframeMode(side: 'left' | 'right') {
               '[utags] Iframe mode script failed to start. Disabling for this site.'
             )
             localStorage.setItem(DISABLE_IFRAME_KEY, '1')
+            localStorage.setItem(CHECK_IFRAME_KEY, '3')
             location.reload()
           }
         }, 5000)
@@ -137,6 +149,7 @@ function enableIframeMode(side: 'left' | 'right') {
       // If we can't access content (e.g. cross-origin redirect), fallback immediately
       if (!isChildReady) {
         localStorage.setItem(DISABLE_IFRAME_KEY, '1')
+        localStorage.setItem(CHECK_IFRAME_KEY, '2')
         location.reload()
       }
     }
@@ -151,6 +164,10 @@ function enableIframeMode(side: 'left' | 'right') {
     switch (data.type) {
       case 'USHORTCUTS_IFRAME_READY': {
         isChildReady = true
+        setTimeout(() => {
+          // Remove the check flag
+          localStorage.removeItem(CHECK_IFRAME_KEY)
+        }, 10_000)
         if (failTimer) clearTimeout(failTimer)
         break
       }
@@ -297,8 +314,7 @@ export function initIframeChild() {
       if (!target || !target.href) return
 
       // Check if it's same origin
-      const url = new URL(target.href, location.href)
-      if (url.origin === location.origin) {
+      if (isSameOrigin(target.href)) {
         // Internal link: let it proceed in iframe
         // (Browser default behavior or SPA router will handle it)
         // We just need to make sure we notify parent if URL changes (handled by hooks above)

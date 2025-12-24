@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.2.3
+// @version              0.2.4
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -1403,9 +1403,6 @@
       try {
         helpers.saveConfig(cfg)
       } catch (e) {}
-      try {
-        helpers.rerender(root, cfg)
-      } catch (e) {}
       close()
     })
     deleteBtn.addEventListener('click', () => {
@@ -1426,9 +1423,6 @@
         } catch (e) {}
         try {
           helpers.saveConfig(cfg)
-        } catch (e) {}
-        try {
-          helpers.rerender(root, cfg)
         } catch (e) {}
         close()
       }
@@ -1791,6 +1785,9 @@
     const cancelBtn = document.createElement('button')
     cancelBtn.className = 'btn btn-secondary'
     cancelBtn.textContent = '\u53D6\u6D88'
+    const deleteBtn = document.createElement('button')
+    deleteBtn.className = 'btn btn-secondary'
+    deleteBtn.textContent = '\u5220\u9664'
     saveBtn.addEventListener('click', () => {
       const res = initialData
       if (!res.name) {
@@ -1814,14 +1811,29 @@
       try {
         helpers.saveConfig(cfg)
       } catch (e) {}
-      try {
-        helpers.rerender(root, cfg)
-      } catch (e) {}
       close()
     })
     cancelBtn.addEventListener('click', close)
+    deleteBtn.addEventListener('click', () => {
+      if (!helpers.existingGroup) return
+      const ok = globalThis.confirm(
+        '\u662F\u5426\u5220\u9664\u6B64\u5206\u7EC4\u53CA\u5176\u6240\u6709\u5185\u5BB9\uFF1F'
+      )
+      if (!ok) return
+      const idx = cfg.groups.findIndex((g) => g.id === helpers.existingGroup.id)
+      if (idx !== -1) {
+        cfg.groups.splice(idx, 1)
+        try {
+          helpers.saveConfig(cfg)
+        } catch (e) {}
+        close()
+      }
+    })
     actions.append(saveBtn)
     actions.append(cancelBtn)
+    if (helpers.existingGroup) {
+      actions.append(deleteBtn)
+    }
   }
   function showDropdownMenu(root, anchor, items, options) {
     for (const n of Array.from(root.querySelectorAll('.quick-add-menu')))
@@ -1922,6 +1934,16 @@
       return domain
     } catch (e) {
       return url || win.location.hostname || ''
+    }
+  }
+  function isSameOrigin(url, baseHref) {
+    try {
+      const base = baseHref != null ? baseHref : win.location.href
+      const target = new URL(url, base)
+      const baseUrl = new URL(base)
+      return target.origin === baseUrl.origin
+    } catch (e) {
+      return false
     }
   }
   function resolveUrlTemplate(s) {
@@ -3750,7 +3772,7 @@
       label: '\u4FA7\u8FB9\u680F\u4F7F\u7528 iframe \u52A0\u8F7D',
       renderHelp(el) {
         el.append(
-          '\u542F\u7528\u540E\uFF0C\u5728\u4FA7\u8FB9\u680F\u6A21\u5F0F\u4E0B\uFF0C\u4F7F\u7528 iframe \u52A0\u8F7D\u9875\u9762\uFF0C\u907F\u514D\u906E\u6321\u5185\u5BB9\u3002\u90E8\u5206\u7F51\u7AD9\u56E0\u5B89\u5168\u7B56\u7565\u4E0D\u652F\u6301 iframe\uFF0C\u5C06\u81EA\u52A8\u56DE\u9000\u5230\u666E\u901A\u6A21\u5F0F\u3002\u5982\u6709\u95EE\u9898\u8BF7\u53CD\u9988\uFF1A'
+          '\u542F\u7528\u540E\uFF0C\u5728\u4FA7\u8FB9\u680F\u6A21\u5F0F\u4E0B\uFF0C\u4F7F\u7528 iframe \u52A0\u8F7D\u9875\u9762\uFF0C\u907F\u514D\u906E\u6321\u5185\u5BB9\uFF08\u9700\u8981\u5237\u65B0\u9875\u9762\u624D\u4F1A\u751F\u6548\uFF09\u3002\u90E8\u5206\u7F51\u7AD9\u56E0\u5B89\u5168\u7B56\u7565\u4E0D\u652F\u6301 iframe\uFF0C\u5C06\u81EA\u52A8\u56DE\u9000\u5230\u666E\u901A\u6A21\u5F0F\u3002\u5982\u6709\u95EE\u9898\u8BF7\u53CD\u9988\uFF1A'
         )
         const a = document.createElement('a')
         a.href = 'https://github.com/utags/userscripts/issues'
@@ -4482,7 +4504,59 @@
       },
     })
   }
+  function isVueApp() {
+    return false
+  }
+  function isSpa() {
+    return doc.querySelector('.ember-application') !== null || isVueApp()
+  }
+  function isForceLocationAssign(url) {
+    const rules = [
+      'https://linux.do/challenge?redirect=',
+      'https://linux.do/?safe_mode=',
+    ]
+    return rules.some((rule) => url.includes(rule))
+  }
+  function navigateUrl(url) {
+    try {
+      if (isSameOrigin(url) && !isForceLocationAssign(url)) {
+        if (
+          document.querySelector('script[src*="/_next/"],link[href*="/_next/"]')
+        ) {
+          try {
+            const key = 'ushortcutsNextNavigated'
+            const code =
+              "\n            try {\n            console.log('window.next', window.next)\n              if (window.next && window.next.router && typeof window.next.router.push === 'function') {\n                window.next.router.push("
+                .concat(
+                  JSON.stringify(url),
+                  ");\n                document.documentElement.dataset['"
+                )
+                .concat(
+                  key,
+                  "'] = '1';\n              }\n            } catch (e) {}\n          "
+                )
+            const s = document.createElement('script')
+            s.textContent = code
+            document.documentElement.append(s)
+            s.remove()
+            if (document.documentElement.dataset[key] === '1') {
+              delete document.documentElement.dataset[key]
+              return
+            }
+          } catch (e) {}
+        }
+        console.log('isSpa', isSpa())
+        if (isSpa()) {
+          win.history.pushState(null, '', url)
+          win.dispatchEvent(new PopStateEvent('popstate'))
+          return
+        }
+      }
+    } catch (e) {}
+    win.location.assign(url)
+  }
   var DISABLE_IFRAME_KEY = 'utags_iframe_mode_disabled'
+  var CHECK_IFRAME_KEY = 'utags_iframe_mode_checking'
   var BLACKLIST_DOMAINS = /* @__PURE__ */ new Set([
     'mail.google.com',
     'gemini.google.com',
@@ -4493,9 +4567,12 @@
     'pro.x.com',
     'www.facebook.com',
     'www.instagram.com',
+    'stackoverflow.com',
+    'superuser.com',
   ])
   var BLACKLIST_URL_PATTERNS = /* @__PURE__ */ new Set([
-    /https:\/\/www\.google\.com\/.*[&?]udm=50/,
+    /^https:\/\/www\.google\.com\/.*[&?]udm=50/,
+    /^https:\/\/(.+\.)?stackexchange\.com\//,
   ])
   function isIframeModeDisabled() {
     if (BLACKLIST_DOMAINS.has(location.host)) {
@@ -4504,7 +4581,10 @@
     if (Array.from(BLACKLIST_URL_PATTERNS).some((p) => p.test(location.href))) {
       return true
     }
-    return Boolean(localStorage.getItem(DISABLE_IFRAME_KEY))
+    return (
+      Boolean(localStorage.getItem(DISABLE_IFRAME_KEY)) ||
+      Boolean(localStorage.getItem(CHECK_IFRAME_KEY))
+    )
   }
   async function checkAndEnableIframeMode() {
     if (!isTopFrame()) return
@@ -4543,6 +4623,7 @@
       'height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden;'
     newBody.style.cssText =
       'height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden;'
+    localStorage.setItem(CHECK_IFRAME_KEY, '1')
     const iframe = document.createElement('iframe')
     iframe.src = currentUrl
     iframe.style.cssText =
@@ -4563,6 +4644,7 @@
                 '[utags] Iframe mode script failed to start. Disabling for this site.'
               )
               localStorage.setItem(DISABLE_IFRAME_KEY, '1')
+              localStorage.setItem(CHECK_IFRAME_KEY, '3')
               location.reload()
             }
           }, 5e3)
@@ -4575,6 +4657,7 @@
         console.error('Failed to access iframe content', error)
         if (!isChildReady) {
           localStorage.setItem(DISABLE_IFRAME_KEY, '1')
+          localStorage.setItem(CHECK_IFRAME_KEY, '2')
           location.reload()
         }
       }
@@ -4586,6 +4669,9 @@
       switch (data.type) {
         case 'USHORTCUTS_IFRAME_READY': {
           isChildReady = true
+          setTimeout(() => {
+            localStorage.removeItem(CHECK_IFRAME_KEY)
+          }, 1e4)
           if (failTimer) clearTimeout(failTimer)
           break
         }
@@ -4702,8 +4788,7 @@
       (e) => {
         const target = e.target.closest('a')
         if (!target || !target.href) return
-        const url = new URL(target.href, location.href)
-        if (url.origin === location.origin) {
+        if (isSameOrigin(target.href)) {
         } else {
           if (
             target.target === '_blank' ||
@@ -4797,15 +4882,13 @@
     const navigate = (url) => {
       if (isIframeMode) {
         try {
-          const currentOrigin = location.origin
-          const targetOrigin = new URL(url, location.href).origin
-          if (currentOrigin === targetOrigin && updateIframeUrl(url)) {
+          if (isSameOrigin(url) && updateIframeUrl(url)) {
             return
           }
         } catch (e) {}
         location.assign(url)
       } else {
-        location.assign(url)
+        navigateUrl(url)
       }
     }
     if (it.type === 'url') {
@@ -6237,7 +6320,10 @@
     void (async () => {
       const cfg = await loadConfig()
       settings = await store.getAll()
-      isIframeMode = settings.sidebarUseIframe && !isIframeModeDisabled()
+      isIframeMode =
+        settings.layoutMode === 'sidebar' &&
+        settings.sidebarUseIframe &&
+        !isIframeModeDisabled()
       const updateState = () => {
         rerender(root, cfg)
         registerMenus(root, cfg)
@@ -6245,7 +6331,10 @@
       }
       store.onChange(async () => {
         settings = await store.getAll()
-        isIframeMode = settings.sidebarUseIframe && !isIframeModeDisabled()
+        isIframeMode =
+          settings.layoutMode === 'sidebar' &&
+          settings.sidebarUseIframe &&
+          !isIframeModeDisabled()
         updateState()
       })
       ensureGlobalStyles()

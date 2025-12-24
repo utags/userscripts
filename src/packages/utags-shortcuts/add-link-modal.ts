@@ -135,10 +135,6 @@ export function openAddLinkModal(
       helpers.saveConfig(cfg)
     } catch {}
 
-    try {
-      helpers.rerender(root, cfg)
-    } catch {}
-
     close()
   })
 
@@ -159,10 +155,6 @@ export function openAddLinkModal(
 
       try {
         helpers.saveConfig(cfg)
-      } catch {}
-
-      try {
-        helpers.rerender(root, cfg)
       } catch {}
 
       close()

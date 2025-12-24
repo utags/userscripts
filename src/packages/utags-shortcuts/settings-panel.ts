@@ -117,7 +117,7 @@ const EDGE_SETTINGS_FIELDS: Field[] = [
     label: '侧边栏使用 iframe 加载',
     renderHelp(el) {
       el.append(
-        '启用后，在侧边栏模式下，使用 iframe 加载页面，避免遮挡内容。部分网站因安全策略不支持 iframe，将自动回退到普通模式。如有问题请反馈：'
+        '启用后，在侧边栏模式下，使用 iframe 加载页面，避免遮挡内容（需要刷新页面才会生效）。部分网站因安全策略不支持 iframe，将自动回退到普通模式。如有问题请反馈：'
       )
       const a = document.createElement('a')
       a.href = 'https://github.com/utags/userscripts/issues'

@@ -37,6 +37,8 @@ import {
   hasDuplicateInGroup,
 } from './add-link-actions'
 import { resolveTargetUrl, resolveIcon, isEditableTarget } from './utils'
+import { navigateUrl } from '../../utils/navigate'
+import { isSameOrigin } from '../../utils/url'
 import {
   checkAndEnableIframeMode,
   initIframeChild,
@@ -155,16 +157,14 @@ function openItem(
   const navigate = (url: string) => {
     if (isIframeMode) {
       try {
-        const currentOrigin = location.origin
-        const targetOrigin = new URL(url, location.href).origin
-        if (currentOrigin === targetOrigin && updateIframeUrl(url)) {
+        if (isSameOrigin(url) && updateIframeUrl(url)) {
           return
         }
       } catch {}
 
       location.assign(url)
     } else {
-      location.assign(url)
+      navigateUrl(url)
     }
   }
 
@@ -1795,7 +1795,10 @@ function main() {
   void (async () => {
     const cfg = await loadConfig()
     settings = await store.getAll()
-    isIframeMode = settings.sidebarUseIframe && !isIframeModeDisabled()
+    isIframeMode =
+      settings.layoutMode === 'sidebar' &&
+      settings.sidebarUseIframe &&
+      !isIframeModeDisabled()
 
     const updateState = () => {
       rerender(root, cfg)
@@ -1805,7 +1808,10 @@ function main() {
 
     store.onChange(async () => {
       settings = await store.getAll()
-      isIframeMode = settings.sidebarUseIframe && !isIframeModeDisabled()
+      isIframeMode =
+        settings.layoutMode === 'sidebar' &&
+        settings.sidebarUseIframe &&
+        !isIframeModeDisabled()
       updateState()
     })
 

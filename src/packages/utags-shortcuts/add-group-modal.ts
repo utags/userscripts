@@ -48,6 +48,9 @@ export function openAddGroupModal(
   const cancelBtn = document.createElement('button')
   cancelBtn.className = 'btn btn-secondary'
   cancelBtn.textContent = '取消'
+  const deleteBtn = document.createElement('button')
+  deleteBtn.className = 'btn btn-secondary'
+  deleteBtn.textContent = '删除'
 
   saveBtn.addEventListener('click', () => {
     const res = initialData
@@ -73,15 +76,32 @@ export function openAddGroupModal(
       helpers.saveConfig(cfg)
     } catch {}
 
-    try {
-      helpers.rerender(root, cfg)
-    } catch {}
-
     close()
   })
 
   cancelBtn.addEventListener('click', close)
 
+  deleteBtn.addEventListener('click', () => {
+    if (!helpers.existingGroup) return
+    const ok = globalThis.confirm('是否删除此分组及其所有内容？')
+    if (!ok) return
+
+    const idx = cfg.groups.findIndex(
+      (g: any) => g.id === helpers.existingGroup.id
+    )
+    if (idx !== -1) {
+      cfg.groups.splice(idx, 1)
+      try {
+        helpers.saveConfig(cfg)
+      } catch {}
+
+      close()
+    }
+  })
+
   actions.append(saveBtn)
   actions.append(cancelBtn)
+  if (helpers.existingGroup) {
+    actions.append(deleteBtn)
+  }
 }
