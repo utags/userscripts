@@ -1,4 +1,5 @@
 import { c } from '../../utils/c'
+import { isTopFrame } from '../../utils/is-top-frame'
 import { ensureShadowRoot } from '../../utils/dom'
 import { normalizeToDefaultType, setOrDelete } from '../../utils/obj'
 import styleText from 'css:./style.css'
@@ -305,7 +306,7 @@ export function openSettingsPanel(
   store: Store,
   options?: PanelOptions
 ): void {
-  if (globalThis.self !== globalThis.top) {
+  if (!isTopFrame()) {
     return
   }
 

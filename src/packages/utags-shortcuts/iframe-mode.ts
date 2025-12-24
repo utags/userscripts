@@ -1,4 +1,5 @@
 import { createUshortcutsSettingsStore } from './settings-panel'
+import { isTopFrame } from '../../utils/is-top-frame'
 import { isEditableTarget } from './utils'
 
 const DISABLE_IFRAME_KEY = 'utags_iframe_mode_disabled'
@@ -31,14 +32,18 @@ export function isIframeModeDisabled() {
 }
 
 export async function checkAndEnableIframeMode() {
-  if (globalThis.top !== globalThis.self) return
+  if (!isTopFrame()) return
 
   // 0. Check if disabled for this site
   if (isIframeModeDisabled()) return
 
   // 1. Check settings
   const settings = await createUshortcutsSettingsStore().getAll()
-  if (settings.layoutMode !== 'sidebar' || !(settings as any).sidebarUseIframe)
+  if (
+    !settings.enabled ||
+    settings.layoutMode !== 'sidebar' ||
+    !settings.sidebarUseIframe
+  )
     return
 
   // 2. Enable Iframe Mode

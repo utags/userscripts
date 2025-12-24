@@ -5,6 +5,7 @@ import {
   setIcon,
 } from '../../utils/dom'
 import { uid } from '../../utils/uid'
+import { isTopFrame } from '../../utils/is-top-frame'
 import { createOpenModeRadios } from './segmented-radios'
 import styleText from 'css:./style.css'
 import { openAddLinkModal } from './add-link-modal'
@@ -238,7 +239,7 @@ async function saveConfig(cfg: ShortcutsConfig) {
 }
 
 function createRoot() {
-  if (globalThis.self !== globalThis.top) {
+  if (!isTopFrame()) {
     // Return a dummy root or handle this gracefully.
     // In iframe mode or any other iframe (ads, etc.), we don't want to render the shortcuts panel.
     // However, the caller expects { host, root }.
@@ -1774,7 +1775,7 @@ function main() {
     if (de && de.dataset) de.dataset.utagsShortcuts = '1'
   } catch {}
 
-  if (globalThis.self !== globalThis.top) {
+  if (!isTopFrame()) {
     return
   }
 

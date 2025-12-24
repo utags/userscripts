@@ -137,6 +137,10 @@
     }
     return el
   }
+  var win = globalThis
+  function isTopFrame() {
+    return win.self === win.top
+  }
   var defaultFavicon16 = encodeURIComponent(
     'https://wsrv.nl/?w=16&h=16&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
   )
@@ -349,7 +353,7 @@
     return { row }
   }
   function openSettingsPanel(schema, store, options) {
-    if (globalThis.self !== globalThis.top) {
+    if (!isTopFrame()) {
       return
     }
     const { host, root, existed } = ensureShadowRoot({
@@ -996,7 +1000,6 @@
       },
     }
   }
-  var win = globalThis
   function extractDomain(url) {
     try {
       let hostname
