@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.2.1
+// @version              0.2.2
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -5843,12 +5843,7 @@
       if (!pinnedFlag && !suppressCollapse) scheduleAutoCollapse(root, cfg)
     })
     place(wrapper, cfg)
-    const mask = root.querySelector('.modal-mask')
-    if (mask) {
-      mask.before(wrapper)
-    } else {
-      root.append(wrapper)
-    }
+    return wrapper
   }
   function openQuickAddMenu(root, cfg, anchor) {
     suppressCollapse = true
@@ -5922,10 +5917,7 @@
         sy = cur.scrollTop
       }
     } catch (e) {}
-    for (const n of Array.from(
-      root.querySelectorAll('.ushortcuts,.collapsed-tab,.quick-add-menu')
-    ))
-      n.remove()
+    const nextNodes = []
     if (settings.enabled === false) {
       lastCollapsed = true
       suppressCollapse = false
@@ -5935,82 +5927,100 @@
         }
         delete document.documentElement.dataset.utagsShortcutsSidebar
       } catch (e) {}
-      return
-    }
-    let isCollapsed = !tempOpen && (tempClosed || !settings.pinned)
-    if ((settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar')
-      isCollapsed = !tempOpen && Boolean(tempClosed)
-    if (isCollapsed) {
-      const effectiveEdgeHidden =
-        (settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
-          ? true
-          : Boolean(settings.edgeHidden)
-      if (!effectiveEdgeHidden) {
-        const tab = document.createElement('div')
-        tab.className = 'collapsed-tab'
-        place(tab, cfg)
-        try {
-          const gw = (_a = settings.edgeWidth) != null ? _a : EDGE_DEFAULT_WIDTH
-          const gh =
-            (_b = settings.edgeHeight) != null ? _b : EDGE_DEFAULT_HEIGHT
-          const go =
-            (_c = settings.edgeOpacity) != null ? _c : EDGE_DEFAULT_OPACITY
-          const horiz = isHorizontalPos(settings.position)
-          const thickness = Math.max(1, Math.min(24, gw))
-          const length = Math.max(24, Math.min(320, gh))
-          tab.style.width = horiz
-            ? ''.concat(length, 'px')
-            : ''.concat(thickness, 'px')
-          tab.style.height = horiz
-            ? ''.concat(thickness, 'px')
-            : ''.concat(length, 'px')
-          tab.style.opacity = String(Math.max(0, Math.min(1, go)))
-          tab.style.backgroundColor = isDarkTheme(cfg)
-            ? String(settings.edgeColorDark || EDGE_DEFAULT_COLOR_DARK)
-            : String(settings.edgeColorLight || EDGE_DEFAULT_COLOR_LIGHT)
-        } catch (e) {}
-        tab.addEventListener('mouseenter', () => {
-          tempOpen = true
-          rerender(root, cfg)
-        })
-        tab.addEventListener('mouseleave', () => {
-          const pinnedFlag =
-            (settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
-              ? true
-              : Boolean(settings.pinned)
-          if (!pinnedFlag && !suppressCollapse) scheduleAutoCollapse(root, cfg)
-        })
-        root.append(tab)
-      }
-      lastCollapsed = true
-      suppressCollapse = false
-      try {
-        if (isIframeMode) {
-          updateIframeLayout(false)
-        }
-        delete document.documentElement.dataset.utagsShortcutsSidebar
-      } catch (e) {}
-      return
-    }
-    renderPanel(root, cfg, lastCollapsed)
-    updateSidebarClass()
-    try {
-      const cur =
-        root.querySelector('.ushortcuts .panel-scroll') ||
-        root.querySelector('.ushortcuts .panel')
-      if (cur) {
-        cur.scrollLeft = sx
-        cur.scrollTop = sy
-        try {
-          requestAnimationFrame(() => {
-            cur.scrollLeft = sx
-            cur.scrollTop = sy
+    } else {
+      let isCollapsed = !tempOpen && (tempClosed || !settings.pinned)
+      if ((settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar')
+        isCollapsed = !tempOpen && Boolean(tempClosed)
+      if (isCollapsed) {
+        const effectiveEdgeHidden =
+          (settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
+            ? true
+            : Boolean(settings.edgeHidden)
+        if (!effectiveEdgeHidden) {
+          const tab = document.createElement('div')
+          tab.className = 'collapsed-tab'
+          place(tab, cfg)
+          try {
+            const gw =
+              (_a = settings.edgeWidth) != null ? _a : EDGE_DEFAULT_WIDTH
+            const gh =
+              (_b = settings.edgeHeight) != null ? _b : EDGE_DEFAULT_HEIGHT
+            const go =
+              (_c = settings.edgeOpacity) != null ? _c : EDGE_DEFAULT_OPACITY
+            const horiz = isHorizontalPos(settings.position)
+            const thickness = Math.max(1, Math.min(24, gw))
+            const length = Math.max(24, Math.min(320, gh))
+            tab.style.width = horiz
+              ? ''.concat(length, 'px')
+              : ''.concat(thickness, 'px')
+            tab.style.height = horiz
+              ? ''.concat(thickness, 'px')
+              : ''.concat(length, 'px')
+            tab.style.opacity = String(Math.max(0, Math.min(1, go)))
+            tab.style.backgroundColor = isDarkTheme(cfg)
+              ? String(settings.edgeColorDark || EDGE_DEFAULT_COLOR_DARK)
+              : String(settings.edgeColorLight || EDGE_DEFAULT_COLOR_LIGHT)
+          } catch (e) {}
+          tab.addEventListener('mouseenter', () => {
+            tempOpen = true
+            rerender(root, cfg)
           })
+          tab.addEventListener('mouseleave', () => {
+            const pinnedFlag =
+              (settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
+                ? true
+                : Boolean(settings.pinned)
+            if (!pinnedFlag && !suppressCollapse)
+              scheduleAutoCollapse(root, cfg)
+          })
+          nextNodes.push(tab)
+        }
+        lastCollapsed = true
+        suppressCollapse = false
+        try {
+          if (isIframeMode) {
+            updateIframeLayout(false)
+          }
+          delete document.documentElement.dataset.utagsShortcutsSidebar
         } catch (e) {}
+      } else {
+        nextNodes.push(renderPanel(root, cfg, lastCollapsed))
+        updateSidebarClass()
+        lastCollapsed = false
+        suppressCollapse = false
       }
-    } catch (e) {}
-    lastCollapsed = false
-    suppressCollapse = false
+    }
+    const toRemove = Array.from(
+      root.querySelectorAll('.ushortcuts,.collapsed-tab,.quick-add-menu')
+    )
+    if (nextNodes.length > 0) {
+      const firstChild = root.firstElementChild
+      if (firstChild) {
+        for (const n of nextNodes) firstChild.before(n)
+      } else {
+        root.append(...nextNodes)
+      }
+    }
+    setTimeout(() => {
+      for (const n of toRemove) n.remove()
+    }, 200)
+    if (!lastCollapsed) {
+      try {
+        const cur =
+          root.querySelector('.ushortcuts .panel-scroll') ||
+          root.querySelector('.ushortcuts .panel')
+        if (cur) {
+          cur.scrollLeft = sx
+          cur.scrollTop = sy
+          try {
+            requestAnimationFrame(() => {
+              cur.scrollLeft = sx
+              cur.scrollTop = sy
+            })
+          } catch (e) {}
+        }
+      } catch (e) {}
+    }
   }
   function registerMenus(root, cfg) {
     try {

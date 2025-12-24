@@ -89,6 +89,11 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.2.2
+
+- Optimized the rendering logic of the panel to reduce UI flickering during state updates.
+- Fixed an issue where the panel might overlap with the modal mask.
+
 ### v0.2.1
 
 - Implemented image caching mechanism to prevent redundant network requests and improve rendering performance for icons.
