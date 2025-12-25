@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.2
+// @version              0.1.3
 // @description          Quickly switch Discourse list sorting (created, activity, replies, views, likes) via menu by updating URL params.
 // @description:zh-CN    通过菜单快速切换 Discourse 列表排序（创建/回复时间、回复数、浏览量、点赞数，升/降序），通过修改 URL 参数实现。
 // @author               Pipecraft
@@ -89,8 +89,8 @@
 
     // Target URL (with updated params)
     const target = new URL(window.location.href)
-    target.searchParams.set('order', order)
     target.searchParams.set('ascending', ascending ? 'true' : 'false')
+    target.searchParams.set('order', order)
 
     // Avoid redundant reload if already at target sort
     const isSame =
