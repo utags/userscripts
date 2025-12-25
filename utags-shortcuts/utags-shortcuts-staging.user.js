@@ -250,6 +250,11 @@
       style: { objectFit: 'contain' },
     })
   }
+  function shouldOpenInCurrentTab(e, target) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false
+    if (target && target.target === '_blank') return false
+    return true
+  }
   function clearChildren(el) {
     try {
       el.textContent = ''
@@ -4859,18 +4864,14 @@
           if (!isSupported()) {
             sessionStorage.setItem(LAST_CLICK_URL_KEY, href)
           }
-          globalThis.parent.postMessage(
-            { type: 'USHORTCUTS_LOADING_START' },
-            '*'
-          )
+          if (shouldOpenInCurrentTab(e, target)) {
+            globalThis.parent.postMessage(
+              { type: 'USHORTCUTS_LOADING_START' },
+              '*'
+            )
+          }
         } else {
-          if (
-            target.target === '_blank' ||
-            e.metaKey ||
-            e.ctrlKey ||
-            e.shiftKey
-          )
-            return
+          if (!shouldOpenInCurrentTab(e, target)) return
           e.preventDefault()
           globalThis.top.location.href = href
         }

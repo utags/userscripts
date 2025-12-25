@@ -1,6 +1,7 @@
 import { createUshortcutsSettingsStore } from './settings-panel'
 import { isTopFrame } from '../../utils/is-top-frame'
 import { isSameOrigin } from '../../utils/url'
+import { shouldOpenInCurrentTab } from '../../utils/dom'
 import { isEditableTarget } from './utils'
 import { ProgressBar } from '../../common/progress-bar'
 import { navigateUrl } from '../../utils/navigate'
@@ -379,11 +380,15 @@ export function initIframeChild() {
           sessionStorage.setItem(LAST_CLICK_URL_KEY, href)
         }
 
-        globalThis.parent.postMessage({ type: 'USHORTCUTS_LOADING_START' }, '*')
+        if (shouldOpenInCurrentTab(e, target)) {
+          globalThis.parent.postMessage(
+            { type: 'USHORTCUTS_LOADING_START' },
+            '*'
+          )
+        }
       } else {
         // External link: open in top frame
-        if (target.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey)
-          return
+        if (!shouldOpenInCurrentTab(e, target)) return
 
         e.preventDefault()
         globalThis.top!.location.href = href

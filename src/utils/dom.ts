@@ -11,6 +11,15 @@ function createIconImage(src: string, className?: string) {
   })
 }
 
+export function shouldOpenInCurrentTab(
+  e: MouseEvent | KeyboardEvent,
+  target?: HTMLAnchorElement | HTMLAreaElement
+) {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false
+  if (target && target.target === '_blank') return false
+  return true
+}
+
 export function clearChildren(el: Node & ParentNode) {
   try {
     ;(el as any).textContent = ''
