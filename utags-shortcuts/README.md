@@ -89,6 +89,10 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.2.6
+
+- **Improved Iframe Focus**: The iframe now automatically receives focus after URL updates, ensuring keyboard shortcuts work immediately.
+
 ### v0.2.5
 
 - **Refined SPA Navigation in Iframe Mode**: Improved the navigation logic by using message passing between parent and iframe, ensuring proper SPA routing handling (e.g. Next.js, Vue Router) instead of forcing a reload.

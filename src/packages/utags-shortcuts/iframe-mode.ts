@@ -142,6 +142,7 @@ function enableIframeMode(side: 'left' | 'right') {
   // Since it's same-origin, we can access contentWindow
   // But we need to wait for it to load
   iframe.addEventListener('load', () => {
+    iframe.focus()
     progressBar?.finish()
 
     try {
@@ -253,6 +254,7 @@ export function updateIframeUrl(url: string) {
   if (iframe && iframe.contentWindow) {
     progressBar?.start()
     iframe.contentWindow.postMessage({ type: 'USHORTCUTS_NAVIGATE', url }, '*')
+    iframe.focus()
     return true
   }
 
@@ -363,15 +365,18 @@ export function initIframeChild() {
     'click',
     (e) => {
       const target = (e.target as Element).closest('a')
-      if (!target || !target.href) return
+      if (!target) return
+      const hrefAttr = target.getAttribute('href')
+      if (!hrefAttr || hrefAttr.startsWith('#')) return
+      const href = target.href
 
       // Check if it's same origin
-      if (isSameOrigin(target.href)) {
+      if (isSameOrigin(href)) {
         // Internal link: let it proceed in iframe
         // (Browser default behavior or SPA router will handle it)
         // We just need to make sure we notify parent if URL changes (handled by hooks above)
         if (!isSupported()) {
-          sessionStorage.setItem(LAST_CLICK_URL_KEY, target.href)
+          sessionStorage.setItem(LAST_CLICK_URL_KEY, href)
         }
 
         globalThis.parent.postMessage({ type: 'USHORTCUTS_LOADING_START' }, '*')
@@ -381,11 +386,11 @@ export function initIframeChild() {
           return
 
         e.preventDefault()
-        globalThis.top!.location.href = target.href
+        globalThis.top!.location.href = href
       }
     },
-    true
-  ) // Capture phase to run before other handlers
+    false
+  ) // Use Bubble phase. Checking defaultPrevented is unreliable as SPAs often call it. Bubble phase allows ignoring events that stopped propagation.
 
   // 3. Forward keydown events
   document.addEventListener('keydown', (e) => {
