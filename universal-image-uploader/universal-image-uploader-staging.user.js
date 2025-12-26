@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name                 Universal Image Uploader
-// @name:zh-CN           通用图片上传助手
-// @name:zh-TW           通用圖片上傳助手
+// @name                 Universal Image Uploader - staging
+// @name:zh-CN           通用图片上传助手 - staging
+// @name:zh-TW           通用圖片上傳助手 - staging
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
