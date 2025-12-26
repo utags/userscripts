@@ -1,3 +1,13 @@
+import { isTopFrame } from '../../utils/is-top-frame'
+import {
+  getValue,
+  setValue,
+  registerMenu,
+  unregisterMenu,
+  addValueChangeListener,
+  addStyle,
+} from '../../common/gm'
+
 // CONFIG: Preset site configuration
 // - Key: site hostname without port; strip leading 'www.'
 // - format: default text format for insertion
@@ -760,6 +770,7 @@ const updateCurrentSiteSettings = (updater) => {
 
   // persist
   if (!next || Object.keys(next).length === 0) {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     if (map[key]) delete map[key]
   } else {
     map[key] = next
@@ -965,7 +976,7 @@ const buildProxyOptions = (selectEl, selectedValue) => {
 }
 
 const css = `
-  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 999999; width: 440px; max-height: calc(100vh - 32px); overflow: auto; background: #111827cc; color: #fff; backdrop-filter: blur(6px); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }
+  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 440px; max-height: calc(100vh - 32px); overflow: auto; background: #111827cc; color: #fff; backdrop-filter: blur(6px); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }
   #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; background-color: unset; box-shadow: unset; transition: unset; }
   #uiu-panel header .uiu-actions { display:flex; gap:8px; }
   #uiu-panel header .uiu-actions button { font-size: 12px; }
@@ -1127,7 +1138,7 @@ async function gmRequest(opts) {
               resolve(res.responseText)
             }
           } catch (error) {
-            reject(error)
+            reject(error as Error)
           }
         },
         onerror() {
@@ -1138,7 +1149,7 @@ async function gmRequest(opts) {
         },
       })
     } catch (error) {
-      reject(error)
+      reject(error as Error)
     }
   })
 }
@@ -1146,6 +1157,7 @@ async function gmRequest(opts) {
 async function getMjjAuthToken() {
   const html = await gmRequest({ url: 'https://mjj.today/upload' })
   const m = /PF\.obj\.config\.auth_token\s*=\s*["']([A-Za-z\d]+)["']/.exec(
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     String(html || '')
   )
   if (!m || !m[1]) throw new Error(t('error_network'))
@@ -1226,6 +1238,7 @@ async function uploadToImgur(file) {
     const formData = new FormData()
     formData.append('image', file)
     try {
+      // eslint-disable-next-line no-await-in-loop
       const data = await gmRequest({
         method: 'POST',
         url: 'https://api.imgur.com/3/upload',
@@ -1243,7 +1256,7 @@ async function uploadToImgur(file) {
     }
   }
 
-  throw lastError || new Error(t('error_upload_failed'))
+  throw (lastError as Error) || new Error(t('error_upload_failed'))
 }
 
 async function uploadToTikolu(file) {
@@ -1384,6 +1397,7 @@ function insertIntoFocused(text) {
         }
       } catch {}
 
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
       document.execCommand('insertText', false, text)
       return true
     }
@@ -1446,6 +1460,10 @@ function replacePlaceholder(el, placeholder, replacement) {
 }
 
 function createPanel() {
+  if (!isTopFrame()) {
+    return
+  }
+
   const panel = createEl('div', { id: 'uiu-panel' })
   // Attach Shadow DOM and inject scoped styles (convert '#uiu-panel' selectors to ':host')
   const root = panel.attachShadow({ mode: 'open' })
@@ -1948,7 +1966,8 @@ function createPanel() {
   // Render into Shadow DOM root
   root.append(header)
   root.append(body)
-  document.body.append(panel)
+  panel.style.display = 'none'
+  document.documentElement.append(panel)
 
   // initialize pressed state
   try {
@@ -1956,7 +1975,11 @@ function createPanel() {
     settingsBtn.setAttribute('aria-pressed', 'false')
   } catch {}
 
-  panel.style.display = 'none'
+  const showPanel = () => {
+    panel.style.display = 'block'
+    // Move to last element to ensure it's on top
+    document.documentElement.append(panel)
+  }
 
   function applySingle(cfg) {
     if (!cfg?.selector) return
@@ -2010,7 +2033,7 @@ function createPanel() {
       }
 
       btn.addEventListener('click', (event) => {
-        panel.style.display = 'block'
+        showPanel()
         event.preventDefault()
         try {
           openFilePicker()
@@ -2134,24 +2157,25 @@ function createPanel() {
           ? Array.from(dt.items).some((it) => it.kind === 'file')
           : false
         if (hasFileType || hasFileItem) {
-          drop && drop.classList.add('show')
+          if (drop) drop.classList.add('show')
           e.preventDefault()
-        } else {
-          drop && drop.classList.remove('show')
-        }
+        } else if (drop) drop.classList.remove('show')
       }
 
       document.addEventListener('dragover', dragoverHandler)
     }
 
     if (!dragleaveHandler) {
-      dragleaveHandler = () => drop && drop.classList.remove('show')
+      dragleaveHandler = () => {
+        if (drop) drop.classList.remove('show')
+      }
+
       document.addEventListener('dragleave', dragleaveHandler)
     }
 
     if (!dropHandler) {
       dropHandler = (event) => {
-        drop && drop.classList.remove('show')
+        if (drop) drop.classList.remove('show')
         event.preventDefault()
         const files = event.dataTransfer?.files
         if (files?.length) handleFiles(Array.from(files))
@@ -2186,7 +2210,13 @@ function createPanel() {
     }
   }
 
-  const queue = []
+  type QueueItem = {
+    file: File
+    placeholder: string | undefined
+    targetEl: Element | undefined
+  }
+
+  const queue: QueueItem[] = []
   let running = 0
   let done = 0
   let total = 0
@@ -2202,10 +2232,11 @@ function createPanel() {
 
   async function processQueue() {
     while (running < CONCURRENCY && queue.length > 0) {
-      const item = queue.shift()
+      const item = queue.shift()!
       running++
       addLog(`${t('log_uploading')}${item.file.name}`)
       try {
+        // eslint-disable-next-line no-await-in-loop
         const link = await uploadImage(item.file)
         const fmt = getFormat()
         const out = formatText(applyProxy(link, getHost()), item.file.name, fmt)
@@ -2267,7 +2298,7 @@ function createPanel() {
       queue.push({ file, placeholder, targetEl })
     }
 
-    processQueue()
+    void processQueue()
   }
 
   const pasteEnabled = getPasteEnabled()
@@ -2377,19 +2408,17 @@ function createPanel() {
     history.append(listWrap)
   }
 
-  try {
-    if (typeof GM_addValueChangeListener === 'function') {
-      GM_addValueChangeListener(
-        HISTORY_KEY,
-        (name, oldValue, newValue, remote) => {
-          renderHistory()
-        }
-      )
+  void addValueChangeListener(
+    HISTORY_KEY,
+    (name, oldValue, newValue, remote) => {
+      try {
+        renderHistory()
+      } catch {}
     }
-  } catch {}
+  )
 
-  GM_registerMenuCommand(t('menu_open_panel'), () => {
-    panel.style.display = 'block'
+  registerMenu(t('menu_open_panel'), () => {
+    showPanel()
     try {
       toggleHistoryBtn.setAttribute(
         'aria-pressed',
@@ -2401,12 +2430,12 @@ function createPanel() {
       )
     } catch {}
   })
-  GM_registerMenuCommand(t('menu_select_images'), () => {
-    panel.style.display = 'block'
+  registerMenu(t('menu_select_images'), () => {
+    showPanel()
     openFilePicker()
   })
-  GM_registerMenuCommand(t('menu_settings'), () => {
-    panel.style.display = 'block'
+  registerMenu(t('menu_settings'), () => {
+    showPanel()
     header.classList.add('uiu-show-settings')
     try {
       refreshSettingsUI()
@@ -2434,15 +2463,10 @@ try {
     })
   }
 
-  if (typeof GM_registerMenuCommand === 'function') {
-    GM_registerMenuCommand(
-      enabled ? t('menu_disable_site') : t('menu_enable_site'),
-      () => {
-        setEnabled(!enabled)
-        try {
-          location.reload()
-        } catch {}
-      }
-    )
-  }
+  registerMenu(enabled ? t('menu_disable_site') : t('menu_enable_site'), () => {
+    setEnabled(!enabled)
+    try {
+      location.reload()
+    } catch {}
+  })
 } catch {}

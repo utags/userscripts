@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.6.2
+// @version              0.7.0
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -23,6 +23,9 @@
 // @connect              tikolu.net
 // @connect              mjj.today
 // @connect              h1.appinn.me
+// @grant                GM_registerMenuCommand
+// @grant                GM.addValueChangeListener
+// @grant                GM_addValueChangeListener
 // @grant                GM_getValue
 // @grant                GM_setValue
 // @grant                GM_deleteValue
@@ -30,8 +33,6 @@
 // @grant                GM.xmlHttpRequest
 // @grant                GM_xmlhttpRequest
 // @grant                GM_setClipboard
-// @grant                GM_addValueChangeListener
-// @grant                GM_registerMenuCommand
 // ==/UserScript==
 //
 ;(() => {
@@ -57,6 +58,28 @@
         if (__propIsEnum.call(b, prop)) __defNormalProp(a, prop, b[prop])
       }
     return a
+  }
+  var win = globalThis
+  function isTopFrame() {
+    return win.self === win.top
+  }
+  function registerMenu(caption, onClick) {
+    if (typeof GM_registerMenuCommand === 'function') {
+      return GM_registerMenuCommand(caption, onClick)
+    }
+    return 0
+  }
+  async function addValueChangeListener(key, callback) {
+    if (
+      typeof GM !== 'undefined' &&
+      typeof GM.addValueChangeListener === 'function'
+    ) {
+      return GM.addValueChangeListener(key, callback)
+    }
+    if (typeof GM_addValueChangeListener === 'function') {
+      return GM_addValueChangeListener(key, callback)
+    }
+    return 0
   }
   var CONFIG = {
     localhost: {
@@ -935,7 +958,7 @@
     }
   }
   var css =
-    '\n  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 999999; width: 440px; max-height: calc(100vh - 32px); overflow: auto; background: #111827cc; color: #fff; backdrop-filter: blur(6px); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }\n  #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; background-color: unset; box-shadow: unset; transition: unset; }\n  #uiu-panel header .uiu-actions { display:flex; gap:8px; }\n  #uiu-panel header .uiu-actions button { font-size: 12px; }\n  /* Active styles for toggles when sections are open */\n  #uiu-panel header.uiu-show-history .uiu-actions .uiu-toggle-history { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }\n  #uiu-panel header.uiu-show-settings .uiu-actions .uiu-toggle-settings { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }\n  #uiu-panel .uiu-body { padding: 8px 12px; }\n  #uiu-panel .uiu-controls { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }\n  #uiu-panel select, #uiu-panel button { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; }\n  #uiu-panel button.uiu-primary { background:#2563eb; border-color:#1d4ed8; }\n  #uiu-panel .uiu-list { margin-top:8px; max-height: 140px; overflow-y:auto; overflow-x:hidden; font-size: 12px; }\n  #uiu-panel .uiu-list .uiu-item { padding:6px 0; border-bottom: 1px dashed #334155; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }\n  #uiu-panel .uiu-history { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel header.uiu-show-history + .uiu-body .uiu-history { display:block; }\n  #uiu-panel .uiu-history .uiu-controls > span { font-size: 16px; font-weight: 600;}\n  #uiu-panel .uiu-history .uiu-list { max-height: 240px; }\n  #uiu-panel .uiu-history .uiu-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }\n  #uiu-panel .uiu-history .uiu-row .uiu-ops { display:flex; gap:6px; }\n  #uiu-panel .uiu-history .uiu-row .uiu-name { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #uiu-panel .uiu-hint { font-size: 11px; opacity:.85; margin-top:6px; }\n  /* Settings container toggling */\n  #uiu-panel .uiu-settings-container { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel header.uiu-show-settings + .uiu-body .uiu-settings-container { display:block; }\n  #uiu-panel .uiu-settings .uiu-controls > span { font-size: 16px; font-weight: 600;}\n  #uiu-panel .uiu-settings .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }\n  #uiu-panel .uiu-settings .uiu-settings-list { margin-top:6px; max-height: 240px; overflow-y:auto; overflow-x:hidden; }\n  #uiu-panel .uiu-settings .uiu-settings-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; font-size: 12px; flex-wrap: nowrap; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item { flex:1; display:flex; align-items:center; gap:6px; min-width:0; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item input[type="text"] { flex:1; min-width:0; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item select { flex:0 0 auto; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-ops { display:flex; gap:6px; flex-shrink:0; white-space:nowrap; }\n  #uiu-drop { position: fixed; inset: 0; background: rgba(37,99,235,.12); border: 2px dashed #2563eb; display:none; align-items:center; justify-content:center; z-index: 999998; color:#2563eb; font-size: 18px; font-weight: 600; }\n  #uiu-drop.show { display:flex; }\n  .uiu-insert-btn { cursor:pointer; }\n  .uiu-insert-btn.uiu-default { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; cursor:pointer; }\n  /* Hover effects for all buttons */\n  #uiu-panel button { transition: background-color .12s ease, box-shadow .12s ease, transform .06s ease, opacity .12s ease, border-color .12s ease; }\n  #uiu-panel button:hover { background:#334155; border-color:#475569; box-shadow: 0 0 0 1px #475569 inset; transform: translateY(-0.5px); }\n  #uiu-panel button.uiu-primary:hover { background:#1d4ed8; border-color:#1e40af; }\n  #uiu-panel button:active { transform: translateY(0); }\n  /* Disabled style for proxy selector */\n  #uiu-panel select:disabled { opacity:.55; cursor:not-allowed; filter: grayscale(80%); background:#111827; color:#9ca3af; border-color:#475569; }\n  /* Custom Formats layout */\n  #uiu-panel .uiu-formats { margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel .uiu-formats .uiu-controls > span { font-size: 16px; font-weight: 600; }\n  #uiu-panel .uiu-formats .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }\n  #uiu-panel .uiu-formats .uiu-formats-list { margin-top:6px; max-height: 200px; overflow-y:auto; overflow-x:hidden; }\n  #uiu-panel .uiu-formats .uiu-formats-row { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }\n  #uiu-panel .uiu-formats .uiu-formats-row .uiu-ops { display:flex; gap:6px; justify-content:flex-end; }\n  #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-template { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-template { overflow: visible; text-overflow: clip; white-space: normal; }\n  #uiu-panel .uiu-formats .uiu-form-add { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; }\n  #uiu-panel .uiu-formats .uiu-formats-row input[type="text"] { width:100%; }\n  #uiu-panel .uiu-formats .uiu-form-add input[type="text"] { width:100%; }\n  #uiu-panel .uiu-formats .uiu-form-add button { justify-self: end; }\n  #uiu-panel .uiu-formats .uiu-formats-header { font-weight: 600; color:#e5e7eb; }\n  #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-template { display:block; min-width:0; }\n  #uiu-panel .uiu-formats .uiu-format-example-row { padding-top:4px; border-bottom: none; }\n  #uiu-panel .uiu-formats .uiu-format-example-row .uiu-fmt-template { font-size:12px; color:#cbd5e1; white-space: normal; overflow: visible; text-overflow: clip; }\n  '
+    '\n  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 440px; max-height: calc(100vh - 32px); overflow: auto; background: #111827cc; color: #fff; backdrop-filter: blur(6px); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }\n  #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; background-color: unset; box-shadow: unset; transition: unset; }\n  #uiu-panel header .uiu-actions { display:flex; gap:8px; }\n  #uiu-panel header .uiu-actions button { font-size: 12px; }\n  /* Active styles for toggles when sections are open */\n  #uiu-panel header.uiu-show-history .uiu-actions .uiu-toggle-history { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }\n  #uiu-panel header.uiu-show-settings .uiu-actions .uiu-toggle-settings { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }\n  #uiu-panel .uiu-body { padding: 8px 12px; }\n  #uiu-panel .uiu-controls { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }\n  #uiu-panel select, #uiu-panel button { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; }\n  #uiu-panel button.uiu-primary { background:#2563eb; border-color:#1d4ed8; }\n  #uiu-panel .uiu-list { margin-top:8px; max-height: 140px; overflow-y:auto; overflow-x:hidden; font-size: 12px; }\n  #uiu-panel .uiu-list .uiu-item { padding:6px 0; border-bottom: 1px dashed #334155; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }\n  #uiu-panel .uiu-history { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel header.uiu-show-history + .uiu-body .uiu-history { display:block; }\n  #uiu-panel .uiu-history .uiu-controls > span { font-size: 16px; font-weight: 600;}\n  #uiu-panel .uiu-history .uiu-list { max-height: 240px; }\n  #uiu-panel .uiu-history .uiu-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }\n  #uiu-panel .uiu-history .uiu-row .uiu-ops { display:flex; gap:6px; }\n  #uiu-panel .uiu-history .uiu-row .uiu-name { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #uiu-panel .uiu-hint { font-size: 11px; opacity:.85; margin-top:6px; }\n  /* Settings container toggling */\n  #uiu-panel .uiu-settings-container { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel header.uiu-show-settings + .uiu-body .uiu-settings-container { display:block; }\n  #uiu-panel .uiu-settings .uiu-controls > span { font-size: 16px; font-weight: 600;}\n  #uiu-panel .uiu-settings .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }\n  #uiu-panel .uiu-settings .uiu-settings-list { margin-top:6px; max-height: 240px; overflow-y:auto; overflow-x:hidden; }\n  #uiu-panel .uiu-settings .uiu-settings-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; font-size: 12px; flex-wrap: nowrap; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item { flex:1; display:flex; align-items:center; gap:6px; min-width:0; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item input[type="text"] { flex:1; min-width:0; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item select { flex:0 0 auto; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-ops { display:flex; gap:6px; flex-shrink:0; white-space:nowrap; }\n  #uiu-drop { position: fixed; inset: 0; background: rgba(37,99,235,.12); border: 2px dashed #2563eb; display:none; align-items:center; justify-content:center; z-index: 999998; color:#2563eb; font-size: 18px; font-weight: 600; }\n  #uiu-drop.show { display:flex; }\n  .uiu-insert-btn { cursor:pointer; }\n  .uiu-insert-btn.uiu-default { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; cursor:pointer; }\n  /* Hover effects for all buttons */\n  #uiu-panel button { transition: background-color .12s ease, box-shadow .12s ease, transform .06s ease, opacity .12s ease, border-color .12s ease; }\n  #uiu-panel button:hover { background:#334155; border-color:#475569; box-shadow: 0 0 0 1px #475569 inset; transform: translateY(-0.5px); }\n  #uiu-panel button.uiu-primary:hover { background:#1d4ed8; border-color:#1e40af; }\n  #uiu-panel button:active { transform: translateY(0); }\n  /* Disabled style for proxy selector */\n  #uiu-panel select:disabled { opacity:.55; cursor:not-allowed; filter: grayscale(80%); background:#111827; color:#9ca3af; border-color:#475569; }\n  /* Custom Formats layout */\n  #uiu-panel .uiu-formats { margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel .uiu-formats .uiu-controls > span { font-size: 16px; font-weight: 600; }\n  #uiu-panel .uiu-formats .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }\n  #uiu-panel .uiu-formats .uiu-formats-list { margin-top:6px; max-height: 200px; overflow-y:auto; overflow-x:hidden; }\n  #uiu-panel .uiu-formats .uiu-formats-row { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }\n  #uiu-panel .uiu-formats .uiu-formats-row .uiu-ops { display:flex; gap:6px; justify-content:flex-end; }\n  #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-template { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-template { overflow: visible; text-overflow: clip; white-space: normal; }\n  #uiu-panel .uiu-formats .uiu-form-add { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; }\n  #uiu-panel .uiu-formats .uiu-formats-row input[type="text"] { width:100%; }\n  #uiu-panel .uiu-formats .uiu-form-add input[type="text"] { width:100%; }\n  #uiu-panel .uiu-formats .uiu-form-add button { justify-self: end; }\n  #uiu-panel .uiu-formats .uiu-formats-header { font-weight: 600; color:#e5e7eb; }\n  #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-template { display:block; min-width:0; }\n  #uiu-panel .uiu-formats .uiu-format-example-row { padding-top:4px; border-bottom: none; }\n  #uiu-panel .uiu-formats .uiu-format-example-row .uiu-fmt-template { font-size:12px; color:#cbd5e1; white-space: normal; overflow: visible; text-overflow: clip; }\n  '
   GM_addStyle(css)
   function loadHistory() {
     return GM_getValue(HISTORY_KEY, [])
@@ -1320,6 +1343,9 @@
     return false
   }
   function createPanel() {
+    if (!isTopFrame()) {
+      return
+    }
     const panel = createEl('div', { id: 'uiu-panel' })
     const root = panel.attachShadow({ mode: 'open' })
     try {
@@ -1791,12 +1817,16 @@
     }
     root.append(header)
     root.append(body)
-    document.body.append(panel)
+    panel.style.display = 'none'
+    document.documentElement.append(panel)
     try {
       toggleHistoryBtn.setAttribute('aria-pressed', 'false')
       settingsBtn.setAttribute('aria-pressed', 'false')
     } catch (e) {}
-    panel.style.display = 'none'
+    const showPanel = () => {
+      panel.style.display = 'block'
+      document.documentElement.append(panel)
+    }
     function applySingle(cfg) {
       var _a, _b
       if (!(cfg == null ? void 0 : cfg.selector)) return
@@ -1852,7 +1882,7 @@
           })
         }
         btn.addEventListener('click', (event) => {
-          panel.style.display = 'block'
+          showPanel()
           event.preventDefault()
           try {
             openFilePicker()
@@ -1975,22 +2005,22 @@
             ? Array.from(dt.items).some((it) => it.kind === 'file')
             : false
           if (hasFileType || hasFileItem) {
-            drop && drop.classList.add('show')
+            if (drop) drop.classList.add('show')
             e.preventDefault()
-          } else {
-            drop && drop.classList.remove('show')
-          }
+          } else if (drop) drop.classList.remove('show')
         }
         document.addEventListener('dragover', dragoverHandler)
       }
       if (!dragleaveHandler) {
-        dragleaveHandler = () => drop && drop.classList.remove('show')
+        dragleaveHandler = () => {
+          if (drop) drop.classList.remove('show')
+        }
         document.addEventListener('dragleave', dragleaveHandler)
       }
       if (!dropHandler) {
         dropHandler = (event) => {
           var _a
-          drop && drop.classList.remove('show')
+          if (drop) drop.classList.remove('show')
           event.preventDefault()
           const files = (_a = event.dataTransfer) == null ? void 0 : _a.files
           if (files == null ? void 0 : files.length)
@@ -2109,7 +2139,7 @@
         }
         queue.push({ file, placeholder, targetEl })
       }
-      processQueue()
+      void processQueue()
     }
     const pasteEnabled = getPasteEnabled()
     if (pasteEnabled) enablePaste()
@@ -2210,18 +2240,16 @@
       }
       history.append(listWrap)
     }
-    try {
-      if (typeof GM_addValueChangeListener === 'function') {
-        GM_addValueChangeListener(
-          HISTORY_KEY,
-          (name, oldValue, newValue, remote) => {
-            renderHistory()
-          }
-        )
+    void addValueChangeListener(
+      HISTORY_KEY,
+      (name, oldValue, newValue, remote) => {
+        try {
+          renderHistory()
+        } catch (e) {}
       }
-    } catch (e) {}
-    GM_registerMenuCommand(t('menu_open_panel'), () => {
-      panel.style.display = 'block'
+    )
+    registerMenu(t('menu_open_panel'), () => {
+      showPanel()
       try {
         toggleHistoryBtn.setAttribute(
           'aria-pressed',
@@ -2233,12 +2261,12 @@
         )
       } catch (e) {}
     })
-    GM_registerMenuCommand(t('menu_select_images'), () => {
-      panel.style.display = 'block'
+    registerMenu(t('menu_select_images'), () => {
+      showPanel()
       openFilePicker()
     })
-    GM_registerMenuCommand(t('menu_settings'), () => {
-      panel.style.display = 'block'
+    registerMenu(t('menu_settings'), () => {
+      showPanel()
       header.classList.add('uiu-show-settings')
       try {
         refreshSettingsUI()
@@ -2263,16 +2291,14 @@
         if (files == null ? void 0 : files.length) handleFiles(files)
       })
     }
-    if (typeof GM_registerMenuCommand === 'function') {
-      GM_registerMenuCommand(
-        enabled ? t('menu_disable_site') : t('menu_enable_site'),
-        () => {
-          setEnabled(!enabled)
-          try {
-            location.reload()
-          } catch (e) {}
-        }
-      )
-    }
+    registerMenu(
+      enabled ? t('menu_disable_site') : t('menu_enable_site'),
+      () => {
+        setEnabled(!enabled)
+        try {
+          location.reload()
+        } catch (e) {}
+      }
+    )
   } catch (e) {}
 })()

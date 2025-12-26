@@ -19,6 +19,7 @@ declare function GM_unregisterMenuCommand(menuId: number): void
 declare const GM: {
   getValue<T = unknown>(key: string, defaultValue: T): Promise<T>
   setValue(key: string, value: unknown): Promise<void>
+  deleteValue(key: string): Promise<void>
   addValueChangeListener(
     key: string,
     cb: (key: string, oldValue: any, newValue: any, remote: boolean) => void
@@ -38,10 +39,12 @@ declare const GM: {
     }) => void
     onerror?: (error: any) => void
   }): Promise<void>
+  setClipboard(text: string): Promise<void>
 }
 
 declare function GM_getValue<T = unknown>(key: string, defaultValue: T): any
 declare function GM_setValue(key: string, value: any): void
+declare function GM_deleteValue(key: string): void
 declare function GM_addStyle(css: string): HTMLStyleElement
 declare function GM_openInTab(
   url: string,
@@ -63,3 +66,5 @@ declare function GM_xmlhttpRequest(options: {
   }) => void
   onerror?: (error: any) => void
 }): void
+
+declare function GM_setClipboard(text: string): void

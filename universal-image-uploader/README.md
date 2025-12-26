@@ -85,6 +85,11 @@ Install one of the following user script managers:
 
 ## Changelog
 
+### v0.7.x
+
+- Fix compatibility issues with utags-shortcuts
+- Refactoring: use esbuild to bundle the script
+
 ### v0.6.x
 
 - Per-site enable toggle via command menu; refresh page to apply.
