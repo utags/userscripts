@@ -42,16 +42,22 @@ const BLACKLIST_DOMAINS = new Set([
 const BLACKLIST_URL_PATTERNS = new Set([
   /^https:\/\/www\.google\.com\/.*[&?]udm=50/,
   /^https:\/\/(.+\.)?stackexchange\.com\//,
+  /.+\.user\.js([?#].*)?$/,
+  // /.+\.md([?#].*)?$/,
 ])
 
 let progressBar: ProgressBar | undefined
+
+function isIframeModeDisabledUrl(url: string): boolean {
+  return Array.from(BLACKLIST_URL_PATTERNS).some((p) => p.test(url))
+}
 
 export function isIframeModeDisabled() {
   if (BLACKLIST_DOMAINS.has(location.host)) {
     return true
   }
 
-  if (Array.from(BLACKLIST_URL_PATTERNS).some((p) => p.test(location.href))) {
+  if (isIframeModeDisabledUrl(location.href)) {
     return true
   }
 
@@ -252,6 +258,11 @@ export function updateIframeUrl(url: string) {
   const iframe = document.querySelector<HTMLIFrameElement>(
     'iframe[name="utags-shortcuts-iframe"]'
   )
+  if (isIframeModeDisabledUrl(url)) {
+    globalThis.top!.location.href = url
+    return true
+  }
+
   if (iframe && iframe.contentWindow) {
     progressBar?.start()
     iframe.contentWindow.postMessage({ type: 'USHORTCUTS_NAVIGATE', url }, '*')
@@ -381,10 +392,14 @@ export function initIframeChild() {
         }
 
         if (shouldOpenInCurrentTab(e, target)) {
-          globalThis.parent.postMessage(
-            { type: 'USHORTCUTS_LOADING_START' },
-            '*'
-          )
+          if (isIframeModeDisabledUrl(href)) {
+            globalThis.top!.location.href = href
+          } else {
+            globalThis.parent.postMessage(
+              { type: 'USHORTCUTS_LOADING_START' },
+              '*'
+            )
+          }
         }
       } else {
         // External link: open in top frame

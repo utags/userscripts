@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.2.6
+// @version              0.2.7
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -4615,13 +4615,17 @@
   var BLACKLIST_URL_PATTERNS = /* @__PURE__ */ new Set([
     /^https:\/\/www\.google\.com\/.*[&?]udm=50/,
     /^https:\/\/(.+\.)?stackexchange\.com\//,
+    /.+\.user\.js([?#].*)?$/,
   ])
   var progressBar2
+  function isIframeModeDisabledUrl(url) {
+    return Array.from(BLACKLIST_URL_PATTERNS).some((p) => p.test(url))
+  }
   function isIframeModeDisabled() {
     if (BLACKLIST_DOMAINS.has(location.host)) {
       return true
     }
-    if (Array.from(BLACKLIST_URL_PATTERNS).some((p) => p.test(location.href))) {
+    if (isIframeModeDisabledUrl(location.href)) {
       return true
     }
     return (
@@ -4769,6 +4773,10 @@
     const iframe = document.querySelector(
       'iframe[name="utags-shortcuts-iframe"]'
     )
+    if (isIframeModeDisabledUrl(url)) {
+      globalThis.top.location.href = url
+      return true
+    }
     if (iframe && iframe.contentWindow) {
       progressBar2 == null ? void 0 : progressBar2.start()
       iframe.contentWindow.postMessage(
@@ -4865,10 +4873,14 @@
             sessionStorage.setItem(LAST_CLICK_URL_KEY, href)
           }
           if (shouldOpenInCurrentTab(e, target)) {
-            globalThis.parent.postMessage(
-              { type: 'USHORTCUTS_LOADING_START' },
-              '*'
-            )
+            if (isIframeModeDisabledUrl(href)) {
+              globalThis.top.location.href = href
+            } else {
+              globalThis.parent.postMessage(
+                { type: 'USHORTCUTS_LOADING_START' },
+                '*'
+              )
+            }
           }
         } else {
           if (!shouldOpenInCurrentTab(e, target)) return
