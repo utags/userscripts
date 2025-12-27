@@ -44,7 +44,7 @@ It is particularly useful for:
 | deleteValue                                        |       ✅        |     1/1      |        ✅        |      1/1      |
 | listValues                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | setValues / getValues / deleteValues               |       ✅        |     1/1      |        ✅        |      1/1      |
-| addValueChangeListener / removeValueChangeListener |       ✅        |     1/1      |        ✅        |      1/1      |
+| addValueChangeListener / removeValueChangeListener |       ✅        |     5/5      |        ✅        |      5/5      |
 | addStyle                                           |       ✅        |     1/1      |        ✅        |      1/1      |
 | addElement                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | registerMenuCommand                                |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -78,8 +78,8 @@ It is particularly useful for:
 | setValue / getValue                                |       ✅        |     2/2      |        ✅        |      2/2      |
 | deleteValue                                        |       ✅        |     1/1      |        ✅        |      1/1      |
 | listValues                                         |       ✅        |     1/1      |        ✅        |      1/1      |
-| setValues / getValues / deleteValues               |       ⚠️        |     0/1      |        ✅        |      1/1      |
-| addValueChangeListener / removeValueChangeListener |       ✅        |     1/1      |        ✅        |      1/1      |
+| setValues / getValues / deleteValues               |       ✅        |     1/1      |        ✅        |      1/1      |
+| addValueChangeListener / removeValueChangeListener |       ✅        |     5/5      |        ✅        |      5/5      |
 | addStyle                                           |       ✅        |     1/1      |        ✅        |      1/1      |
 | addElement                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | registerMenuCommand                                |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -114,7 +114,7 @@ It is particularly useful for:
 | deleteValue                                        |       ✅        |     1/1      |        ✅        |      1/1      |
 | listValues                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | setValues / getValues / deleteValues               |       ✅        |     1/1      |        ✅        |      1/1      |
-| addValueChangeListener / removeValueChangeListener |       ✅        |     1/1      |        ✅        |      1/1      |
+| addValueChangeListener / removeValueChangeListener |       ✅        |     5/5      |        ✅        |      5/5      |
 | addStyle                                           |       ✅        |     1/1      |        ✅        |      1/1      |
 | addElement                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | registerMenuCommand                                |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -149,7 +149,7 @@ It is particularly useful for:
 | deleteValue                                        |       ✅        |     1/1      |        ❌        |      0/1      |
 | listValues                                         |       ✅        |     1/1      |        ❌        |      0/1      |
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |
-| addValueChangeListener / removeValueChangeListener |       ❌        |     0/1      |        ❌        |      0/1      |
+| addValueChangeListener / removeValueChangeListener |       ❌        |     0/5      |        ❌        |      0/5      |
 | addStyle                                           |       ✅        |     1/1      |        ❌        |      0/1      |
 | addElement                                         |       ❌        |     0/1      |        ❌        |      0/1      |
 | registerMenuCommand                                |       ❌        |     0/1      |        ❌        |      0/1      |
@@ -184,7 +184,7 @@ It is particularly useful for:
 | deleteValue                                        |       ✅        |     1/1      |        ✅        |      1/1      |
 | listValues                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |
-| addValueChangeListener / removeValueChangeListener |       ⚠️        |     0/1      |        ⚠️        |      0/1      |
+| addValueChangeListener / removeValueChangeListener |       ⚠️        |     0/5      |        ⚠️        |      0/5      |
 | addStyle                                           |       ✅        |     1/1      |        ✅        |      1/1      |
 | addElement                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | registerMenuCommand                                |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -219,7 +219,7 @@ It is particularly useful for:
 | deleteValue                                        |       ✅        |     1/1      |        ❌        |      0/1      |
 | listValues                                         |       ✅        |     1/1      |        ❌        |      0/1      |
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |
-| addValueChangeListener / removeValueChangeListener |       ❌        |     0/1      |        ❌        |      0/1      |
+| addValueChangeListener / removeValueChangeListener |       ❌        |     0/5      |        ❌        |      0/5      |
 | addStyle                                           |       ❌        |     0/1      |        ❌        |      0/1      |
 | addElement                                         |       ❌        |     0/1      |        ❌        |      0/1      |
 | registerMenuCommand                                |       ✅        |     1/1      |        ❌        |      0/1      |
@@ -239,6 +239,8 @@ It is particularly useful for:
 | window.onurlchange                                 |       ❌        |     0/1      |        -         |       -       |
 | window.close                                       |       ✅        |     1/1      |        -         |       -       |
 | window.focus                                       |       ✅        |     1/1      |        -         |       -       |
+
+### END
 
 ## Project Info
 

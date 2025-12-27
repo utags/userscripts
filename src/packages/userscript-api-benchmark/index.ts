@@ -1,4 +1,5 @@
-export {}
+import { isTopFrame } from '../../utils/is-top-frame'
+import { registerValueChangeListenerTests } from './tests/value-change-listener'
 /* eslint-disable @typescript-eslint/naming-convention */
 
 declare const GM_info: any
@@ -255,16 +256,16 @@ registerTest(
     }
 
     const data = {
-      benchmark_gm_key1: 'val1-' + Math.random(),
-      benchmark_gm_key2: 12_345,
+      benchmark_set_values_key1: 'val1-' + Math.random(),
+      benchmark_set_values_key2: 12_345,
     }
     await GM_setValues(data)
     const retrieved = await GM_getValues(Object.keys(data))
     await GM_deleteValues(Object.keys(data))
 
     const passed =
-      retrieved.benchmark_gm_key1 === data.benchmark_gm_key1 &&
-      retrieved.benchmark_gm_key2 === data.benchmark_gm_key2
+      retrieved.benchmark_set_values_key1 === data.benchmark_set_values_key1 &&
+      retrieved.benchmark_set_values_key2 === data.benchmark_set_values_key2
     return { supported: true, passed: passed ? 1 : 0, total: 1 }
   },
   async () => {
@@ -278,88 +279,23 @@ registerTest(
     }
 
     const data = {
-      benchmark_gm_key1: 'val1-' + Math.random(),
-      benchmark_gm_key2: 12_345,
+      benchmark_set_values_gm4_key1: 'val1-' + Math.random(),
+      benchmark_set_values_gm4_key2: 12_345,
     }
     await GM.setValues(data)
     const retrieved = await GM.getValues(Object.keys(data))
     await GM.deleteValues(Object.keys(data))
 
     const passed =
-      retrieved.benchmark_gm_key1 === data.benchmark_gm_key1 &&
-      retrieved.benchmark_gm_key2 === data.benchmark_gm_key2
+      retrieved.benchmark_set_values_gm4_key1 ===
+        data.benchmark_set_values_gm4_key1 &&
+      retrieved.benchmark_set_values_gm4_key2 ===
+        data.benchmark_set_values_gm4_key2
     return { supported: true, passed: passed ? 1 : 0, total: 1 }
   }
 )
 
-registerTest(
-  'addValueChangeListener / removeValueChangeListener',
-  async () => {
-    if (
-      typeof GM_addValueChangeListener !== 'function' ||
-      typeof GM_removeValueChangeListener !== 'function' ||
-      typeof GM_setValue !== 'function'
-    ) {
-      return { supported: false, passed: 0, total: 1 }
-    }
-
-    const key = 'benchmark_listener_key'
-    let triggered = false
-    const id = GM_addValueChangeListener(
-      key,
-      (name: string, oldVal: any, newVal: any, remote: boolean) => {
-        if (name === key && newVal === 'changed') {
-          triggered = true
-        }
-      }
-    )
-
-    await GM_setValue(key, 'changed')
-
-    // Wait for listener
-    await new Promise((resolve) => {
-      setTimeout(resolve, 200)
-    })
-
-    GM_removeValueChangeListener(id)
-    await GM_deleteValue(key)
-
-    return { supported: true, passed: triggered ? 1 : 0, total: 1 }
-  },
-  async () => {
-    if (
-      typeof GM === 'undefined' ||
-      typeof GM.addValueChangeListener !== 'function' ||
-      typeof GM.removeValueChangeListener !== 'function' ||
-      typeof GM.setValue !== 'function'
-    ) {
-      return { supported: false, passed: 0, total: 1 }
-    }
-
-    const key = 'benchmark_listener_key'
-    let triggered = false
-    const id = await GM.addValueChangeListener(
-      key,
-      (name: string, oldVal: any, newVal: any, remote: boolean) => {
-        if (name === key && newVal === 'changed') {
-          triggered = true
-        }
-      }
-    )
-
-    await GM.setValue(key, 'changed')
-
-    // Wait for listener
-    await new Promise((resolve) => {
-      setTimeout(resolve, 200)
-    })
-
-    await GM.removeValueChangeListener(id)
-    await GM.deleteValue(key)
-
-    return { supported: true, passed: triggered ? 1 : 0, total: 1 }
-  }
-)
+registerValueChangeListenerTests(registerTest)
 
 registerTest(
   'addStyle',
@@ -748,6 +684,7 @@ async function render() {
     .log-entry { margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
     .log-entry:last-child { border-bottom: none; margin-bottom: 0; }
     .log-entry.error { color: #e74c3c; }
+    .log-entry.warning { color: #f59e0b; }
   `
   shadow.append(style)
 
@@ -811,7 +748,10 @@ async function render() {
   })
 
   const logArea = wrapper.querySelector('#benchmark-log')!
-  const appendLog = (msg: string, type: 'info' | 'error' = 'info') => {
+  const appendLog = (
+    msg: string,
+    type: 'info' | 'error' | 'warning' = 'info'
+  ) => {
     const entry = document.createElement('div')
     entry.className = `log-entry ${type}`
     entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`
@@ -970,10 +910,22 @@ async function render() {
       console.error(msg, gmRes.error)
     }
 
+    if (gmRes.message && gmRes.message !== 'N/A') {
+      const msg = `${t.name} (GM_): ${gmRes.message}`
+      appendLog(msg, 'warning')
+      console.warn(msg)
+    }
+
     if (gmDotRes.error) {
       const msg = `${t.name} (GM.): ${String(gmDotRes.error)}`
       appendLog(msg, 'error')
       console.error(msg, gmDotRes.error)
+    }
+
+    if (gmDotRes.message && gmDotRes.message !== 'N/A') {
+      const msg = `${t.name} (GM.): ${gmDotRes.message}`
+      appendLog(msg, 'warning')
+      console.warn(msg)
     }
 
     const isWindowApi = [
@@ -1026,6 +978,24 @@ function start() {
 }
 
 function main() {
+  const urlParams = new URLSearchParams(globalThis.location.search)
+  if (urlParams.get('benchmark_role') === 'iframe') {
+    const key = urlParams.get('key')
+    const value = urlParams.get('value')
+    if (key && value) {
+      if (typeof GM_setValue === 'function') GM_setValue(key, value)
+      if (typeof GM !== 'undefined' && typeof GM.setValue === 'function') {
+        void GM.setValue(key, value)
+      }
+    }
+
+    return
+  }
+
+  if (!isTopFrame()) {
+    return
+  }
+
   try {
     const de = document.documentElement as any
     if (de && de.dataset && de.dataset.uab === '1') return

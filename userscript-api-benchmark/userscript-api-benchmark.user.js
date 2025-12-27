@@ -2,26 +2,29 @@
 // @name                 Userscript API Benchmark
 // @name:zh-CN           用户脚本 API 基准测试
 // @namespace            https://github.com/utags/userscripts
-// @version              0.1.1
+// @version              0.1.2
 // @description          Comprehensive benchmark tool for UserScript Manager APIs (GM.* and GM_*)
 // @description:zh-CN    用户脚本管理器 API (GM.* 和 GM_*) 的综合基准测试工具，用于检查兼容性与准确性
 // @author               Pipecraft
-// @noframes
 // @match                *://*/*
 // @grant                unsafeWindow
 // @grant                window.close
 // @grant                window.focus
 // @grant                window.onurlchange
+// @grant                GM_addValueChangeListener
+// @grant                GM_removeValueChangeListener
+// @grant                GM_setValue
+// @grant                GM_deleteValue
+// @grant                GM.addValueChangeListener
+// @grant                GM.removeValueChangeListener
+// @grant                GM.setValue
+// @grant                GM.deleteValue
 // @grant                GM_info
 // @grant                GM.info
 // @grant                GM_log
 // @grant                GM.log
-// @grant                GM_setValue
 // @grant                GM_getValue
-// @grant                GM_deleteValue
-// @grant                GM.setValue
 // @grant                GM.getValue
-// @grant                GM.deleteValue
 // @grant                GM_listValues
 // @grant                GM.listValues
 // @grant                GM_setValues
@@ -30,10 +33,6 @@
 // @grant                GM.setValues
 // @grant                GM.getValues
 // @grant                GM.deleteValues
-// @grant                GM_addValueChangeListener
-// @grant                GM_removeValueChangeListener
-// @grant                GM.addValueChangeListener
-// @grant                GM.removeValueChangeListener
 // @grant                GM_addStyle
 // @grant                GM.addStyle
 // @grant                GM_addElement
@@ -72,6 +71,322 @@
 //
 ;(() => {
   'use strict'
+  var win = globalThis
+  function isTopFrame() {
+    return win.self === win.top
+  }
+  function registerValueChangeListenerTests(registerTest2) {
+    registerTest2(
+      'addValueChangeListener / removeValueChangeListener',
+      async () => {
+        if (
+          typeof GM_addValueChangeListener !== 'function' ||
+          typeof GM_removeValueChangeListener !== 'function' ||
+          typeof GM_setValue !== 'function' ||
+          typeof GM_deleteValue !== 'function'
+        ) {
+          return { supported: false, passed: 0, total: 5 }
+        }
+        let passed = 0
+        const total = 5
+        const messages = []
+        {
+          const key = 'benchmark_listener_basic_gm'
+          let triggered = false
+          const id = GM_addValueChangeListener(
+            key,
+            (name, oldVal, newVal, remote) => {
+              if (name === key && newVal === 'changed') {
+                triggered = true
+              }
+            }
+          )
+          GM_setValue(key, 'changed')
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200)
+          })
+          GM_removeValueChangeListener(id)
+          GM_deleteValue(key)
+          if (triggered) {
+            passed++
+          } else {
+            messages.push('Basic: Not triggered')
+          }
+        }
+        {
+          const key = 'benchmark_listener_same_gm'
+          GM_deleteValue(key)
+          let triggered = false
+          const id = GM_addValueChangeListener(
+            key,
+            (name, oldVal, newVal, remote) => {
+              if (name === key) triggered = true
+            }
+          )
+          GM_setValue(key, 'initial')
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200)
+          })
+          const initialTriggered = triggered
+          if (!initialTriggered) {
+            messages.push('SameValue: Initial change NOT triggered')
+          }
+          triggered = false
+          GM_setValue(key, 'initial')
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200)
+          })
+          GM_removeValueChangeListener(id)
+          GM_deleteValue(key)
+          if (triggered) {
+            messages.push('SameValue: Triggered unexpectedly on same value')
+          }
+          if (initialTriggered && !triggered) {
+            passed++
+          }
+        }
+        {
+          const key = 'benchmark_listener_obj_gm'
+          const obj = { foo: 'bar', num: 123 }
+          let receivedVal = null
+          const id = GM_addValueChangeListener(
+            key,
+            (name, oldVal, newVal, remote) => {
+              if (name === key) receivedVal = newVal
+            }
+          )
+          GM_setValue(key, obj)
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200)
+          })
+          GM_removeValueChangeListener(id)
+          GM_deleteValue(key)
+          const objPassed =
+            receivedVal &&
+            typeof receivedVal === 'object' &&
+            receivedVal.foo === 'bar' &&
+            receivedVal.num === 123
+          if (objPassed) {
+            passed++
+          } else {
+            messages.push('Object: Value mismatch')
+          }
+        }
+        {
+          const keyLocal = 'benchmark_listener_remote_local_gm'
+          const keyRemote = 'benchmark_listener_remote_other_gm'
+          let localRemoteFlag
+          let otherRemoteFlag
+          const id1 = GM_addValueChangeListener(
+            keyLocal,
+            (name, oldVal, newVal, remote) => {
+              if (name === keyLocal) localRemoteFlag = remote
+            }
+          )
+          GM_setValue(keyLocal, 'local_change')
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200)
+          })
+          GM_removeValueChangeListener(id1)
+          GM_deleteValue(keyLocal)
+          const id2 = GM_addValueChangeListener(
+            keyRemote,
+            (name, oldVal, newVal, remote) => {
+              if (name === keyRemote) otherRemoteFlag = remote
+            }
+          )
+          const iframe = document.createElement('iframe')
+          const url = new URL(location.href)
+          url.searchParams.set('benchmark_role', 'iframe')
+          url.searchParams.set('key', keyRemote)
+          url.searchParams.set('value', 'remote_change')
+          iframe.src = url.href
+          iframe.style.display = 'none'
+          document.body.append(iframe)
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1e3)
+          })
+          iframe.remove()
+          GM_removeValueChangeListener(id2)
+          GM_deleteValue(keyRemote)
+          if (localRemoteFlag === false) {
+            passed++
+          } else {
+            messages.push(
+              'Remote(Local): Expected false, got '.concat(localRemoteFlag)
+            )
+          }
+          if (otherRemoteFlag === true) {
+            passed++
+          } else {
+            messages.push(
+              'Remote(Other): Expected true, got '.concat(otherRemoteFlag)
+            )
+          }
+        }
+        return {
+          supported: true,
+          passed,
+          total,
+          message: messages.length > 0 ? messages.join('; ') : void 0,
+        }
+      },
+      async () => {
+        if (
+          typeof GM === 'undefined' ||
+          typeof GM.addValueChangeListener !== 'function' ||
+          typeof GM.removeValueChangeListener !== 'function' ||
+          typeof GM.setValue !== 'function' ||
+          typeof GM.deleteValue !== 'function'
+        ) {
+          return { supported: false, passed: 0, total: 5 }
+        }
+        let passed = 0
+        const total = 5
+        const messages = []
+        {
+          const key = 'benchmark_listener_basic_gm_dot'
+          let triggered = false
+          const id = await GM.addValueChangeListener(
+            key,
+            (name, oldVal, newVal, remote) => {
+              if (name === key && newVal === 'changed') {
+                triggered = true
+              }
+            }
+          )
+          await GM.setValue(key, 'changed')
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200)
+          })
+          await GM.removeValueChangeListener(id)
+          await GM.deleteValue(key)
+          if (triggered) {
+            passed++
+          } else {
+            messages.push('Basic: Not triggered')
+          }
+        }
+        {
+          const key = 'benchmark_listener_same_gm_dot'
+          await GM.deleteValue(key)
+          let triggered = false
+          const id = await GM.addValueChangeListener(
+            key,
+            (name, oldVal, newVal, remote) => {
+              if (name === key) triggered = true
+            }
+          )
+          await GM.setValue(key, 'initial')
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200)
+          })
+          const initialTriggered = triggered
+          if (!initialTriggered) {
+            messages.push('SameValue: Initial change NOT triggered')
+          }
+          triggered = false
+          await GM.setValue(key, 'initial')
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200)
+          })
+          await GM.removeValueChangeListener(id)
+          await GM.deleteValue(key)
+          if (triggered) {
+            messages.push('SameValue: Triggered unexpectedly on same value')
+          }
+          if (initialTriggered && !triggered) {
+            passed++
+          }
+        }
+        {
+          const key = 'benchmark_listener_obj_gm_dot'
+          const obj = { foo: 'bar', num: 123 }
+          let receivedVal = null
+          const id = await GM.addValueChangeListener(
+            key,
+            (name, oldVal, newVal, remote) => {
+              if (name === key) receivedVal = newVal
+            }
+          )
+          await GM.setValue(key, obj)
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200)
+          })
+          await GM.removeValueChangeListener(id)
+          await GM.deleteValue(key)
+          const objPassed =
+            receivedVal &&
+            typeof receivedVal === 'object' &&
+            receivedVal.foo === 'bar' &&
+            receivedVal.num === 123
+          if (objPassed) {
+            passed++
+          } else {
+            messages.push('Object: Value mismatch')
+          }
+        }
+        {
+          const keyLocal = 'benchmark_listener_remote_local_gm_dot'
+          const keyRemote = 'benchmark_listener_remote_other_gm_dot'
+          let localRemoteFlag
+          let otherRemoteFlag
+          const id1 = await GM.addValueChangeListener(
+            keyLocal,
+            (name, oldVal, newVal, remote) => {
+              if (name === keyLocal) localRemoteFlag = remote
+            }
+          )
+          await GM.setValue(keyLocal, 'local_change')
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200)
+          })
+          await GM.removeValueChangeListener(id1)
+          await GM.deleteValue(keyLocal)
+          const id2 = await GM.addValueChangeListener(
+            keyRemote,
+            (name, oldVal, newVal, remote) => {
+              if (name === keyRemote) otherRemoteFlag = remote
+            }
+          )
+          const iframe = document.createElement('iframe')
+          const url = new URL(location.href)
+          url.searchParams.set('benchmark_role', 'iframe')
+          url.searchParams.set('key', keyRemote)
+          url.searchParams.set('value', 'remote_change')
+          iframe.src = url.href
+          iframe.style.display = 'none'
+          document.body.append(iframe)
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1e3)
+          })
+          iframe.remove()
+          await GM.removeValueChangeListener(id2)
+          await GM.deleteValue(keyRemote)
+          if (localRemoteFlag === false) {
+            passed++
+          } else {
+            messages.push(
+              'Remote(Local): Expected false, got '.concat(localRemoteFlag)
+            )
+          }
+          if (otherRemoteFlag === true) {
+            passed++
+          } else {
+            messages.push(
+              'Remote(Other): Expected true, got '.concat(otherRemoteFlag)
+            )
+          }
+        }
+        return {
+          supported: true,
+          passed,
+          total,
+          message: messages.length > 0 ? messages.join('; ') : void 0,
+        }
+      }
+    )
+  }
   var tests = []
   function registerTest(name, gmRun, gmDotRun) {
     tests.push({ name, gmRun, gmDotRun })
@@ -244,15 +559,16 @@
         return { supported: false, passed: 0, total: 1 }
       }
       const data = {
-        benchmark_gm_key1: 'val1-' + Math.random(),
-        benchmark_gm_key2: 12345,
+        benchmark_set_values_key1: 'val1-' + Math.random(),
+        benchmark_set_values_key2: 12345,
       }
       await GM_setValues(data)
       const retrieved = await GM_getValues(Object.keys(data))
       await GM_deleteValues(Object.keys(data))
       const passed =
-        retrieved.benchmark_gm_key1 === data.benchmark_gm_key1 &&
-        retrieved.benchmark_gm_key2 === data.benchmark_gm_key2
+        retrieved.benchmark_set_values_key1 ===
+          data.benchmark_set_values_key1 &&
+        retrieved.benchmark_set_values_key2 === data.benchmark_set_values_key2
       return { supported: true, passed: passed ? 1 : 0, total: 1 }
     },
     async () => {
@@ -265,74 +581,21 @@
         return { supported: false, passed: 0, total: 1 }
       }
       const data = {
-        benchmark_gm_key1: 'val1-' + Math.random(),
-        benchmark_gm_key2: 12345,
+        benchmark_set_values_gm4_key1: 'val1-' + Math.random(),
+        benchmark_set_values_gm4_key2: 12345,
       }
       await GM.setValues(data)
       const retrieved = await GM.getValues(Object.keys(data))
       await GM.deleteValues(Object.keys(data))
       const passed =
-        retrieved.benchmark_gm_key1 === data.benchmark_gm_key1 &&
-        retrieved.benchmark_gm_key2 === data.benchmark_gm_key2
+        retrieved.benchmark_set_values_gm4_key1 ===
+          data.benchmark_set_values_gm4_key1 &&
+        retrieved.benchmark_set_values_gm4_key2 ===
+          data.benchmark_set_values_gm4_key2
       return { supported: true, passed: passed ? 1 : 0, total: 1 }
     }
   )
-  registerTest(
-    'addValueChangeListener / removeValueChangeListener',
-    async () => {
-      if (
-        typeof GM_addValueChangeListener !== 'function' ||
-        typeof GM_removeValueChangeListener !== 'function' ||
-        typeof GM_setValue !== 'function'
-      ) {
-        return { supported: false, passed: 0, total: 1 }
-      }
-      const key = 'benchmark_listener_key'
-      let triggered = false
-      const id = GM_addValueChangeListener(
-        key,
-        (name, oldVal, newVal, remote) => {
-          if (name === key && newVal === 'changed') {
-            triggered = true
-          }
-        }
-      )
-      await GM_setValue(key, 'changed')
-      await new Promise((resolve) => {
-        setTimeout(resolve, 200)
-      })
-      GM_removeValueChangeListener(id)
-      await GM_deleteValue(key)
-      return { supported: true, passed: triggered ? 1 : 0, total: 1 }
-    },
-    async () => {
-      if (
-        typeof GM === 'undefined' ||
-        typeof GM.addValueChangeListener !== 'function' ||
-        typeof GM.removeValueChangeListener !== 'function' ||
-        typeof GM.setValue !== 'function'
-      ) {
-        return { supported: false, passed: 0, total: 1 }
-      }
-      const key = 'benchmark_listener_key'
-      let triggered = false
-      const id = await GM.addValueChangeListener(
-        key,
-        (name, oldVal, newVal, remote) => {
-          if (name === key && newVal === 'changed') {
-            triggered = true
-          }
-        }
-      )
-      await GM.setValue(key, 'changed')
-      await new Promise((resolve) => {
-        setTimeout(resolve, 200)
-      })
-      await GM.removeValueChangeListener(id)
-      await GM.deleteValue(key)
-      return { supported: true, passed: triggered ? 1 : 0, total: 1 }
-    }
-  )
+  registerValueChangeListenerTests(registerTest)
   registerTest(
     'addStyle',
     () => {
@@ -636,7 +899,7 @@
     const shadow = host.attachShadow({ mode: 'open' })
     const style = document.createElement('style')
     style.textContent =
-      '\n    :host {\n      position: fixed; top: 20px; right: 20px; z-index: 2147483647;\n      background: #fff; color: #333; padding: 16px; border-radius: 8px;\n      box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-family: sans-serif;\n      max-height: 90vh; overflow-y: auto; width: 600px;\n      font-size: 13px;\n    }\n    table { width: 100%; border-collapse: collapse; margin-top: 10px; }\n    th, td { border: 1px solid #eee; padding: 6px 8px; text-align: left; }\n    th { background: #f9f9f9; font-weight: 600; }\n    .pass { color: #2ecc71; font-weight: bold; }\n    .fail { color: #e74c3c; font-weight: bold; }\n    .na { color: #f59e0b; font-weight: bold; }\n    .header h3 { margin: 0 0 8px 0; font-size: 16px; }\n    .close { position: absolute; top: 10px; right: 10px; cursor: pointer; font-size: 16px; color: #999; }\n    .close:hover { color: #333; }\n    .copy-btn {\n      position: absolute; top: 10px; right: 40px;\n      cursor: pointer; font-size: 13px; color: #007aff; border: 1px solid #007aff;\n      padding: 2px 8px; border-radius: 4px; background: transparent;\n    }\n    .copy-btn:hover { background: #007aff; color: #fff; }\n    .copy-btn:active { transform: translateY(1px); }\n    .log-area {\n      margin-top: 16px;\n      padding: 10px;\n      background: #f5f5f5;\n      border: 1px solid #ddd;\n      border-radius: 4px;\n      font-family: monospace;\n      font-size: 11px;\n      max-height: 150px;\n      overflow-y: auto;\n      white-space: pre-wrap;\n    }\n    .log-entry { margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 4px; }\n    .log-entry:last-child { border-bottom: none; margin-bottom: 0; }\n    .log-entry.error { color: #e74c3c; }\n  '
+      '\n    :host {\n      position: fixed; top: 20px; right: 20px; z-index: 2147483647;\n      background: #fff; color: #333; padding: 16px; border-radius: 8px;\n      box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-family: sans-serif;\n      max-height: 90vh; overflow-y: auto; width: 600px;\n      font-size: 13px;\n    }\n    table { width: 100%; border-collapse: collapse; margin-top: 10px; }\n    th, td { border: 1px solid #eee; padding: 6px 8px; text-align: left; }\n    th { background: #f9f9f9; font-weight: 600; }\n    .pass { color: #2ecc71; font-weight: bold; }\n    .fail { color: #e74c3c; font-weight: bold; }\n    .na { color: #f59e0b; font-weight: bold; }\n    .header h3 { margin: 0 0 8px 0; font-size: 16px; }\n    .close { position: absolute; top: 10px; right: 10px; cursor: pointer; font-size: 16px; color: #999; }\n    .close:hover { color: #333; }\n    .copy-btn {\n      position: absolute; top: 10px; right: 40px;\n      cursor: pointer; font-size: 13px; color: #007aff; border: 1px solid #007aff;\n      padding: 2px 8px; border-radius: 4px; background: transparent;\n    }\n    .copy-btn:hover { background: #007aff; color: #fff; }\n    .copy-btn:active { transform: translateY(1px); }\n    .log-area {\n      margin-top: 16px;\n      padding: 10px;\n      background: #f5f5f5;\n      border: 1px solid #ddd;\n      border-radius: 4px;\n      font-family: monospace;\n      font-size: 11px;\n      max-height: 150px;\n      overflow-y: auto;\n      white-space: pre-wrap;\n    }\n    .log-entry { margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 4px; }\n    .log-entry:last-child { border-bottom: none; margin-bottom: 0; }\n    .log-entry.error { color: #e74c3c; }\n    .log-entry.warning { color: #f59e0b; }\n  '
     shadow.append(style)
     const wrapper = document.createElement('div')
     let handler = 'Unknown'
@@ -814,10 +1077,20 @@
         appendLog(msg, 'error')
         console.error(msg, gmRes.error)
       }
+      if (gmRes.message && gmRes.message !== 'N/A') {
+        const msg = ''.concat(t.name, ' (GM_): ').concat(gmRes.message)
+        appendLog(msg, 'warning')
+        console.warn(msg)
+      }
       if (gmDotRes.error) {
         const msg = ''.concat(t.name, ' (GM.): ').concat(String(gmDotRes.error))
         appendLog(msg, 'error')
         console.error(msg, gmDotRes.error)
+      }
+      if (gmDotRes.message && gmDotRes.message !== 'N/A') {
+        const msg = ''.concat(t.name, ' (GM.): ').concat(gmDotRes.message)
+        appendLog(msg, 'warning')
+        console.warn(msg)
       }
       const isWindowApi = [
         'unsafeWindow',
@@ -859,6 +1132,21 @@
     void render()
   }
   function main() {
+    const urlParams = new URLSearchParams(globalThis.location.search)
+    if (urlParams.get('benchmark_role') === 'iframe') {
+      const key = urlParams.get('key')
+      const value = urlParams.get('value')
+      if (key && value) {
+        if (typeof GM_setValue === 'function') GM_setValue(key, value)
+        if (typeof GM !== 'undefined' && typeof GM.setValue === 'function') {
+          void GM.setValue(key, value)
+        }
+      }
+      return
+    }
+    if (!isTopFrame()) {
+      return
+    }
     try {
       const de = document.documentElement
       if (de && de.dataset && de.dataset.uab === '1') return
