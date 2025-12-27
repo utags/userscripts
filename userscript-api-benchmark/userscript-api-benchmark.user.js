@@ -2,7 +2,7 @@
 // @name                 Userscript API Benchmark
 // @name:zh-CN           用户脚本 API 基准测试
 // @namespace            https://github.com/utags/userscripts
-// @version              0.1.2
+// @version              0.1.3
 // @description          Comprehensive benchmark tool for UserScript Manager APIs (GM.* and GM_*)
 // @description:zh-CN    用户脚本管理器 API (GM.* 和 GM_*) 的综合基准测试工具，用于检查兼容性与准确性
 // @author               Pipecraft
@@ -871,12 +871,11 @@
     }
   )
   registerTest('unsafeWindow', () => {
-    const supported = typeof globalThis.unsafeWindow !== 'undefined'
+    const supported = typeof unsafeWindow !== 'undefined'
     return { supported, passed: supported ? 1 : 0, total: 1 }
   })
   registerTest('window.onurlchange', () => {
-    const supported =
-      'onurlchange' in globalThis && globalThis.onurlchange === null
+    const supported = 'onurlchange' in window && window.onurlchange === null
     return { supported, passed: supported ? 1 : 0, total: 1 }
   })
   registerTest('window.close', () => {

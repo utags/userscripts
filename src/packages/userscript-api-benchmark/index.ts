@@ -607,14 +607,15 @@ registerTest(
 )
 
 registerTest('unsafeWindow', () => {
-  const supported = typeof globalThis.unsafeWindow !== 'undefined'
+  const supported = typeof unsafeWindow !== 'undefined'
   return { supported, passed: supported ? 1 : 0, total: 1 }
 })
 
 registerTest('window.onurlchange', () => {
   // Check if the event handler is supported on window
   const supported =
-    'onurlchange' in globalThis && globalThis.onurlchange === null
+    // eslint-disable-next-line unicorn/prefer-global-this
+    'onurlchange' in window && window.onurlchange === null
   return { supported, passed: supported ? 1 : 0, total: 1 }
 })
 
