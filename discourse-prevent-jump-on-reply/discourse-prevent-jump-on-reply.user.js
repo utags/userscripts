@@ -73,6 +73,7 @@
   var valueChangeBroadcastChannel = new BroadcastChannel(
     'gm_value_change_channel'
   )
+  var lastKnownValues = /* @__PURE__ */ new Map()
   var getScriptHandler = () => {
     if (typeof GM_info !== 'undefined') {
       return GM_info.scriptHandler || ''
@@ -100,6 +101,7 @@
   }
   valueChangeBroadcastChannel.addEventListener('message', (event) => {
     const { key, oldValue, newValue } = event.data
+    lastKnownValues.set(key, newValue)
     triggerValueChangeListeners(key, oldValue, newValue, true)
   })
   async function getValue(key, defaultValue) {
@@ -121,6 +123,7 @@
       if (deepEqual(oldValue, newValue)) {
         return
       }
+      lastKnownValues.set(key, newValue)
       triggerValueChangeListeners(key, oldValue, newValue, false)
       valueChangeBroadcastChannel.postMessage({ key, oldValue, newValue })
     }

@@ -16,6 +16,31 @@ let valueChangeListenerIdCounter = 0
 const valueChangeBroadcastChannel = new BroadcastChannel(
   'gm_value_change_channel'
 )
+const lastKnownValues = new Map<string, unknown>()
+let pollingIntervalId: any = null
+
+function startPolling() {
+  if (pollingIntervalId || isNativeListenerSupported) return
+  pollingIntervalId = setInterval(async () => {
+    const keys = new Set(
+      Array.from(valueChangeListeners.values()).map((l) => l.key)
+    )
+    for (const key of keys) {
+      const newValue = await getValue(key)
+      if (!lastKnownValues.has(key)) {
+        lastKnownValues.set(key, newValue)
+        continue
+      }
+
+      const oldValue = lastKnownValues.get(key)
+      if (!deepEqual(oldValue, newValue)) {
+        lastKnownValues.set(key, newValue)
+        triggerValueChangeListeners(key, oldValue, newValue, true)
+        valueChangeBroadcastChannel.postMessage({ key, oldValue, newValue })
+      }
+    }
+  }, 1500)
+}
 
 const getScriptHandler = () => {
   if (typeof GM_info !== 'undefined') {
@@ -55,6 +80,7 @@ function triggerValueChangeListeners(
 
 valueChangeBroadcastChannel.addEventListener('message', (event) => {
   const { key, oldValue, newValue } = event.data
+  lastKnownValues.set(key, newValue)
   triggerValueChangeListeners(key, oldValue, newValue, true)
 })
 
@@ -90,6 +116,7 @@ async function updateValue(
       return
     }
 
+    lastKnownValues.set(key, newValue)
     triggerValueChangeListeners(key, oldValue, newValue, false)
 
     valueChangeBroadcastChannel.postMessage({ key, oldValue, newValue })
@@ -140,6 +167,14 @@ export async function addValueChangeListener(
 
   const id = ++valueChangeListenerIdCounter
   valueChangeListeners.set(id, { key, callback })
+  if (!lastKnownValues.has(key)) {
+    // eslint-disable-next-line promise/prefer-await-to-then
+    void getValue(key).then((v) => {
+      lastKnownValues.set(key, v)
+    })
+  }
+
+  startPolling()
   return id
 }
 
@@ -160,4 +195,9 @@ export async function removeValueChangeListener(id: number): Promise<void> {
   }
 
   valueChangeListeners.delete(id)
+  if (valueChangeListeners.size === 0 && pollingIntervalId) {
+    clearInterval(pollingIntervalId)
+    pollingIntervalId = null
+    lastKnownValues.clear()
+  }
 }

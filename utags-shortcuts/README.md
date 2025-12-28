@@ -89,12 +89,10 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
-### v0.3.1
+### v0.3.x
 
 - **Compatibility**: Disabled Iframe Mode for Stay script manager (as it deletes the created iframe body).
-
-### v0.3.0
-
+- **Optimization**: Add polling mechanism as a fallback for data synchronization when native listeners are unavailable.
 - Add simulated `addValueChangeListener` support for script managers that do not implement it natively, enabling cross-tab data synchronization.
 
 ### v0.2.6

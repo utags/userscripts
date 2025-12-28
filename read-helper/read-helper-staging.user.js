@@ -523,6 +523,29 @@
   var valueChangeBroadcastChannel = new BroadcastChannel(
     'gm_value_change_channel'
   )
+  var lastKnownValues = /* @__PURE__ */ new Map()
+  var pollingIntervalId = null
+  function startPolling() {
+    if (pollingIntervalId || isNativeListenerSupported) return
+    pollingIntervalId = setInterval(async () => {
+      const keys = new Set(
+        Array.from(valueChangeListeners.values()).map((l) => l.key)
+      )
+      for (const key of keys) {
+        const newValue = await getValue(key)
+        if (!lastKnownValues.has(key)) {
+          lastKnownValues.set(key, newValue)
+          continue
+        }
+        const oldValue = lastKnownValues.get(key)
+        if (!deepEqual(oldValue, newValue)) {
+          lastKnownValues.set(key, newValue)
+          triggerValueChangeListeners(key, oldValue, newValue, true)
+          valueChangeBroadcastChannel.postMessage({ key, oldValue, newValue })
+        }
+      }
+    }, 1500)
+  }
   var getScriptHandler = () => {
     if (typeof GM_info !== 'undefined') {
       return GM_info.scriptHandler || ''
@@ -550,6 +573,7 @@
   }
   valueChangeBroadcastChannel.addEventListener('message', (event) => {
     const { key, oldValue, newValue } = event.data
+    lastKnownValues.set(key, newValue)
     triggerValueChangeListeners(key, oldValue, newValue, true)
   })
   async function getValue(key, defaultValue) {
@@ -571,6 +595,7 @@
       if (deepEqual(oldValue, newValue)) {
         return
       }
+      lastKnownValues.set(key, newValue)
       triggerValueChangeListeners(key, oldValue, newValue, false)
       valueChangeBroadcastChannel.postMessage({ key, oldValue, newValue })
     }
@@ -598,6 +623,12 @@
     }
     const id = ++valueChangeListenerIdCounter
     valueChangeListeners.set(id, { key, callback })
+    if (!lastKnownValues.has(key)) {
+      void getValue(key).then((v) => {
+        lastKnownValues.set(key, v)
+      })
+    }
+    startPolling()
     return id
   }
   function isObject(item) {

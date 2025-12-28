@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.8.1
+// @version              0.8.2
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -120,6 +120,29 @@
   var valueChangeBroadcastChannel = new BroadcastChannel(
     'gm_value_change_channel'
   )
+  var lastKnownValues = /* @__PURE__ */ new Map()
+  var pollingIntervalId = null
+  function startPolling() {
+    if (pollingIntervalId || isNativeListenerSupported) return
+    pollingIntervalId = setInterval(async () => {
+      const keys = new Set(
+        Array.from(valueChangeListeners.values()).map((l) => l.key)
+      )
+      for (const key of keys) {
+        const newValue = await getValue(key)
+        if (!lastKnownValues.has(key)) {
+          lastKnownValues.set(key, newValue)
+          continue
+        }
+        const oldValue = lastKnownValues.get(key)
+        if (!deepEqual(oldValue, newValue)) {
+          lastKnownValues.set(key, newValue)
+          triggerValueChangeListeners(key, oldValue, newValue, true)
+          valueChangeBroadcastChannel.postMessage({ key, oldValue, newValue })
+        }
+      }
+    }, 1500)
+  }
   var getScriptHandler = () => {
     if (typeof GM_info !== 'undefined') {
       return GM_info.scriptHandler || ''
@@ -147,6 +170,7 @@
   }
   valueChangeBroadcastChannel.addEventListener('message', (event) => {
     const { key, oldValue, newValue } = event.data
+    lastKnownValues.set(key, newValue)
     triggerValueChangeListeners(key, oldValue, newValue, true)
   })
   async function getValue(key, defaultValue) {
@@ -168,6 +192,7 @@
       if (deepEqual(oldValue, newValue)) {
         return
       }
+      lastKnownValues.set(key, newValue)
       triggerValueChangeListeners(key, oldValue, newValue, false)
       valueChangeBroadcastChannel.postMessage({ key, oldValue, newValue })
     }
@@ -204,6 +229,12 @@
     }
     const id = ++valueChangeListenerIdCounter
     valueChangeListeners.set(id, { key, callback })
+    if (!lastKnownValues.has(key)) {
+      void getValue(key).then((v) => {
+        lastKnownValues.set(key, v)
+      })
+    }
+    startPolling()
     return id
   }
   var CONFIG = {

@@ -51,9 +51,10 @@ A user script to quickly find scripts for the current site across multiple repos
 
 ## Changelog
 
-### v0.4.0
+### v0.4.x
 
 - Add simulated `addValueChangeListener` support for script managers that do not implement it natively, enabling cross-tab data synchronization.
+- Optimization: Add polling mechanism as a fallback for data synchronization when native listeners are unavailable.
 
 ### v0.3.x
 

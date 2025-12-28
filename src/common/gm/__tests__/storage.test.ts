@@ -246,4 +246,41 @@ describe('GM API polyfill', () => {
     // Should NOT use native listener
     expect(nativeAddListener).not.toHaveBeenCalled()
   })
+
+  it('should poll for value changes when native listener is not supported', async () => {
+    vi.useFakeTimers()
+    const storage = new Map<string, any>()
+    storage.set('pollKey', 'initial')
+
+    vi.stubGlobal('GM', {
+      getValue: vi.fn(async (k) => storage.get(k)),
+      setValue: vi.fn(async (k, v) => storage.set(k, v)),
+      addValueChangeListener: undefined,
+    })
+
+    const gm = await import('../storage.js')
+    const callback = vi.fn()
+    const id = await gm.addValueChangeListener('pollKey', callback)
+
+    // Wait for initial value load (void getValue(...))
+    await vi.advanceTimersByTimeAsync(100)
+
+    // Simulate external change
+    storage.set('pollKey', 'changed')
+
+    // Advance time to trigger polling (interval is 1500ms)
+    await vi.advanceTimersByTimeAsync(1500)
+
+    expect(callback).toHaveBeenCalledWith('pollKey', 'initial', 'changed', true)
+
+    // Verify polling stops after removal
+    callback.mockClear()
+    await gm.removeValueChangeListener(id)
+
+    storage.set('pollKey', 'changed again')
+    await vi.advanceTimersByTimeAsync(1500)
+
+    expect(callback).not.toHaveBeenCalled()
+    vi.useRealTimers()
+  })
 })
