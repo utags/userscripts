@@ -49,6 +49,10 @@
 
 ## 更新记录
 
+### v0.2.0
+
+- 为不支持 `addValueChangeListener` 的脚本管理器增加监听数据变化的功能，实现跨标签页数据同步。
+
 ### v0.1.4
 
 - 删除 `@noframes` 声明，兼容 utags-shortcuts 在 iframe 模式下运行

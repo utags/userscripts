@@ -1,4 +1,5 @@
-import { getValue, setValue, xmlHttpRequestWithFallback } from '../../common/gm'
+import { xmlHttpRequestWithFallback } from '../../common/gm'
+import { getValue, setValue } from '../../common/gm/storage'
 import { uid } from '../../utils/uid'
 import { importAndSave } from './importer'
 

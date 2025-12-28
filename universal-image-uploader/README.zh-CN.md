@@ -85,6 +85,10 @@
 
 ## 更新记录
 
+### v0.8.x
+
+- 为不支持 `addValueChangeListener` 的脚本管理器增加监听数据变化的功能，实现跨标签页数据同步。
+
 ### v0.7.x
 
 - 修复与 utags-shortcuts 的兼容性问题

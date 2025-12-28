@@ -49,6 +49,10 @@ Tested on modern browsers with Tampermonkey/Violentmonkey and Discourse‑based 
 
 ## Changelog
 
+### v0.2.0
+
+- Add simulated `addValueChangeListener` support for script managers that do not implement it natively, enabling cross-tab data synchronization.
+
 ### v0.1.4
 
 - Delete `@noframes` declaration, compatible with utags-shortcuts in iframe mode

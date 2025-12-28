@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.4
+// @version              0.2.0
 // @description          Prevent Discourse from jumping after posting a reply by intercepting the reply button click and forcing shiftKey, keeping scroll position and context.
 // @description:zh-CN    拦截回复按钮点击并强制 shiftKey，避免发帖后页面跳转，保持当前位置与上下文。
 // @icon                 https://www.google.com/s2/favicons?sz=64&domain=meta.discourse.org
@@ -16,6 +16,10 @@
 // @match                https://www.nodeloc.com/*
 // @match                https://meta.appinn.net/*
 // @run-at               document-idle
+// @grant                GM_info
+// @grant                GM.info
+// @grant                GM.addValueChangeListener
+// @grant                GM_addValueChangeListener
 // @grant                GM.getValue
 // @grant                GM_getValue
 // @grant                GM.setValue
@@ -24,6 +28,80 @@
 //
 ;(() => {
   'use strict'
+  function deepEqual(a, b) {
+    if (a === b) {
+      return true
+    }
+    if (
+      typeof a !== 'object' ||
+      a === null ||
+      typeof b !== 'object' ||
+      b === null
+    ) {
+      return false
+    }
+    if (Array.isArray(a) !== Array.isArray(b)) {
+      return false
+    }
+    if (Array.isArray(a)) {
+      if (a.length !== b.length) {
+        return false
+      }
+      for (let i = 0; i < a.length; i++) {
+        if (!deepEqual(a[i], b[i])) {
+          return false
+        }
+      }
+      return true
+    }
+    const keysA = Object.keys(a)
+    const keysB = Object.keys(b)
+    if (keysA.length !== keysB.length) {
+      return false
+    }
+    for (const key of keysA) {
+      if (
+        !Object.prototype.hasOwnProperty.call(b, key) ||
+        !deepEqual(a[key], b[key])
+      ) {
+        return false
+      }
+    }
+    return true
+  }
+  var valueChangeListeners = /* @__PURE__ */ new Map()
+  var valueChangeBroadcastChannel = new BroadcastChannel(
+    'gm_value_change_channel'
+  )
+  var getScriptHandler = () => {
+    if (typeof GM_info !== 'undefined') {
+      return GM_info.scriptHandler || ''
+    }
+    if (typeof GM !== 'undefined' && GM.info) {
+      return GM.info.scriptHandler || ''
+    }
+    return ''
+  }
+  var scriptHandler = getScriptHandler()
+  var isIgnoredHandler =
+    scriptHandler === 'tamp' || scriptHandler.includes('stay')
+  var isNativeListenerSupported =
+    !isIgnoredHandler &&
+    ((typeof GM !== 'undefined' &&
+      typeof GM.addValueChangeListener === 'function') ||
+      typeof GM_addValueChangeListener === 'function')
+  function triggerValueChangeListeners(key, oldValue, newValue, remote) {
+    const list = Array.from(valueChangeListeners.values()).filter(
+      (l) => l.key === key
+    )
+    for (const l of list) {
+      l.callback(key, oldValue, newValue, remote)
+    }
+  }
+  valueChangeBroadcastChannel.addEventListener('message', (event) => {
+    const { key, oldValue, newValue } = event.data
+    triggerValueChangeListeners(key, oldValue, newValue, true)
+  })
   async function getValue(key, defaultValue) {
     if (typeof GM !== 'undefined' && typeof GM.getValue === 'function') {
       return GM.getValue(key, defaultValue)
@@ -33,14 +111,28 @@
     }
     return defaultValue
   }
+  async function updateValue(key, newValue, updater) {
+    let oldValue
+    if (!isNativeListenerSupported) {
+      oldValue = await getValue(key)
+    }
+    await updater()
+    if (!isNativeListenerSupported) {
+      if (deepEqual(oldValue, newValue)) {
+        return
+      }
+      triggerValueChangeListeners(key, oldValue, newValue, false)
+      valueChangeBroadcastChannel.postMessage({ key, oldValue, newValue })
+    }
+  }
   async function setValue(key, value) {
-    if (typeof GM !== 'undefined' && typeof GM.setValue === 'function') {
-      await GM.setValue(key, value)
-      return
-    }
-    if (typeof GM_setValue === 'function') {
-      GM_setValue(key, value)
-    }
+    await updateValue(key, value, async () => {
+      if (typeof GM !== 'undefined' && typeof GM.setValue === 'function') {
+        await GM.setValue(key, value)
+      } else if (typeof GM_setValue === 'function') {
+        GM_setValue(key, value)
+      }
+    })
   }
   var SELECTOR_REPLY_BUTTON =
     '.composer-action-reply .save-or-cancel button.create'

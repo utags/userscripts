@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createSettingsStore } from '../index'
-import * as gm from '../../gm'
+import * as gm from '../../gm/storage'
 
 // Mock gm module
-vi.mock('../../gm', () => ({
+vi.mock('../../gm/storage', () => ({
   getValue: vi.fn(),
   setValue: vi.fn(),
   addValueChangeListener: vi.fn(),

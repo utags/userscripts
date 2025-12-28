@@ -23,14 +23,12 @@ import {
   type ShortcutsGroup,
   type ShortcutsItem,
 } from './store'
+import { registerMenu, unregisterMenu, addStyle } from '../../common/gm'
 import {
   getValue,
   setValue,
-  registerMenu,
-  unregisterMenu,
   addValueChangeListener,
-  addStyle,
-} from '../../common/gm'
+} from '../../common/gm/storage'
 import {
   addCurrentPageLinkToGroup,
   pickLinkFromPageAndAdd,

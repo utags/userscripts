@@ -40,8 +40,10 @@ const BLACKLIST_DOMAINS = new Set([
   'superuser.com',
 ])
 const BLACKLIST_URL_PATTERNS = new Set([
-  /^https:\/\/www\.google\.com\/.*[&?]udm=50/,
+  /^https:\/\/www\.google\.com\/search\?.*[&?]udm=50/,
+  /^https:\/\/www\.google\.com\/search\?((?![?&]udm=).)*$/,
   /^https:\/\/(.+\.)?stackexchange\.com\//,
+  /^https:\/\/(login|auth)[^.]*\./,
   /.+\.user\.js([?#].*)?$/,
   // /.+\.md([?#].*)?$/,
 ])

@@ -51,6 +51,10 @@ A user script to quickly find scripts for the current site across multiple repos
 
 ## Changelog
 
+### v0.4.0
+
+- Add simulated `addValueChangeListener` support for script managers that do not implement it natively, enabling cross-tab data synchronization.
+
 ### v0.3.x
 
 - Fixed an issue where styles could not be injected on websites with strict CSP (Content Security Policy).

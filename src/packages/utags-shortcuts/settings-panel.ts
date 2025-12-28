@@ -9,7 +9,8 @@ import {
   type PanelSchema,
   type Store,
 } from '../../common/settings'
-import { getValue, setValue, xmlHttpRequestWithFallback } from '../../common/gm'
+import { xmlHttpRequestWithFallback } from '../../common/gm'
+import { getValue, setValue } from '../../common/gm/storage'
 import { openEditorModal } from './editor-modal-tabs'
 import styleText from 'css:./style.css'
 import { uid } from '../../utils/uid'

@@ -1,4 +1,4 @@
-import { getValue, setValue } from '../../common/gm'
+import { getValue, setValue } from '../../common/gm/storage'
 
 const SELECTOR_REPLY_BUTTON =
   '.composer-action-reply .save-or-cancel button.create'

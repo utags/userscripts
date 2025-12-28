@@ -234,16 +234,20 @@ export function isElementVisible(el: Element | undefined): boolean {
 
 export function isInteractive(el: Element | undefined): boolean {
   if (!el) return false
-  const tag = el.tagName.toLowerCase()
+  const tag = (el.tagName || '').toLowerCase()
   if (['input', 'textarea', 'select', 'button'].includes(tag)) return true
-  if (el.hasAttribute('contenteditable')) return true
+  if (
+    typeof el.hasAttribute === 'function' &&
+    el.hasAttribute('contenteditable')
+  )
+    return true
   return false
 }
 
 export function isBlockElement(el: Element): boolean {
   const cs = globalThis.getComputedStyle(el)
   const d = cs.display
-  const tag = el.tagName.toLowerCase()
+  const tag = (el.tagName || '').toLowerCase()
   if (
     d === 'block' ||
     d === 'list-item' ||

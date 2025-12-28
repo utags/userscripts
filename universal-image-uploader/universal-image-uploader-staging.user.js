@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.7.0
+// @version              0.8.0
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -24,6 +24,8 @@
 // @connect              mjj.today
 // @connect              h1.appinn.me
 // @grant                GM_registerMenuCommand
+// @grant                GM_info
+// @grant                GM.info
 // @grant                GM.addValueChangeListener
 // @grant                GM_addValueChangeListener
 // @grant                GM_getValue
@@ -69,17 +71,55 @@
     }
     return 0
   }
+  var valueChangeListeners = /* @__PURE__ */ new Map()
+  var valueChangeListenerIdCounter = 0
+  var valueChangeBroadcastChannel = new BroadcastChannel(
+    'gm_value_change_channel'
+  )
+  var getScriptHandler = () => {
+    if (typeof GM_info !== 'undefined') {
+      return GM_info.scriptHandler || ''
+    }
+    if (typeof GM !== 'undefined' && GM.info) {
+      return GM.info.scriptHandler || ''
+    }
+    return ''
+  }
+  var scriptHandler = getScriptHandler()
+  var isIgnoredHandler =
+    scriptHandler === 'tamp' || scriptHandler.includes('stay')
+  var isNativeListenerSupported =
+    !isIgnoredHandler &&
+    ((typeof GM !== 'undefined' &&
+      typeof GM.addValueChangeListener === 'function') ||
+      typeof GM_addValueChangeListener === 'function')
+  function triggerValueChangeListeners(key, oldValue, newValue, remote) {
+    const list = Array.from(valueChangeListeners.values()).filter(
+      (l) => l.key === key
+    )
+    for (const l of list) {
+      l.callback(key, oldValue, newValue, remote)
+    }
+  }
+  valueChangeBroadcastChannel.addEventListener('message', (event) => {
+    const { key, oldValue, newValue } = event.data
+    triggerValueChangeListeners(key, oldValue, newValue, true)
+  })
   async function addValueChangeListener(key, callback) {
-    if (
-      typeof GM !== 'undefined' &&
-      typeof GM.addValueChangeListener === 'function'
-    ) {
-      return GM.addValueChangeListener(key, callback)
+    if (isNativeListenerSupported) {
+      if (
+        typeof GM !== 'undefined' &&
+        typeof GM.addValueChangeListener === 'function'
+      ) {
+        return GM.addValueChangeListener(key, callback)
+      }
+      if (typeof GM_addValueChangeListener === 'function') {
+        return GM_addValueChangeListener(key, callback)
+      }
     }
-    if (typeof GM_addValueChangeListener === 'function') {
-      return GM_addValueChangeListener(key, callback)
-    }
-    return 0
+    const id = ++valueChangeListenerIdCounter
+    valueChangeListeners.set(id, { key, callback })
+    return id
   }
   var CONFIG = {
     localhost: {

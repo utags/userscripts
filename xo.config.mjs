@@ -53,6 +53,7 @@ const xoConfig = [
       'capitalized-comments': 0,
       '@stylistic/indent': 0,
       '@stylistic/indent-binary-ops': 0,
+      'prefer-object-has-own': 0,
       // temp
       '@typescript-eslint/no-unsafe-assignment': 0,
       '@typescript-eslint/no-unsafe-call': 0,

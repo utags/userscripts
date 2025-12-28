@@ -85,6 +85,10 @@ Install one of the following user script managers:
 
 ## Changelog
 
+### v0.8.x
+
+- Add simulated `addValueChangeListener` support for script managers that do not implement it natively, enabling cross-tab data synchronization.
+
 ### v0.7.x
 
 - Fix compatibility issues with utags-shortcuts

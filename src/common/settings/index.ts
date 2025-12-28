@@ -3,7 +3,7 @@ import { isTopFrame } from '../../utils/is-top-frame'
 import { ensureShadowRoot } from '../../utils/dom'
 import { normalizeToDefaultType, setOrDelete } from '../../utils/obj'
 import styleText from 'css:./style.css'
-import { getValue, setValue, addValueChangeListener } from '../gm'
+import { getValue, setValue, addValueChangeListener } from '../gm/storage'
 
 export type FieldOption = { value: string; label: string }
 type FieldToggle = {

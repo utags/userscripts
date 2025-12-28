@@ -1,12 +1,10 @@
 import { isTopFrame } from '../../utils/is-top-frame'
+import { registerMenu, unregisterMenu, addStyle } from '../../common/gm'
 import {
   getValue,
   setValue,
-  registerMenu,
-  unregisterMenu,
   addValueChangeListener,
-  addStyle,
-} from '../../common/gm'
+} from '../../common/gm/storage'
 
 // CONFIG: Preset site configuration
 // - Key: site hostname without port; strip leading 'www.'

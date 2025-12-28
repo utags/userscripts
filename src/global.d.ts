@@ -3,6 +3,11 @@ declare module 'css:*' {
   export default cssText
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
+declare const GM_info: {
+  scriptHandler: string
+}
+
 declare function GM_addValueChangeListener(
   key: string,
   cb: (key: string, oldValue: any, newValue: any, remote: boolean) => void

@@ -89,6 +89,10 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.3.0
+
+- Add simulated `addValueChangeListener` support for script managers that do not implement it natively, enabling cross-tab data synchronization.
+
 ### v0.2.6
 
 - **Improved Iframe Focus**: The iframe now automatically receives focus after URL updates, ensuring keyboard shortcuts work immediately.
