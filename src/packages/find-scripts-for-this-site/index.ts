@@ -415,5 +415,4 @@ async function initialize(): Promise<void> {
 }
 
 // Initialize the script
-// eslint-disable-next-line unicorn/prefer-top-level-await
 void initialize()

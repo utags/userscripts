@@ -88,6 +88,7 @@ Install one of the following user script managers:
 ### v0.8.x
 
 - Add simulated `addValueChangeListener` support for script managers that do not implement it natively, enabling cross-tab data synchronization.
+- Refactoring: Migrate all synchronous `GM_` storage calls to asynchronous APIs to improve script performance and compatibility with modern environments.
 
 ### v0.7.x
 

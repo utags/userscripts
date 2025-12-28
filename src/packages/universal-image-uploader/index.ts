@@ -3,6 +3,7 @@ import { registerMenu, unregisterMenu, addStyle } from '../../common/gm'
 import {
   getValue,
   setValue,
+  deleteValue,
   addValueChangeListener,
 } from '../../common/gm/storage'
 
@@ -401,28 +402,29 @@ const APPINN_UPLOAD_PARAMS = {
 }
 
 // Migrate legacy storage keys from older versions (iu_*) to new (uiu_*) - v0.1 to v0.2
-function migrateLegacyStorage() {
+async function migrateLegacyStorage() {
   try {
-    const maybeMove = (oldKey, newKey) => {
-      const hasNew = GM_getValue(newKey, undefined) !== undefined
-      const oldVal = GM_getValue(oldKey, undefined)
+    const maybeMove = async (oldKey, newKey) => {
+      const newVal = await getValue(newKey)
+      const hasNew = newVal !== undefined
+      const oldVal = await getValue(oldKey)
       const hasOld = oldVal !== undefined
       if (!hasNew && hasOld) {
-        GM_setValue(newKey, oldVal)
+        await setValue(newKey, oldVal)
         try {
-          if (typeof GM_deleteValue === 'function') GM_deleteValue(oldKey)
+          await deleteValue(oldKey)
         } catch {}
       }
     }
 
-    maybeMove('iu_history', HISTORY_KEY)
-    maybeMove('iu_format_map', FORMAT_MAP_KEY)
-    maybeMove('iu_site_btn_settings_map', BTN_SETTINGS_MAP_KEY)
+    await maybeMove('iu_history', HISTORY_KEY)
+    await maybeMove('iu_format_map', FORMAT_MAP_KEY)
+    await maybeMove('iu_site_btn_settings_map', BTN_SETTINGS_MAP_KEY)
   } catch {}
 }
 
 // Run migration early before any reads/writes
-migrateLegacyStorage()
+// await migrateLegacyStorage() // Moved to init
 
 // Utility: normalize a host string consistently (trim and strip leading 'www.')
 function normalizeHost(h) {
@@ -443,7 +445,11 @@ function normalizeHost(h) {
  * - Optimizes lookups for larger lists via `Set`.
  * - Does not coerce types; comparison is strict equality against items in `allowedValues`.
  */
-function ensureAllowedValue(value, allowedValues, defaultValue) {
+function ensureAllowedValue(
+  value: any,
+  allowedValues: any[],
+  defaultValue?: any
+) {
   if (!Array.isArray(allowedValues) || allowedValues.length === 0) {
     return defaultValue
   }
@@ -457,9 +463,9 @@ function ensureAllowedValue(value, allowedValues, defaultValue) {
 }
 
 // Global custom formats: [{ name: string, template: string }]
-function getCustomFormats() {
+async function getCustomFormats() {
   try {
-    const list = GM_getValue(CUSTOM_FORMATS_KEY, []) || []
+    const list = (await getValue(CUSTOM_FORMATS_KEY, [])) || []
     if (!Array.isArray(list)) return []
     return list
       .map((it) => ({
@@ -472,7 +478,7 @@ function getCustomFormats() {
   }
 }
 
-function setCustomFormats(list) {
+async function setCustomFormats(list) {
   try {
     const arr = Array.isArray(list) ? list : []
     const normalized = arr
@@ -488,16 +494,16 @@ function setCustomFormats(list) {
       name,
       template,
     }))
-    GM_setValue(CUSTOM_FORMATS_KEY, out)
+    await setValue(CUSTOM_FORMATS_KEY, out)
   } catch {}
 }
 
-function upsertCustomFormat(name, template) {
+async function upsertCustomFormat(name, template) {
   try {
     name = String(name || '').trim()
     template = String(template || '')
     if (!name || !template) return
-    const list = getCustomFormats()
+    const list = await getCustomFormats()
     const idx = list.findIndex((it) => it.name === name)
     if (idx === -1) {
       list.push({ name, template })
@@ -505,44 +511,48 @@ function upsertCustomFormat(name, template) {
       list[idx] = { name, template }
     }
 
-    setCustomFormats(list)
+    await setCustomFormats(list)
   } catch {}
 }
 
-function removeCustomFormat(name) {
+async function removeCustomFormat(name) {
   try {
     name = String(name || '').trim()
     if (!name) return
-    const list = getCustomFormats().filter((it) => it.name !== name)
-    setCustomFormats(list)
+    const customFormats = await getCustomFormats()
+    const list = customFormats.filter((it) => it.name !== name)
+    await setCustomFormats(list)
   } catch {}
 }
 
-function getAllowedFormats() {
+async function getAllowedFormats() {
   try {
-    return [...ALLOWED_FORMATS, ...getCustomFormats().map((f) => f.name)]
+    const customFormats = await getCustomFormats()
+    return [...ALLOWED_FORMATS, ...customFormats.map((f) => f.name)]
   } catch {
     return [...ALLOWED_FORMATS]
   }
 }
 
-function ensureAllowedFormat(fmt) {
-  return ensureAllowedValue(fmt, getAllowedFormats(), DEFAULT_FORMAT)
+async function ensureAllowedFormat(fmt) {
+  return ensureAllowedValue(fmt, await getAllowedFormats(), DEFAULT_FORMAT)
 }
 
 // Migrate existing separate maps (format/host/proxy/buttons) into unified per-domain map - v0.2 to v0.3 and later
-function migrateToUnifiedSiteMap() {
+async function migrateToUnifiedSiteMap() {
   try {
-    const existing = GM_getValue(SITE_SETTINGS_MAP_KEY, undefined)
+    const existing: Record<string, any> | undefined = await getValue<
+      Record<string, any> | undefined
+    >(SITE_SETTINGS_MAP_KEY, undefined)
     const siteMap = existing && typeof existing === 'object' ? existing : {}
     const isEmpty = !siteMap || Object.keys(siteMap).length === 0
     // Only migrate if the unified map is empty to avoid overwriting user settings
     if (!isEmpty) return
 
-    const formatMap = GM_getValue(FORMAT_MAP_KEY, {}) || {}
-    const hostMap = GM_getValue(HOST_MAP_KEY, {}) || {}
-    const proxyMap = GM_getValue(PROXY_MAP_KEY, {}) || {}
-    const btnMap = GM_getValue(BTN_SETTINGS_MAP_KEY, {}) || {}
+    const formatMap = (await getValue(FORMAT_MAP_KEY, {})) || {}
+    const hostMap = (await getValue(HOST_MAP_KEY, {})) || {}
+    const proxyMap = (await getValue(PROXY_MAP_KEY, {})) || {}
+    const btnMap = (await getValue(BTN_SETTINGS_MAP_KEY, {})) || {}
 
     const rawKeys = new Set([
       ...Object.keys(formatMap),
@@ -561,7 +571,7 @@ function migrateToUnifiedSiteMap() {
       // Format
       if (s.format === undefined) {
         const fmt = formatMap[key] ?? preset.format
-        const normalizedFormat = ensureAllowedFormat(fmt)
+        const normalizedFormat = await ensureAllowedFormat(fmt)
         if (normalizedFormat) s.format = normalizedFormat
       }
 
@@ -605,25 +615,23 @@ function migrateToUnifiedSiteMap() {
       if (Object.keys(s).length > 0) siteMap[key] = s
     }
 
-    GM_setValue(SITE_SETTINGS_MAP_KEY, siteMap)
+    await setValue(SITE_SETTINGS_MAP_KEY, siteMap)
     // Optionally clear legacy keys to avoid duplication
     try {
-      if (typeof GM_deleteValue === 'function') {
-        GM_deleteValue(FORMAT_MAP_KEY)
-        GM_deleteValue(HOST_MAP_KEY)
-        GM_deleteValue(PROXY_MAP_KEY)
-        GM_deleteValue(BTN_SETTINGS_MAP_KEY)
-      }
+      await deleteValue(FORMAT_MAP_KEY)
+      await deleteValue(HOST_MAP_KEY)
+      await deleteValue(PROXY_MAP_KEY)
+      await deleteValue(BTN_SETTINGS_MAP_KEY)
     } catch {}
   } catch {}
 }
 
-migrateToUnifiedSiteMap()
+// migrateToUnifiedSiteMap() // Moved to init
 
 // Apply preset config to unified storage (only set missing fields)
-function applyPresetConfig() {
+async function applyPresetConfig() {
   try {
-    const siteMap = GM_getValue(SITE_SETTINGS_MAP_KEY, {}) || {}
+    const siteMap = (await getValue(SITE_SETTINGS_MAP_KEY, {})) || {}
     let changed = false
     for (const [host, preset] of Object.entries(CONFIG || {})) {
       const key = normalizeHost(host)
@@ -712,54 +720,54 @@ function applyPresetConfig() {
       if (changed) siteMap[key] = s
     }
 
-    if (changed) GM_setValue(SITE_SETTINGS_MAP_KEY, siteMap)
+    if (changed) await setValue(SITE_SETTINGS_MAP_KEY, siteMap)
   } catch {}
 }
 
 // Initialize once at runtime
-applyPresetConfig()
+// applyPresetConfig() // Moved to init
 
 const SITE_KEY = normalizeHost(location.hostname || '')
-const getSiteSettingsMap = () => GM_getValue(SITE_SETTINGS_MAP_KEY, {})
-const setSiteSettingsMap = (map) => {
-  GM_setValue(SITE_SETTINGS_MAP_KEY, map)
+const getSiteSettingsMap = async () => getValue(SITE_SETTINGS_MAP_KEY, {})
+const setSiteSettingsMap = async (map) => {
+  await setValue(SITE_SETTINGS_MAP_KEY, map)
 }
 
-const getCurrentSiteSettings = () => {
-  const map = getSiteSettingsMap()
+const getCurrentSiteSettings = async () => {
+  const map = await getSiteSettingsMap()
   return map[SITE_KEY] || {}
 }
 
-const updateCurrentSiteSettings = (updater) => {
-  const map = getSiteSettingsMap()
+const updateCurrentSiteSettings = async (updater) => {
+  const map = await getSiteSettingsMap()
   const key = SITE_KEY
   const current = map[key] || {}
   const partial =
     typeof updater === 'function' ? updater({ ...current }) : { ...updater }
   const next = { ...current, ...partial }
   // sanitize format (allow built-ins and user custom formats)
-  if (Object.hasOwn(next, 'format')) {
-    const resolvedFormat = ensureAllowedFormat(next.format)
+  if (Object.prototype.hasOwnProperty.call(next, 'format')) {
+    const resolvedFormat = await ensureAllowedFormat(next.format)
     if (resolvedFormat) next.format = resolvedFormat
     else delete next.format
   }
 
   // sanitize host
-  if (Object.hasOwn(next, 'host')) {
+  if (Object.prototype.hasOwnProperty.call(next, 'host')) {
     const resolvedHost = ensureAllowedValue(next.host, ALLOWED_HOSTS)
     if (resolvedHost) next.host = resolvedHost
     else delete next.host
   }
 
   // sanitize proxy
-  if (Object.hasOwn(next, 'proxy')) {
+  if (Object.prototype.hasOwnProperty.call(next, 'proxy')) {
     const resolved = ensureAllowedValue(next.proxy, ALLOWED_PROXIES)
     if (resolved) next.proxy = resolved
     else delete next.proxy
   }
 
   // sanitize buttons (empty or falsy removes the field)
-  if (Object.hasOwn(next, 'buttons')) {
+  if (Object.prototype.hasOwnProperty.call(next, 'buttons')) {
     const list = next.buttons
     if (!list || !Array.isArray(list) || list.length === 0) {
       delete next.buttons
@@ -774,75 +782,75 @@ const updateCurrentSiteSettings = (updater) => {
     map[key] = next
   }
 
-  setSiteSettingsMap(map)
+  await setSiteSettingsMap(map)
 }
 
-const getFormat = () => {
-  const s = getCurrentSiteSettings()
+const getFormat = async () => {
+  const s = await getCurrentSiteSettings()
   return s.format || DEFAULT_FORMAT
 }
 
-const setFormat = (format) => {
-  updateCurrentSiteSettings({ format })
+const setFormat = async (format) => {
+  await updateCurrentSiteSettings({ format })
 }
 
-const getHost = () => {
-  const s = getCurrentSiteSettings()
+const getHost = async () => {
+  const s = await getCurrentSiteSettings()
   return s.host || DEFAULT_HOST
 }
 
-const setHost = (host) => {
-  updateCurrentSiteSettings({ host })
+const setHost = async (host) => {
+  await updateCurrentSiteSettings({ host })
 }
 
-const getProxy = () => {
-  const s = getCurrentSiteSettings()
+const getProxy = async () => {
+  const s = await getCurrentSiteSettings()
   return s.proxy || DEFAULT_PROXY
 }
 
-const setProxy = (proxy) => {
-  updateCurrentSiteSettings({ proxy })
+const setProxy = async (proxy) => {
+  await updateCurrentSiteSettings({ proxy })
 }
 
-const getEnabled = () => {
-  const s = getCurrentSiteSettings()
+const getEnabled = async () => {
+  const s = await getCurrentSiteSettings()
   return s.enabled === true
 }
 
-const setEnabled = (val) => {
-  updateCurrentSiteSettings({ enabled: Boolean(val) })
+const setEnabled = async (val) => {
+  await updateCurrentSiteSettings({ enabled: Boolean(val) })
 }
 
-const getPasteEnabled = () => {
-  const s = getCurrentSiteSettings()
+const getPasteEnabled = async () => {
+  const s = await getCurrentSiteSettings()
   return s.pasteEnabled === true
 }
 
-const setPasteEnabled = (val) => {
-  updateCurrentSiteSettings({ pasteEnabled: Boolean(val) })
+const setPasteEnabled = async (val) => {
+  await updateCurrentSiteSettings({ pasteEnabled: Boolean(val) })
 }
 
-const getDragAndDropEnabled = () => {
-  const s = getCurrentSiteSettings()
+const getDragAndDropEnabled = async () => {
+  const s = await getCurrentSiteSettings()
   return s.dragAndDropEnabled === true
 }
 
-const setDragAndDropEnabled = (val) => {
-  updateCurrentSiteSettings({ dragAndDropEnabled: Boolean(val) })
+const setDragAndDropEnabled = async (val) => {
+  await updateCurrentSiteSettings({ dragAndDropEnabled: Boolean(val) })
 }
 
 // Support multiple site button configurations
-const getSiteBtnSettingsList = () => {
-  const s = getCurrentSiteSettings()
+const getSiteBtnSettingsList = async () => {
+  const s = await getCurrentSiteSettings()
   const val = s.buttons || []
   return Array.isArray(val) ? val : val?.selector ? [val] : []
 }
 
-const setSiteBtnSettingsList = (list) => {
-  updateCurrentSiteSettings({ buttons: list })
+const setSiteBtnSettingsList = async (list) => {
+  await updateCurrentSiteSettings({ buttons: list })
 }
 
-const addSiteBtnSetting = (cfg) => {
+const addSiteBtnSetting = async (cfg) => {
   const selector = (cfg?.selector || '').trim()
   if (!selector) return
   const p = (cfg?.position || '').trim()
@@ -852,21 +860,21 @@ const addSiteBtnSetting = (cfg) => {
     DEFAULT_BUTTON_POSITION
   )
   const text = (cfg?.text || t('insert_image_button_default')).trim()
-  const list = getSiteBtnSettingsList()
+  const list = await getSiteBtnSettingsList()
   list.push({ selector, position: pos, text })
-  setSiteBtnSettingsList(list)
+  await setSiteBtnSettingsList(list)
 }
 
-const removeSiteBtnSetting = (index) => {
-  const list = getSiteBtnSettingsList()
+const removeSiteBtnSetting = async (index) => {
+  const list = await getSiteBtnSettingsList()
   if (index >= 0 && index < list.length) {
     list.splice(index, 1)
-    setSiteBtnSettingsList(list)
+    await setSiteBtnSettingsList(list)
   }
 }
 
-const updateSiteBtnSetting = (index, cfg) => {
-  const list = getSiteBtnSettingsList()
+const updateSiteBtnSetting = async (index, cfg) => {
+  const list = await getSiteBtnSettingsList()
   if (!list || index < 0 || index >= list.length) return
   const selector = (cfg?.selector || '').trim()
   if (!selector) return
@@ -878,7 +886,7 @@ const updateSiteBtnSetting = (index, cfg) => {
   )
   const text = (cfg?.text || t('insert_image_button_default')).trim()
   list[index] = { selector, position: pos, text }
-  setSiteBtnSettingsList(list)
+  await setSiteBtnSettingsList(list)
 }
 
 const MAX_HISTORY = 50
@@ -916,15 +924,15 @@ const buildPositionOptions = (selectEl, selectedValue) => {
 }
 
 // Helper: build format options
-const buildFormatOptions = (selectEl, selectedValue) => {
+const buildFormatOptions = async (selectEl, selectedValue) => {
   if (!selectEl) return
   // Avoid Trusted Types violation: clear without using innerHTML
   selectEl.textContent = ''
   const selected = selectedValue
-    ? ensureAllowedFormat(selectedValue)
+    ? await ensureAllowedFormat(selectedValue)
     : DEFAULT_FORMAT
   const builtins = ALLOWED_FORMATS
-  const customs = getCustomFormats()
+  const customs = await getCustomFormats()
   for (const val of builtins) {
     const opt = createEl('option', { value: val, text: t('format_' + val) })
     if (val === selected) opt.selected = true
@@ -1037,18 +1045,18 @@ const css = `
   `
 GM_addStyle(css)
 
-function loadHistory() {
-  return GM_getValue(HISTORY_KEY, [])
+async function loadHistory() {
+  return (await getValue<any[]>(HISTORY_KEY, [])) || []
 }
 
-function saveHistory(list) {
-  GM_setValue(HISTORY_KEY, list.slice(0, MAX_HISTORY))
+async function saveHistory(list) {
+  await setValue(HISTORY_KEY, list.slice(0, MAX_HISTORY))
 }
 
-function addToHistory(entry) {
-  const list = loadHistory()
+async function addToHistory(entry) {
+  const list = await loadHistory()
   list.unshift(entry)
-  saveHistory(list)
+  await saveHistory(list)
 }
 
 function basename(name) {
@@ -1057,11 +1065,12 @@ function basename(name) {
   return n.replace(/\.[^.]+$/, '')
 }
 
-function formatText(link, name, fmt) {
+async function formatText(link, name, fmt) {
   const alt = basename(name)
   // Custom format support: if fmt matches a user-defined template name
   try {
-    const custom = getCustomFormats().find((cf) => cf.name === fmt)
+    const formats = await getCustomFormats()
+    const custom = formats.find((cf) => cf.name === fmt)
     if (custom) {
       return tpl(custom.template, { link, name: alt })
     }
@@ -1096,11 +1105,11 @@ function isImgurUrl(url) {
   }
 }
 
-function applyProxy(url, providerKey) {
+async function applyProxy(url, providerKey) {
   try {
-    const px = getProxy()
+    const px = await getProxy()
     if (px === 'none') return url
-    const provider = providerKey || getHost()
+    const provider = providerKey || (await getHost())
     if (provider === 'imgur' || isImgurUrl(url)) return url
     if (px === 'wsrv.nl') {
       return `https://wsrv.nl/?url=${encodeURIComponent(url)}`
@@ -1236,7 +1245,6 @@ async function uploadToImgur(file) {
     const formData = new FormData()
     formData.append('image', file)
     try {
-      // eslint-disable-next-line no-await-in-loop
       const data = await gmRequest({
         method: 'POST',
         url: 'https://api.imgur.com/3/upload',
@@ -1280,7 +1288,7 @@ async function uploadToTikolu(file) {
 }
 
 async function uploadImage(file) {
-  const host = getHost()
+  const host = await getHost()
   if (host === 'tikolu') return uploadToTikolu(file)
   if (host === 'mjj') return uploadToMjj(file)
   if (host === 'appinn') return uploadToAppinn(file)
@@ -1457,7 +1465,7 @@ function replacePlaceholder(el, placeholder, replacement) {
   return false
 }
 
-function createPanel() {
+async function createPanel() {
   if (!isTopFrame()) {
     return
   }
@@ -1478,9 +1486,9 @@ function createPanel() {
     text: t('btn_history'),
     class: 'uiu-toggle-history',
   })
-  toggleHistoryBtn.addEventListener('click', () => {
+  toggleHistoryBtn.addEventListener('click', async () => {
     header.classList.toggle('uiu-show-history')
-    renderHistory()
+    await renderHistory()
     try {
       toggleHistoryBtn.setAttribute(
         'aria-pressed',
@@ -1492,10 +1500,10 @@ function createPanel() {
     text: t('btn_settings'),
     class: 'uiu-toggle-settings',
   })
-  settingsBtn.addEventListener('click', () => {
+  settingsBtn.addEventListener('click', async () => {
     header.classList.toggle('uiu-show-settings')
     try {
-      refreshSettingsUI()
+      await refreshSettingsUI()
     } catch {}
 
     try {
@@ -1517,43 +1525,43 @@ function createPanel() {
   const body = createEl('div', { class: 'uiu-body' })
   const controls = createEl('div', { class: 'uiu-controls' })
 
-  const format = getFormat()
+  const format = await getFormat()
   const formatSel = createEl('select')
-  buildFormatOptions(formatSel, format)
-  formatSel.addEventListener('change', () => {
-    setFormat(formatSel.value)
+  await buildFormatOptions(formatSel, format)
+  formatSel.addEventListener('change', async () => {
+    await setFormat(formatSel.value)
   })
 
-  const host = getHost()
+  const host = await getHost()
   const hostSel = createEl('select')
   buildHostOptions(hostSel, host)
-  hostSel.addEventListener('change', () => {
-    setHost(hostSel.value)
-    updateProxyState()
+  hostSel.addEventListener('change', async () => {
+    await setHost(hostSel.value)
+    await updateProxyState()
   })
 
-  const proxy = getProxy()
+  const proxy = await getProxy()
   const proxySel = createEl('select')
   buildProxyOptions(proxySel, proxy)
-  function updateProxyState() {
+  async function updateProxyState() {
     const currentHost = hostSel.value
     if (currentHost === 'imgur') {
       proxySel.value = 'none'
       proxySel.disabled = true
-      setProxy('none')
+      await setProxy('none')
       try {
-        renderHistory()
+        await renderHistory()
       } catch {}
     } else {
       proxySel.disabled = false
     }
   }
 
-  updateProxyState()
-  proxySel.addEventListener('change', () => {
-    setProxy(proxySel.value)
+  await updateProxyState()
+  proxySel.addEventListener('change', async () => {
+    await setProxy(proxySel.value)
     try {
-      renderHistory()
+      await renderHistory()
     } catch {}
   })
 
@@ -1617,11 +1625,11 @@ function createPanel() {
   const pasteLabel = createEl('label')
   const pasteChk = createEl('input', { type: 'checkbox' })
   try {
-    pasteChk.checked = getPasteEnabled()
+    pasteChk.checked = await getPasteEnabled()
   } catch {}
 
-  pasteChk.addEventListener('change', () => {
-    setPasteEnabled(Boolean(pasteChk.checked))
+  pasteChk.addEventListener('change', async () => {
+    await setPasteEnabled(Boolean(pasteChk.checked))
     if (pasteChk.checked) enablePaste()
     else disablePaste()
   })
@@ -1635,11 +1643,11 @@ function createPanel() {
   const dragLabel = createEl('label', { style: 'margin-left:12px;' })
   const dragChk = createEl('input', { type: 'checkbox' })
   try {
-    dragChk.checked = getDragAndDropEnabled()
+    dragChk.checked = await getDragAndDropEnabled()
   } catch {}
 
-  dragChk.addEventListener('change', () => {
-    setDragAndDropEnabled(Boolean(dragChk.checked))
+  dragChk.addEventListener('change', async () => {
+    await setDragAndDropEnabled(Boolean(dragChk.checked))
     if (dragChk.checked) enableDrag()
     else disableDrag()
   })
@@ -1677,8 +1685,8 @@ function createPanel() {
   })
   textInput.value = t('insert_image_button_default')
   const saveBtn = createEl('button', { text: t('btn_save_and_insert') })
-  saveBtn.addEventListener('click', () => {
-    addSiteBtnSetting({
+  saveBtn.addEventListener('click', async () => {
+    await addSiteBtnSetting({
       selector: selInput.value,
       position: posSel.value,
       text: textInput.value,
@@ -1687,12 +1695,12 @@ function createPanel() {
     selInput.value = ''
     buildPositionOptions(posSel)
     textInput.value = t('insert_image_button_default')
-    renderSettingsList()
+    await renderSettingsList()
 
     for (const el of document.querySelectorAll('.uiu-insert-btn')) el.remove()
-    applySiteButtons()
+    await applySiteButtons()
     try {
-      restartSiteButtonObserver()
+      await restartSiteButtonObserver()
     } catch {}
   })
   const removeBtn = createEl('button', { text: t('btn_remove_button_temp') })
@@ -1703,9 +1711,9 @@ function createPanel() {
     } catch {}
   })
   const clearBtn = createEl('button', { text: t('btn_clear_settings') })
-  clearBtn.addEventListener('click', () => {
-    setSiteBtnSettingsList([])
-    renderSettingsList()
+  clearBtn.addEventListener('click', async () => {
+    await setSiteBtnSettingsList([])
+    await renderSettingsList()
     for (const el of document.querySelectorAll('.uiu-insert-btn')) el.remove()
     try {
       if (siteBtnObserver) siteBtnObserver.disconnect()
@@ -1759,16 +1767,16 @@ function createPanel() {
     placeholder: t('placeholder_format_template'),
   })
   const addFmtBtn = createEl('button', { text: t('btn_add_format') })
-  addFmtBtn.addEventListener('click', () => {
+  addFmtBtn.addEventListener('click', async () => {
     const name = (fnameInput.value || '').trim()
     const tplStr = String(ftemplateInput.value || '')
     if (!name || !tplStr) return
-    upsertCustomFormat(name, tplStr)
+    await upsertCustomFormat(name, tplStr)
     fnameInput.value = ''
     ftemplateInput.value = ''
-    renderFormatsList()
+    await renderFormatsList()
     try {
-      buildFormatOptions(formatSel, getFormat())
+      await buildFormatOptions(formatSel, await getFormat())
     } catch {}
   })
   // Wrap inputs with the same column containers as list rows for alignment
@@ -1799,9 +1807,9 @@ function createPanel() {
   formats.append(formatsExampleRow)
   settingsContainer.append(formats)
 
-  function renderFormatsList() {
+  async function renderFormatsList() {
     formatsList.textContent = ''
-    const list = getCustomFormats()
+    const list = await getCustomFormats()
     for (const cf of list) {
       const row = createEl('div', { class: 'uiu-formats-row' })
       const nameEl = createEl('span', {
@@ -1830,25 +1838,25 @@ function createPanel() {
         colTpl.append(eTpl)
         const ops = createEl('span', { class: 'uiu-ops' })
         const updateBtn = createEl('button', { text: t('btn_update') })
-        updateBtn.addEventListener('click', () => {
+        updateBtn.addEventListener('click', async () => {
           const newName = (eName.value || '').trim()
           const newTpl = String(eTpl.value || '')
           if (!newName || !newTpl) return
-          if (newName !== cf.name) removeCustomFormat(cf.name)
-          upsertCustomFormat(newName, newTpl)
+          if (newName !== cf.name) await removeCustomFormat(cf.name)
+          await upsertCustomFormat(newName, newTpl)
           // Update current format selection if renamed
           try {
-            if (getFormat() === cf.name) setFormat(newName)
+            if ((await getFormat()) === cf.name) await setFormat(newName)
           } catch {}
 
-          renderFormatsList()
+          await renderFormatsList()
           try {
-            buildFormatOptions(formatSel, getFormat())
+            await buildFormatOptions(formatSel, await getFormat())
           } catch {}
         })
         const cancelBtn = createEl('button', { text: t('btn_cancel') })
-        cancelBtn.addEventListener('click', () => {
-          renderFormatsList()
+        cancelBtn.addEventListener('click', async () => {
+          await renderFormatsList()
         })
         ops.append(updateBtn)
         ops.append(cancelBtn)
@@ -1857,16 +1865,16 @@ function createPanel() {
         row.append(ops)
       })
       const delBtn = createEl('button', { text: t('btn_delete') })
-      delBtn.addEventListener('click', () => {
-        removeCustomFormat(cf.name)
+      delBtn.addEventListener('click', async () => {
+        await removeCustomFormat(cf.name)
         // Reset site format if current selection removed
         try {
-          if (getFormat() === cf.name) setFormat(DEFAULT_FORMAT)
+          if ((await getFormat()) === cf.name) await setFormat(DEFAULT_FORMAT)
         } catch {}
 
-        renderFormatsList()
+        await renderFormatsList()
         try {
-          buildFormatOptions(formatSel, getFormat())
+          await buildFormatOptions(formatSel, await getFormat())
         } catch {}
       })
       const ops = createEl('span', { class: 'uiu-ops' })
@@ -1879,10 +1887,10 @@ function createPanel() {
     }
   }
 
-  function renderSettingsList() {
+  async function renderSettingsList() {
     // Avoid Trusted Types violation: clear without using innerHTML
     settingsList.textContent = ''
-    const listData = getSiteBtnSettingsList()
+    const listData = await getSiteBtnSettingsList()
     for (const [idx, cfg] of listData.entries()) {
       const row = createEl('div', { class: 'uiu-settings-row' })
       const info = createEl('span', {
@@ -1906,23 +1914,23 @@ function createPanel() {
         fields.append(eText)
         const ops = createEl('span', { class: 'uiu-ops' })
         const updateBtn = createEl('button', { text: t('btn_update') })
-        updateBtn.addEventListener('click', () => {
-          updateSiteBtnSetting(idx, {
+        updateBtn.addEventListener('click', async () => {
+          await updateSiteBtnSetting(idx, {
             selector: eSel.value,
             position: ePos.value,
             text: eText.value,
           })
-          renderSettingsList()
+          await renderSettingsList()
           for (const el of document.querySelectorAll('.uiu-insert-btn'))
             el.remove()
-          applySiteButtons()
+          await applySiteButtons()
           try {
-            restartSiteButtonObserver()
+            await restartSiteButtonObserver()
           } catch {}
         })
         const cancelBtn = createEl('button', { text: t('btn_cancel') })
-        cancelBtn.addEventListener('click', () => {
-          renderSettingsList()
+        cancelBtn.addEventListener('click', async () => {
+          await renderSettingsList()
         })
         ops.append(updateBtn)
         ops.append(cancelBtn)
@@ -1930,14 +1938,14 @@ function createPanel() {
         row.append(ops)
       })
       const delBtn = createEl('button', { text: t('btn_delete') })
-      delBtn.addEventListener('click', () => {
-        removeSiteBtnSetting(idx)
-        renderSettingsList()
+      delBtn.addEventListener('click', async () => {
+        await removeSiteBtnSetting(idx)
+        await renderSettingsList()
         for (const el of document.querySelectorAll('.uiu-insert-btn'))
           el.remove()
-        applySiteButtons()
+        await applySiteButtons()
         try {
-          restartSiteButtonObserver()
+          await restartSiteButtonObserver()
         } catch {}
       })
       row.append(info)
@@ -1949,15 +1957,15 @@ function createPanel() {
     }
   }
 
-  function refreshSettingsUI() {
+  async function refreshSettingsUI() {
     selInput.value = ''
     buildPositionOptions(posSel)
     textInput.value = t('insert_image_button_default')
-    renderSettingsList()
+    await renderSettingsList()
     try {
       fnameInput.value = ''
       ftemplateInput.value = ''
-      renderFormatsList()
+      await renderFormatsList()
     } catch {}
   }
 
@@ -2047,8 +2055,8 @@ function createPanel() {
     }
   }
 
-  function applySiteButtons() {
-    const list = getSiteBtnSettingsList()
+  async function applySiteButtons() {
+    const list = await getSiteBtnSettingsList()
     for (const cfg of list) {
       try {
         applySingle(cfg)
@@ -2056,15 +2064,15 @@ function createPanel() {
     }
   }
 
-  applySiteButtons()
+  await applySiteButtons()
 
   let siteBtnObserver
-  function restartSiteButtonObserver() {
+  async function restartSiteButtonObserver() {
     try {
       if (siteBtnObserver) siteBtnObserver.disconnect()
     } catch {}
 
-    const list = getSiteBtnSettingsList()
+    const list = await getSiteBtnSettingsList()
     if (list.length === 0) {
       siteBtnObserver = null
       return
@@ -2088,7 +2096,7 @@ function createPanel() {
     })
   }
 
-  restartSiteButtonObserver()
+  await restartSiteButtonObserver()
 
   let drop = null
   let pasteHandler = null
@@ -2234,10 +2242,11 @@ function createPanel() {
       running++
       addLog(`${t('log_uploading')}${item.file.name}`)
       try {
-        // eslint-disable-next-line no-await-in-loop
         const link = await uploadImage(item.file)
-        const fmt = getFormat()
-        const out = formatText(applyProxy(link, getHost()), item.file.name, fmt)
+        const fmt = await getFormat()
+        const host = await getHost()
+        const proxied = await applyProxy(link, host)
+        const out = await formatText(proxied, item.file.name, fmt)
         if (item.placeholder && item.targetEl) {
           const ok = replacePlaceholder(
             item.targetEl,
@@ -2249,12 +2258,12 @@ function createPanel() {
           copyAndInsert(out)
         }
 
-        addToHistory({
+        await addToHistory({
           link,
           name: item.file.name,
           ts: Date.now(),
           pageUrl: location.href,
-          provider: getHost(),
+          provider: host,
         })
         addLog(`${t('log_success')}${item.file.name} → ${link}`)
       } catch (error) {
@@ -2299,39 +2308,40 @@ function createPanel() {
     void processQueue()
   }
 
-  const pasteEnabled = getPasteEnabled()
+  const pasteEnabled = await getPasteEnabled()
   if (pasteEnabled) enablePaste()
 
-  const dragEnabled = getDragAndDropEnabled()
+  const dragEnabled = await getDragAndDropEnabled()
   if (dragEnabled) enableDrag()
 
-  function renderHistory() {
+  async function renderHistory() {
     // Avoid Trusted Types violation: clear without using innerHTML
     history.textContent = ''
     const header = createEl('div', { class: 'uiu-controls' })
+    const historyItems = await loadHistory()
     header.append(
       createEl('span', {
-        text: tpl(t('btn_history_count'), { count: loadHistory().length }),
+        text: tpl(t('btn_history_count'), { count: historyItems.length }),
       })
     )
     const clearBtn = createEl('button', { text: t('btn_clear_history') })
-    clearBtn.addEventListener('click', () => {
-      saveHistory([])
-      renderHistory()
+    clearBtn.addEventListener('click', async () => {
+      await saveHistory([])
+      await renderHistory()
     })
     header.append(clearBtn)
     history.append(header)
 
     const listWrap = createEl('div', { class: 'uiu-list' })
-    const items = loadHistory()
-    for (const it of items) {
+    for (const it of historyItems) {
       const row = createEl('div', { class: 'uiu-row' })
 
+      const previewUrl = await applyProxy(
+        it.link,
+        it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
+      )
       const preview = createEl('img', {
-        src: applyProxy(
-          it.link,
-          it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
-        ),
+        src: previewUrl,
         style:
           'width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid #334155;',
       })
@@ -2380,18 +2390,22 @@ function createPanel() {
 
       const ops = createEl('div', { class: 'uiu-ops' })
       const copyBtn = createEl('button', { text: t('btn_copy') })
-      copyBtn.addEventListener('click', () => {
-        const fmt = getFormat()
-        const proxied = applyProxy(
+      copyBtn.addEventListener('click', async () => {
+        const fmt = await getFormat()
+        const proxied = await applyProxy(
           it.link,
           it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
         )
-        const out = formatText(proxied, it.name || t('default_image_name'), fmt)
+        const out = await formatText(
+          proxied,
+          it.name || t('default_image_name'),
+          fmt
+        )
         copyAndInsert(out)
       })
       const openBtn = createEl('button', { text: t('btn_open') })
-      openBtn.addEventListener('click', () => {
-        const url = applyProxy(
+      openBtn.addEventListener('click', async () => {
+        const url = await applyProxy(
           it.link,
           it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
         )
@@ -2410,7 +2424,7 @@ function createPanel() {
     HISTORY_KEY,
     (name, oldValue, newValue, remote) => {
       try {
-        renderHistory()
+        void renderHistory()
       } catch {}
     }
   )
@@ -2432,11 +2446,11 @@ function createPanel() {
     showPanel()
     openFilePicker()
   })
-  registerMenu(t('menu_settings'), () => {
+  registerMenu(t('menu_settings'), async () => {
     showPanel()
     header.classList.add('uiu-show-settings')
     try {
-      refreshSettingsUI()
+      await refreshSettingsUI()
     } catch {}
 
     try {
@@ -2451,20 +2465,29 @@ function createPanel() {
   return { handleFiles }
 }
 
-try {
-  const enabled = getEnabled()
-  if (enabled && !document.querySelector('#uiu-panel')) {
-    const { handleFiles } = createPanel()
-    globalThis.addEventListener('iu:uploadFiles', (e) => {
-      const files = e.detail?.files
-      if (files?.length) handleFiles(files)
-    })
-  }
+;(async () => {
+  try {
+    await migrateLegacyStorage()
+    await migrateToUnifiedSiteMap()
+    await applyPresetConfig()
 
-  registerMenu(enabled ? t('menu_disable_site') : t('menu_enable_site'), () => {
-    setEnabled(!enabled)
-    try {
-      location.reload()
-    } catch {}
-  })
-} catch {}
+    const enabled = await getEnabled()
+    if (enabled && !document.querySelector('#uiu-panel')) {
+      const { handleFiles } = await createPanel()
+      globalThis.addEventListener('iu:uploadFiles', (e) => {
+        const files = e.detail?.files
+        if (files?.length) handleFiles(files)
+      })
+    }
+
+    registerMenu(
+      enabled ? t('menu_disable_site') : t('menu_enable_site'),
+      async () => {
+        await setEnabled(!enabled)
+        try {
+          location.reload()
+        } catch {}
+      }
+    )
+  } catch {}
+})()

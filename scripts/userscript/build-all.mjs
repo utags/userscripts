@@ -56,7 +56,7 @@ for (const packageName of packages) {
   }
 
   log(`Building ${packageName}...`)
-  // eslint-disable-next-line no-await-in-loop
+
   await esbuild.build(buildOptions)
 
   let text = fs.readFileSync(buildOptions.outfile, 'utf8')

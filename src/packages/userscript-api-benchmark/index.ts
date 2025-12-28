@@ -888,7 +888,6 @@ async function render() {
     let gmDotRes: TestResult = { supported: false, passed: 0, total: 0 }
 
     try {
-      // eslint-disable-next-line no-await-in-loop
       gmRes = await t.gmRun()
     } catch (error) {
       gmRes = { supported: false, passed: 0, total: 0, error }
@@ -896,7 +895,6 @@ async function render() {
 
     if (t.gmDotRun) {
       try {
-        // eslint-disable-next-line no-await-in-loop
         gmDotRes = await t.gmDotRun()
       } catch (error) {
         gmDotRes = { supported: false, passed: 0, total: 0, error }

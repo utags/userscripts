@@ -54,6 +54,8 @@ const xoConfig = [
       '@stylistic/indent': 0,
       '@stylistic/indent-binary-ops': 0,
       'prefer-object-has-own': 0,
+      'unicorn/prefer-top-level-await': 0,
+      'no-await-in-loop': 0,
       // temp
       '@typescript-eslint/no-unsafe-assignment': 0,
       '@typescript-eslint/no-unsafe-call': 0,

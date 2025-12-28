@@ -159,7 +159,6 @@ function ensureToggle(button) {
   container.append(label)
 }
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
 void loadEnabled()
 scan()
 const mo = new MutationObserver(() => {
