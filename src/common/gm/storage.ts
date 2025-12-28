@@ -29,7 +29,7 @@ const getScriptHandler = () => {
   return ''
 }
 
-const scriptHandler = getScriptHandler()
+export const scriptHandler = getScriptHandler().toLowerCase()
 const isIgnoredHandler =
   scriptHandler === 'tamp' || scriptHandler.includes('stay')
 

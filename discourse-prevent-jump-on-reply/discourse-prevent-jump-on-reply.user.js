@@ -82,7 +82,7 @@
     }
     return ''
   }
-  var scriptHandler = getScriptHandler()
+  var scriptHandler = getScriptHandler().toLowerCase()
   var isIgnoredHandler =
     scriptHandler === 'tamp' || scriptHandler.includes('stay')
   var isNativeListenerSupported =

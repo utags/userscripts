@@ -1,3 +1,4 @@
+import { scriptHandler } from '../../common/gm/storage'
 import { createUshortcutsSettingsStore } from './settings-panel'
 import { isTopFrame } from '../../utils/is-top-frame'
 import { isSameOrigin } from '../../utils/url'
@@ -60,6 +61,11 @@ export function isIframeModeDisabled() {
   }
 
   if (isIframeModeDisabledUrl(location.href)) {
+    return true
+  }
+
+  // Stay scripts manager will delete the newBody containing the iframe, so we must disable iframe mode for it.
+  if (scriptHandler === 'tamp' || scriptHandler.includes('stay')) {
     return true
   }
 
