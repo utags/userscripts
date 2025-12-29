@@ -43,7 +43,7 @@ export class ShortcutsStore {
 
   async load(): Promise<ShortcutsConfig> {
     try {
-      const v = await getValue<string>(CONFIG_KEY, '')
+      const v = await getValue(CONFIG_KEY, '')
       if (v) {
         const raw = JSON.parse(String(v) || '{}')
         const ensureGroup = (gg: any): ShortcutsGroup => ({

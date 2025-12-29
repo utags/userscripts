@@ -84,7 +84,7 @@ valueChangeBroadcastChannel.addEventListener('message', (event) => {
   triggerValueChangeListeners(key, oldValue, newValue, true)
 })
 
-export async function getValue<T = unknown>(
+export async function getValue<T = string>(
   key: string,
   defaultValue?: T
 ): Promise<T | undefined> {

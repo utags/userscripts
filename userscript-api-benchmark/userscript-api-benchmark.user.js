@@ -2,7 +2,7 @@
 // @name                 Userscript API Benchmark
 // @name:zh-CN           用户脚本 API 基准测试
 // @namespace            https://github.com/utags/userscripts
-// @version              0.1.3
+// @version              0.1.4
 // @description          Comprehensive benchmark tool for UserScript Manager APIs (GM.* and GM_*)
 // @description:zh-CN    用户脚本管理器 API (GM.* 和 GM_*) 的综合基准测试工具，用于检查兼容性与准确性
 // @author               Pipecraft
@@ -489,10 +489,14 @@
       let passed = 0
       if (isPromise(retrievedRaw)) {
         passed++
+      } else {
+        console.warn('getValue should return a promise')
       }
       const retrieved = await retrievedRaw
       if (retrieved === val) {
         passed++
+      } else {
+        console.warn('getValue should return the correct value')
       }
       await GM.deleteValue(key)
       return { supported: true, passed, total: 2 }
@@ -603,7 +607,11 @@
         return { supported: false, passed: 0, total: 1 }
       try {
         const el = GM_addStyle('.gm-test-style { display: none; }')
-        return { supported: true, passed: 1, total: 1 }
+        const passed = el instanceof HTMLStyleElement ? 1 : 0
+        if (!passed) {
+          console.warn('addStyle should return a style element', el, typeof el)
+        }
+        return { supported: true, passed, total: 1 }
       } catch (e) {
         return { supported: true, passed: 0, total: 1 }
       }
@@ -613,7 +621,11 @@
         return { supported: false, passed: 0, total: 1 }
       try {
         const el = await GM.addStyle('.gm4-test-style { display: none; }')
-        return { supported: true, passed: 1, total: 1 }
+        const passed = el instanceof HTMLStyleElement ? 1 : 0
+        if (!passed) {
+          console.warn('addStyle should return a style element', el, typeof el)
+        }
+        return { supported: true, passed, total: 1 }
       } catch (e) {
         return { supported: true, passed: 0, total: 1 }
       }
@@ -1127,10 +1139,49 @@
       tr.innerHTML = rowContent
     }
   }
-  function start() {
+  async function start() {
+    if (!(await checkAndAcquireLock())) {
+      console.warn(
+        'Userscript API Benchmark: Already running (locked). Process ID:',
+        processId
+      )
+      return
+    }
+    console.warn('Userscript API Benchmark: Start. Process ID:', processId)
     void render()
   }
-  function main() {
+  var processId = 0
+  async function checkAndAcquireLock() {
+    const lockKey = 'benchmark_running_lock'
+    const lockTTL = 5e3
+    const now = Date.now()
+    processId = Math.random()
+    const de = document.documentElement
+    if (
+      de.dataset.uabLockTtl &&
+      now - Number(de.dataset.uabLockTtl) < lockTTL
+    ) {
+      return false
+    }
+    de.dataset.uabLockTtl = String(now)
+    de.dataset.uabProcessId = String(processId)
+    let lastRun = 0
+    if (typeof GM_getValue === 'function') {
+      lastRun = GM_getValue(lockKey, 0)
+    } else if (typeof GM !== 'undefined' && typeof GM.getValue === 'function') {
+      lastRun = await GM.getValue(lockKey, 0)
+    }
+    if (now - lastRun < lockTTL) {
+      return false
+    }
+    if (typeof GM_setValue === 'function') {
+      GM_setValue(lockKey, now)
+    } else if (typeof GM !== 'undefined' && typeof GM.setValue === 'function') {
+      await GM.setValue(lockKey, now)
+    }
+    return true
+  }
+  async function main() {
     const urlParams = new URLSearchParams(globalThis.location.search)
     if (urlParams.get('benchmark_role') === 'iframe') {
       const key = urlParams.get('key')
@@ -1159,8 +1210,8 @@
     } else if (typeof GM_registerMenuCommand === 'function') {
       GM_registerMenuCommand('Run Benchmark', start)
     } else {
-      start()
+      void start()
     }
   }
-  main()
+  void main()
 })()

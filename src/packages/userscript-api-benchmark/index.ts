@@ -179,12 +179,16 @@ registerTest(
     let passed = 0
     if (isPromise(retrievedRaw)) {
       passed++
+    } else {
+      console.warn('getValue should return a promise')
     }
 
     // Check value correctness
     const retrieved = await retrievedRaw
     if (retrieved === val) {
       passed++
+    } else {
+      console.warn('getValue should return the correct value')
     }
 
     await GM.deleteValue(key)
@@ -304,7 +308,12 @@ registerTest(
       return { supported: false, passed: 0, total: 1 }
     try {
       const el = GM_addStyle('.gm-test-style { display: none; }')
-      return { supported: true, passed: 1, total: 1 }
+      const passed = el instanceof HTMLStyleElement ? 1 : 0
+      if (!passed) {
+        console.warn('addStyle should return a style element', el, typeof el)
+      }
+
+      return { supported: true, passed, total: 1 }
     } catch {
       return { supported: true, passed: 0, total: 1 }
     }
@@ -314,7 +323,12 @@ registerTest(
       return { supported: false, passed: 0, total: 1 }
     try {
       const el = await GM.addStyle('.gm4-test-style { display: none; }')
-      return { supported: true, passed: 1, total: 1 }
+      const passed = el instanceof HTMLStyleElement ? 1 : 0
+      if (!passed) {
+        console.warn('addStyle should return a style element', el, typeof el)
+      }
+
+      return { supported: true, passed, total: 1 }
     } catch {
       return { supported: true, passed: 0, total: 1 }
     }
@@ -972,11 +986,56 @@ async function render() {
   }
 }
 
-function start() {
+async function start() {
+  if (!(await checkAndAcquireLock())) {
+    console.warn(
+      'Userscript API Benchmark: Already running (locked). Process ID:',
+      processId
+    )
+    return
+  }
+
+  console.warn('Userscript API Benchmark: Start. Process ID:', processId)
   void render()
 }
 
-function main() {
+let processId = 0
+async function checkAndAcquireLock(): Promise<boolean> {
+  const lockKey = 'benchmark_running_lock'
+  const lockTTL = 5000 // 5 seconds
+  const now = Date.now()
+  processId = Math.random()
+  // 1. Check in-memory lock (fastest, prevents same-context double execution)
+  const de = document.documentElement as any
+  if (de.dataset.uabLockTtl && now - Number(de.dataset.uabLockTtl) < lockTTL) {
+    return false
+  }
+
+  de.dataset.uabLockTtl = String(now)
+  de.dataset.uabProcessId = String(processId)
+
+  // 2. Check storage lock (slower, prevents cross-tab execution)
+  let lastRun = 0
+  if (typeof GM_getValue === 'function') {
+    lastRun = GM_getValue(lockKey, 0)
+  } else if (typeof GM !== 'undefined' && typeof GM.getValue === 'function') {
+    lastRun = await GM.getValue(lockKey, 0)
+  }
+
+  if (now - lastRun < lockTTL) {
+    return false
+  }
+
+  if (typeof GM_setValue === 'function') {
+    GM_setValue(lockKey, now)
+  } else if (typeof GM !== 'undefined' && typeof GM.setValue === 'function') {
+    await GM.setValue(lockKey, now)
+  }
+
+  return true
+}
+
+async function main() {
   const urlParams = new URLSearchParams(globalThis.location.search)
   if (urlParams.get('benchmark_role') === 'iframe') {
     const key = urlParams.get('key')
@@ -1010,9 +1069,9 @@ function main() {
     GM_registerMenuCommand('Run Benchmark', start)
   } else {
     // Fallback for managers that don't support menu commands or if the API is missing
-    start()
+    void start()
   }
 }
 
-main()
+void main()
 /* eslint-enable unicorn/no-typeof-undefined */

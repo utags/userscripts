@@ -22,6 +22,10 @@ declare function GM_registerMenuCommand(
 declare function GM_unregisterMenuCommand(menuId: number): void
 
 declare const GM: {
+  info: {
+    scriptHandler: string
+    version: string
+  }
   getValue<T = unknown>(key: string, defaultValue: T): Promise<T>
   setValue(key: string, value: unknown): Promise<void>
   deleteValue(key: string): Promise<void>
@@ -45,17 +49,63 @@ declare const GM: {
     onerror?: (error: any) => void
   }): Promise<void>
   setClipboard(text: string): Promise<void>
+  addStyle(css: string): Promise<HTMLStyleElement>
+  addElement(
+    tag: string,
+    attributes?: Record<string, string>
+  ): Promise<HTMLElement>
+  registerMenuCommand(
+    caption: string,
+    onClick: () => void,
+    accessKey?: string
+  ): Promise<number>
+  unregisterMenuCommand(menuId: number): Promise<void>
+  download(options: {
+    url: string
+    name: string
+    onload?: () => void
+  }): Promise<void>
+  openInTab(
+    url: string,
+    options?: { active?: boolean; insert?: boolean }
+  ): Promise<void>
+  notification(options: {
+    text: string
+    title?: string
+    image?: string
+    onclick?: () => void
+  }): Promise<void>
 }
 
 declare function GM_getValue<T = unknown>(key: string, defaultValue: T): any
 declare function GM_setValue(key: string, value: any): void
 declare function GM_deleteValue(key: string): void
 declare function GM_addStyle(css: string): HTMLStyleElement
+declare function GM_addElement(
+  tag: string,
+  attributes?: Record<string, string>
+): HTMLElement
+declare function GM_addElement(
+  parentNode: Element,
+  tag: string,
+  attributes?: Record<string, string>
+): HTMLElement
 declare function GM_openInTab(
   url: string,
   options?: { active?: boolean; insert?: boolean }
 ): void
 declare function GM_removeValueChangeListener(id: number): void
+declare function GM_download(options: {
+  url: string
+  name: string
+  onload?: () => void
+}): void
+declare function GM_notification(options: {
+  text: string
+  title?: string
+  image?: string
+  onclick?: () => void
+}): void
 
 declare function GM_xmlhttpRequest(options: {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'

@@ -139,7 +139,7 @@ It is particularly useful for:
 
 - **Manager**: Userscripts (4.8.2)
 - **Browser**: Safari 605.1.15
-- **Date**: 2025-12-27
+- **Date**: 2025-12-29
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
@@ -150,7 +150,7 @@ It is particularly useful for:
 | listValues                                         |       ✅        |     1/1      |        ❌        |      0/1      |
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |
 | addValueChangeListener / removeValueChangeListener |       ❌        |     0/5      |        ❌        |      0/5      |
-| addStyle                                           |       ✅        |     1/1      |        ❌        |      0/1      |
+| addStyle                                           |       ⚠️        |     0/1      |        ❌        |      0/1      |
 | addElement                                         |       ❌        |     0/1      |        ❌        |      0/1      |
 | registerMenuCommand                                |       ❌        |     0/1      |        ❌        |      0/1      |
 | unregisterMenuCommand                              |       ❌        |     0/1      |        ❌        |      0/1      |
@@ -174,7 +174,7 @@ It is particularly useful for:
 
 - **Manager**: tamp (2.9.12)
 - **Browser**: Safari 605.1.15
-- **Date**: 2025-12-27
+- **Date**: 2025-12-29
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
@@ -185,7 +185,7 @@ It is particularly useful for:
 | listValues                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |
 | addValueChangeListener / removeValueChangeListener |       ⚠️        |     0/5      |        ⚠️        |      0/5      |
-| addStyle                                           |       ✅        |     1/1      |        ✅        |      1/1      |
+| addStyle                                           |       ⚠️        |     0/1      |        ✅        |      1/1      |
 | addElement                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | registerMenuCommand                                |       ✅        |     1/1      |        ✅        |      1/1      |
 | unregisterMenuCommand                              |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -209,7 +209,7 @@ It is particularly useful for:
 
 - **Manager**: extensions/stay (0.1)
 - **Browser**: Chrome 143.0.0.0
-- **Date**: 2025-12-27
+- **Date**: 2025-12-29
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
@@ -227,7 +227,7 @@ It is particularly useful for:
 | xmlHttpRequest                                     |       ✅        |     1/1      |        ✅        |      1/1      |
 | download                                           |       ❌        |     0/1      |        ✅        |      1/1      |
 | openInTab                                          |       ✅        |     1/1      |        ✅        |      1/1      |
-| setClipboard                                       |       ⚠️        |     0/1      |        ✅        |      1/1      |
+| setClipboard                                       |       ✅        |     1/1      |        ✅        |      1/1      |
 | notification                                       |       ✅        |     1/1      |        ✅        |      1/1      |
 | getResourceText                                    |       ❌        |     0/1      |        ✅        |      1/1      |
 | getResourceURL                                     |       ✅        |     1/1      |        ✅        |      1/1      |
