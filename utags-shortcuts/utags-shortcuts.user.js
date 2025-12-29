@@ -5005,6 +5005,7 @@
           }
           if (shouldOpenInCurrentTab(e, target)) {
             if (isIframeModeDisabledUrl(href)) {
+              e.preventDefault()
               globalThis.top.location.href = href
             } else {
               globalThis.parent.postMessage(

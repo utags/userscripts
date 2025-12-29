@@ -51,6 +51,10 @@ const BLACKLIST_URL_PATTERNS = new Set([
 
 let progressBar: ProgressBar | undefined
 
+function isUserScript(url: string): boolean {
+  return url.endsWith('.user.js')
+}
+
 function isIframeModeDisabledUrl(url: string): boolean {
   return Array.from(BLACKLIST_URL_PATTERNS).some((p) => p.test(url))
 }
@@ -400,7 +404,12 @@ export function initIframeChild() {
         }
 
         if (shouldOpenInCurrentTab(e, target)) {
+          // if (isUserScript(href)) {
+          //   e.preventDefault()
+          //   window.open(href, '_blank', 'noopener')
+          // } else
           if (isIframeModeDisabledUrl(href)) {
+            e.preventDefault()
             globalThis.top!.location.href = href
           } else {
             globalThis.parent.postMessage(
