@@ -54,6 +54,11 @@ declare const GM: {
     tag: string,
     attributes?: Record<string, string>
   ): Promise<HTMLElement>
+  addElement(
+    parentNode: Element,
+    tag: string,
+    attributes?: Record<string, string>
+  ): Promise<HTMLElement>
   registerMenuCommand(
     caption: string,
     onClick: () => void,

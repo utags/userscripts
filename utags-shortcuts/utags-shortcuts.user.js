@@ -22,6 +22,7 @@
 // @grant                GM.xmlHttpRequest
 // @grant                GM_xmlhttpRequest
 // @grant                GM_addStyle
+// @grant                GM.addStyle
 // @grant                GM_info
 // @grant                GM.info
 // @grant                GM.addValueChangeListener
@@ -178,9 +179,14 @@
       } catch (e) {}
     }
   }
-  function addStyle(css) {
+  async function addStyle(css) {
     if (typeof GM_addStyle === 'function') {
-      return GM_addStyle(css)
+      const style2 = GM_addStyle(css)
+      if (style2 instanceof HTMLStyleElement) return style2
+    }
+    if (typeof GM !== 'undefined' && typeof GM.addStyle === 'function') {
+      const style2 = await GM.addStyle(css)
+      if (style2 instanceof HTMLStyleElement) return style2
     }
     const style = document.createElement('style')
     style.textContent = css
@@ -5114,7 +5120,7 @@
   var HOTKEY_DEFAULT = 'Alt+Shift+K'
   var LAYOUT_DEFAULT = 'floating'
   var SIDEBAR_SIDE_DEFAULT = 'right'
-  function ensureGlobalStyles() {
+  async function ensureGlobalStyles() {
     try {
       const existed = document.querySelector(
         'style[data-ushortcuts-style="sidebar"]'
@@ -5122,7 +5128,7 @@
       if (existed) return
       const styleContent =
         '\nhtml[data-utags-shortcuts-sidebar="left-open"] body { width: calc(100% - 360px) !important; margin-left: 360px !important; margin-right: 0 !important; }\nhtml[data-utags-shortcuts-sidebar="right-open"] body { width: calc(100% - 360px) !important; margin-right: 360px !important; margin-left: 0 !important; }\n'
-      const style = addStyle(styleContent)
+      const style = await addStyle(styleContent)
       style.dataset.ushortcutsStyle = 'sidebar'
     } catch (e) {}
   }
@@ -6552,7 +6558,7 @@
     }
     try {
       if (settings.enabled !== false && settings.layoutMode === 'sidebar') {
-        ensureGlobalStyles()
+        void ensureGlobalStyles()
         document.documentElement.dataset.utagsShortcutsSidebar =
           (settings.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
             ? 'left-open'
@@ -6619,7 +6625,7 @@
           !isIframeModeDisabled()
         updateState()
       })
-      ensureGlobalStyles()
+      void ensureGlobalStyles()
       registerHostAutofix(root, cfg)
       registerHotkeys(root, cfg)
       registerStorageListener(root, cfg)

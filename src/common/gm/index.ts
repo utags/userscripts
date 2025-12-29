@@ -98,13 +98,76 @@ export async function xmlHttpRequestWithFallback(options: {
   }
 }
 
-export function addStyle(css: string): HTMLStyleElement {
+export async function addStyle(css: string): Promise<HTMLStyleElement> {
   if (typeof GM_addStyle === 'function') {
-    return GM_addStyle(css)
+    const style = GM_addStyle(css)
+    if (style instanceof HTMLStyleElement) return style
+  }
+
+  if (typeof GM !== 'undefined' && typeof GM.addStyle === 'function') {
+    const style = await GM.addStyle(css)
+    if (style instanceof HTMLStyleElement) return style
   }
 
   const style = document.createElement('style')
   style.textContent = css
   ;(document.head || document.documentElement).append(style)
   return style
+}
+
+export async function addElement(
+  tag: string,
+  attributes?: Record<string, string>
+): Promise<HTMLElement>
+export async function addElement(
+  parentNode: Element,
+  tag: string,
+  attributes?: Record<string, string>
+): Promise<HTMLElement>
+export async function addElement(...args: any[]): Promise<HTMLElement> {
+  let parentNode: Element | undefined
+  let tag: string
+  let attributes: Record<string, string> | undefined
+
+  if (typeof args[0] === 'string') {
+    tag = args[0]
+    attributes = args[1]
+  } else {
+    parentNode = args[0]
+    tag = args[1]
+    attributes = args[2]
+  }
+
+  if (typeof GM_addElement === 'function') {
+    try {
+      const el = parentNode
+        ? GM_addElement(parentNode, tag, attributes)
+        : GM_addElement(tag, attributes)
+      if (el instanceof HTMLElement) return el
+    } catch {}
+  }
+
+  if (typeof GM !== 'undefined' && typeof GM.addElement === 'function') {
+    try {
+      const el = await (parentNode
+        ? GM.addElement(parentNode, tag, attributes)
+        : GM.addElement(tag, attributes))
+      if (el instanceof HTMLElement) return el
+    } catch {}
+  }
+
+  const el = document.createElement(tag)
+  if (attributes) {
+    for (const [key, value] of Object.entries(attributes)) {
+      el.setAttribute(key, value)
+    }
+  }
+
+  if (parentNode) {
+    parentNode.append(el)
+  } else {
+    ;(document.body || document.documentElement).append(el)
+  }
+
+  return el
 }

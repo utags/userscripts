@@ -76,7 +76,7 @@ const HOTKEY_DEFAULT = 'Alt+Shift+K'
 const LAYOUT_DEFAULT: 'floating' | 'sidebar' = 'floating'
 const SIDEBAR_SIDE_DEFAULT: 'left' | 'right' = 'right'
 
-function ensureGlobalStyles() {
+async function ensureGlobalStyles() {
   try {
     const existed = document.querySelector(
       'style[data-ushortcuts-style="sidebar"]'
@@ -87,7 +87,7 @@ function ensureGlobalStyles() {
 html[data-utags-shortcuts-sidebar="left-open"] body { width: calc(100% - 360px) !important; margin-left: 360px !important; margin-right: 0 !important; }
 html[data-utags-shortcuts-sidebar="right-open"] body { width: calc(100% - 360px) !important; margin-right: 360px !important; margin-left: 0 !important; }
 `
-    const style = addStyle(styleContent)
+    const style = await addStyle(styleContent)
     style.dataset.ushortcutsStyle = 'sidebar'
   } catch {}
 }
@@ -1734,7 +1734,7 @@ function updateSidebarClass() {
 
   try {
     if (settings.enabled !== false && settings.layoutMode === 'sidebar') {
-      ensureGlobalStyles()
+      void ensureGlobalStyles()
       document.documentElement.dataset.utagsShortcutsSidebar =
         (settings.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left'
           ? 'left-open'
@@ -1813,7 +1813,7 @@ function main() {
       updateState()
     })
 
-    ensureGlobalStyles()
+    void ensureGlobalStyles()
     registerHostAutofix(root, cfg)
     registerHotkeys(root, cfg)
     registerStorageListener(root, cfg)
