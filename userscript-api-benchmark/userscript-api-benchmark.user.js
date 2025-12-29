@@ -2,7 +2,7 @@
 // @name                 Userscript API Benchmark
 // @name:zh-CN           用户脚本 API 基准测试
 // @namespace            https://github.com/utags/userscripts
-// @version              0.1.4
+// @version              0.1.5
 // @description          Comprehensive benchmark tool for UserScript Manager APIs (GM.* and GM_*)
 // @description:zh-CN    用户脚本管理器 API (GM.* 和 GM_*) 的综合基准测试工具，用于检查兼容性与准确性
 // @author               Pipecraft
@@ -635,25 +635,153 @@
     'addElement',
     () => {
       if (typeof GM_addElement !== 'function')
-        return { supported: false, passed: 0, total: 1 }
+        return { supported: false, passed: 0, total: 6 }
+      let passed = 0
+      const total = 6
+      const id = 'gm-add-element-test'
       try {
-        const el = GM_addElement('div', { id: 'gm-add-element-test' })
-        const passed = el && el.tagName === 'DIV' ? 1 : 0
-        return { supported: true, passed, total: 1 }
-      } catch (e) {
-        return { supported: true, passed: 0, total: 1 }
-      }
+        const el = GM_addElement('div', { id: ''.concat(id, '-default') })
+        if (el && el.tagName === 'DIV' && el.parentNode) {
+          passed++
+          el.remove()
+        }
+      } catch (e) {}
+      try {
+        const el = GM_addElement(document.body, 'div', {
+          id: ''.concat(id, '-body'),
+        })
+        if (el && el.tagName === 'DIV' && el.parentNode === document.body) {
+          passed++
+          el.remove()
+        }
+      } catch (e) {}
+      try {
+        const el = GM_addElement(document.head, 'div', {
+          id: ''.concat(id, '-head'),
+        })
+        if (el && el.tagName === 'DIV' && el.parentNode === document.head) {
+          passed++
+          el.remove()
+        }
+      } catch (e) {}
+      try {
+        const el = GM_addElement(document.documentElement, 'div', {
+          id: ''.concat(id, '-doc'),
+        })
+        if (
+          el &&
+          el.tagName === 'DIV' &&
+          el.parentNode === document.documentElement
+        ) {
+          passed++
+          el.remove()
+        }
+      } catch (e) {}
+      try {
+        const el = GM_addElement(null, 'div', { id: ''.concat(id, '-null') })
+        if (el && el.tagName === 'DIV' && el.parentNode) {
+          passed++
+          el.remove()
+        } else {
+          console.warn(
+            'addElement should return a div element when parent is null',
+            el,
+            typeof el
+          )
+        }
+      } catch (e) {}
+      try {
+        const el = GM_addElement(void 0, 'div', {
+          id: ''.concat(id, '-undefined'),
+        })
+        if (el && el.tagName === 'DIV' && el.parentNode) {
+          passed++
+          el.remove()
+        } else {
+          console.warn(
+            'addElement should return a div element when parent is undefined',
+            el,
+            typeof el
+          )
+        }
+      } catch (e) {}
+      return { supported: true, passed, total }
     },
     async () => {
       if (typeof GM === 'undefined' || typeof GM.addElement !== 'function')
-        return { supported: false, passed: 0, total: 1 }
+        return { supported: false, passed: 0, total: 6 }
+      let passed = 0
+      const total = 6
+      const id = 'gm4-add-element-test'
       try {
-        const el = await GM.addElement('div', { id: 'gm4-add-element-test' })
-        const passed = el && el.tagName === 'DIV' ? 1 : 0
-        return { supported: true, passed, total: 1 }
-      } catch (e) {
-        return { supported: true, passed: 0, total: 1 }
-      }
+        const el = await GM.addElement('div', { id: ''.concat(id, '-default') })
+        if (el && el.tagName === 'DIV' && el.parentNode) {
+          passed++
+          el.remove()
+        }
+      } catch (e) {}
+      try {
+        const el = await GM.addElement(document.body, 'div', {
+          id: ''.concat(id, '-body'),
+        })
+        if (el && el.tagName === 'DIV' && el.parentNode === document.body) {
+          passed++
+          el.remove()
+        }
+      } catch (e) {}
+      try {
+        const el = await GM.addElement(document.head, 'div', {
+          id: ''.concat(id, '-head'),
+        })
+        if (el && el.tagName === 'DIV' && el.parentNode === document.head) {
+          passed++
+          el.remove()
+        }
+      } catch (e) {}
+      try {
+        const el = await GM.addElement(document.documentElement, 'div', {
+          id: ''.concat(id, '-doc'),
+        })
+        if (
+          el &&
+          el.tagName === 'DIV' &&
+          el.parentNode === document.documentElement
+        ) {
+          passed++
+          el.remove()
+        }
+      } catch (e) {}
+      try {
+        const el = await GM.addElement(null, 'div', {
+          id: ''.concat(id, '-null'),
+        })
+        if (el && el.tagName === 'DIV' && el.parentNode) {
+          passed++
+          el.remove()
+        } else {
+          console.warn(
+            'addElement should return a div element when parent is null',
+            el,
+            typeof el
+          )
+        }
+      } catch (e) {}
+      try {
+        const el = await GM.addElement(void 0, 'div', {
+          id: ''.concat(id, '-undefined'),
+        })
+        if (el && el.tagName === 'DIV' && el.parentNode) {
+          passed++
+          el.remove()
+        } else {
+          console.warn(
+            'addElement should return a div element when parent is undefined',
+            el,
+            typeof el
+          )
+        }
+      } catch (e) {}
+      return { supported: true, passed, total }
     }
   )
   registerTest(

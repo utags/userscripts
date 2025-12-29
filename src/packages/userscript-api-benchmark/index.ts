@@ -339,26 +339,169 @@ registerTest(
   'addElement',
   () => {
     if (typeof GM_addElement !== 'function')
-      return { supported: false, passed: 0, total: 1 }
-    // Try adding an element
+      return { supported: false, passed: 0, total: 6 }
+
+    let passed = 0
+    const total = 6
+    const id = 'gm-add-element-test'
+
+    // 1. GM_addElement(tag_name, attributes)
     try {
-      const el = GM_addElement('div', { id: 'gm-add-element-test' })
-      const passed = el && el.tagName === 'DIV' ? 1 : 0
-      return { supported: true, passed, total: 1 }
-    } catch {
-      return { supported: true, passed: 0, total: 1 }
-    }
+      const el = GM_addElement('div', { id: `${id}-default` })
+      if (el && el.tagName === 'DIV' && el.parentNode) {
+        passed++
+        el.remove()
+      }
+    } catch {}
+
+    // 2. GM_addElement(document.body, tag_name, attributes)
+    try {
+      const el = GM_addElement(document.body, 'div', { id: `${id}-body` })
+      if (el && el.tagName === 'DIV' && el.parentNode === document.body) {
+        passed++
+        el.remove()
+      }
+    } catch {}
+
+    // 3. GM_addElement(document.head, tag_name, attributes)
+    try {
+      const el = GM_addElement(document.head, 'div', { id: `${id}-head` })
+      if (el && el.tagName === 'DIV' && el.parentNode === document.head) {
+        passed++
+        el.remove()
+      }
+    } catch {}
+
+    // 4. GM_addElement(document.documentElement, tag_name, attributes)
+    try {
+      const el = GM_addElement(document.documentElement, 'div', {
+        id: `${id}-doc`,
+      })
+      if (
+        el &&
+        el.tagName === 'DIV' &&
+        el.parentNode === document.documentElement
+      ) {
+        passed++
+        el.remove()
+      }
+    } catch {}
+
+    // 5. GM_addElement(null, tag_name, attributes)
+    try {
+      const el = GM_addElement(null, 'div', { id: `${id}-null` })
+      if (el && el.tagName === 'DIV' && el.parentNode) {
+        passed++
+        el.remove()
+      } else {
+        console.warn(
+          'addElement should return a div element when parent is null',
+          el,
+          typeof el
+        )
+      }
+    } catch {}
+
+    // 6. GM_addElement(undefined, tag_name, attributes)
+    try {
+      const el = GM_addElement(undefined, 'div', { id: `${id}-undefined` })
+      if (el && el.tagName === 'DIV' && el.parentNode) {
+        passed++
+        el.remove()
+      } else {
+        console.warn(
+          'addElement should return a div element when parent is undefined',
+          el,
+          typeof el
+        )
+      }
+    } catch {}
+
+    return { supported: true, passed, total }
   },
   async () => {
     if (typeof GM === 'undefined' || typeof GM.addElement !== 'function')
-      return { supported: false, passed: 0, total: 1 }
+      return { supported: false, passed: 0, total: 6 }
+
+    let passed = 0
+    const total = 6
+    const id = 'gm4-add-element-test'
+
+    // 1. GM.addElement(tag_name, attributes)
     try {
-      const el = await GM.addElement('div', { id: 'gm4-add-element-test' })
-      const passed = el && el.tagName === 'DIV' ? 1 : 0
-      return { supported: true, passed, total: 1 }
-    } catch {
-      return { supported: true, passed: 0, total: 1 }
-    }
+      const el = await GM.addElement('div', { id: `${id}-default` })
+      if (el && el.tagName === 'DIV' && el.parentNode) {
+        passed++
+        el.remove()
+      }
+    } catch {}
+
+    // 2. GM.addElement(document.body, tag_name, attributes)
+    try {
+      const el = await GM.addElement(document.body, 'div', { id: `${id}-body` })
+      if (el && el.tagName === 'DIV' && el.parentNode === document.body) {
+        passed++
+        el.remove()
+      }
+    } catch {}
+
+    // 3. GM.addElement(document.head, tag_name, attributes)
+    try {
+      const el = await GM.addElement(document.head, 'div', { id: `${id}-head` })
+      if (el && el.tagName === 'DIV' && el.parentNode === document.head) {
+        passed++
+        el.remove()
+      }
+    } catch {}
+
+    // 4. GM.addElement(document.documentElement, tag_name, attributes)
+    try {
+      const el = await GM.addElement(document.documentElement, 'div', {
+        id: `${id}-doc`,
+      })
+      if (
+        el &&
+        el.tagName === 'DIV' &&
+        el.parentNode === document.documentElement
+      ) {
+        passed++
+        el.remove()
+      }
+    } catch {}
+
+    // 5. GM.addElement(null, tag_name, attributes)
+    try {
+      const el = await GM.addElement(null, 'div', { id: `${id}-null` })
+      if (el && el.tagName === 'DIV' && el.parentNode) {
+        passed++
+        el.remove()
+      } else {
+        console.warn(
+          'addElement should return a div element when parent is null',
+          el,
+          typeof el
+        )
+      }
+    } catch {}
+
+    // 6. GM.addElement(undefined, tag_name, attributes)
+    try {
+      const el = await GM.addElement(undefined, 'div', {
+        id: `${id}-undefined`,
+      })
+      if (el && el.tagName === 'DIV' && el.parentNode) {
+        passed++
+        el.remove()
+      } else {
+        console.warn(
+          'addElement should return a div element when parent is undefined',
+          el,
+          typeof el
+        )
+      }
+    } catch {}
+
+    return { supported: true, passed, total }
   }
 )
 

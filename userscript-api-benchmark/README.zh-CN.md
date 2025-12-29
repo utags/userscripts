@@ -30,11 +30,11 @@
 
 ## 测试结果
 
-### Tampermonkey (v5.4.1)
+### Tampermonkey
 
 - **Manager**: Tampermonkey (5.4.1)
 - **Browser**: Chrome 143.0.0.0
-- **Date**: 2025-12-27
+- **Date**: 2025-12-29
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
@@ -46,7 +46,7 @@
 | setValues / getValues / deleteValues               |       ✅        |     1/1      |        ✅        |      1/1      |
 | addValueChangeListener / removeValueChangeListener |       ✅        |     5/5      |        ✅        |      5/5      |
 | addStyle                                           |       ✅        |     1/1      |        ✅        |      1/1      |
-| addElement                                         |       ✅        |     1/1      |        ✅        |      1/1      |
+| addElement                                         |       ✅        |     6/6      |        ✅        |      6/6      |
 | registerMenuCommand                                |       ✅        |     1/1      |        ✅        |      1/1      |
 | unregisterMenuCommand                              |       ✅        |     1/1      |        ✅        |      1/1      |
 | xmlHttpRequest                                     |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -65,11 +65,11 @@
 | window.close                                       |       ✅        |     1/1      |        -         |       -       |
 | window.focus                                       |       ✅        |     1/1      |        -         |       -       |
 
-### Violentmonkey (v2.31.0)
+### Violentmonkey
 
 - **Manager**: Violentmonkey (2.31.0)
 - **Browser**: Firefox 146.0
-- **Date**: 2025-12-27
+- **Date**: 2025-12-29
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
@@ -81,7 +81,7 @@
 | setValues / getValues / deleteValues               |       ✅        |     1/1      |        ✅        |      1/1      |
 | addValueChangeListener / removeValueChangeListener |       ✅        |     5/5      |        ✅        |      5/5      |
 | addStyle                                           |       ✅        |     1/1      |        ✅        |      1/1      |
-| addElement                                         |       ✅        |     1/1      |        ✅        |      1/1      |
+| addElement                                         |       ✅        |     6/6      |        ✅        |      6/6      |
 | registerMenuCommand                                |       ✅        |     1/1      |        ✅        |      1/1      |
 | unregisterMenuCommand                              |       ✅        |     1/1      |        ✅        |      1/1      |
 | xmlHttpRequest                                     |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -100,11 +100,11 @@
 | window.close                                       |       ✅        |     1/1      |        -         |       -       |
 | window.focus                                       |       ✅        |     1/1      |        -         |       -       |
 
-### ScriptCat (v1.2.2)
+### ScriptCat
 
-- **Manager**: ScriptCat (1.2.2)
+- **Manager**: ScriptCat (1.2.3)
 - **Browser**: Chrome 143.0.0.0
-- **Date**: 2025-12-27
+- **Date**: 2025-12-29
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
@@ -116,7 +116,7 @@
 | setValues / getValues / deleteValues               |       ✅        |     1/1      |        ✅        |      1/1      |
 | addValueChangeListener / removeValueChangeListener |       ✅        |     5/5      |        ✅        |      5/5      |
 | addStyle                                           |       ✅        |     1/1      |        ✅        |      1/1      |
-| addElement                                         |       ✅        |     1/1      |        ✅        |      1/1      |
+| addElement                                         |       ✅        |     6/6      |        ✅        |      6/6      |
 | registerMenuCommand                                |       ✅        |     1/1      |        ✅        |      1/1      |
 | unregisterMenuCommand                              |       ✅        |     1/1      |        ✅        |      1/1      |
 | xmlHttpRequest                                     |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -135,7 +135,7 @@
 | window.close                                       |       ✅        |     1/1      |        -         |       -       |
 | window.focus                                       |       ✅        |     1/1      |        -         |       -       |
 
-### Userscripts (Safari) (v4.8.2)
+### Userscripts (Safari)
 
 - **Manager**: Userscripts (4.8.2)
 - **Browser**: Safari 605.1.15
@@ -151,7 +151,7 @@
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |
 | addValueChangeListener / removeValueChangeListener |       ❌        |     0/5      |        ❌        |      0/5      |
 | addStyle                                           |       ⚠️        |     0/1      |        ❌        |      0/1      |
-| addElement                                         |       ❌        |     0/1      |        ❌        |      0/1      |
+| addElement                                         |       ❌        |     0/6      |        ❌        |      0/6      |
 | registerMenuCommand                                |       ❌        |     0/1      |        ❌        |      0/1      |
 | unregisterMenuCommand                              |       ❌        |     0/1      |        ❌        |      0/1      |
 | xmlHttpRequest                                     |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -170,7 +170,7 @@
 | window.close                                       |       ✅        |     1/1      |        -         |       -       |
 | window.focus                                       |       ✅        |     1/1      |        -         |       -       |
 
-### Stay (Safari) (v2.9.12)
+### Stay (Safari)
 
 - **Manager**: tamp (2.9.12)
 - **Browser**: Safari 605.1.15
@@ -186,7 +186,7 @@
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |
 | addValueChangeListener / removeValueChangeListener |       ⚠️        |     0/5      |        ⚠️        |      0/5      |
 | addStyle                                           |       ⚠️        |     0/1      |        ✅        |      1/1      |
-| addElement                                         |       ✅        |     1/1      |        ✅        |      1/1      |
+| addElement                                         |       ⚠️        |     4/6      |        ⚠️        |      4/6      |
 | registerMenuCommand                                |       ✅        |     1/1      |        ✅        |      1/1      |
 | unregisterMenuCommand                              |       ✅        |     1/1      |        ✅        |      1/1      |
 | xmlHttpRequest                                     |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -221,7 +221,7 @@
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |
 | addValueChangeListener / removeValueChangeListener |       ⚠️        |     0/5      |        ⚠️        |      0/5      |
 | addStyle                                           |       ✅        |     1/1      |        ✅        |      1/1      |
-| addElement                                         |       ✅        |     1/1      |        ✅        |      1/1      |
+| addElement                                         |       ⚠️        |     4/6      |        ⚠️        |      4/6      |
 | registerMenuCommand                                |       ✅        |     1/1      |        ✅        |      1/1      |
 | unregisterMenuCommand                              |       ✅        |     1/1      |        ✅        |      1/1      |
 | xmlHttpRequest                                     |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -240,11 +240,11 @@
 | window.close                                       |       ✅        |     1/1      |        -         |       -       |
 | window.focus                                       |       ✅        |     1/1      |        -         |       -       |
 
-### Greasemonkey (v4.13.0)
+### Greasemonkey
 
 - **Manager**: Greasemonkey (4.13)
 - **Browser**: Firefox 146.0
-- **Date**: 2025-12-27
+- **Date**: 2025-12-29
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
@@ -256,7 +256,7 @@
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |
 | addValueChangeListener / removeValueChangeListener |       ❌        |     0/5      |        ❌        |      0/5      |
 | addStyle                                           |       ❌        |     0/1      |        ❌        |      0/1      |
-| addElement                                         |       ❌        |     0/1      |        ❌        |      0/1      |
+| addElement                                         |       ❌        |     0/6      |        ❌        |      0/6      |
 | registerMenuCommand                                |       ✅        |     1/1      |        ❌        |      0/1      |
 | unregisterMenuCommand                              |       ❌        |     0/1      |        ❌        |      0/1      |
 | xmlHttpRequest                                     |       ✅        |     1/1      |        ❌        |      0/1      |
@@ -270,7 +270,7 @@
 | cookie                                             |       ❌        |     0/1      |        ❌        |      0/1      |
 | audio                                              |       ❌        |     0/1      |        ❌        |      0/1      |
 | webRequest (Deprecated)                            |       ❌        |     0/1      |        ❌        |      0/1      |
-| unsafeWindow                                       |       ❌        |     0/1      |        -         |       -       |
+| unsafeWindow                                       |       ✅        |     1/1      |        -         |       -       |
 | window.onurlchange                                 |       ❌        |     0/1      |        -         |       -       |
 | window.close                                       |       ✅        |     1/1      |        -         |       -       |
 | window.focus                                       |       ✅        |     1/1      |        -         |       -       |
@@ -279,11 +279,15 @@
 
 ## 项目信息
 
-- **代码仓库**: [https://github.com/utags/userscripts](https://github.com/utags/userscripts)
-- **问题反馈**: [https://github.com/utags/userscripts/issues](https://github.com/utags/userscripts/issues)
+- **代码仓库**: [https://github.com/utags/userscript-api-benchmark](https://github.com/utags/userscript-api-benchmark)
+- **问题反馈**: [https://github.com/utags/userscript-api-benchmark/issues](https://github.com/utags/userscript-api-benchmark/issues)
 - **许可证**: MIT
 
 ## 更新日志
+
+### 0.1.5
+
+- 添加 `addStyle` 和 `addElement` 测试用例。
 
 ### 0.1.1
 
