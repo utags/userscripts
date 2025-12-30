@@ -28,19 +28,27 @@ It is particularly useful for:
 4. Click on **"Run Benchmark"**.
 5. A table will appear overlaying the page with the test results.
 
+## API Docs
+
+- Tampermonkey: https://www.tampermonkey.net/documentation.php
+- Violentmonkey: https://violentmonkey.github.io/api/gm/
+- ScriptCat: https://docs.scriptcat.org/docs/dev/api/
+- Greasemonkey: https://wiki.greasespot.net/Greasemonkey_Manual:API
+- Userscripts: https://github.com/quoid/userscripts
+
 ## Benchmark Results
 
 ### Tampermonkey
 
 - **Manager**: Tampermonkey (5.4.1)
 - **Browser**: Chrome 143.0.0.0
-- **Date**: 2025-12-29
+- **Date**: 2025-12-30
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
 | info                                               |       ✅        |     1/1      |        ✅        |      1/1      |
 | log                                                |       ✅        |     1/1      |        ✅        |      1/1      |
-| setValue / getValue                                |       ✅        |     2/2      |        ✅        |      2/2      |
+| setValue / getValue                                |       ✅        |     3/3      |        ✅        |      3/3      |
 | deleteValue                                        |       ✅        |     1/1      |        ✅        |      1/1      |
 | listValues                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | setValues / getValues / deleteValues               |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -69,13 +77,13 @@ It is particularly useful for:
 
 - **Manager**: Violentmonkey (2.31.0)
 - **Browser**: Firefox 146.0
-- **Date**: 2025-12-29
+- **Date**: 2025-12-30
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
 | info                                               |       ✅        |     1/1      |        ✅        |      1/1      |
 | log                                                |       ✅        |     1/1      |        ✅        |      1/1      |
-| setValue / getValue                                |       ✅        |     2/2      |        ✅        |      2/2      |
+| setValue / getValue                                |       ✅        |     3/3      |        ✅        |      3/3      |
 | deleteValue                                        |       ✅        |     1/1      |        ✅        |      1/1      |
 | listValues                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | setValues / getValues / deleteValues               |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -104,13 +112,13 @@ It is particularly useful for:
 
 - **Manager**: ScriptCat (1.2.3)
 - **Browser**: Chrome 143.0.0.0
-- **Date**: 2025-12-29
+- **Date**: 2025-12-30
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
 | info                                               |       ✅        |     1/1      |        ✅        |      1/1      |
 | log                                                |       ✅        |     1/1      |        ✅        |      1/1      |
-| setValue / getValue                                |       ✅        |     2/2      |        ✅        |      2/2      |
+| setValue / getValue                                |       ⚠️        |     2/3      |        ⚠️        |      2/3      |
 | deleteValue                                        |       ✅        |     1/1      |        ✅        |      1/1      |
 | listValues                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | setValues / getValues / deleteValues               |       ✅        |     1/1      |        ✅        |      1/1      |
@@ -139,13 +147,13 @@ It is particularly useful for:
 
 - **Manager**: Userscripts (4.8.2)
 - **Browser**: Safari 605.1.15
-- **Date**: 2025-12-29
+- **Date**: 2025-12-30
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
 | info                                               |       ✅        |     1/1      |        ✅        |      1/1      |
 | log                                                |       ❌        |     0/1      |        ❌        |      0/1      |
-| setValue / getValue                                |       ✅        |     2/2      |        ❌        |      0/2      |
+| setValue / getValue                                |       ✅        |     3/3      |        ❌        |      0/3      |
 | deleteValue                                        |       ✅        |     1/1      |        ❌        |      0/1      |
 | listValues                                         |       ✅        |     1/1      |        ❌        |      0/1      |
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |
@@ -174,13 +182,13 @@ It is particularly useful for:
 
 - **Manager**: tamp (2.9.12)
 - **Browser**: Safari 605.1.15
-- **Date**: 2025-12-29
+- **Date**: 2025-12-30
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
 | info                                               |       ✅        |     1/1      |        ✅        |      1/1      |
 | log                                                |       ✅        |     1/1      |        ✅        |      1/1      |
-| setValue / getValue                                |       ✅        |     2/2      |        ✅        |      2/2      |
+| setValue / getValue                                |       ⚠️        |     2/3      |        ⚠️        |      2/3      |
 | deleteValue                                        |       ✅        |     1/1      |        ✅        |      1/1      |
 | listValues                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |
@@ -209,13 +217,13 @@ It is particularly useful for:
 
 - **Manager**: extensions/stay (0.1)
 - **Browser**: Chrome 143.0.0.0
-- **Date**: 2025-12-29
+- **Date**: 2025-12-30
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
 | info                                               |       ✅        |     1/1      |        ✅        |      1/1      |
 | log                                                |       ✅        |     1/1      |        ✅        |      1/1      |
-| setValue / getValue                                |       ✅        |     2/2      |        ✅        |      2/2      |
+| setValue / getValue                                |       ⚠️        |     2/3      |        ⚠️        |      2/3      |
 | deleteValue                                        |       ✅        |     1/1      |        ✅        |      1/1      |
 | listValues                                         |       ✅        |     1/1      |        ✅        |      1/1      |
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |
@@ -244,13 +252,13 @@ It is particularly useful for:
 
 - **Manager**: Greasemonkey (4.13)
 - **Browser**: Firefox 146.0
-- **Date**: 2025-12-29
+- **Date**: 2025-12-30
 
 | API                                                | GM.\* (Support) | GM.\* (Pass) | GM\_\* (Support) | GM\_\* (Pass) |
 | :------------------------------------------------- | :-------------: | :----------: | :--------------: | :-----------: |
 | info                                               |       ✅        |     1/1      |        ✅        |      1/1      |
 | log                                                |       ❌        |     0/1      |        ❌        |      0/1      |
-| setValue / getValue                                |       ✅        |     2/2      |        ❌        |      0/2      |
+| setValue / getValue                                |       ✅        |     3/3      |        ❌        |      0/3      |
 | deleteValue                                        |       ✅        |     1/1      |        ❌        |      0/1      |
 | listValues                                         |       ✅        |     1/1      |        ❌        |      0/1      |
 | setValues / getValues / deleteValues               |       ❌        |     0/1      |        ❌        |      0/1      |

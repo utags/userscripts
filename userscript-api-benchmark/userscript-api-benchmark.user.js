@@ -2,7 +2,7 @@
 // @name                 Userscript API Benchmark
 // @name:zh-CN           用户脚本 API 基准测试
 // @namespace            https://github.com/utags/userscripts
-// @version              0.1.5
+// @version              0.1.6
 // @description          Comprehensive benchmark tool for UserScript Manager APIs (GM.* and GM_*)
 // @description:zh-CN    用户脚本管理器 API (GM.* 和 GM_*) 的综合基准测试工具，用于检查兼容性与准确性
 // @author               Pipecraft
@@ -457,7 +457,7 @@
         typeof GM_setValue !== 'function' ||
         typeof GM_getValue !== 'function'
       ) {
-        return { supported: false, passed: 0, total: 2 }
+        return { supported: false, passed: 0, total: 3 }
       }
       const key = 'benchmark_gm_key'
       const val = 'test-' + Math.random()
@@ -472,7 +472,22 @@
         passed++
       }
       GM_deleteValue(key)
-      return { supported: true, passed, total: 2 }
+      const keyObj = 'benchmark_gm_key_obj'
+      const valObj = { a: 1, b: { c: 2 } }
+      GM_setValue(keyObj, valObj)
+      const v1 = GM_getValue(keyObj)
+      if (v1 && typeof v1 === 'object') {
+        v1.a = 999
+        v1.b.c = 888
+      }
+      const v2 = GM_getValue(keyObj)
+      if (v2.a === 1 && v2.b.c === 2) {
+        passed++
+      } else {
+        console.warn('GM_getValue should return a deep copy', v2)
+      }
+      GM_deleteValue(keyObj)
+      return { supported: true, passed, total: 3 }
     },
     async () => {
       if (
@@ -480,7 +495,7 @@
         typeof GM.setValue !== 'function' ||
         typeof GM.getValue !== 'function'
       ) {
-        return { supported: false, passed: 0, total: 2 }
+        return { supported: false, passed: 0, total: 3 }
       }
       const key = 'benchmark_gm4_key'
       const val = 'gm4-' + Math.random()
@@ -499,7 +514,22 @@
         console.warn('getValue should return the correct value')
       }
       await GM.deleteValue(key)
-      return { supported: true, passed, total: 2 }
+      const keyObj = 'benchmark_gm4_key_obj'
+      const valObj = { a: 1, b: { c: 2 } }
+      await GM.setValue(keyObj, valObj)
+      const v1 = await GM.getValue(keyObj)
+      if (v1 && typeof v1 === 'object') {
+        v1.a = 999
+        v1.b.c = 888
+      }
+      const v2 = await GM.getValue(keyObj)
+      if (v2.a === 1 && v2.b.c === 2) {
+        passed++
+      } else {
+        console.warn('GM.getValue should return a deep copy', v2)
+      }
+      await GM.deleteValue(keyObj)
+      return { supported: true, passed, total: 3 }
     }
   )
   registerTest(
