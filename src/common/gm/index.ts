@@ -1,6 +1,10 @@
-export function registerMenu(caption: string, onClick: () => void): number {
+export function registerMenu(
+  caption: string,
+  onClick: () => void,
+  options?: Parameters<typeof GM_registerMenuCommand>[2]
+): number {
   if (typeof GM_registerMenuCommand === 'function') {
-    return GM_registerMenuCommand(caption, onClick)
+    return GM_registerMenuCommand(caption, onClick, options)
   }
 
   return 0

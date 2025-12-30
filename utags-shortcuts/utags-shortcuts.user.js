@@ -109,9 +109,9 @@
     32: defaultFavicon32,
     64: defaultFavicon64,
   }
-  function registerMenu(caption, onClick) {
+  function registerMenu(caption, onClick, options) {
     if (typeof GM_registerMenuCommand === 'function') {
-      return GM_registerMenuCommand(caption, onClick)
+      return GM_registerMenuCommand(caption, onClick, options)
     }
     return 0
   }

@@ -56,9 +56,9 @@
   var defaultFavicon64 = encodeURIComponent(
     'https://wsrv.nl/?w=64&h=64&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
   )
-  function registerMenu(caption, onClick2) {
+  function registerMenu(caption, onClick2, options) {
     if (typeof GM_registerMenuCommand === 'function') {
-      return GM_registerMenuCommand(caption, onClick2)
+      return GM_registerMenuCommand(caption, onClick2, options)
     }
     return 0
   }

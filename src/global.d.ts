@@ -3,6 +3,8 @@ declare module 'css:*' {
   export default cssText
 }
 
+declare const browser: typeof chrome
+
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare const GM_info: {
   scriptHandler: string
@@ -16,7 +18,19 @@ declare function GM_addValueChangeListener(
 declare function GM_registerMenuCommand(
   caption: string,
   onClick: () => void,
-  accessKey?: string
+  options_or_accessKey?:
+    | string
+    | {
+        id?: string | number
+        accessKey?: string
+        autoClose?: boolean
+        // Tampermonkey-specific
+        title?: string
+        // ScriptCat-specific
+        nested?: boolean
+        // ScriptCat-specific
+        individual?: boolean
+      }
 ): number
 
 declare function GM_unregisterMenuCommand(menuId: number): void
@@ -62,7 +76,19 @@ declare const GM: {
   registerMenuCommand(
     caption: string,
     onClick: () => void,
-    accessKey?: string
+    options_or_accessKey?:
+      | string
+      | {
+          id?: string | number
+          accessKey?: string
+          autoClose?: boolean
+          // Tampermonkey-specific
+          title?: string
+          // ScriptCat-specific
+          nested?: boolean
+          // ScriptCat-specific
+          individual?: boolean
+        }
   ): Promise<number>
   unregisterMenuCommand(menuId: number): Promise<void>
   download(options: {

@@ -68,9 +68,9 @@
   function isTopFrame() {
     return win.self === win.top
   }
-  function registerMenu(caption, onClick) {
+  function registerMenu(caption, onClick, options) {
     if (typeof GM_registerMenuCommand === 'function') {
-      return GM_registerMenuCommand(caption, onClick)
+      return GM_registerMenuCommand(caption, onClick, options)
     }
     return 0
   }
