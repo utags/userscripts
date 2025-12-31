@@ -9,7 +9,7 @@
 // @description:zh-CN    增强 Discourse 论坛体验，提供即时话题切换、当前话题高亮和上一个/下一个话题的快速导航功能
 // @author               Pipecraft
 // @license              MIT
-// @icon                 https://www.google.com/s2/favicons?sz=64&domain=meta.discourse.org
+// @icon                 https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Fmeta.discourse.org%26size%3D64
 // @match                https://meta.discourse.org/*
 // @match                https://linux.do/*
 // @match                https://idcflare.com/*

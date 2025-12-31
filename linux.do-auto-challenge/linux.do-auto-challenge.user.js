@@ -10,7 +10,7 @@
 // @author               Pipecraft
 // @license              MIT
 // @match                https://linux.do/*
-// @icon                 https://www.google.com/s2/favicons?sz=64&domain=linux.do
+// @icon                 https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Flinux.do%26size%3D64
 // @grant                GM_registerMenuCommand
 // ==/UserScript==
 

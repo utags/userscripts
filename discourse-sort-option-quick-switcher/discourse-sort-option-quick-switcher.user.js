@@ -9,7 +9,7 @@
 // @description:zh-CN    通过菜单快速切换 Discourse 列表排序（创建/回复时间、回复数、浏览量、点赞数，升/降序），通过修改 URL 参数实现。
 // @author               Pipecraft
 // @license              MIT
-// @icon                 https://www.google.com/s2/favicons?sz=64&domain=meta.discourse.org
+// @icon                 https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Fmeta.discourse.org%26size%3D64
 // @match                https://meta.discourse.org/*
 // @match                https://linux.do/*
 // @match                https://idcflare.com/*
