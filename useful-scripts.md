@@ -40,6 +40,14 @@
 - **Supported Sites**: All websites
 - **Description**: A user script to quickly find scripts for the current site across multiple repositories, now with a settings dialog and real-time sync across tabs
 
+### 🖼️ Universal Image Uploader
+
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/553341-universal-image-uploader) · [ScriptCat](https://scriptcat.org/script-show-page/4467) · [GitHub](https://github.com/utags/userscripts/raw/main/universal-image-uploader/universal-image-uploader.user.js)
+- **Features**: Paste/drag/select images to batch-upload to Imgur/Tikolu/MJJ.Today/Appinn
+- **Highlights**: Auto-copy to Markdown/HTML/BBCode/Link, supports site buttons & local history, SPA-compatible
+- **Supported Sites**: All websites
+- **Description**: A user script that lets you paste, drag, or select images and batch-upload them to various providers, then auto-copy the result in your preferred format
+
 ---
 
 ## 更多实用脚本
@@ -85,6 +93,14 @@
 - **亮点**：支持多个流行的脚本仓库，轻松发现有用的脚本
 - **支持网站**：适用于任何网站，查找相关用户脚本
 - **描述**：一个方便的工具，用于发现和安装专为您访问的网站设计的用户脚本
+
+### 🖼️ 通用图片上传助手 (Universal Image Uploader)
+
+- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/553341-universal-image-uploader) · [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/4467) · [GitHub](https://github.com/utags/userscripts/raw/main/universal-image-uploader/universal-image-uploader.user.js)
+- **功能**：粘贴/拖拽/选择图片批量上传到 Imgur/Tikolu/MJJ.Today/Appinn
+- **亮点**：自动复制为 Markdown/HTML/BBCode/链接，支持站点按钮与本地历史，兼容单页应用 (SPA)
+- **支持网站**：所有网站
+- **描述**：在任意网站上粘贴、拖拽或选择图片，批量上传到图床，并按需自动复制为多种格式，支持本地历史记录以便快速复用
 
 ### 🔄 Discourse 话题快捷切换器
 

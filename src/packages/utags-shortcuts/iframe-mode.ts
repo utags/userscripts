@@ -29,9 +29,12 @@ function clearDetectionStorage() {
 
 const BLACKLIST_DOMAINS = new Set([
   'mail.google.com',
+  'accounts.google.com',
+  'gds.google.com',
   'gemini.google.com',
   'github.com',
   'developer.mozilla.org',
+  'addons.mozilla.org',
   'www.threads.com',
   'x.com',
   'pro.x.com',
@@ -45,6 +48,7 @@ const BLACKLIST_URL_PATTERNS = new Set([
   /^https:\/\/www\.google\.com\/search\?((?![?&]udm=).)*$/,
   /^https:\/\/(.+\.)?stackexchange\.com\//,
   /^https:\/\/(login|auth)[^.]*\./,
+  /(login|auth|signin|signup)/i,
   /.+\.user\.js([?#].*)?$/,
   // /.+\.md([?#].*)?$/,
 ])
@@ -489,7 +493,7 @@ function detectInfiniteReload() {
     sessionStorage.setItem(LAST_LOAD_URL_KEY, location.href)
     sessionStorage.setItem(RELOAD_COUNT_KEY, reloadCount.toString())
 
-    if (reloadCount > 3) {
+    if (reloadCount > 5) {
       clearDetectionStorage()
       // Infinite reload detected
       globalThis.parent.postMessage(
