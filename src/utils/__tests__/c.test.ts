@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
+
 import { c } from '../c'
 
 describe('c (create element helper)', () => {

@@ -1,7 +1,7 @@
-import { getWrappedIconUrl } from './favicon'
 import { xmlHttpRequest } from '../common/gm'
 import { doc } from '../globals/doc'
 import { c } from './c'
+import { getWrappedIconUrl } from './favicon'
 
 function createIconImage(src: string, className?: string) {
   return c('img', {

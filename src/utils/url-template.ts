@@ -1,5 +1,5 @@
-import { win } from '../globals/win'
 import { doc } from '../globals/doc'
+import { win } from '../globals/win'
 import { extractDomain } from './url'
 
 export function resolveUrlTemplate(s: string): string {

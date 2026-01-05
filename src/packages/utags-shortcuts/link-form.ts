@@ -1,6 +1,6 @@
 import { pickLinkFromPage } from './add-link-actions'
-import { createOpenModeRadios, createSegmentedRadios } from './segmented-radios'
 import { createIconInput } from './icon-input'
+import { createOpenModeRadios, createSegmentedRadios } from './segmented-radios'
 
 export type LinkFormData = {
   id?: string

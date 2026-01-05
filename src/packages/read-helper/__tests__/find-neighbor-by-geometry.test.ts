@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { findNeighborByGeometry, type Mode } from '../index'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
 import * as domUtils from '../../../utils/dom'
+import { findNeighborByGeometry, type Mode } from '../index'
 
 vi.mock('../../../utils/dom', async () => {
   const mod = await vi.importActual<any>('../../../utils/dom')

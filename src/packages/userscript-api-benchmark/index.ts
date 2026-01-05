@@ -1,5 +1,6 @@
 import { isTopFrame } from '../../utils/is-top-frame'
 import { registerValueChangeListenerTests } from './tests/value-change-listener'
+
 /* eslint-disable @typescript-eslint/naming-convention */
 
 declare const GM_info: any

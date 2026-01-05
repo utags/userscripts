@@ -1,20 +1,41 @@
+import styleText from 'css:./style.css'
+
+import { addStyle, registerMenu, unregisterMenu } from '../../common/gm'
+import {
+  addValueChangeListener,
+  getValue,
+  setValue,
+} from '../../common/gm/storage'
 import {
   clearChildren,
   ensureShadowRoot,
   renderIcon,
   setIcon,
 } from '../../utils/dom'
-import { uid } from '../../utils/uid'
 import { isTopFrame } from '../../utils/is-top-frame'
-import { createOpenModeRadios } from './segmented-radios'
-import styleText from 'css:./style.css'
-import { openAddLinkModal } from './add-link-modal'
+import { navigateUrl } from '../../utils/navigate'
+import { uid } from '../../utils/uid'
+import { isSameOrigin } from '../../utils/url'
 import { openAddGroupModal } from './add-group-modal'
+import {
+  addCurrentPageLinkToGroup,
+  hasDuplicateInGroup,
+  pickLinkFromPageAndAdd,
+} from './add-link-actions'
+import { openAddLinkModal } from './add-link-modal'
 import { showDropdownMenu } from './dropdown'
 import { openEditorModal } from './editor-modal-tabs'
 import {
-  openSettingsPanel,
+  checkAndEnableIframeMode,
+  initIframeChild,
+  isIframeModeDisabled,
+  updateIframeLayout,
+  updateIframeUrl,
+} from './iframe-mode'
+import { createOpenModeRadios } from './segmented-radios'
+import {
   createUshortcutsSettingsStore,
+  openSettingsPanel,
 } from './settings-panel'
 import {
   CONFIG_KEY,
@@ -23,27 +44,7 @@ import {
   type ShortcutsGroup,
   type ShortcutsItem,
 } from './store'
-import { registerMenu, unregisterMenu, addStyle } from '../../common/gm'
-import {
-  getValue,
-  setValue,
-  addValueChangeListener,
-} from '../../common/gm/storage'
-import {
-  addCurrentPageLinkToGroup,
-  pickLinkFromPageAndAdd,
-  hasDuplicateInGroup,
-} from './add-link-actions'
-import { resolveTargetUrl, resolveIcon, isEditableTarget } from './utils'
-import { navigateUrl } from '../../utils/navigate'
-import { isSameOrigin } from '../../utils/url'
-import {
-  checkAndEnableIframeMode,
-  initIframeChild,
-  isIframeModeDisabled,
-  updateIframeLayout,
-  updateIframeUrl,
-} from './iframe-mode'
+import { isEditableTarget, resolveIcon, resolveTargetUrl } from './utils'
 
 type OpenMode = 'same-tab' | 'new-tab'
 type Position =

@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { mergeGroupsOverwrite, mergeGroupsMerge } from '../merge-utils'
+import { describe, expect, it } from 'vitest'
+
+import { mergeGroupsMerge, mergeGroupsOverwrite } from '../merge-utils'
 import { type ShortcutsConfig, type ShortcutsGroup } from '../store'
 
 const createConfig = (groups: ShortcutsGroup[]): ShortcutsConfig => ({ groups })

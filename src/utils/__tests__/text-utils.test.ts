@@ -1,15 +1,16 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
 import {
-  type TextIndex,
   buildTextIndex,
-  getTextIndex,
-  findPrevBoundary,
   findNextBoundary,
-  rangeForText,
-  rangeForParagraph,
-  rangeForLine,
+  findPrevBoundary,
+  getTextIndex,
   isPunctuationRect,
+  rangeForLine,
+  rangeForParagraph,
+  rangeForText,
+  type TextIndex,
 } from '../text'
 import * as textUtils from '../text'
 

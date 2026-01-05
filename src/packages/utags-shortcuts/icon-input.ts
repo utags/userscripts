@@ -1,6 +1,6 @@
+import { debounce } from '../../utils/async'
 import { clearChildren, setIcon } from '../../utils/dom'
 import { createSegmentedRadios } from './segmented-radios'
-import { debounce } from '../../utils/async'
 
 export type IconKind = 'icon' | 'favicon' | 'url' | 'emoji'
 

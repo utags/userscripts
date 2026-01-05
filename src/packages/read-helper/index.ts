@@ -1,33 +1,33 @@
-import {
-  isElementVisible,
-  isInteractive,
-  isBlockElement,
-  closestBlockElement,
-  caretRangeFromPoint,
-  hasNestedBlock,
-} from '../../utils/dom'
-import { c } from '../../utils/c'
-import {
-  type TextIndex,
-  getTextIndex,
-  mapIndexToPosition,
-  mapPositionToIndex,
-  adjustIndexToNode,
-  findPrevBoundary,
-  findNextBoundary,
-  rangeForParagraph,
-  rangeForLine,
-  rangeForText,
-  isPunctuationRect,
-} from '../../utils/text'
-import { type Mode, type Style, DEFAULT_READ_HELPER_SETTINGS } from './config'
+import { registerMenu as gmRegisterMenu } from '../../common/gm'
 import {
   createSettingsStore,
   openSettingsPanel as openPanel,
   type Field,
   type PanelSchema,
 } from '../../common/settings'
-import { registerMenu as gmRegisterMenu } from '../../common/gm'
+import { c } from '../../utils/c'
+import {
+  caretRangeFromPoint,
+  closestBlockElement,
+  hasNestedBlock,
+  isBlockElement,
+  isElementVisible,
+  isInteractive,
+} from '../../utils/dom'
+import {
+  adjustIndexToNode,
+  findNextBoundary,
+  findPrevBoundary,
+  getTextIndex,
+  isPunctuationRect,
+  mapIndexToPosition,
+  mapPositionToIndex,
+  rangeForLine,
+  rangeForParagraph,
+  rangeForText,
+  type TextIndex,
+} from '../../utils/text'
+import { DEFAULT_READ_HELPER_SETTINGS, type Mode, type Style } from './config'
 
 let mode: Mode = DEFAULT_READ_HELPER_SETTINGS.mode
 let style: Style = DEFAULT_READ_HELPER_SETTINGS.style

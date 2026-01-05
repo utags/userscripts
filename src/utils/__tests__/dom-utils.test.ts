@@ -1,13 +1,14 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
+
 import {
-  isInteractive,
-  isBlockElement,
-  closestBlockElement,
-  isElementVisible,
-  hasNestedBlock,
   caretRangeFromPoint,
+  closestBlockElement,
   ensureShadowRoot,
+  hasNestedBlock,
+  isBlockElement,
+  isElementVisible,
+  isInteractive,
 } from '../dom'
 
 describe('dom utils', () => {

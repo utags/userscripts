@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { createSettingsStore } from '../index'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
 import * as gm from '../../gm/storage'
+import { createSettingsStore } from '../index'
 
 // Mock gm module
 vi.mock('../../gm/storage', () => ({

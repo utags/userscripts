@@ -1,11 +1,10 @@
-import { registerMenu, unregisterMenu, openInTab } from '../../common/gm'
+import { openInTab, registerMenu, unregisterMenu } from '../../common/gm'
 import {
-  openSettingsPanel,
   createSettingsStore,
+  openSettingsPanel,
   type Field,
   type PanelSchema,
 } from '../../common/settings'
-
 import { extractDomain } from '../../utils/url'
 
 type RepoConfig = {

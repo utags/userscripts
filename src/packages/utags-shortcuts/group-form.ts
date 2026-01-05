@@ -1,5 +1,5 @@
-import { createOpenModeRadios, createSegmentedRadios } from './segmented-radios'
 import { createIconInput } from './icon-input'
+import { createOpenModeRadios, createSegmentedRadios } from './segmented-radios'
 
 export type GroupFormData = {
   id?: string

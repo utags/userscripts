@@ -3,7 +3,8 @@
     "node_modules"
   ],
   "include": [
-    "./**/*.ts",
+    "./src/**/*.ts",
+    "./scripts/**/*.ts",
   ],
   "compilerOptions": {
     "target": "ES2021",

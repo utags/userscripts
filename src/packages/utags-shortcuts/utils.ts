@@ -1,5 +1,5 @@
-import { resolveUrlTemplate } from '../../utils/url-template'
 import { getFaviconUrl } from '../../utils/favicon'
+import { resolveUrlTemplate } from '../../utils/url-template'
 
 export function resolveTargetUrl(data?: string) {
   const path = String(data || '').trim() || '/'

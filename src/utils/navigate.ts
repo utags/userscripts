@@ -1,6 +1,6 @@
+import { ProgressBar } from '../common/progress-bar'
 import { doc } from '../globals/doc'
 import { win } from '../globals/win'
-import { ProgressBar } from '../common/progress-bar'
 import { isSameOrigin } from './url'
 
 let progressBar: ProgressBar | undefined

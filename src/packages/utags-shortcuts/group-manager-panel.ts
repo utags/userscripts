@@ -1,9 +1,9 @@
-import { uid } from '../../utils/uid'
 import { clearChildren, setIcon } from '../../utils/dom'
-import { resolveTargetUrl, resolveIcon } from './utils'
+import { uid } from '../../utils/uid'
+import { hasDuplicateInGroup } from './add-link-actions'
 import { renderGroupForm, type GroupFormData } from './group-form'
 import { renderLinkForm, type LinkFormData } from './link-form'
-import { hasDuplicateInGroup } from './add-link-actions'
+import { resolveIcon, resolveTargetUrl } from './utils'
 
 export function createGroupManagerPanel(
   root: ShadowRoot,

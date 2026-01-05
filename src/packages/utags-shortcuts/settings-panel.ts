@@ -1,23 +1,24 @@
-import { deepMergeReplaceArrays } from '../../utils/obj'
-import { ensureShadowRoot, setIcon } from '../../utils/dom'
+import styleText from 'css:./style.css'
+
+import { xmlHttpRequestWithFallback } from '../../common/gm'
+import { getValue, setValue } from '../../common/gm/storage'
 import {
+  closeSettingsPanel,
   createSettingsStore,
   openSettingsPanel as openPanel,
-  closeSettingsPanel,
   type Field,
   type Group,
   type PanelSchema,
   type Store,
 } from '../../common/settings'
-import { xmlHttpRequestWithFallback } from '../../common/gm'
-import { getValue, setValue } from '../../common/gm/storage'
-import { openEditorModal } from './editor-modal-tabs'
-import styleText from 'css:./style.css'
-import { uid } from '../../utils/uid'
+import { ensureShadowRoot, setIcon } from '../../utils/dom'
 import { importJson } from '../../utils/import-json'
-import { shortcutsStore, type ShortcutsConfig } from './store'
-import { createModalFrame } from './modal-base'
+import { deepMergeReplaceArrays } from '../../utils/obj'
+import { uid } from '../../utils/uid'
+import { openEditorModal } from './editor-modal-tabs'
 import { importAndSave } from './importer'
+import { createModalFrame } from './modal-base'
+import { shortcutsStore, type ShortcutsConfig } from './store'
 
 const SETTINGS_KEY = 'settings'
 

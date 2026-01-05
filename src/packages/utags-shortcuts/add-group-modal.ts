@@ -1,6 +1,6 @@
 import { uid } from '../../utils/uid'
-import { createModalFrame } from './modal-base'
 import { renderGroupForm } from './group-form'
+import { createModalFrame } from './modal-base'
 
 export function openAddGroupModal(
   root: ShadowRoot,

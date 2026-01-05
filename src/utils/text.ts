@@ -1,9 +1,9 @@
 import { doc } from '../globals/doc'
 import {
+  caretRangeFromPoint,
   closestBlockElement,
   hasNestedBlock,
   isElementVisible,
-  caretRangeFromPoint,
 } from './dom'
 
 export type TextIndex = {

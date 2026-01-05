@@ -1,7 +1,7 @@
-import { hasDuplicateInGroup } from './add-link-actions'
 import { uid } from '../../utils/uid'
-import { createModalFrame } from './modal-base'
+import { hasDuplicateInGroup } from './add-link-actions'
 import { renderLinkForm, type LinkFormData } from './link-form'
+import { createModalFrame } from './modal-base'
 
 export function openAddLinkModal(
   root: ShadowRoot,
