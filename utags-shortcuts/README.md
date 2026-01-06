@@ -53,6 +53,17 @@
       - Change matching rules for when groups should appear.
       - Adjust layout preferences (Floating vs. Sidebar).
 
+### Discourse Sidebar Integration
+
+On Discourse forums (e.g., Linux.do) that support custom sidebar sections:
+
+1.  Go to the sidebar customization page.
+2.  Click **Add Link** or edit an existing section.
+3.  You will see three new buttons:
+    - **Import from UTags Shortcuts**: Import links from your existing UTags Shortcuts groups.
+    - **Import from JSON File**: Import links from a JSON file into the current section.
+    - **Export as JSON File**: Export the current section's links as a JSON file compatible with UTags Shortcuts.
+
 ## Use Cases
 
 - **Site-Specific Tools**: Create a "GitHub" group that only appears on `github.com`, containing links to your Issues, Pull Requests, and Profile.
@@ -88,6 +99,13 @@ You can use the following variables in the URL field. They will be replaced with
 - **Fallback**: Use `||` to define a fallback value (e.g., `{selected||query||t:default}`).
 
 ## Changelog
+
+### v0.4.x
+
+- **Discourse Integration**: Added support for importing/exporting custom sidebar sections in Discourse forums.
+- **Export Filter**: Automatically excludes items with `[Hidden]` in the name during export.
+- **URL Processing**: Automatically converts absolute URLs to relative paths when importing if they match the current domain.
+- **UI Improvements**: Optimized toast notifications and button layout in the Discourse sidebar.
 
 ### v0.3.x
 

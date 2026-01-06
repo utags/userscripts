@@ -124,7 +124,7 @@ export function createModalFrame(options: ModalOptions) {
         )
       ).filter(
         (el) => !(el as HTMLElement).hasAttribute('disabled')
-      ) as HTMLElement[]
+      ) as HTMLInputElement[]
 
       if (focusables.length === 0) return
 
@@ -132,7 +132,7 @@ export function createModalFrame(options: ModalOptions) {
       const last = focusables[focusables.length - 1]
 
       // Check active element in shadow root
-      const current = root.activeElement as HTMLElement | undefined
+      const current = root.activeElement as HTMLInputElement | undefined
 
       if (e.shiftKey) {
         if (current === first || !modal.contains(current as Node)) {
@@ -150,11 +150,11 @@ export function createModalFrame(options: ModalOptions) {
 
   // Initial focus
   requestAnimationFrame(() => {
-    const focusables = modal.querySelectorAll(
+    const focusables = modal.querySelectorAll<HTMLInputElement>(
       'input, button, [tabindex]:not([tabindex="-1"])'
     )
     if (focusables.length > 0) {
-      ;(focusables[0] as HTMLElement).focus()
+      focusables[0].focus()
     }
   })
 

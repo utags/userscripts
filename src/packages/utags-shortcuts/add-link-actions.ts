@@ -141,10 +141,10 @@ export function pickLinkFromPage(
     return u.protocol === 'http:' || u.protocol === 'https:'
   })
 
-  const panelEl = root.querySelector('.ushortcuts')
+  const panelEl = root.querySelector<HTMLDivElement>('.ushortcuts')
   const prevPanelDisplay =
-    panelEl instanceof HTMLElement ? panelEl.style.display || '' : ''
-  if (panelEl instanceof HTMLElement) panelEl.style.display = 'none'
+    panelEl instanceof HTMLDivElement ? panelEl.style.display || '' : ''
+  if (panelEl instanceof HTMLDivElement) panelEl.style.display = 'none'
 
   const cleanup = () => {
     for (const a of anchors) a.classList.remove('ushortcuts-picker-highlight')
@@ -152,7 +152,8 @@ export function pickLinkFromPage(
       tip.remove()
     } catch {}
 
-    if (panelEl instanceof HTMLElement) panelEl.style.display = prevPanelDisplay
+    if (panelEl instanceof HTMLDivElement)
+      panelEl.style.display = prevPanelDisplay
     try {
       const ov = document.querySelector('#ushortcuts-picker-overlay')
       ov?.remove()

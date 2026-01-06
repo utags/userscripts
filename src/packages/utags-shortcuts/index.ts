@@ -23,6 +23,7 @@ import {
   pickLinkFromPageAndAdd,
 } from './add-link-actions'
 import { openAddLinkModal } from './add-link-modal'
+import { initDiscourseSidebar } from './discourse-sidebar'
 import { showDropdownMenu } from './dropdown'
 import { openEditorModal } from './editor-modal-tabs'
 import {
@@ -95,6 +96,7 @@ html[data-utags-shortcuts-sidebar="right-open"] body { width: calc(100% - 360px)
 
 void checkAndEnableIframeMode()
 initIframeChild()
+initDiscourseSidebar()
 
 const store = createUshortcutsSettingsStore()
 let settings: any = {}
@@ -552,9 +554,9 @@ function renderShortcutsItem(
 ) {
   const wrap = document.createElement('div')
   wrap.className = 'item-wrap'
-  ;(wrap as HTMLElement).dataset.itemId = it.id
-  ;(wrap as HTMLElement).classList.add('fade-in')
-  if (it.hidden) (wrap as HTMLElement).classList.add('is-hidden')
+  wrap.dataset.itemId = it.id
+  wrap.classList.add('fade-in')
+  if (it.hidden) wrap.classList.add('is-hidden')
   const a = document.createElement('a')
   a.className = 'item'
   a.draggable = true
@@ -771,8 +773,8 @@ function renderGroupSection(
 
   const section = document.createElement('div')
   section.className = 'section'
-  ;(section as HTMLElement).dataset.gid = g.id
-  if (g.hidden) (section as HTMLElement).classList.add('is-hidden')
+  section.dataset.gid = g.id
+  if (g.hidden) section.classList.add('is-hidden')
 
   section.addEventListener('dragover', (e) => {
     if (draggingItem && draggingItem.groupId === g.id) return
@@ -1008,7 +1010,7 @@ function renderGroupSection(
       void saveConfig(cfg)
       const itemsDiv = section.querySelector('.items')
       if (itemsDiv)
-        (itemsDiv as HTMLElement).style.display = g.collapsed ? 'none' : ''
+        (itemsDiv as HTMLDivElement).style.display = g.collapsed ? 'none' : ''
       setIcon(
         toggleBtn,
         g.collapsed ? 'lucide:chevron-right' : 'lucide:chevron-down',
@@ -1087,7 +1089,7 @@ function renderGroupSection(
   }
 
   section.append(items)
-  ;(section as HTMLElement).classList.add('fade-in')
+  section.classList.add('fade-in')
   body.append(section)
 }
 
@@ -1186,14 +1188,17 @@ function renderPanelHeader(
       preserveScroll(panel, () => {
         for (const g of cfg.groups) g.collapsed = false
         void saveConfig(cfg)
-        for (const sec of Array.from(panel.querySelectorAll('.section'))) {
-          const itemsDiv = sec.querySelector('.items')
-          if (itemsDiv) (itemsDiv as HTMLElement).style.display = ''
-          const gid = (sec as HTMLElement).dataset.gid
+        for (const sec of Array.from(
+          panel.querySelectorAll<HTMLElement>('.section')
+        )) {
+          const itemsDiv = sec.querySelector<HTMLDivElement>('.items')
+          if (itemsDiv) itemsDiv.style.display = ''
+          const gid = sec.dataset.gid
           const grp = cfg.groups.find((x) => x.id === gid)
-          const btn = sec.querySelector('.header .icon-btn:nth-last-child(1)')
-          if (grp && btn)
-            setIcon(btn as HTMLElement, 'lucide:chevron-down', '折叠')
+          const btn = sec.querySelector<HTMLButtonElement>(
+            '.header .icon-btn:nth-last-child(1)'
+          )
+          if (grp && btn) setIcon(btn, 'lucide:chevron-down', '折叠')
         }
       })
     })
@@ -1205,14 +1210,17 @@ function renderPanelHeader(
       preserveScroll(panel, () => {
         for (const g of cfg.groups) g.collapsed = true
         void saveConfig(cfg)
-        for (const sec of Array.from(panel.querySelectorAll('.section'))) {
-          const itemsDiv = sec.querySelector('.items')
-          if (itemsDiv) (itemsDiv as HTMLElement).style.display = 'none'
-          const gid = (sec as HTMLElement).dataset.gid
+        for (const sec of Array.from(
+          panel.querySelectorAll<HTMLElement>('.section')
+        )) {
+          const itemsDiv = sec.querySelector<HTMLDivElement>('.items')
+          if (itemsDiv) itemsDiv.style.display = 'none'
+          const gid = sec.dataset.gid
           const grp = cfg.groups.find((x) => x.id === gid)
-          const btn = sec.querySelector('.header .icon-btn:nth-last-child(1)')
-          if (grp && btn)
-            setIcon(btn as HTMLElement, 'lucide:chevron-right', '展开')
+          const btn = sec.querySelector<HTMLButtonElement>(
+            '.header .icon-btn:nth-last-child(1)'
+          )
+          if (grp && btn) setIcon(btn, 'lucide:chevron-right', '展开')
         }
       })
     })
@@ -1440,8 +1448,8 @@ function rerender(root: ShadowRoot, cfg: ShortcutsConfig) {
   let sy = 0
   try {
     const cur =
-      root.querySelector('.ushortcuts .panel-scroll') ||
-      root.querySelector('.ushortcuts .panel')
+      root.querySelector<HTMLDivElement>('.ushortcuts .panel-scroll') ||
+      root.querySelector<HTMLDivElement>('.ushortcuts .panel')
     if (cur) {
       sx = cur.scrollLeft
       sy = cur.scrollTop
@@ -1536,8 +1544,8 @@ function rerender(root: ShadowRoot, cfg: ShortcutsConfig) {
   if (!lastCollapsed) {
     try {
       const cur =
-        root.querySelector('.ushortcuts .panel-scroll') ||
-        root.querySelector('.ushortcuts .panel')
+        root.querySelector<HTMLDivElement>('.ushortcuts .panel-scroll') ||
+        root.querySelector<HTMLDivElement>('.ushortcuts .panel')
       if (cur) {
         cur.scrollLeft = sx
         cur.scrollTop = sy
