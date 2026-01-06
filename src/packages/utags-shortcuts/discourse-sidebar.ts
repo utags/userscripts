@@ -499,6 +499,24 @@ async function processItems(
     }
   }
 
+  // 4. Clean empty rows that may exist before import
+  for (const row of form.querySelectorAll<HTMLDivElement>(
+    '.sidebar-section-form-link'
+  )) {
+    const nameInput = row.querySelector<HTMLInputElement>(
+      'input[name="link-name"]'
+    )
+    const urlInput = row.querySelector<HTMLInputElement>(
+      'input[name="link-url"]'
+    )
+    const deleteBtn = row.querySelector<HTMLButtonElement>('button.delete-link')
+    const name = nameInput?.value.trim() ?? ''
+    const url = urlInput?.value.trim() ?? ''
+    if (!name && !url && deleteBtn) {
+      deleteBtn.click()
+    }
+  }
+
   showToast(
     `导入 ${urlItems.length} 项 (总数: ${countTotal}, 类型过滤: ${countTypeFiltered}, 变量过滤: ${countVarFiltered}, 重复过滤: ${countDupFiltered})`,
     form

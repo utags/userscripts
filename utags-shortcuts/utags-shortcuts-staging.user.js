@@ -727,6 +727,7 @@
         if (isSpa()) {
           win.history.pushState(null, '', url)
           win.dispatchEvent(new PopStateEvent('popstate'))
+          win.scrollTo(0, 0)
           setTimeout(() => {
             progressBar == null ? void 0 : progressBar.finish()
           }, 800)
@@ -2710,6 +2711,7 @@
     toast.dataset.timerId = String(newTimerId)
   }
   async function processItems(items, addBtn, form) {
+    var _a, _b
     const existingUrls = /* @__PURE__ */ new Set()
     for (const input of form.querySelectorAll('input[name="link-url"]')) {
       if (input.value) existingUrls.add(input.value)
@@ -2771,6 +2773,22 @@
       const row = rows[startIndex + index]
       if (row) {
         fillRow(row, item)
+      }
+    }
+    for (const row of form.querySelectorAll('.sidebar-section-form-link')) {
+      const nameInput = row.querySelector('input[name="link-name"]')
+      const urlInput = row.querySelector('input[name="link-url"]')
+      const deleteBtn = row.querySelector('button.delete-link')
+      const name =
+        (_a = nameInput == null ? void 0 : nameInput.value.trim()) != null
+          ? _a
+          : ''
+      const url =
+        (_b = urlInput == null ? void 0 : urlInput.value.trim()) != null
+          ? _b
+          : ''
+      if (!name && !url && deleteBtn) {
+        deleteBtn.click()
       }
     }
     showToast(
@@ -5186,6 +5204,7 @@
     'www.instagram.com',
     'stackoverflow.com',
     'superuser.com',
+    't.me',
   ])
   var BLACKLIST_URL_PATTERNS = /* @__PURE__ */ new Set([
     /^https:\/\/www\.google\.com\/search\?.*[&?]udm=50/,

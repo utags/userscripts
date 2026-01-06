@@ -42,6 +42,7 @@ const BLACKLIST_DOMAINS = new Set([
   'www.instagram.com',
   'stackoverflow.com',
   'superuser.com',
+  't.me',
 ])
 const BLACKLIST_URL_PATTERNS = new Set([
   /^https:\/\/www\.google\.com\/search\?.*[&?]udm=50/,

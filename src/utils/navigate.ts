@@ -90,6 +90,7 @@ export function navigateUrl(url: string) {
       if (isSpa()) {
         win.history.pushState(null, '', url)
         win.dispatchEvent(new PopStateEvent('popstate'))
+        win.scrollTo(0, 0)
         setTimeout(() => {
           progressBar?.finish()
         }, 800)
