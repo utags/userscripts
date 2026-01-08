@@ -110,6 +110,8 @@ let showHiddenItems = false
 const editingGroups = new Set<string>()
 const selectedItemsByGroup = new Map<string, Set<string>>()
 let draggingItem: { groupId: string; itemId: string } | undefined
+let lastDragTarget: Element | undefined
+let lastDragPos: 'before' | 'after' | undefined
 
 function matchPattern(url: string, pattern: string) {
   try {
@@ -557,6 +559,86 @@ function renderShortcutsItem(
   wrap.dataset.itemId = it.id
   wrap.classList.add('fade-in')
   if (it.hidden) wrap.classList.add('is-hidden')
+
+  // Drag and Drop Reordering
+  wrap.addEventListener('dragover', (e) => {
+    if (draggingItem && draggingItem.groupId === g.id) {
+      e.preventDefault()
+      e.stopPropagation()
+
+      if (lastDragTarget && lastDragTarget !== wrap) {
+        lastDragTarget.classList.remove('drag-over-before', 'drag-over-after')
+      }
+
+      lastDragTarget = wrap
+
+      const itemsContainer = wrap.closest('.items')
+      let isGrid = itemsContainer?.classList.contains('layout-grid')
+      if (itemsContainer?.classList.contains('mode-icon-only')) {
+        const cols = (itemsContainer as HTMLElement).style.getPropertyValue(
+          '--cols'
+        )
+        isGrid = cols !== '1'
+      }
+
+      const rect = wrap.getBoundingClientRect()
+
+      const isSecondHalf = isGrid
+        ? e.clientX - rect.left > rect.width / 2
+        : e.clientY - rect.top > rect.height / 2
+
+      lastDragPos = isSecondHalf ? 'after' : 'before'
+
+      wrap.classList.toggle('drag-over-after', isSecondHalf)
+      wrap.classList.toggle('drag-over-before', !isSecondHalf)
+    }
+  })
+
+  wrap.addEventListener('dragleave', () => {
+    // Keep the visual state until we enter another item or drop
+  })
+
+  wrap.addEventListener('drop', (e) => {
+    if (draggingItem && draggingItem.groupId === g.id) {
+      e.preventDefault()
+      e.stopPropagation()
+
+      const isAfter = wrap.classList.contains('drag-over-after')
+
+      if (lastDragTarget) {
+        lastDragTarget.classList.remove('drag-over-before', 'drag-over-after')
+        lastDragTarget = undefined
+      }
+
+      lastDragPos = undefined
+
+      wrap.classList.remove('drag-over-before', 'drag-over-after')
+
+      const srcIndex = g.items.findIndex((i) => i.id === draggingItem!.itemId)
+      let targetIndex = g.items.findIndex((i) => i.id === it.id)
+
+      if (srcIndex !== -1 && targetIndex !== -1) {
+        if (srcIndex === targetIndex) return
+
+        // If dropped on the right/bottom half, insert after
+        if (isAfter) {
+          targetIndex++
+        }
+
+        // Adjust index because removing the item shifts subsequent items
+        const insertIndex =
+          srcIndex < targetIndex ? targetIndex - 1 : targetIndex
+
+        if (srcIndex !== insertIndex) {
+          const [movedItem] = g.items.splice(srcIndex, 1)
+          g.items.splice(insertIndex, 0, movedItem)
+          void saveConfig(cfg)
+          rerender(root, cfg)
+        }
+      }
+    }
+  })
+
   const a = document.createElement('a')
   a.className = 'item'
   a.draggable = true
@@ -567,6 +649,12 @@ function renderShortcutsItem(
   })
   a.addEventListener('dragend', () => {
     draggingItem = undefined
+    if (lastDragTarget) {
+      lastDragTarget.classList.remove('drag-over-before', 'drag-over-after')
+      lastDragTarget = undefined
+    }
+
+    lastDragPos = undefined
   })
 
   if (isEditing) {
@@ -708,6 +796,11 @@ async function handleDropOnGroup(
     e.dataTransfer?.getData('text/plain')
   if (url) {
     url = url.split('\n')[0].trim()
+    try {
+      url = decodeURI(url)
+    } catch {
+      /* empty */
+    }
   }
 
   if (
@@ -777,15 +870,75 @@ function renderGroupSection(
   if (g.hidden) section.classList.add('is-hidden')
 
   section.addEventListener('dragover', (e) => {
-    if (draggingItem && draggingItem.groupId === g.id) return
     e.preventDefault()
-    section.classList.add('drag-over')
+    if (draggingItem && draggingItem.groupId === g.id) {
+      if (lastDragTarget && section.contains(lastDragTarget)) {
+        section.classList.remove('drag-over-append')
+      } else {
+        if (lastDragTarget) {
+          lastDragTarget.classList.remove('drag-over-before', 'drag-over-after')
+          lastDragTarget = undefined
+          lastDragPos = undefined
+        }
+
+        section.classList.add('drag-over-append')
+      }
+    } else {
+      section.classList.add('drag-over')
+    }
   })
-  section.addEventListener('dragleave', () => {
-    section.classList.remove('drag-over')
+  section.addEventListener('dragleave', (e) => {
+    if (section.contains(e.relatedTarget as Node)) return
+
+    section.classList.remove('drag-over', 'drag-over-append')
+
+    if (lastDragTarget && section.contains(lastDragTarget)) {
+      lastDragTarget.classList.remove('drag-over-before', 'drag-over-after')
+      lastDragTarget = undefined
+      lastDragPos = undefined
+    }
   })
   section.addEventListener('drop', (e) => {
-    if (draggingItem && draggingItem.groupId === g.id) return
+    if (draggingItem && draggingItem.groupId === g.id) {
+      if (lastDragTarget && section.contains(lastDragTarget)) {
+        const targetId = (lastDragTarget as HTMLElement).dataset.itemId
+        const targetIndex = g.items.findIndex((i) => i.id === targetId)
+        const srcIndex = g.items.findIndex((i) => i.id === draggingItem!.itemId)
+
+        if (srcIndex !== -1 && targetIndex !== -1) {
+          lastDragTarget.classList.remove('drag-over-before', 'drag-over-after')
+          lastDragTarget = undefined
+
+          const insertIndex =
+            lastDragPos === 'after' ? targetIndex + 1 : targetIndex
+          const finalIndex =
+            srcIndex < insertIndex ? insertIndex - 1 : insertIndex
+
+          if (srcIndex !== finalIndex) {
+            const [movedItem] = g.items.splice(srcIndex, 1)
+            g.items.splice(finalIndex, 0, movedItem)
+            void saveConfig(cfg)
+            rerender(root, cfg)
+          }
+        }
+
+        section.classList.remove('drag-over', 'drag-over-append')
+        return
+      }
+
+      // Move to the end
+      const srcIndex = g.items.findIndex((i) => i.id === draggingItem!.itemId)
+      if (srcIndex !== -1 && srcIndex !== g.items.length - 1) {
+        const [movedItem] = g.items.splice(srcIndex, 1)
+        g.items.push(movedItem)
+        void saveConfig(cfg)
+        rerender(root, cfg)
+      }
+
+      section.classList.remove('drag-over', 'drag-over-append')
+      return
+    }
+
     void handleDropOnGroup(e, g, cfg, root, section)
   })
 
@@ -1040,13 +1193,19 @@ function renderGroupSection(
     if (iconCols > 0) {
       items.classList.add('layout-grid')
       items.style.setProperty('--cols', String(iconCols))
+      if (iconCols === 1) items.classList.add('cols-1')
+    } else {
+      items.classList.add('layout-auto')
     }
   } else {
     if (isTitleOnly) items.classList.add('mode-title-only')
-    items.style.setProperty(
-      '--cols',
-      String(isEditing ? 1 : g.itemsPerRow || 1)
-    )
+    const cols = isEditing ? 1 : g.itemsPerRow || 1
+    items.style.setProperty('--cols', String(cols))
+    if (cols > 1) {
+      items.classList.add('layout-grid')
+    } else {
+      items.classList.add('layout-list')
+    }
   }
 
   items.style.display = g.collapsed ? 'none' : ''

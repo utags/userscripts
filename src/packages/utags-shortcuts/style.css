@@ -252,6 +252,67 @@
   @apply inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md text-gray-900 no-underline transition-colors duration-150 truncate min-w-0;
 }
 
+.item-wrap {
+  @apply relative rounded-md transition-all duration-150;
+}
+
+.layout-list .item-wrap.drag-over-before::before,
+.layout-list .item-wrap.drag-over-after::after {
+  content: '';
+  @apply absolute left-0 right-0 h-[2px] bg-blue-500 z-20 pointer-events-none;
+}
+.layout-list .item-wrap.drag-over-before::before {
+  top: 0;
+}
+.layout-list .item-wrap.drag-over-after::after {
+  bottom: 0;
+}
+
+.layout-grid .item-wrap.drag-over-before::before,
+.layout-grid .item-wrap.drag-over-after::after,
+.layout-auto .item-wrap.drag-over-before::before,
+.layout-auto .item-wrap.drag-over-after::after {
+  content: '';
+  @apply absolute top-0 bottom-0 w-[2px] bg-blue-500 z-20 pointer-events-none;
+}
+.layout-grid .item-wrap.drag-over-before::before,
+.layout-auto .item-wrap.drag-over-before::before {
+  left: 0;
+}
+.layout-grid .item-wrap.drag-over-after::after,
+.layout-auto .item-wrap.drag-over-after::after {
+  right: 0;
+}
+
+.layout-grid.cols-1 .item-wrap.drag-over-before::before,
+.layout-grid.cols-1 .item-wrap.drag-over-after::after {
+  top: auto;
+  bottom: auto;
+  width: auto;
+  @apply left-0 right-0 h-[2px];
+}
+
+.layout-grid.cols-1 .item-wrap.drag-over-before::before {
+  top: 0;
+}
+
+.layout-grid.cols-1 .item-wrap.drag-over-after::after {
+  bottom: 0;
+}
+
+.ushortcuts.dark .item-wrap.drag-over-before::before,
+.ushortcuts.dark .item-wrap.drag-over-after::after {
+  @apply bg-blue-400;
+}
+
+/* Section drag over feedback (append to end) */
+.section.drag-over-append .items {
+  box-shadow: 0 2px 0 0 #3b82f6; /* blue-500 */
+}
+.ushortcuts.dark .section.drag-over-append .items {
+  box-shadow: 0 2px 0 0 #60a5fa; /* blue-400 */
+}
+
 .item {
   width: 100%;
 }

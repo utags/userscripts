@@ -102,6 +102,9 @@ You can use the following variables in the URL field. They will be replaced with
 
 ### v0.4.x
 
+- **Drag-and-Drop Sorting**: Enhanced drag-and-drop experience with visual insertion lines for precise reordering within groups.
+- **Adaptive Visual Feedback**: Automatically switches between vertical (top/bottom) and horizontal (left/right) insertion lines based on the layout mode (List vs. Grid/Auto).
+- **URL Handling**: Fixed an issue where URLs were double-encoded when dragged into a group, ensuring template variables (e.g., `{hostname}`) are preserved correctly.
 - **Discourse Integration**: Added support for importing/exporting custom sidebar sections in Discourse forums.
 - **Export Filter**: Automatically excludes items with `[Hidden]` in the name during export.
 - **URL Processing**: Automatically converts absolute URLs to relative paths when importing if they match the current domain.
