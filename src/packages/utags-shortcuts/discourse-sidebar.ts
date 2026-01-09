@@ -438,6 +438,17 @@ async function processItems(
     .map((item) => {
       // Check and replace variables in URL
       let processedUrl = processUrl(item.data)
+
+      if (item.data.startsWith('https://linux.do/challenge')) {
+        processedUrl = `https://www.google.com/url?q=${encodeURIComponent(
+          'https://linux.do/challenge'
+        )}`
+      } else if (item.data === '?safe_mode=no_themes%2Cno_plugins') {
+        processedUrl = `https://www.google.com/url?q=${encodeURIComponent(
+          'https://linux.do/?safe_mode=no_themes%2Cno_plugins'
+        )}`
+      }
+
       if (!processedUrl) {
         countVarFiltered++
         return undefined
