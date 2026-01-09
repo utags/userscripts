@@ -454,6 +454,11 @@ async function processItems(
         } catch {}
       }
 
+      if (processedUrl.startsWith('?')) {
+        countVarFiltered++
+        return undefined
+      }
+
       return { ...item, url: processedUrl }
     })
     .filter((item): item is typeof item => {
