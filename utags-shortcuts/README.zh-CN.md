@@ -34,7 +34,14 @@
 
 ## 安装方法
 
-- 需要安装油猴脚本管理器：[Tampermonkey](https://www.tampermonkey.net/)、[Violentmonkey](https://violentmonkey.github.io/)、或 [ScriptCat](https://scriptcat.org/)
+- 需要安装油猴脚本管理器：
+  - [Tampermonkey](https://www.tampermonkey.net/)
+  - [Violentmonkey](https://violentmonkey.github.io/)
+  - [ScriptCat](https://scriptcat.org/)
+  - [Userscripts（Safari）](https://github.com/quoid/userscripts)
+  - [Greasemonkey（Firefox）](https://addons.mozilla.org/firefox/addon/greasemonkey/)
+- 不兼容：
+  - Stay
 - 安装地址： [GitHub](https://github.com/utags/userscripts/raw/main/utags-shortcuts/utags-shortcuts.user.js) · [Greasy Fork](https://greasyfork.org/zh-CN/scripts/558485-utags-shortcuts) · [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/4910)
 
 ## 使用指南

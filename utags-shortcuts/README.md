@@ -34,7 +34,14 @@
 
 ## Installation
 
-- Requires a user script manager: [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), or [ScriptCat](https://scriptcat.org/)
+- Requires a user script manager:
+  - [Tampermonkey](https://www.tampermonkey.net/)
+  - [Violentmonkey](https://violentmonkey.github.io/)
+  - [ScriptCat](https://scriptcat.org/)
+  - [Userscripts (Safari)](https://github.com/quoid/userscripts)
+  - [Greasemonkey (Firefox)](https://addons.mozilla.org/firefox/addon/greasemonkey/)
+- Incompatible:
+  - Stay
 - Install from: [GitHub](https://github.com/utags/userscripts/raw/main/utags-shortcuts/utags-shortcuts.user.js) · [Greasy Fork](https://greasyfork.org/scripts/558485-utags-shortcuts) · [ScriptCat](https://scriptcat.org/script-show-page/4910)
 
 ## Usage
