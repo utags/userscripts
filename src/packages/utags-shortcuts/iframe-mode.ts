@@ -271,12 +271,21 @@ export function updateIframeLayout(sidebarVisible: boolean) {
   iframe.style.width = sidebarVisible ? 'calc(100% - 360px)' : '100%'
 }
 
+function redirectToTop(url: string): boolean {
+  try {
+    globalThis.top!.location.href = url
+    return true
+  } catch {}
+
+  return false
+}
+
 export function updateIframeUrl(url: string) {
   const iframe = document.querySelector<HTMLIFrameElement>(
     'iframe[name="utags-shortcuts-iframe"]'
   )
   if (isIframeModeDisabledUrl(url)) {
-    globalThis.top!.location.href = url
+    redirectToTop(url)
     return true
   }
 
@@ -292,7 +301,11 @@ export function updateIframeUrl(url: string) {
 
 function syncState(url: string, title?: string) {
   if (location.href !== url) {
-    history.replaceState(null, '', url)
+    try {
+      history.replaceState(null, '', url)
+    } catch {
+      location.href = url
+    }
   }
 
   if (title && document.title !== title) {
@@ -312,6 +325,7 @@ export function initIframeChild() {
   // Check if we are inside the managed iframe
   if ((globalThis as any).name !== 'utags-shortcuts-iframe') return
 
+  let initialOrigin = 'http://unkownorigin.unknown'
   // Capture initial state before detection logic modifies it
   const initialLoadUrl = sessionStorage.getItem(LAST_LOAD_URL_KEY)
 
@@ -328,16 +342,39 @@ export function initIframeChild() {
   const notify = () => {
     // Verify support on navigation (SPA)
     verifyIframeSupport()
+    const url = location.href
+
+    // Check if we are same-origin and iframe mode is disabled
+    if (
+      isSameOrigin(url, initialOrigin) &&
+      isIframeModeDisabledUrl(url) &&
+      !redirectToTop(url)
+    )
+      return
 
     globalThis.parent.postMessage(
       {
         type: 'USHORTCUTS_URL_CHANGE',
-        url: location.href,
+        url,
         title: document.title,
       },
       '*'
     )
   }
+
+  try {
+    if (globalThis.top!.location.origin !== location.origin) {
+      // Cross-origin redirect: redirect top frame
+      notify()
+      return
+    }
+  } catch {
+    // Cross-origin redirect: redirect top frame
+    notify()
+    return
+  }
+
+  initialOrigin = location.origin
 
   // Monitor title changes
   try {
@@ -415,7 +452,7 @@ export function initIframeChild() {
           // } else
           if (isIframeModeDisabledUrl(href)) {
             e.preventDefault()
-            globalThis.top!.location.href = href
+            redirectToTop(href)
           } else {
             globalThis.parent.postMessage(
               { type: 'USHORTCUTS_LOADING_START' },
@@ -428,13 +465,35 @@ export function initIframeChild() {
         if (!shouldOpenInCurrentTab(e, target)) return
 
         e.preventDefault()
-        globalThis.top!.location.href = href
+        redirectToTop(href)
       }
     },
     false
   ) // Use Bubble phase. Checking defaultPrevented is unreliable as SPAs often call it. Bubble phase allows ignoring events that stopped propagation.
 
-  // 3. Forward keydown events
+  // 3. Intercept navigation API (if supported) to handle JS-initiated location changes
+  if ((globalThis as any).navigation) {
+    ;(globalThis as any).navigation.addEventListener('navigate', (e: any) => {
+      // Only handle navigations that aren't downloads/hash changes
+      if (e.hashChange || e.downloadRequest) return
+
+      const url = e.destination.url
+      if (!url) return
+
+      // Check if it's same origin
+      if (!isSameOrigin(url)) {
+        // External navigation: prevent default handling in iframe and open in top frame
+        e.preventDefault()
+        redirectToTop(url)
+      } else if (isIframeModeDisabledUrl(url)) {
+        // Disabled URL: prevent default handling in iframe and open in top frame
+        e.preventDefault()
+        redirectToTop(url)
+      }
+    })
+  }
+
+  // 4. Forward keydown events
   document.addEventListener('keydown', (e) => {
     if (e.defaultPrevented) return
     if (isEditableTarget((e as any).target || undefined)) return
@@ -454,7 +513,7 @@ export function initIframeChild() {
       '*'
     )
   })
-  // 4. Handle messages from parent
+  // 5. Handle messages from parent
   globalThis.addEventListener('message', (e) => {
     if (e.source !== globalThis.parent) return
     const data = e.data

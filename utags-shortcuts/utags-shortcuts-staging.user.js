@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.4.1
+// @version              0.4.2
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -5369,12 +5369,19 @@
     if (!iframe) return
     iframe.style.width = sidebarVisible ? 'calc(100% - 360px)' : '100%'
   }
+  function redirectToTop(url) {
+    try {
+      globalThis.top.location.href = url
+      return true
+    } catch (e) {}
+    return false
+  }
   function updateIframeUrl(url) {
     const iframe = document.querySelector(
       'iframe[name="utags-shortcuts-iframe"]'
     )
     if (isIframeModeDisabledUrl(url)) {
-      globalThis.top.location.href = url
+      redirectToTop(url)
       return true
     }
     if (iframe && iframe.contentWindow) {
@@ -5390,7 +5397,11 @@
   }
   function syncState(url, title) {
     if (location.href !== url) {
-      history.replaceState(null, '', url)
+      try {
+        history.replaceState(null, '', url)
+      } catch (e) {
+        location.href = url
+      }
     }
     if (title && document.title !== title) {
       document.title = title
@@ -5405,21 +5416,39 @@
   }
   function initIframeChild() {
     if (globalThis.name !== 'utags-shortcuts-iframe') return
+    let initialOrigin = 'http://unkownorigin.unknown'
     const initialLoadUrl = sessionStorage.getItem(LAST_LOAD_URL_KEY)
     if (!detectInfiniteReload()) return
     globalThis.parent.postMessage({ type: 'USHORTCUTS_IFRAME_READY' }, '*')
     verifyIframeSupport(initialLoadUrl != null ? initialLoadUrl : void 0)
     const notify = () => {
       verifyIframeSupport()
+      const url = location.href
+      if (
+        isSameOrigin(url, initialOrigin) &&
+        isIframeModeDisabledUrl(url) &&
+        !redirectToTop(url)
+      )
+        return
       globalThis.parent.postMessage(
         {
           type: 'USHORTCUTS_URL_CHANGE',
-          url: location.href,
+          url,
           title: document.title,
         },
         '*'
       )
     }
+    try {
+      if (globalThis.top.location.origin !== location.origin) {
+        notify()
+        return
+      }
+    } catch (e) {
+      notify()
+      return
+    }
+    initialOrigin = location.origin
     try {
       const titleObserver = new MutationObserver(() => {
         notify()
@@ -5475,7 +5504,7 @@
           if (shouldOpenInCurrentTab(e, target)) {
             if (isIframeModeDisabledUrl(href)) {
               e.preventDefault()
-              globalThis.top.location.href = href
+              redirectToTop(href)
             } else {
               globalThis.parent.postMessage(
                 { type: 'USHORTCUTS_LOADING_START' },
@@ -5486,11 +5515,25 @@
         } else {
           if (!shouldOpenInCurrentTab(e, target)) return
           e.preventDefault()
-          globalThis.top.location.href = href
+          redirectToTop(href)
         }
       },
       false
     )
+    if (globalThis.navigation) {
+      globalThis.navigation.addEventListener('navigate', (e) => {
+        if (e.hashChange || e.downloadRequest) return
+        const url = e.destination.url
+        if (!url) return
+        if (!isSameOrigin(url)) {
+          e.preventDefault()
+          redirectToTop(url)
+        } else if (isIframeModeDisabledUrl(url)) {
+          e.preventDefault()
+          redirectToTop(url)
+        }
+      })
+    }
     document.addEventListener('keydown', (e) => {
       if (e.defaultPrevented) return
       if (isEditableTarget(e.target || void 0)) return

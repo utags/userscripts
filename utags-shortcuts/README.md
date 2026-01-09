@@ -109,6 +109,7 @@ You can use the following variables in the URL field. They will be replaced with
 - **Export Filter**: Automatically excludes items with `[Hidden]` in the name during export.
 - **URL Processing**: Automatically converts absolute URLs to relative paths when importing if they match the current domain.
 - **UI Improvements**: Optimized toast notifications and button layout in the Discourse sidebar.
+- **Iframe Mode Improvements**: Enhanced cross-origin navigation handling to ensure external links open in the top frame, and improved security by validating origin before syncing URL state.
 
 ### v0.3.x
 
