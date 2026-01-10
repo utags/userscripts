@@ -111,6 +111,7 @@ You can use the following variables in the URL field. They will be replaced with
 
 - **Enhanced Open Mode**: Added "Follow Group Settings" for links and "Follow Site Settings" for groups, allowing flexible inheritance of open behavior.
 - **Smart Defaults**: Automatically selects the inheritance option when the open mode is not explicitly set.
+- **UX Improvement**: Automatically scrolls the sidebar to the newly created group.
 
 ### v0.4.x
 

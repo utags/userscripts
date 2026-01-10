@@ -168,6 +168,12 @@ export function createGroupManagerPanel(
       activeTab = 'settings'
       helpers.saveConfig(cfg)
       rebuildSidebar()
+
+      const activeEl = sidebarList.querySelector('.sidebar-item.active')
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+
       rebuildContent()
       helpers.rerender(root, cfg)
     })
