@@ -38,20 +38,41 @@ export function createSegmentedRadios<T extends string>(
 }
 
 export function createOpenModeRadios(
-  initial: OpenMode,
-  onChange: (m: OpenMode) => void,
-  opts?: { labels?: Record<OpenMode, string> }
+  // eslint-disable-next-line @typescript-eslint/no-restricted-types
+  initial: OpenMode | undefined | null | string,
+  onChange: (m: OpenMode | undefined) => void,
+  opts?: { labels?: Record<OpenMode, string>; inheritLabel?: string }
 ) {
   const labels = opts?.labels ?? {
     'same-tab': '当前页',
     'new-tab': '新标签页',
   }
+  const hasInherit = Boolean(opts?.inheritLabel)
+  const values = hasInherit
+    ? (['inherit', 'same-tab', 'new-tab'] as const)
+    : (['same-tab', 'new-tab'] as const)
+
+  const current =
+    initial === 'same-tab' || initial === 'new-tab'
+      ? initial
+      : hasInherit
+        ? 'inherit'
+        : 'same-tab'
+
+  const labelMap: Record<string, string> = { ...labels }
+  if (hasInherit && opts?.inheritLabel) {
+    labelMap.inherit = opts.inheritLabel
+  }
+
   return createSegmentedRadios(
-    initial,
-    ['same-tab', 'new-tab'] as const,
-    onChange,
+    current,
+    values,
+    (v) => {
+      if (v === 'inherit') onChange(undefined)
+      else onChange(v as OpenMode)
+    },
     {
-      labels,
+      labels: labelMap,
       namePrefix: 'ushortcuts-open-',
     }
   )

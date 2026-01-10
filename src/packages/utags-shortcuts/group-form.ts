@@ -207,11 +207,12 @@ export function renderGroupForm(
   const openLabel = document.createElement('label')
   openLabel.textContent = '默认打开方式'
   const openRadios = createOpenModeRadios(
-    data.defaultOpen || 'same-tab',
+    data.defaultOpen,
     (m) => {
       data.defaultOpen = m
       notifyChange()
-    }
+    },
+    { inheritLabel: '跟随站点设置' }
   )
   openRow.append(openLabel)
   openRow.append(openRadios)

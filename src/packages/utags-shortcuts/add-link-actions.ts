@@ -25,7 +25,7 @@ export function addCurrentPageLinkToGroup(
     rerender: (root: ShadowRoot, cfg: any) => void
   },
   groupId: string,
-  openMode: OpenMode
+  openMode: OpenMode | undefined
 ) {
   const grp = (cfg.groups || []).find((g: any) => g.id === groupId)
   if (!grp) return
@@ -70,7 +70,7 @@ export function pickLinkFromPageAndAdd(
     rerender: (root: ShadowRoot, cfg: any) => void
   },
   groupId: string,
-  openMode: OpenMode,
+  openMode: OpenMode | undefined,
   opts?: { beforeStart?: () => void; afterFinish?: () => void }
 ) {
   const grp = (cfg.groups || []).find((g: any) => g.id === groupId)

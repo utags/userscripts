@@ -231,7 +231,7 @@ function exportToJson(form: HTMLFormElement) {
     name: sectionName,
     icon: `url:${getFaviconUrl(globalThis.location.origin)}`,
     match: [`*://${hostname}/*`],
-    defaultOpen: 'same-tab',
+    defaultOpen: undefined,
     items,
     itemsPerRow: 1,
   }
@@ -260,7 +260,7 @@ function exportToJson(form: HTMLFormElement) {
   showToast(`已导出 ${items.length} 项`, form)
 }
 
-function getOpenInType(url: string): OpenMode {
+function getOpenInType(url: string): OpenMode | undefined {
   // If not same origin, always new-tab
   if (!isSameOrigin(url)) {
     return 'new-tab'
@@ -275,7 +275,7 @@ function getOpenInType(url: string): OpenMode {
     }
   } catch {}
 
-  return 'same-tab'
+  return undefined
 }
 
 /**

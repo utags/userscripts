@@ -656,7 +656,7 @@ export function openSettingsPanel(store: Store): void {
                   name: '默认组',
                   icon: 'lucide:folder',
                   match: ['*'],
-                  defaultOpen: 'same-tab',
+                  defaultOpen: undefined,
                   items: [
                     {
                       id: uid(),
@@ -664,7 +664,7 @@ export function openSettingsPanel(store: Store): void {
                       icon: 'lucide:home',
                       type: 'url',
                       data: '/',
-                      openIn: 'same-tab',
+                      openIn: undefined,
                       hidden: false,
                     },
                   ],
@@ -675,8 +675,6 @@ export function openSettingsPanel(store: Store): void {
                 raw.groups = [g]
               }
 
-              const sitePref = await store.getAll()
-
               openEditorModal(root, raw, {
                 async saveConfig(cfg) {
                   try {
@@ -686,7 +684,6 @@ export function openSettingsPanel(store: Store): void {
                 rerender() {
                   void 0
                 },
-                sitePref,
                 updateThemeUI() {
                   void 0
                 },

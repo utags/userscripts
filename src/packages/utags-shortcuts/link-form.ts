@@ -10,7 +10,7 @@ export type LinkFormData = {
   icon?: string
   type: 'url' | 'js'
   data: string
-  openIn: OpenMode
+  openIn?: OpenMode
   hidden?: boolean
 }
 
@@ -207,10 +207,14 @@ export function renderLinkForm(
   openRow.className = 'row'
   const openLabel = document.createElement('label')
   openLabel.textContent = '打开方式'
-  const openRadios = createOpenModeRadios(data.openIn, (m) => {
-    data.openIn = m
-    notifyChange()
-  })
+  const openRadios = createOpenModeRadios(
+    data.openIn,
+    (m) => {
+      data.openIn = m
+      notifyChange()
+    },
+    { inheritLabel: '跟随分组设置' }
+  )
   openRow.append(openLabel)
   openRow.append(openRadios)
   grid.append(openRow)

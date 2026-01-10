@@ -59,7 +59,6 @@ const EDGE_DEFAULT_COLOR_LIGHT = '#1A73E8'
 const EDGE_DEFAULT_COLOR_DARK = '#8AB4F8'
 const EDGE_DEFAULT_HIDDEN = false
 const POSITION_DEFAULT: Position = 'right-top'
-const OPEN_DEFAULT: OpenMode = 'same-tab'
 const THEME_DEFAULT: 'light' | 'dark' | 'system' = 'system'
 const PINNED_DEFAULT = false
 const ENABLED_DEFAULT = true
@@ -539,9 +538,7 @@ function renderShortcutsItem(
   g: ShortcutsGroup,
   it: ShortcutsItem,
   section: Element,
-  isEditing: boolean,
-  siteDefaultOpenConst: OpenMode,
-  defOpen: OpenMode
+  isEditing: boolean
 ) {
   const wrap = document.createElement('div')
   wrap.className = 'item-wrap'
@@ -729,7 +726,6 @@ function renderShortcutsItem(
     const editItemBtn = document.createElement('button')
     editItemBtn.className = 'icon-btn'
     setIcon(editItemBtn, 'lucide:edit-3', '编辑该导航')
-    const defaultOpenForItems = g.defaultOpen ?? siteDefaultOpenConst
 
     editItemBtn.addEventListener('click', (e) => {
       e.stopPropagation()
@@ -740,7 +736,6 @@ function renderShortcutsItem(
         rerender(r, c) {
           rerender(r, c)
         },
-        defaultOpen: defaultOpenForItems,
         defaultGroupId: g.id,
         existingItem: it,
       })
@@ -828,8 +823,7 @@ async function handleDropOnGroup(
     name: name || 'New Link',
     type: 'url',
     data: url,
-    openIn: (g.defaultOpen ??
-      (settings.defaultOpen || OPEN_DEFAULT)) as OpenMode,
+    openIn: undefined,
     icon: 'favicon',
   }
 
@@ -956,7 +950,6 @@ function renderGroupSection(
   })
   const actions = document.createElement('div')
   actions.className = 'header-actions'
-  const siteDefaultOpenConst = settings.defaultOpen as OpenMode
   const editMenuRightSide =
     isRightSide(settings.position) || settings.position.endsWith('-right')
   const groupMenuRightSide = editMenuRightSide
@@ -1015,8 +1008,6 @@ function renderGroupSection(
                 rerender(r, c) {
                   rerender(r, c)
                 },
-                defaultOpen: (g.defaultOpen ??
-                  (settings.defaultOpen || OPEN_DEFAULT)) as OpenMode,
                 defaultGroupId: g.id,
               })
             },
@@ -1037,8 +1028,7 @@ function renderGroupSection(
                   },
                 },
                 g.id,
-                (g.defaultOpen ??
-                  (settings.defaultOpen || OPEN_DEFAULT)) as OpenMode
+                undefined
               )
             },
           },
@@ -1058,8 +1048,7 @@ function renderGroupSection(
                   },
                 },
                 g.id,
-                (g.defaultOpen ??
-                  (settings.defaultOpen || OPEN_DEFAULT)) as OpenMode
+                undefined
               )
             },
           },
@@ -1107,7 +1096,7 @@ function renderGroupSection(
                 rerender(r, c) {
                   rerender(r, c)
                 },
-                defaultOpen: g.defaultOpen || siteDefaultOpenConst,
+                defaultOpen: g.defaultOpen,
                 defaultMatch: g.match,
                 existingGroup: g,
               })
@@ -1191,20 +1180,10 @@ function renderGroupSection(
 
   items.style.display = g.collapsed ? 'none' : ''
   let visibleCount = 0
-  const defOpen = (settings.defaultOpen || OPEN_DEFAULT) as OpenMode
   for (const it of g.items) {
     if (it.hidden && !showHiddenItems && !isEditing) continue
     visibleCount++
-    const wrap = renderShortcutsItem(
-      root,
-      cfg,
-      g,
-      it,
-      section,
-      isEditing,
-      siteDefaultOpenConst,
-      defOpen
-    )
+    const wrap = renderShortcutsItem(root, cfg, g, it, section, isEditing)
     items.append(wrap)
   }
 
@@ -1374,9 +1353,6 @@ function renderPanelHeader(
         rerender(r, c) {
           rerender(r, c)
         },
-        sitePref: {
-          defaultOpen: settings.defaultOpen || OPEN_DEFAULT,
-        },
         updateThemeUI,
         edgeDefaults: {
           width: EDGE_DEFAULT_WIDTH,
@@ -1498,7 +1474,6 @@ function openEditor(root: ShadowRoot, cfg: ShortcutsConfig) {
     rerender(r, c) {
       rerender(r, c)
     },
-    sitePref: settings,
     updateThemeUI,
     edgeDefaults: {
       width: EDGE_DEFAULT_WIDTH,
@@ -1535,7 +1510,7 @@ function openQuickAddMenu(
             rerender(r, c) {
               rerender(r, c)
             },
-            defaultOpen: settings.defaultOpen as OpenMode,
+            defaultOpen: undefined,
             defaultMatch: ['*://' + (location.hostname || '') + '/*'],
           })
         },
@@ -1552,7 +1527,6 @@ function openQuickAddMenu(
             rerender(r, c) {
               rerender(r, c)
             },
-            defaultOpen: (settings.defaultOpen || OPEN_DEFAULT) as OpenMode,
             defaultGroupId: (matched[0] || cfg.groups[0])?.id,
           })
         },

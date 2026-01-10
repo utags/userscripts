@@ -6,8 +6,6 @@ import { type OpenMode } from './types'
 
 export const CONFIG_KEY = 'ushortcuts'
 
-const OPEN_DEFAULT: OpenMode = 'same-tab'
-
 export type ShortcutsItem = {
   id: string
   name: string
@@ -51,7 +49,10 @@ export class ShortcutsStore {
           name: String(gg?.name || '默认组'),
           icon: String(gg?.icon || 'lucide:folder'),
           match: Array.isArray(gg?.match) ? gg.match : ['*'],
-          defaultOpen: gg?.defaultOpen === 'new-tab' ? 'new-tab' : 'same-tab',
+          defaultOpen:
+            gg?.defaultOpen === 'new-tab' || gg?.defaultOpen === 'same-tab'
+              ? gg.defaultOpen
+              : undefined,
           items: Array.isArray(gg?.items) ? gg.items : [],
           collapsed: Boolean(gg?.collapsed),
           itemsPerRow: Number.isFinite(gg?.itemsPerRow) ? gg.itemsPerRow : 1,
@@ -86,7 +87,7 @@ export class ShortcutsStore {
               icon: 'lucide:home',
               type: 'url',
               data: '/',
-              openIn: OPEN_DEFAULT,
+              openIn: undefined,
               hidden: false,
             },
           ]

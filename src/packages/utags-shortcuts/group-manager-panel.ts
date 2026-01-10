@@ -12,7 +12,6 @@ export function createGroupManagerPanel(
   helpers: {
     saveConfig: (cfg: any) => void
     rerender: (root: ShadowRoot, cfg: any) => void
-    sitePref: any
   }
 ) {
   const wrap = document.createElement('div')
@@ -162,7 +161,7 @@ export function createGroupManagerPanel(
         icon: 'lucide:folder',
         match: ['*://' + (location.hostname || '') + '/*'],
         items: [],
-        defaultOpen: helpers.sitePref.defaultOpen,
+        defaultOpen: undefined,
       }
       cfg.groups.push(ng)
       activeGroup = ng
@@ -203,7 +202,7 @@ export function createGroupManagerPanel(
           icon: 'lucide:folder',
           match: ['*://' + (location.hostname || '') + '/*'],
           items: [],
-          defaultOpen: helpers.sitePref.defaultOpen,
+          defaultOpen: undefined,
         }
         kept.push(ng)
       }
@@ -524,8 +523,7 @@ export function createGroupManagerPanel(
         name: '新项',
         type: 'url',
         data: '/',
-        openIn: (activeGroup.defaultOpen ??
-          helpers.sitePref.defaultOpen) as OpenMode,
+        openIn: undefined,
       }
       isLinkDirty = false
       editingLinkOriginalId = undefined

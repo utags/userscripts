@@ -8,7 +8,6 @@ export function openEditorModal(
     [key: string]: any
     saveConfig: (cfg: any) => void
     rerender: (root: ShadowRoot, cfg: any) => void
-    sitePref: any
   }
 ) {
   const { modal, body, actions, close } = createModalFrame({

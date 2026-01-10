@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.4.4
+// @version              0.5.0
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -786,10 +786,32 @@
             'same-tab': '\u5F53\u524D\u9875',
             'new-tab': '\u65B0\u6807\u7B7E\u9875',
           }
-    return createSegmentedRadios(initial, ['same-tab', 'new-tab'], onChange, {
-      labels,
-      namePrefix: 'ushortcuts-open-',
-    })
+    const hasInherit = Boolean(opts == null ? void 0 : opts.inheritLabel)
+    const values = hasInherit
+      ? ['inherit', 'same-tab', 'new-tab']
+      : ['same-tab', 'new-tab']
+    const current =
+      initial === 'same-tab' || initial === 'new-tab'
+        ? initial
+        : hasInherit
+          ? 'inherit'
+          : 'same-tab'
+    const labelMap = __spreadValues({}, labels)
+    if (hasInherit && (opts == null ? void 0 : opts.inheritLabel)) {
+      labelMap.inherit = opts.inheritLabel
+    }
+    return createSegmentedRadios(
+      current,
+      values,
+      (v) => {
+        if (v === 'inherit') onChange(void 0)
+        else onChange(v)
+      },
+      {
+        labels: labelMap,
+        namePrefix: 'ushortcuts-open-',
+      }
+    )
   }
   function detectIconKind(v, kinds) {
     const s = String(v || '').trim()
@@ -1161,11 +1183,12 @@
     const openLabel = document.createElement('label')
     openLabel.textContent = '\u9ED8\u8BA4\u6253\u5F00\u65B9\u5F0F'
     const openRadios = createOpenModeRadios(
-      data.defaultOpen || 'same-tab',
+      data.defaultOpen,
       (m) => {
         data.defaultOpen = m
         notifyChange()
-      }
+      },
+      { inheritLabel: '\u8DDF\u968F\u7AD9\u70B9\u8BBE\u7F6E' }
     )
     openRow.append(openLabel)
     openRow.append(openRadios)
@@ -1433,9 +1456,7 @@
       match: ((_d = helpers.existingGroup) == null ? void 0 : _d.match) ||
         helpers.defaultMatch || ['*://' + (location.hostname || '') + '/*'],
       defaultOpen:
-        ((_e = helpers.existingGroup) == null ? void 0 : _e.defaultOpen) ||
-        helpers.defaultOpen ||
-        'same-tab',
+        (_e = helpers.existingGroup) == null ? void 0 : _e.defaultOpen,
       itemsPerRow:
         ((_f = helpers.existingGroup) == null ? void 0 : _f.itemsPerRow) || 1,
       hidden: (_g = helpers.existingGroup) == null ? void 0 : _g.hidden,
@@ -1856,10 +1877,14 @@
     openRow.className = 'row'
     const openLabel = document.createElement('label')
     openLabel.textContent = '\u6253\u5F00\u65B9\u5F0F'
-    const openRadios = createOpenModeRadios(data.openIn, (m) => {
-      data.openIn = m
-      notifyChange()
-    })
+    const openRadios = createOpenModeRadios(
+      data.openIn,
+      (m) => {
+        data.openIn = m
+        notifyChange()
+      },
+      { inheritLabel: '\u8DDF\u968F\u5206\u7EC4\u8BBE\u7F6E' }
+    )
     openRow.append(openLabel)
     openRow.append(openRadios)
     grid.append(openRow)
@@ -1980,8 +2005,7 @@
           data:
             helpers.existingItem.data ||
             (helpers.existingItem.type === 'js' ? '' : '/'),
-          openIn:
-            helpers.existingItem.openIn || helpers.defaultOpen || 'same-tab',
+          openIn: helpers.existingItem.openIn,
           hidden: helpers.existingItem.hidden,
         }
       : {
@@ -1990,7 +2014,7 @@
           name: '\u65B0\u9879',
           type: 'url',
           data: '/',
-          openIn: helpers.defaultOpen || 'same-tab',
+          openIn: void 0,
         }
     const formContainer = document.createElement('div')
     renderLinkForm(formContainer, formData, {
@@ -2260,7 +2284,6 @@
     return merged
   }
   var CONFIG_KEY = 'ushortcuts'
-  var OPEN_DEFAULT = 'same-tab'
   var ShortcutsStore = class {
     constructor() {
       this.lastSaved = ''
@@ -2280,9 +2303,10 @@
               ? gg.match
               : ['*'],
             defaultOpen:
-              (gg == null ? void 0 : gg.defaultOpen) === 'new-tab'
-                ? 'new-tab'
-                : 'same-tab',
+              (gg == null ? void 0 : gg.defaultOpen) === 'new-tab' ||
+              (gg == null ? void 0 : gg.defaultOpen) === 'same-tab'
+                ? gg.defaultOpen
+                : void 0,
             items: Array.isArray(gg == null ? void 0 : gg.items)
               ? gg.items
               : [],
@@ -2324,7 +2348,7 @@
                 icon: 'lucide:home',
                 type: 'url',
                 data: '/',
-                openIn: OPEN_DEFAULT,
+                openIn: void 0,
                 hidden: false,
               },
             ]
@@ -2567,7 +2591,7 @@
       name: sectionName,
       icon: 'url:'.concat(getFaviconUrl(globalThis.location.origin)),
       match: ['*://'.concat(hostname, '/*')],
-      defaultOpen: 'same-tab',
+      defaultOpen: void 0,
       items,
       itemsPerRow: 1,
     }
@@ -2605,7 +2629,7 @@
         return 'new-tab'
       }
     } catch (e) {}
-    return 'same-tab'
+    return void 0
   }
   async function showImportDialog(form) {
     const config = await shortcutsStore.load()
@@ -3068,7 +3092,7 @@
           icon: 'lucide:folder',
           match: ['*://' + (location.hostname || '') + '/*'],
           items: [],
-          defaultOpen: helpers.sitePref.defaultOpen,
+          defaultOpen: void 0,
         }
         cfg.groups.push(ng)
         activeGroup = ng
@@ -3110,7 +3134,7 @@
             icon: 'lucide:folder',
             match: ['*://' + (location.hostname || '') + '/*'],
             items: [],
-            defaultOpen: helpers.sitePref.defaultOpen,
+            defaultOpen: void 0,
           }
           kept.push(ng)
         }
@@ -3373,17 +3397,13 @@
       addBtn.className = 'btn btn-primary w-full justify-center'
       addBtn.textContent = '+ \u6DFB\u52A0\u5FEB\u6377\u5BFC\u822A'
       addBtn.addEventListener('click', () => {
-        var _a
         activeLinkItem = {
           id: uid(),
           groupId: activeGroup.id,
           name: '\u65B0\u9879',
           type: 'url',
           data: '/',
-          openIn:
-            (_a = activeGroup.defaultOpen) != null
-              ? _a
-              : helpers.sitePref.defaultOpen,
+          openIn: void 0,
         }
         isLinkDirty = false
         editingLinkOriginalId = void 0
@@ -4981,7 +5001,7 @@
                     name: '\u9ED8\u8BA4\u7EC4',
                     icon: 'lucide:folder',
                     match: ['*'],
-                    defaultOpen: 'same-tab',
+                    defaultOpen: void 0,
                     items: [
                       {
                         id: uid(),
@@ -4989,7 +5009,7 @@
                         icon: 'lucide:home',
                         type: 'url',
                         data: '/',
-                        openIn: 'same-tab',
+                        openIn: void 0,
                         hidden: false,
                       },
                     ],
@@ -4999,7 +5019,6 @@
                   }
                   raw.groups = [g]
                 }
-                const sitePref = await store2.getAll()
                 openEditorModal(root, raw, {
                   async saveConfig(cfg) {
                     try {
@@ -5007,7 +5026,6 @@
                     } catch (e) {}
                   },
                   rerender() {},
-                  sitePref,
                   updateThemeUI() {},
                   edgeDefaults: {
                     width: 3,
@@ -5636,7 +5654,6 @@
   var EDGE_DEFAULT_OPACITY = 0.6
   var EDGE_DEFAULT_COLOR_LIGHT = '#1A73E8'
   var EDGE_DEFAULT_COLOR_DARK = '#8AB4F8'
-  var OPEN_DEFAULT2 = 'same-tab'
   var THEME_DEFAULT = 'system'
   var HOTKEY_DEFAULT = 'Alt+Shift+K'
   var LAYOUT_DEFAULT = 'floating'
@@ -6022,17 +6039,7 @@
       check(e)
     })
   }
-  function renderShortcutsItem(
-    root,
-    cfg,
-    g,
-    it,
-    section,
-    isEditing,
-    siteDefaultOpenConst,
-    defOpen
-  ) {
-    var _a
+  function renderShortcutsItem(root, cfg, g, it, section, isEditing) {
     const wrap = document.createElement('div')
     wrap.className = 'item-wrap'
     wrap.dataset.itemId = it.id
@@ -6102,11 +6109,11 @@
     a.className = 'item'
     a.draggable = true
     a.addEventListener('dragstart', (e) => {
-      var _a2, _b
+      var _a, _b
       draggingItem = { groupId: g.id, itemId: it.id }
-      ;(_a2 = e.dataTransfer) == null
+      ;(_a = e.dataTransfer) == null
         ? void 0
-        : _a2.setData('text/plain', it.data)
+        : _a.setData('text/plain', it.data)
       ;(_b = e.dataTransfer) == null
         ? void 0
         : _b.setData('text/uri-list', it.data)
@@ -6164,15 +6171,15 @@
       sel.type = 'checkbox'
       sel.checked = set.has(it.id)
       const updateDeleteBtnState = () => {
-        var _a2
+        var _a
         const btn = section.querySelector(
           '.header-actions .btn.mini:last-child'
         )
         if (btn instanceof HTMLButtonElement) {
           const count =
-            ((_a2 = selectedItemsByGroup.get(g.id)) == null
+            ((_a = selectedItemsByGroup.get(g.id)) == null
               ? void 0
-              : _a2.size) || 0
+              : _a.size) || 0
           btn.disabled = !(count > 0)
         }
       }
@@ -6197,8 +6204,6 @@
       const editItemBtn = document.createElement('button')
       editItemBtn.className = 'icon-btn'
       setIcon(editItemBtn, 'lucide:edit-3', '\u7F16\u8F91\u8BE5\u5BFC\u822A')
-      const defaultOpenForItems =
-        (_a = g.defaultOpen) != null ? _a : siteDefaultOpenConst
       editItemBtn.addEventListener('click', (e) => {
         e.stopPropagation()
         openAddLinkModal(root, cfg, {
@@ -6208,7 +6213,6 @@
           rerender(r, c2) {
             rerender(r, c2)
           },
-          defaultOpen: defaultOpenForItems,
           defaultGroupId: g.id,
           existingItem: it,
         })
@@ -6232,7 +6236,7 @@
     return wrap
   }
   async function handleDropOnGroup(e, g, cfg, root, section) {
-    var _a, _b, _c, _d
+    var _a, _b, _c
     e.preventDefault()
     section.classList.remove('drag-over')
     let url =
@@ -6281,10 +6285,7 @@
       name: name || 'New Link',
       type: 'url',
       data: url,
-      openIn:
-        (_d = g.defaultOpen) != null
-          ? _d
-          : settings.defaultOpen || OPEN_DEFAULT2,
+      openIn: void 0,
       icon: 'favicon',
     }
     g.items.push(newItem)
@@ -6396,7 +6397,6 @@
     })
     const actions = document.createElement('div')
     actions.className = 'header-actions'
-    const siteDefaultOpenConst = settings.defaultOpen
     const editMenuRightSide =
       isRightSide(settings.position) || settings.position.endsWith('-right')
     const groupMenuRightSide = editMenuRightSide
@@ -6452,7 +6452,6 @@
               icon: 'lucide:keyboard',
               label: '\u624B\u52A8\u8F93\u5165',
               onClick() {
-                var _a2
                 openAddLinkModal(root, cfg, {
                   saveConfig(c2) {
                     void saveConfig(c2)
@@ -6460,10 +6459,6 @@
                   rerender(r, c2) {
                     rerender(r, c2)
                   },
-                  defaultOpen:
-                    (_a2 = g.defaultOpen) != null
-                      ? _a2
-                      : settings.defaultOpen || OPEN_DEFAULT2,
                   defaultGroupId: g.id,
                 })
               },
@@ -6472,7 +6467,6 @@
               icon: 'lucide:globe',
               label: '\u6DFB\u52A0\u5F53\u524D\u7F51\u9875',
               onClick() {
-                var _a2
                 addCurrentPageLinkToGroup(
                   root,
                   cfg,
@@ -6485,9 +6479,7 @@
                     },
                   },
                   g.id,
-                  (_a2 = g.defaultOpen) != null
-                    ? _a2
-                    : settings.defaultOpen || OPEN_DEFAULT2
+                  void 0
                 )
               },
             },
@@ -6495,7 +6487,6 @@
               icon: 'lucide:link',
               label: '\u4ECE\u5F53\u524D\u7F51\u9875\u91C7\u96C6\u94FE\u63A5',
               onClick() {
-                var _a2
                 pickLinkFromPageAndAdd(
                   root,
                   cfg,
@@ -6508,9 +6499,7 @@
                     },
                   },
                   g.id,
-                  (_a2 = g.defaultOpen) != null
-                    ? _a2
-                    : settings.defaultOpen || OPEN_DEFAULT2
+                  void 0
                 )
               },
             },
@@ -6556,7 +6545,7 @@
                   rerender(r, c2) {
                     rerender(r, c2)
                   },
-                  defaultOpen: g.defaultOpen || siteDefaultOpenConst,
+                  defaultOpen: g.defaultOpen,
                   defaultMatch: g.match,
                   existingGroup: g,
                 })
@@ -6633,20 +6622,10 @@
     }
     items.style.display = g.collapsed ? 'none' : ''
     let visibleCount = 0
-    const defOpen = settings.defaultOpen || OPEN_DEFAULT2
     for (const it of g.items) {
       if (it.hidden && !showHiddenItems && !isEditing) continue
       visibleCount++
-      const wrap = renderShortcutsItem(
-        root,
-        cfg,
-        g,
-        it,
-        section,
-        isEditing,
-        siteDefaultOpenConst,
-        defOpen
-      )
+      const wrap = renderShortcutsItem(root, cfg, g, it, section, isEditing)
       items.append(wrap)
     }
     if (!isIconOnly) {
@@ -6794,9 +6773,6 @@
           rerender(r, c2) {
             rerender(r, c2)
           },
-          sitePref: {
-            defaultOpen: settings.defaultOpen || OPEN_DEFAULT2,
-          },
           updateThemeUI,
           edgeDefaults: {
             width: EDGE_DEFAULT_WIDTH,
@@ -6915,7 +6891,7 @@
               rerender(r, c2) {
                 rerender(r, c2)
               },
-              defaultOpen: settings.defaultOpen,
+              defaultOpen: void 0,
               defaultMatch: ['*://' + (location.hostname || '') + '/*'],
             })
           },
@@ -6933,7 +6909,6 @@
               rerender(r, c2) {
                 rerender(r, c2)
               },
-              defaultOpen: settings.defaultOpen || OPEN_DEFAULT2,
               defaultGroupId:
                 (_a = matched[0] || cfg.groups[0]) == null ? void 0 : _a.id,
             })

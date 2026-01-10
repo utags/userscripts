@@ -107,6 +107,11 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.5.x
+
+- **Enhanced Open Mode**: Added "Follow Group Settings" for links and "Follow Site Settings" for groups, allowing flexible inheritance of open behavior.
+- **Smart Defaults**: Automatically selects the inheritance option when the open mode is not explicitly set.
+
 ### v0.4.x
 
 - **Drag-and-Drop Sorting**: Enhanced drag-and-drop experience with visual insertion lines for precise reordering within groups.

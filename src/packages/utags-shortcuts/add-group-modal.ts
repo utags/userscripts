@@ -9,7 +9,7 @@ export function openAddGroupModal(
   helpers: {
     saveConfig: (cfg: any) => void
     rerender: (root: ShadowRoot, cfg: any) => void
-    defaultOpen: OpenMode
+    defaultOpen?: OpenMode
     defaultMatch?: string[]
     existingGroup?: any
   }
@@ -27,8 +27,7 @@ export function openAddGroupModal(
     icon: helpers.existingGroup?.icon || 'lucide:folder',
     match: helpers.existingGroup?.match ||
       helpers.defaultMatch || ['*://' + (location.hostname || '') + '/*'],
-    defaultOpen:
-      helpers.existingGroup?.defaultOpen || helpers.defaultOpen || 'same-tab',
+    defaultOpen: helpers.existingGroup?.defaultOpen,
     itemsPerRow: helpers.existingGroup?.itemsPerRow || 1,
     hidden: helpers.existingGroup?.hidden,
     displayStyle: helpers.existingGroup?.displayStyle || 'icon-title',

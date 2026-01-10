@@ -10,7 +10,6 @@ export function openAddLinkModal(
   helpers: {
     saveConfig: (cfg: any) => void
     rerender: (root: ShadowRoot, cfg: any) => void
-    defaultOpen: OpenMode
     defaultGroupId?: string
     existingItem?: any
   }
@@ -40,8 +39,7 @@ export function openAddLinkModal(
         data:
           helpers.existingItem.data ||
           (helpers.existingItem.type === 'js' ? '' : '/'),
-        openIn:
-          helpers.existingItem.openIn || helpers.defaultOpen || 'same-tab',
+        openIn: helpers.existingItem.openIn,
         hidden: helpers.existingItem.hidden,
       }
     : {
@@ -50,7 +48,7 @@ export function openAddLinkModal(
         name: '新项',
         type: 'url',
         data: '/',
-        openIn: helpers.defaultOpen || 'same-tab',
+        openIn: undefined,
       }
 
   const formContainer = document.createElement('div')
