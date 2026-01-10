@@ -3,6 +3,7 @@ import { uid } from '../../utils/uid'
 import { hasDuplicateInGroup } from './add-link-actions'
 import { renderGroupForm, type GroupFormData } from './group-form'
 import { renderLinkForm, type LinkFormData } from './link-form'
+import { type OpenMode } from './types'
 import { resolveIcon, resolveTargetUrl } from './utils'
 
 export function createGroupManagerPanel(
@@ -523,9 +524,8 @@ export function createGroupManagerPanel(
         name: '新项',
         type: 'url',
         data: '/',
-        openIn: (activeGroup.defaultOpen ?? helpers.sitePref.defaultOpen) as
-          | 'same-tab'
-          | 'new-tab',
+        openIn: (activeGroup.defaultOpen ??
+          helpers.sitePref.defaultOpen) as OpenMode,
       }
       isLinkDirty = false
       editingLinkOriginalId = undefined

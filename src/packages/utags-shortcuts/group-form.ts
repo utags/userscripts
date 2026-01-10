@@ -1,5 +1,6 @@
 import { createIconInput } from './icon-input'
 import { createOpenModeRadios, createSegmentedRadios } from './segmented-radios'
+import { type OpenMode } from './types'
 
 export type GroupFormData = {
   id?: string
@@ -7,7 +8,7 @@ export type GroupFormData = {
   displayName?: string
   icon?: string
   match?: string[]
-  defaultOpen?: 'same-tab' | 'new-tab'
+  defaultOpen?: OpenMode
   itemsPerRow?: number
   hidden?: boolean
   displayStyle?: 'icon-title' | 'icon-only' | 'title-only'

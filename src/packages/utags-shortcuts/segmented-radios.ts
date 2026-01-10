@@ -1,4 +1,5 @@
 import { uid } from '../../utils/uid'
+import { type OpenMode } from './types'
 
 export function createSegmentedRadios<T extends string>(
   initial: T,
@@ -37,9 +38,9 @@ export function createSegmentedRadios<T extends string>(
 }
 
 export function createOpenModeRadios(
-  initial: 'same-tab' | 'new-tab',
-  onChange: (m: 'same-tab' | 'new-tab') => void,
-  opts?: { labels?: Record<'same-tab' | 'new-tab', string> }
+  initial: OpenMode,
+  onChange: (m: OpenMode) => void,
+  opts?: { labels?: Record<OpenMode, string> }
 ) {
   const labels = opts?.labels ?? {
     'same-tab': '当前页',

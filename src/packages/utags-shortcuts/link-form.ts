@@ -1,6 +1,7 @@
 import { pickLinkFromPage } from './add-link-actions'
 import { createIconInput } from './icon-input'
 import { createOpenModeRadios, createSegmentedRadios } from './segmented-radios'
+import { type OpenMode } from './types'
 
 export type LinkFormData = {
   id?: string
@@ -9,7 +10,7 @@ export type LinkFormData = {
   icon?: string
   type: 'url' | 'js'
   data: string
-  openIn: 'same-tab' | 'new-tab'
+  openIn: OpenMode
   hidden?: boolean
 }
 

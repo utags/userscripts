@@ -1,5 +1,6 @@
 import { querySelectorAllDeep } from '../../utils/dom'
 import { uid } from '../../utils/uid'
+import { type OpenMode } from './types'
 
 function ensurePickerStylesIn(r: Document | ShadowRoot) {
   const has = (r as any).querySelector?.('#ushortcuts-picker-styles')
@@ -24,7 +25,7 @@ export function addCurrentPageLinkToGroup(
     rerender: (root: ShadowRoot, cfg: any) => void
   },
   groupId: string,
-  openMode: 'same-tab' | 'new-tab'
+  openMode: OpenMode
 ) {
   const grp = (cfg.groups || []).find((g: any) => g.id === groupId)
   if (!grp) return
@@ -69,7 +70,7 @@ export function pickLinkFromPageAndAdd(
     rerender: (root: ShadowRoot, cfg: any) => void
   },
   groupId: string,
-  openMode: 'same-tab' | 'new-tab',
+  openMode: OpenMode,
   opts?: { beforeStart?: () => void; afterFinish?: () => void }
 ) {
   const grp = (cfg.groups || []).find((g: any) => g.id === groupId)

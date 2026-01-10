@@ -708,8 +708,9 @@ export function openSettingsPanel(store: Store): void {
                   modal.querySelectorAll('.segmented .seg-item')
                 )
                 for (const seg of segs) {
-                  const textEl = seg.querySelector('.seg-text')
-                  const inputEl = seg.querySelector('.seg-radio')
+                  const textEl = seg.querySelector<HTMLSpanElement>('.seg-text')
+                  const inputEl =
+                    seg.querySelector<HTMLInputElement>('.seg-radio')
                   if (
                     textEl &&
                     textEl.textContent === '分组' &&

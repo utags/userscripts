@@ -1,6 +1,7 @@
 import { uid } from '../../utils/uid'
 import { renderGroupForm } from './group-form'
 import { createModalFrame } from './modal-base'
+import { type OpenMode } from './types'
 
 export function openAddGroupModal(
   root: ShadowRoot,
@@ -8,7 +9,7 @@ export function openAddGroupModal(
   helpers: {
     saveConfig: (cfg: any) => void
     rerender: (root: ShadowRoot, cfg: any) => void
-    defaultOpen: 'same-tab' | 'new-tab'
+    defaultOpen: OpenMode
     defaultMatch?: string[]
     existingGroup?: any
   }

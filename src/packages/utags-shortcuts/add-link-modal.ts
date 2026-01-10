@@ -2,6 +2,7 @@ import { uid } from '../../utils/uid'
 import { hasDuplicateInGroup } from './add-link-actions'
 import { renderLinkForm, type LinkFormData } from './link-form'
 import { createModalFrame } from './modal-base'
+import { type OpenMode } from './types'
 
 export function openAddLinkModal(
   root: ShadowRoot,
@@ -9,7 +10,7 @@ export function openAddLinkModal(
   helpers: {
     saveConfig: (cfg: any) => void
     rerender: (root: ShadowRoot, cfg: any) => void
-    defaultOpen: 'same-tab' | 'new-tab'
+    defaultOpen: OpenMode
     defaultGroupId?: string
     existingItem?: any
   }

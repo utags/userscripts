@@ -2,10 +2,10 @@ import { xmlHttpRequestWithFallback } from '../../common/gm'
 import { getValue, setValue } from '../../common/gm/storage'
 import { uid } from '../../utils/uid'
 import { importAndSave } from './importer'
+import { type OpenMode } from './types'
 
 export const CONFIG_KEY = 'ushortcuts'
 
-type OpenMode = 'same-tab' | 'new-tab'
 const OPEN_DEFAULT: OpenMode = 'same-tab'
 
 export type ShortcutsItem = {

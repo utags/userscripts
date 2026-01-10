@@ -1,17 +1,8 @@
 import styleText from 'css:./style.css'
 
 import { addStyle, registerMenu, unregisterMenu } from '../../common/gm'
-import {
-  addValueChangeListener,
-  getValue,
-  setValue,
-} from '../../common/gm/storage'
-import {
-  clearChildren,
-  ensureShadowRoot,
-  renderIcon,
-  setIcon,
-} from '../../utils/dom'
+import { addValueChangeListener } from '../../common/gm/storage'
+import { ensureShadowRoot, setIcon } from '../../utils/dom'
 import { isTopFrame } from '../../utils/is-top-frame'
 import { navigateUrl } from '../../utils/navigate'
 import { uid } from '../../utils/uid'
@@ -33,7 +24,6 @@ import {
   updateIframeLayout,
   updateIframeUrl,
 } from './iframe-mode'
-import { createOpenModeRadios } from './segmented-radios'
 import {
   createUshortcutsSettingsStore,
   openSettingsPanel,
@@ -45,9 +35,9 @@ import {
   type ShortcutsGroup,
   type ShortcutsItem,
 } from './store'
+import { type OpenMode } from './types'
 import { isEditableTarget, resolveIcon, resolveTargetUrl } from './utils'
 
-type OpenMode = 'same-tab' | 'new-tab'
 type Position =
   | 'right-top'
   | 'right-center'
@@ -61,7 +51,6 @@ type Position =
   | 'bottom-left'
   | 'bottom-center'
   | 'bottom-right'
-type ItemType = 'url' | 'js'
 
 const EDGE_DEFAULT_WIDTH = 3
 const EDGE_DEFAULT_HEIGHT = 60
@@ -551,8 +540,8 @@ function renderShortcutsItem(
   it: ShortcutsItem,
   section: Element,
   isEditing: boolean,
-  siteDefaultOpenConst: 'same-tab' | 'new-tab',
-  defOpen: 'same-tab' | 'new-tab'
+  siteDefaultOpenConst: OpenMode,
+  defOpen: OpenMode
 ) {
   const wrap = document.createElement('div')
   wrap.className = 'item-wrap'
@@ -740,9 +729,7 @@ function renderShortcutsItem(
     const editItemBtn = document.createElement('button')
     editItemBtn.className = 'icon-btn'
     setIcon(editItemBtn, 'lucide:edit-3', '编辑该导航')
-    const defaultOpenForItems = (g.defaultOpen ?? siteDefaultOpenConst) as
-      | 'same-tab'
-      | 'new-tab'
+    const defaultOpenForItems = g.defaultOpen ?? siteDefaultOpenConst
 
     editItemBtn.addEventListener('click', (e) => {
       e.stopPropagation()
@@ -969,7 +956,7 @@ function renderGroupSection(
   })
   const actions = document.createElement('div')
   actions.className = 'header-actions'
-  const siteDefaultOpenConst = settings.defaultOpen as 'same-tab' | 'new-tab'
+  const siteDefaultOpenConst = settings.defaultOpen as OpenMode
   const editMenuRightSide =
     isRightSide(settings.position) || settings.position.endsWith('-right')
   const groupMenuRightSide = editMenuRightSide
@@ -1029,9 +1016,7 @@ function renderGroupSection(
                   rerender(r, c)
                 },
                 defaultOpen: (g.defaultOpen ??
-                  (settings.defaultOpen || OPEN_DEFAULT)) as
-                  | 'same-tab'
-                  | 'new-tab',
+                  (settings.defaultOpen || OPEN_DEFAULT)) as OpenMode,
                 defaultGroupId: g.id,
               })
             },
@@ -1052,9 +1037,8 @@ function renderGroupSection(
                   },
                 },
                 g.id,
-                (g.defaultOpen ?? (settings.defaultOpen || OPEN_DEFAULT)) as
-                  | 'same-tab'
-                  | 'new-tab'
+                (g.defaultOpen ??
+                  (settings.defaultOpen || OPEN_DEFAULT)) as OpenMode
               )
             },
           },
@@ -1074,9 +1058,8 @@ function renderGroupSection(
                   },
                 },
                 g.id,
-                (g.defaultOpen ?? (settings.defaultOpen || OPEN_DEFAULT)) as
-                  | 'same-tab'
-                  | 'new-tab'
+                (g.defaultOpen ??
+                  (settings.defaultOpen || OPEN_DEFAULT)) as OpenMode
               )
             },
           },
@@ -1124,9 +1107,7 @@ function renderGroupSection(
                 rerender(r, c) {
                   rerender(r, c)
                 },
-                defaultOpen: (g.defaultOpen || siteDefaultOpenConst) as
-                  | 'same-tab'
-                  | 'new-tab',
+                defaultOpen: g.defaultOpen || siteDefaultOpenConst,
                 defaultMatch: g.match,
                 existingGroup: g,
               })
@@ -1210,9 +1191,7 @@ function renderGroupSection(
 
   items.style.display = g.collapsed ? 'none' : ''
   let visibleCount = 0
-  const defOpen = (settings.defaultOpen || OPEN_DEFAULT) as
-    | 'same-tab'
-    | 'new-tab'
+  const defOpen = (settings.defaultOpen || OPEN_DEFAULT) as OpenMode
   for (const it of g.items) {
     if (it.hidden && !showHiddenItems && !isEditing) continue
     visibleCount++
@@ -1556,7 +1535,7 @@ function openQuickAddMenu(
             rerender(r, c) {
               rerender(r, c)
             },
-            defaultOpen: settings.defaultOpen as 'same-tab' | 'new-tab',
+            defaultOpen: settings.defaultOpen as OpenMode,
             defaultMatch: ['*://' + (location.hostname || '') + '/*'],
           })
         },
@@ -1573,9 +1552,7 @@ function openQuickAddMenu(
             rerender(r, c) {
               rerender(r, c)
             },
-            defaultOpen: (settings.defaultOpen || OPEN_DEFAULT) as
-              | 'same-tab'
-              | 'new-tab',
+            defaultOpen: (settings.defaultOpen || OPEN_DEFAULT) as OpenMode,
             defaultGroupId: (matched[0] || cfg.groups[0])?.id,
           })
         },

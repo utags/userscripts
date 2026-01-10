@@ -3,6 +3,7 @@ import { uid } from '../../utils/uid'
 import { extractDomain, isSameOrigin } from '../../utils/url'
 import { resolveUrlTemplate } from '../../utils/url-template'
 import { shortcutsStore } from './store'
+import { type OpenMode } from './types'
 
 // import { t } from '../../common/i18n' // Removed as i18n module doesn't exist
 
@@ -259,7 +260,7 @@ function exportToJson(form: HTMLFormElement) {
   showToast(`已导出 ${items.length} 项`, form)
 }
 
-function getOpenInType(url: string): 'same-tab' | 'new-tab' {
+function getOpenInType(url: string): OpenMode {
   // If not same origin, always new-tab
   if (!isSameOrigin(url)) {
     return 'new-tab'
