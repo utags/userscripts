@@ -275,6 +275,10 @@
   @apply text-gray-400 text-[11px];
 }
 
+.row.help-row .field-help {
+  @apply ml-0;
+}
+
 .user-settings .field-help a {
   @apply text-blue-600 hover:text-blue-700;
   text-decoration: underline;

@@ -160,7 +160,7 @@ export function renderLinkForm(
   urlHelp.innerHTML = `
     <div class="field-help-title">🔗 URL 变量与示例</div>
     <div><b>基础变量：</b>{hostname}、{current_url}、{current_title}、{query}、{selected}</div>
-    <div><b>高级变量：</b>{q:key} (查询参数)、{p:index} (路径片段)</div>
+    <div><b>高级变量：</b>{q:key} (查询参数)、{p:index} (路径片段)、{v:key} (自定义变量)</div>
     <div><b>常量文本：</b>{t:text} (编码后的文本)</div>
     <div><b>组合逻辑：</b>{selected||q:wd||t:默认值} (按顺序取非空值)</div>
     <div><b>示例：</b>https://google.com/search?q={selected}</div>

@@ -2,7 +2,10 @@ import { doc } from '../globals/doc'
 import { win } from '../globals/win'
 import { extractDomain } from './url'
 
-export function resolveUrlTemplate(s: string): string {
+export function resolveUrlTemplate(
+  s: string,
+  extraResolvers?: (key: string) => string | undefined
+): string {
   const l = win.location || {}
   const href = l.href || ''
   let u: URL | undefined
@@ -92,6 +95,12 @@ export function resolveUrlTemplate(s: string): string {
     for (const p of parts) {
       let v = String(resolvers[p]?.() || '').trim()
       if (v) return v
+
+      if (extraResolvers) {
+        const extra = extraResolvers(p)
+        if (extra !== undefined && extra !== null)
+          return encodeURIComponent(String(extra))
+      }
 
       if (p.startsWith('q:')) {
         const key = p.slice(2)

@@ -1,19 +1,25 @@
 import { getFaviconUrl } from '../../utils/favicon'
 import { resolveUrlTemplate } from '../../utils/url-template'
 
-export function resolveTargetUrl(data?: string) {
+export function resolveTargetUrl(
+  data?: string,
+  extraResolvers?: (key: string) => string | undefined
+) {
   const path = String(data || '').trim() || '/'
-  return new URL(resolveUrlTemplate(path), location.href).href
+  return new URL(resolveUrlTemplate(path, extraResolvers), location.href).href
 }
 
 export function resolveIcon(
   icon: string | undefined,
   type: string,
   data: string | undefined,
-  defaultIcon?: string
+  options?: {
+    defaultIcon?: string
+    extraResolvers?: (key: string) => string | undefined
+  }
 ) {
   const rawIcon = String(icon || '')
-  let iconStr = rawIcon || defaultIcon || 'lucide:link'
+  let iconStr = rawIcon || options?.defaultIcon || 'lucide:link'
 
   if (rawIcon.startsWith('favicon')) {
     const param = rawIcon.split(':')[1]
@@ -21,7 +27,7 @@ export function resolveIcon(
     const size: 16 | 32 | 64 = sizeNum === 32 ? 32 : sizeNum === 64 ? 64 : 64
     if (type === 'url') {
       try {
-        const targetUrl = resolveTargetUrl(data)
+        const targetUrl = resolveTargetUrl(data, options?.extraResolvers)
         iconStr = 'url:' + getFaviconUrl(targetUrl, size)
       } catch {}
     } else {

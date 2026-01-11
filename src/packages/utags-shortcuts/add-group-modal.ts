@@ -33,6 +33,7 @@ export function openAddGroupModal(
     displayStyle: helpers.existingGroup?.displayStyle || 'icon-title',
     iconSize: helpers.existingGroup?.iconSize || 'medium',
     iconItemsPerRow: helpers.existingGroup?.iconItemsPerRow || 0,
+    variables: helpers.existingGroup?.variables || undefined,
   }
 
   // Render form

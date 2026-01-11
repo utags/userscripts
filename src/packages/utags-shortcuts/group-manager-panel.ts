@@ -547,7 +547,9 @@ export function createGroupManagerPanel(
       const iconEl = document.createElement('div')
       iconEl.className = 'shortcut-icon'
       {
-        const iconStr = resolveIcon(it.icon, it.type, it.data, 'lucide:link')
+        const iconStr = resolveIcon(it.icon, it.type, it.data, {
+          defaultIcon: 'lucide:link',
+        })
 
         setIcon(iconEl, iconStr)
       }

@@ -1,6 +1,7 @@
 import { createIconInput } from './icon-input'
 import { createOpenModeRadios, createSegmentedRadios } from './segmented-radios'
-import { type OpenMode } from './types'
+import { type OpenMode, type Variable } from './types'
+import { renderVariableTable } from './variable-table'
 
 export type GroupFormData = {
   id?: string
@@ -14,6 +15,7 @@ export type GroupFormData = {
   displayStyle?: 'icon-title' | 'icon-only' | 'title-only'
   iconSize?: 'small' | 'medium' | 'large'
   iconItemsPerRow?: number
+  variables?: Variable[]
 }
 
 export function renderGroupForm(
@@ -362,6 +364,40 @@ export function renderGroupForm(
   grid.append(iconColsRow)
   grid.append(iconSizeRow)
   grid.append(stateRow)
+
+  // Variables
+  const varsRow = document.createElement('div')
+  varsRow.className = 'row'
+  const varsLabel = document.createElement('label')
+  varsLabel.textContent = '分组变量'
+
+  const varsContent = document.createElement('div')
+  varsContent.style.width = '100%'
+  varsContent.style.display = 'flex'
+  varsContent.style.flexDirection = 'column'
+  varsContent.style.gap = '0.5rem'
+
+  const varsHelp = document.createElement('div')
+  varsHelp.className = 'desc'
+  varsHelp.textContent =
+    '定义分组可用的变量，可在 URL 或脚本中使用 {v:key} 引用。优先级高于站点变量与全局变量。'
+  varsHelp.style.fontSize = '12px'
+  varsHelp.style.color = '#6b7280'
+
+  const varsContainer = document.createElement('div')
+  varsContainer.style.width = '100%'
+  renderVariableTable(varsContainer, {
+    initialValue: data.variables || [],
+    onChange(val) {
+      data.variables = val
+      notifyChange()
+    },
+  })
+
+  varsContent.append(varsHelp, varsContainer)
+  varsRow.append(varsLabel)
+  varsRow.append(varsContent)
+  grid.append(varsRow)
 
   container.append(grid)
 

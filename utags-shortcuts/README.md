@@ -103,9 +103,16 @@ You can use the following variables in the URL field. They will be replaced with
 - `{q:param}`: Value of the specified query parameter (e.g., `{q:id}` for `?id=123`).
 - `{p:n}`: The n-th path segment of the URL (e.g., `{p:1}` gets `foo` from `/foo/bar`).
 - `{t:text}`: Returns the text directly (e.g., `{t:hello}`).
+- `{v:key}`: Value of the custom variable (e.g., `{v:api_key}`). Defined in Group, Site, or Global settings.
 - **Fallback**: Use `||` to define a fallback value (e.g., `{selected||query||t:default}`).
 
 ## Changelog
+
+### v0.6.x
+
+- **Custom Variables**: Introduced support for custom variables. You can now define variables in Global, Site, or Group settings and use them in URLs (e.g., `{v:api_key}`).
+- **Hierarchical Resolution**: Variables are resolved with a priority order: Group > Site > Global.
+- **Enhanced Settings**: Added a new settings interface for managing custom variables.
 
 ### v0.5.x
 

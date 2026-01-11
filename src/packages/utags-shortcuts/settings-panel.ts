@@ -19,6 +19,8 @@ import { openEditorModal } from './editor-modal-tabs'
 import { importAndSave } from './importer'
 import { createModalFrame } from './modal-base'
 import { shortcutsStore, type ShortcutsConfig } from './store'
+import { type Variable } from './types'
+import { renderVariableTable } from './variable-table'
 
 const SETTINGS_KEY = 'settings'
 
@@ -55,6 +57,8 @@ const DEFAULTS = {
   edgeColorLight: '#1A73E8',
   edgeColorDark: '#8AB4F8',
   edgeHidden: false,
+  variables: [] as Variable[],
+  siteVariables: [] as Variable[],
 } as const
 
 const COMMON_SETTINGS_FIELDS: Field[] = [
@@ -255,6 +259,31 @@ export function openSettingsPanel(store: Store): void {
             fields: EDGE_SETTINGS_FIELDS,
           },
           {
+            id: 'global-variables',
+            title: '全局变量',
+            fields: [
+              {
+                type: 'custom',
+                key: 'variables',
+                render(container, options) {
+                  const table = renderVariableTable(container, {
+                    initialValue: [],
+                    onChange: options.onChange,
+                  })
+                  return {
+                    update(val) {
+                      table.update(val as Variable[])
+                    },
+                  }
+                },
+              },
+              {
+                type: 'help',
+                help: '定义全局可用的变量，可在 URL 或脚本中使用 {v:key} 引用',
+              },
+            ] as Field[],
+          },
+          {
             id: 'global-reset',
             title: '',
             fields: [
@@ -288,6 +317,34 @@ export function openSettingsPanel(store: Store): void {
               ...f,
               isSitePref: true,
             })),
+          },
+          {
+            id: 'site-variables',
+            title: '当前网站变量',
+            fields: [
+              {
+                type: 'custom',
+                key: 'siteVariables',
+                isSitePref: true,
+                render(container, options) {
+                  const table = renderVariableTable(container, {
+                    initialValue: [],
+                    onChange(val) {
+                      options.onChange(val)
+                    },
+                  })
+                  return {
+                    update(val) {
+                      table.update(val as Variable[])
+                    },
+                  }
+                },
+              },
+              {
+                type: 'help',
+                help: '仅在当前网站生效的变量，优先级高于全局变量',
+              },
+            ] as Field[],
           },
           {
             id: 'site-reset',

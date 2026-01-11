@@ -2,7 +2,7 @@ import { xmlHttpRequestWithFallback } from '../../common/gm'
 import { getValue, setValue } from '../../common/gm/storage'
 import { uid } from '../../utils/uid'
 import { importAndSave } from './importer'
-import { type OpenMode } from './types'
+import { type OpenMode, type Variable } from './types'
 
 export const CONFIG_KEY = 'ushortcuts'
 
@@ -30,6 +30,7 @@ export type ShortcutsGroup = {
   displayStyle?: 'icon-title' | 'icon-only' | 'title-only'
   iconSize?: 'small' | 'medium' | 'large'
   iconItemsPerRow?: number
+  variables?: Variable[]
 }
 
 export type ShortcutsConfig = {
@@ -73,6 +74,7 @@ export class ShortcutsStore {
           iconItemsPerRow: Number.isFinite(gg?.iconItemsPerRow)
             ? gg.iconItemsPerRow
             : 0,
+          variables: Array.isArray(gg?.variables) ? gg.variables : undefined,
         })
 
         const groupsArr: ShortcutsGroup[] = Array.isArray(raw?.groups)

@@ -65,6 +65,25 @@ type FieldAction = {
   isSitePref?: boolean
   layout?: 'vertical'
 }
+export type FieldCustom = {
+  type: 'custom'
+  key: string
+  label?: string
+  render: (
+    container: HTMLElement,
+    options: {
+      key: string
+      isSitePref?: boolean
+      onChange: (val: unknown) => void
+    }
+  ) => { update: (val: unknown) => void }
+  isSitePref?: boolean
+  help?: string
+}
+export type FieldHelp = {
+  type: 'help'
+  help: string
+}
 export type Field =
   | FieldToggle
   | FieldInput
@@ -73,6 +92,8 @@ export type Field =
   | FieldSelect
   | FieldColors
   | FieldAction
+  | FieldCustom
+  | FieldHelp
 
 export type Group = { id: string; title: string; fields: Field[] }
 export type Tab =
@@ -96,6 +117,11 @@ export type Store = {
   getAll<T extends Record<string, unknown> = Record<string, unknown>>(
     isGlobalPref?: boolean
   ): Promise<T>
+  /**
+   * Set settings values.
+   * @param args - Arguments for setting values.
+   * If the last argument is a boolean, it indicates whether to set global preferences (isGlobalPref).
+   */
   set(
     ...args:
       | [string, unknown]
@@ -450,6 +476,41 @@ export function openSettingsPanel(
         container.append(row)
         break
       }
+
+      case 'custom': {
+        const row = c('div', { className: 'row custom-row' })
+        if (f.label) {
+          const lab = c('label', { text: f.label })
+          row.append(lab)
+        }
+
+        if (f.help) {
+          const help = c('div', { className: 'field-help', text: f.help })
+          row.append(help)
+        }
+
+        const { update } = f.render(row, {
+          key: f.key,
+          isSitePref: f.isSitePref,
+          onChange(val) {
+            void store.set({ [f.key]: val }, !f.isSitePref)
+          },
+        })
+
+        appendAndFill(container, row, f.key, () => {
+          const value = getFieldValue(f.key, f.isSitePref)
+          update(value)
+        })
+        break
+      }
+
+      case 'help': {
+        const row = c('div', { className: 'row help-row' })
+        const help = c('div', { className: 'field-help', text: f.help })
+        row.append(help)
+        container.append(row)
+        break
+      }
     }
   }
 
@@ -588,8 +649,9 @@ export function openSettingsPanel(
     } catch {}
   }
 
-  function getFieldValue(key: string, el: HTMLElement) {
-    const isSitePref = Boolean(el.dataset.isSitePref)
+  function getFieldValue(key: string, el: HTMLElement | boolean | undefined) {
+    const isSitePref =
+      el instanceof HTMLElement ? Boolean(el.dataset.isSitePref) : Boolean(el)
     const values = isSitePref ? lastValues.site : lastValues.global
     return values[key]
   }

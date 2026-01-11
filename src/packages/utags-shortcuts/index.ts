@@ -37,6 +37,7 @@ import {
 } from './store'
 import { type OpenMode } from './types'
 import { isEditableTarget, resolveIcon, resolveTargetUrl } from './utils'
+import { createVariableResolver } from './variables'
 
 type Position =
   | 'right-top'
@@ -144,6 +145,11 @@ function openItem(
   opts?: { forceNewTab?: boolean }
 ) {
   const mode: OpenMode = it.openIn || group.defaultOpen || settings.defaultOpen
+  const resolver = createVariableResolver([
+    group.variables,
+    settings.siteVariables,
+    settings.variables,
+  ])
 
   const navigate = (url: string) => {
     if (isIframeMode) {
@@ -160,7 +166,7 @@ function openItem(
   }
 
   if (it.type === 'url') {
-    const url = resolveTargetUrl(it.data)
+    const url = resolveTargetUrl(it.data, resolver)
     const finalMode: OpenMode = opts?.forceNewTab ? 'new-tab' : mode
     if (finalMode === 'new-tab') {
       window.open(url, '_blank', 'noopener')
@@ -650,7 +656,12 @@ function renderShortcutsItem(
       e.stopImmediatePropagation()
     })
   } else if (it.type === 'url') {
-    const url = resolveTargetUrl(it.data)
+    const resolver = createVariableResolver([
+      g.variables,
+      settings.siteVariables,
+      settings.variables,
+    ])
+    const url = resolveTargetUrl(it.data, resolver)
     // This is not the final URL, just for mouse over to show the full URL
     a.href = url
 
@@ -682,7 +693,14 @@ function renderShortcutsItem(
   }
 
   {
-    const iconStr = resolveIcon(it.icon, it.type, it.data)
+    const resolver = createVariableResolver([
+      g.variables,
+      settings.siteVariables,
+      settings.variables,
+    ])
+    const iconStr = resolveIcon(it.icon, it.type, it.data, {
+      extraResolvers: resolver,
+    })
 
     setIcon(a as HTMLElement, iconStr)
   }
