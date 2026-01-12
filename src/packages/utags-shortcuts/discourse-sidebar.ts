@@ -441,12 +441,20 @@ async function processItems(
       let processedUrl = processUrl(item.data)
 
       if (item.data.startsWith('https://linux.do/challenge')) {
-        processedUrl = `https://www.google.com/url?q=${encodeURIComponent(
+        processedUrl = `https://wsrv.nl/?url=&default=${encodeURIComponent(
           'https://linux.do/challenge'
         )}`
-      } else if (item.data === '?safe_mode=no_themes%2Cno_plugins') {
-        processedUrl = `https://www.google.com/url?q=${encodeURIComponent(
+      } else if (item.data.includes('?safe_mode=no_themes%2Cno_plugins')) {
+        processedUrl = `https://wsrv.nl/?url=&default=${encodeURIComponent(
           'https://linux.do/?safe_mode=no_themes%2Cno_plugins'
+        )}`
+      } else if (item.data === 'https://linux.do/pub/resources') {
+        processedUrl = `https://wsrv.nl/?url=&default=${encodeURIComponent(
+          'https://linux.do/pub/resources'
+        )}`
+      } else if (item.data === 'https://linux.do/cdn-cgi/trace') {
+        processedUrl = `https://wsrv.nl/?url=&default=${encodeURIComponent(
+          'https://linux.do/cdn-cgi/trace'
         )}`
       }
 
