@@ -85,7 +85,7 @@ export function isIframeModeDisabled() {
 }
 
 export async function checkAndEnableIframeMode() {
-  if (!isTopFrame()) return
+  if (!isTopFrame() || document.documentElement.tagName !== 'HTML') return
 
   // 0. Check if disabled for this site
   if (isIframeModeDisabled()) return

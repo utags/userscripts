@@ -2,7 +2,8 @@ import styleText from 'css:./style.css'
 
 import { addStyle, registerMenu, unregisterMenu } from '../../common/gm'
 import { addValueChangeListener } from '../../common/gm/storage'
-import { ensureShadowRoot, setIcon } from '../../utils/dom'
+import { ensureShadowRoot } from '../../utils/dom'
+import { setIcon } from '../../utils/icon'
 import { isTopFrame } from '../../utils/is-top-frame'
 import { navigateUrl } from '../../utils/navigate'
 import { uid } from '../../utils/uid'
@@ -1918,8 +1919,9 @@ function registerHostAutofix(_root: ShadowRoot, cfg: ShortcutsConfig) {
 function main() {
   try {
     const de = document.documentElement as any
-    if (de && de.dataset && de.dataset.utagsShortcuts === '1') return
-    if (de && de.dataset) de.dataset.utagsShortcuts = '1'
+    if (!de || de.tagName !== 'HTML') return
+    if (de.dataset && de.dataset.utagsShortcuts === '1') return
+    if (de.dataset) de.dataset.utagsShortcuts = '1'
   } catch {}
 
   if (!isTopFrame()) {

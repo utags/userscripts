@@ -110,6 +110,8 @@ You can use the following variables in the URL field. They will be replaced with
 
 ### v0.6.x
 
+- **Performance**: Implemented icon cache persistence to local storage, reducing network requests and speeding up initialization.
+- **Stability**: Added timeout handling for network requests with automatic fallback to `GM_xmlhttpRequest` to prevent hanging.
 - **Custom Variables**: Introduced support for custom variables. You can now define variables in Global, Site, or Group settings and use them in URLs (e.g., `{v:api_key}`).
 - **Hierarchical Resolution**: Variables are resolved with a priority order: Group > Site > Global.
 - **Enhanced Settings**: Added a new settings interface for managing custom variables.

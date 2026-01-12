@@ -1,4 +1,4 @@
-import { xmlHttpRequestWithFallback } from '../../common/gm'
+import { fetchWithGmFallback } from '../../common/fetch'
 import { getValue, setValue } from '../../common/gm/storage'
 import { uid } from '../../utils/uid'
 import { importAndSave } from './importer'
@@ -109,7 +109,7 @@ export class ShortcutsStore {
     void (async () => {
       try {
         const data = await new Promise<any>((resolve, reject) => {
-          void xmlHttpRequestWithFallback({
+          fetchWithGmFallback({
             url: 'https://raw.githubusercontent.com/utags/utags-shared-shortcuts/main/zh-CN/collections/builtin_groups.json',
             method: 'GET',
             onload(response) {

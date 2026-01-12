@@ -22,7 +22,7 @@ export function c<K extends keyof HTMLElementTagNameMap>(
   if (opts.className) (el as any).className = opts.className
   if (opts.classes)
     for (const cls of opts.classes) (el as any).classList.add(cls)
-  if (opts.dataset)
+  if (opts.dataset && (el as any).dataset)
     for (const k of Object.keys(opts.dataset))
       (el as any).dataset[k] = opts.dataset[k]
   if (opts.attrs)

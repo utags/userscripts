@@ -1,5 +1,5 @@
 import { c } from '../../utils/c'
-import { setIcon } from '../../utils/dom'
+import { setIcon } from '../../utils/icon'
 import { uid } from '../../utils/uid'
 import { type Variable } from './types'
 

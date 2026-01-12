@@ -61,7 +61,7 @@
     if (!opts) return el
     if (opts.className) el.className = opts.className
     if (opts.classes) for (const cls of opts.classes) el.classList.add(cls)
-    if (opts.dataset)
+    if (opts.dataset && el.dataset)
       for (const k of Object.keys(opts.dataset)) el.dataset[k] = opts.dataset[k]
     if (opts.attrs)
       for (const k of Object.keys(opts.attrs)) el.setAttribute(k, opts.attrs[k])
@@ -83,15 +83,6 @@
     }
     return el
   }
-  var defaultFavicon16 = encodeURIComponent(
-    'https://wsrv.nl/?w=16&h=16&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
-  )
-  var defaultFavicon32 = encodeURIComponent(
-    'https://wsrv.nl/?w=32&h=32&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
-  )
-  var defaultFavicon64 = encodeURIComponent(
-    'https://wsrv.nl/?w=64&h=64&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
-  )
   function isElementVisible(el) {
     if (!el) return true
     try {

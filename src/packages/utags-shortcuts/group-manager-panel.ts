@@ -1,4 +1,5 @@
-import { clearChildren, setIcon } from '../../utils/dom'
+import { clearChildren } from '../../utils/dom'
+import { setIcon } from '../../utils/icon'
 import { uid } from '../../utils/uid'
 import { hasDuplicateInGroup } from './add-link-actions'
 import { renderGroupForm, type GroupFormData } from './group-form'

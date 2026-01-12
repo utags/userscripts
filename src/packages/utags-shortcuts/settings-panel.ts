@@ -1,6 +1,6 @@
 import styleText from 'css:./style.css'
 
-import { xmlHttpRequestWithFallback } from '../../common/gm'
+import { fetchWithGmFallback } from '../../common/fetch'
 import { getValue, setValue } from '../../common/gm/storage'
 import {
   closeSettingsPanel,
@@ -11,7 +11,8 @@ import {
   type PanelSchema,
   type Store,
 } from '../../common/settings'
-import { ensureShadowRoot, setIcon } from '../../utils/dom'
+import { ensureShadowRoot } from '../../utils/dom'
+import { setIcon } from '../../utils/icon'
 import { importJson } from '../../utils/import-json'
 import { deepMergeReplaceArrays } from '../../utils/obj'
 import { uid } from '../../utils/uid'
@@ -585,7 +586,7 @@ export function openSettingsPanel(store: Store): void {
             btnImport.disabled = true
             btnImport.textContent = '下载中...'
 
-            void xmlHttpRequestWithFallback({
+            fetchWithGmFallback({
               method: 'GET',
               url,
               async onload(res) {

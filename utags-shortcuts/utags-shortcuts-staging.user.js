@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.5.1
+// @version              0.6.0
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -88,49 +88,6 @@
         GM_xmlhttpRequest(options)
       }
     } catch (e) {}
-  }
-  async function xmlHttpRequestWithFallback(options) {
-    var _a
-    try {
-      if (
-        typeof GM !== 'undefined' &&
-        typeof GM.xmlHttpRequest === 'function'
-      ) {
-        GM.xmlHttpRequest(options)
-        return
-      }
-    } catch (e) {}
-    try {
-      if (typeof GM_xmlhttpRequest === 'function') {
-        GM_xmlhttpRequest(options)
-        return
-      }
-    } catch (e) {}
-    try {
-      const { url, method, responseType, onload, onerror } = options
-      const init = { method }
-      const res = await fetch(url, init)
-      try {
-        let responseText = ''
-        let response
-        if (responseType === 'blob') {
-          response = await res.blob()
-        } else {
-          responseText = await res.text()
-        }
-        onload == null
-          ? void 0
-          : onload({ status: res.status, responseText, response })
-      } catch (error) {
-        try {
-          onerror == null ? void 0 : onerror(error)
-        } catch (e) {}
-      }
-    } catch (error) {
-      try {
-        ;(_a = options.onerror) == null ? void 0 : _a.call(options, error)
-      } catch (e) {}
-    }
   }
   async function addStyle(css) {
     if (typeof GM_addStyle === 'function') {
@@ -306,7 +263,7 @@
     if (!opts) return el
     if (opts.className) el.className = opts.className
     if (opts.classes) for (const cls of opts.classes) el.classList.add(cls)
-    if (opts.dataset)
+    if (opts.dataset && el.dataset)
       for (const k of Object.keys(opts.dataset)) el.dataset[k] = opts.dataset[k]
     if (opts.attrs)
       for (const k of Object.keys(opts.attrs)) el.setAttribute(k, opts.attrs[k])
@@ -327,6 +284,204 @@
       }
     }
     return el
+  }
+  function shouldOpenInCurrentTab(e, target) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false
+    if (target && target.target === '_blank') return false
+    return true
+  }
+  function clearChildren(el) {
+    try {
+      el.textContent = ''
+    } catch (e) {
+      try {
+        while (el.firstChild) el.firstChild.remove()
+      } catch (e2) {}
+    }
+  }
+  function querySelectorAllDeep(root, selector) {
+    const result = []
+    const visited = /* @__PURE__ */ new Set()
+    const visit = (node) => {
+      if (!node || visited.has(node)) return
+      visited.add(node)
+      const anyNode = node
+      try {
+        if (typeof anyNode.querySelectorAll === 'function') {
+          const found = Array.from(anyNode.querySelectorAll(selector))
+          for (const el of found) if (el instanceof Element) result.push(el)
+        }
+      } catch (e) {}
+      try {
+        const children = Array.from(anyNode.childNodes || [])
+        for (const child of children) visit(child)
+      } catch (e) {}
+      try {
+        const shadow = anyNode.shadowRoot
+        if (shadow) visit(shadow)
+      } catch (e) {}
+    }
+    visit(root)
+    return Array.from(new Set(result))
+  }
+  function addStyleToShadow(shadowRoot, css) {
+    try {
+      if (shadowRoot.adoptedStyleSheets) {
+        const sheet = new CSSStyleSheet()
+        sheet.replaceSync(css)
+        shadowRoot.adoptedStyleSheets = [
+          ...shadowRoot.adoptedStyleSheets,
+          sheet,
+        ]
+        return
+      }
+    } catch (e) {}
+    const s = c('style', { text: css })
+    shadowRoot.append(s)
+  }
+  function camelToKebab(str) {
+    return str.replaceAll(/[A-Z]/g, (letter) =>
+      '-'.concat(letter.toLowerCase())
+    )
+  }
+  function ensureShadowRoot(options) {
+    const key = options.hostDatasetKey || 'userscriptHost'
+    const val = options.hostId
+    const attrKey = camelToKebab(key)
+    const sel = '[data-'.concat(attrKey, '="').concat(val, '"]')
+    const existing = doc.querySelector(sel)
+    if (existing instanceof HTMLDivElement && existing.shadowRoot) {
+      if (!existing.isConnected || options.moveToEnd) {
+        try {
+          doc.documentElement.append(existing)
+        } catch (e) {}
+      }
+      return { host: existing, root: existing.shadowRoot, existed: true }
+    }
+    const host = c('div', { dataset: { [key]: val } })
+    const root = host.attachShadow({ mode: 'open' })
+    if (options.style) {
+      addStyleToShadow(root, options.style)
+    }
+    doc.documentElement.append(host)
+    return { host, root, existed: false }
+  }
+  var originStatus = /* @__PURE__ */ new Map()
+  var originQueue = /* @__PURE__ */ new Map()
+  function getOrigin(url) {
+    var _a
+    try {
+      return new URL(url, (_a = globalThis.location) == null ? void 0 : _a.href)
+        .origin
+    } catch (e) {
+      return 'default'
+    }
+  }
+  function flushOriginQueue(origin) {
+    const queue = originQueue.get(origin) || []
+    originQueue.delete(origin)
+    for (const req of queue) {
+      req()
+    }
+  }
+  function fetchWithGmFallback(options) {
+    const {
+      method = 'GET',
+      url,
+      responseType,
+      timeout,
+      onload,
+      onerror,
+      ontimeout,
+    } = options
+    const origin = getOrigin(url)
+    const status = originStatus.get(origin) || 'unknown'
+    if (status === 'broken') {
+      xmlHttpRequest(__spreadProps(__spreadValues({}, options), { method }))
+      return
+    }
+    const performFetch = () => {
+      void (async () => {
+        const controller = new AbortController()
+        let timeoutId
+        if (timeout && timeout > 0) {
+          timeoutId = setTimeout(() => {
+            controller.abort()
+          }, timeout)
+        }
+        try {
+          const res = await fetch(url, { method, signal: controller.signal })
+          if (timeoutId) clearTimeout(timeoutId)
+          const currentStatus = originStatus.get(origin)
+          if (currentStatus === 'testing') {
+            originStatus.set(origin, 'working')
+            flushOriginQueue(origin)
+          }
+          if (res.ok || res.status === 304) {
+            let response
+            let responseText
+            switch (responseType) {
+              case 'blob': {
+                response = await res.blob()
+                break
+              }
+              case 'json': {
+                response = await res.json()
+                responseText = JSON.stringify(response)
+                break
+              }
+              case 'arraybuffer': {
+                response = await res.arrayBuffer()
+                break
+              }
+              default: {
+                responseText = await res.text()
+                response = responseText
+                break
+              }
+            }
+            onload == null
+              ? void 0
+              : onload({
+                  status: res.status,
+                  statusText: res.statusText,
+                  response,
+                  responseText,
+                  finalUrl: res.url,
+                })
+            return
+          }
+          throw new Error('Fetch failed: '.concat(res.status))
+        } catch (error) {
+          if (timeoutId) clearTimeout(timeoutId)
+          const isHttpError =
+            error instanceof Error && error.message.startsWith('Fetch failed:')
+          if (!isHttpError) {
+            const currentStatus = originStatus.get(origin)
+            if (currentStatus === 'testing') {
+              originStatus.set(origin, 'broken')
+              flushOriginQueue(origin)
+            } else if (currentStatus === 'working') {
+            }
+          }
+          xmlHttpRequest(__spreadProps(__spreadValues({}, options), { method }))
+        }
+      })()
+    }
+    if (status === 'working') {
+      performFetch()
+      return
+    }
+    if (status === 'testing') {
+      const queue = originQueue.get(origin) || []
+      queue.push(() => {
+        fetchWithGmFallback(options)
+      })
+      originQueue.set(origin, queue)
+      return
+    }
+    originStatus.set(origin, 'testing')
+    performFetch()
   }
   function getFaviconUrl(href, size = 64) {
     try {
@@ -377,6 +532,10 @@
     32: defaultFavicon32,
     64: defaultFavicon64,
   }
+  function getNewIconId() {
+    return 0
+  }
+  function logIconPerf(id, icon, stage, extra) {}
   function createIconImage(src, className) {
     return c('img', {
       className,
@@ -384,80 +543,50 @@
       style: { objectFit: 'contain' },
     })
   }
-  function shouldOpenInCurrentTab(e, target) {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false
-    if (target && target.target === '_blank') return false
-    return true
-  }
-  function clearChildren(el) {
-    try {
-      el.textContent = ''
-    } catch (e) {
-      try {
-        while (el.firstChild) el.firstChild.remove()
-      } catch (e2) {}
-    }
-  }
-  function querySelectorAllDeep(root, selector) {
-    const result = []
-    const visited = /* @__PURE__ */ new Set()
-    const visit = (node) => {
-      if (!node || visited.has(node)) return
-      visited.add(node)
-      const anyNode = node
-      try {
-        if (typeof anyNode.querySelectorAll === 'function') {
-          const found = Array.from(anyNode.querySelectorAll(selector))
-          for (const el of found) if (el instanceof Element) result.push(el)
-        }
-      } catch (e) {}
-      try {
-        const children = Array.from(anyNode.childNodes || [])
-        for (const child of children) visit(child)
-      } catch (e) {}
-      try {
-        const shadow = anyNode.shadowRoot
-        if (shadow) visit(shadow)
-      } catch (e) {}
-    }
-    visit(root)
-    return Array.from(new Set(result))
-  }
   var iconCache = /* @__PURE__ */ new Map()
-  function renderIcon(s) {
-    const span = c('span', { className: 'icon' })
-    let t = String(s || '').trim()
-    if (!t) t = 'lucide:link'
-    if (t.startsWith('lucide:')) {
-      const k = t.split(':')[1]
-      injectLucideIcon(span, k)
-      return span
-    }
-    if (t.startsWith('url:')) {
-      const url = t.slice(4)
-      injectImageAsData(span, getWrappedIconUrl(url))
-      return span
-    }
-    if (t.startsWith('svg:')) {
-      try {
-        const svg = t.slice(4)
-        const url =
-          'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
-        const img = createIconImage(url)
-        clearChildren(span)
-        span.append(img)
-      } catch (e) {}
-      return span
-    }
-    span.textContent = t
-    return span
-  }
-  function setIcon(el, icon, title) {
+  var STORAGE_KEY = 'utags_icon_cache'
+  void (async () => {
     try {
-      clearChildren(el)
-      el.append(renderIcon(icon))
-      if (title !== void 0) el.title = title
+      const stored = await getValue(STORAGE_KEY, {})
+      if (stored) {
+        for (const [key, value] of Object.entries(stored)) {
+          if (!iconCache.has(key)) {
+            iconCache.set(key, value)
+          }
+        }
+      }
     } catch (e) {}
+  })()
+  var saveTimeoutId
+  async function saveCache() {
+    try {
+      const stored = (await getValue(STORAGE_KEY, {})) || {}
+      const merged = __spreadValues({}, stored)
+      for (const [key, value] of iconCache) {
+        merged[key] = value
+      }
+      await setValue(STORAGE_KEY, merged)
+      for (const [key, value] of Object.entries(merged)) {
+        if (!iconCache.has(key)) {
+          iconCache.set(key, value)
+        }
+      }
+    } catch (e) {}
+  }
+  function scheduleSaveCache() {
+    if (saveTimeoutId) clearTimeout(saveTimeoutId)
+    saveTimeoutId = setTimeout(() => {
+      if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(
+          () => {
+            void saveCache()
+          },
+          { timeout: 2e3 }
+        )
+      } else {
+        void saveCache()
+      }
+    }, 3e3)
   }
   var lastSuccessfulCdnIndex = 0
   var cdnBases = [
@@ -465,10 +594,11 @@
     'https://fastly.jsdelivr.net/npm',
     'https://unpkg.com',
   ]
-  function injectLucideIcon(container, name) {
+  function injectLucideIcon(container, name, id) {
     try {
       const cached = iconCache.get(name)
       if (cached) {
+        logIconPerf(id, name, 'cache-hit')
         const img = createIconImage(cached, 'lucide-icon')
         clearChildren(container)
         container.append(img)
@@ -488,17 +618,21 @@
       const url = ''
         .concat(cdnBase, '/lucide-static@latest/icons/')
         .concat(name, '.svg')
+      logIconPerf(id, name, 'server-start', { url })
       try {
-        xmlHttpRequest({
+        fetchWithGmFallback({
           method: 'GET',
           url,
+          timeout: 5e3,
           onload(res) {
             try {
               const svg = String(res.responseText || '')
+              logIconPerf(id, name, 'server-end', { status: res.status, url })
               if (res.status >= 200 && res.status < 300 && svg) {
                 const dataUrl =
                   'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
                 iconCache.set(name, dataUrl)
+                scheduleSaveCache()
                 const img = createIconImage(dataUrl, 'lucide-icon')
                 clearChildren(container)
                 container.append(img)
@@ -513,6 +647,9 @@
           onerror() {
             tryFetch(attempt + 1)
           },
+          ontimeout() {
+            tryFetch(attempt + 1)
+          },
         })
       } catch (e) {
         tryFetch(attempt + 1)
@@ -520,18 +657,21 @@
     }
     tryFetch(0)
   }
-  function injectImageAsData(container, url) {
+  function injectImageAsData(container, url, id) {
     try {
       const cached = iconCache.get(url)
       if (cached) {
+        logIconPerf(id, url, 'cache-hit')
         const img = createIconImage(cached)
         clearChildren(container)
         container.append(img)
         return
       }
-      xmlHttpRequest({
+      logIconPerf(id, url, 'server-start', { url })
+      fetchWithGmFallback({
         method: 'GET',
         url,
+        timeout: 5e3,
         responseType: 'blob',
         onload(res) {
           try {
@@ -539,8 +679,10 @@
             if (!blob) return
             const reader = new FileReader()
             reader.addEventListener('load', () => {
+              logIconPerf(id, url, 'server-end', { status: 200, url })
               const result = String(reader.result || '')
               iconCache.set(url, result)
+              scheduleSaveCache()
               const img = createIconImage(result)
               clearChildren(container)
               container.append(img)
@@ -551,47 +693,44 @@
       })
     } catch (e) {}
   }
-  function addStyleToShadow(shadowRoot, css) {
+  function renderIcon(s) {
+    const span = c('span', { className: 'icon' })
+    let t = String(s || '').trim()
+    if (!t) t = 'lucide:link'
+    const id = getNewIconId()
+    logIconPerf(id, t, 'start')
+    if (t.startsWith('lucide:')) {
+      const k = t.split(':')[1]
+      injectLucideIcon(span, k, id)
+      return span
+    }
+    if (t.startsWith('url:')) {
+      const url = t.slice(4)
+      injectImageAsData(span, getWrappedIconUrl(url), id)
+      return span
+    }
+    if (t.startsWith('svg:')) {
+      try {
+        const svg = t.slice(4)
+        const url =
+          'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg)
+        const img = createIconImage(url)
+        clearChildren(span)
+        span.append(img)
+      } catch (e) {}
+      logIconPerf(id, t, 'cache-hit')
+      return span
+    }
+    span.textContent = t
+    logIconPerf(id, t, 'cache-hit')
+    return span
+  }
+  function setIcon(el, icon, title) {
     try {
-      if (shadowRoot.adoptedStyleSheets) {
-        const sheet = new CSSStyleSheet()
-        sheet.replaceSync(css)
-        shadowRoot.adoptedStyleSheets = [
-          ...shadowRoot.adoptedStyleSheets,
-          sheet,
-        ]
-        return
-      }
+      clearChildren(el)
+      el.append(renderIcon(icon))
+      if (title !== void 0) el.title = title
     } catch (e) {}
-    const s = c('style', { text: css })
-    shadowRoot.append(s)
-  }
-  function camelToKebab(str) {
-    return str.replaceAll(/[A-Z]/g, (letter) =>
-      '-'.concat(letter.toLowerCase())
-    )
-  }
-  function ensureShadowRoot(options) {
-    const key = options.hostDatasetKey || 'userscriptHost'
-    const val = options.hostId
-    const attrKey = camelToKebab(key)
-    const sel = '[data-'.concat(attrKey, '="').concat(val, '"]')
-    const existing = doc.querySelector(sel)
-    if (existing instanceof HTMLDivElement && existing.shadowRoot) {
-      if (!existing.isConnected || options.moveToEnd) {
-        try {
-          doc.documentElement.append(existing)
-        } catch (e) {}
-      }
-      return { host: existing, root: existing.shadowRoot, existed: true }
-    }
-    const host = c('div', { dataset: { [key]: val } })
-    const root = host.attachShadow({ mode: 'open' })
-    if (options.style) {
-      addStyleToShadow(root, options.style)
-    }
-    doc.documentElement.append(host)
-    return { host, root, existed: false }
   }
   var win = globalThis
   function isTopFrame() {
@@ -2540,7 +2679,7 @@
       void (async () => {
         try {
           const data = await new Promise((resolve, reject) => {
-            void xmlHttpRequestWithFallback({
+            fetchWithGmFallback({
               url: 'https://raw.githubusercontent.com/utags/utags-shared-shortcuts/main/zh-CN/collections/builtin_groups.json',
               method: 'GET',
               onload(response) {
@@ -5164,7 +5303,7 @@
               if (!url) return
               btnImport.disabled = true
               btnImport.textContent = '\u4E0B\u8F7D\u4E2D...'
-              void xmlHttpRequestWithFallback({
+              fetchWithGmFallback({
                 method: 'GET',
                 url,
                 async onload(res) {
@@ -5542,7 +5681,7 @@
     )
   }
   async function checkAndEnableIframeMode() {
-    if (!isTopFrame()) return
+    if (!isTopFrame() || document.documentElement.tagName !== 'HTML') return
     if (isIframeModeDisabled()) return
     const settings2 = await createUshortcutsSettingsStore().getAll()
     if (
@@ -7537,8 +7676,9 @@
   function main() {
     try {
       const de = document.documentElement
-      if (de && de.dataset && de.dataset.utagsShortcuts === '1') return
-      if (de && de.dataset) de.dataset.utagsShortcuts = '1'
+      if (!de || de.tagName !== 'HTML') return
+      if (de.dataset && de.dataset.utagsShortcuts === '1') return
+      if (de.dataset) de.dataset.utagsShortcuts = '1'
     } catch (e) {}
     if (!isTopFrame()) {
       return
