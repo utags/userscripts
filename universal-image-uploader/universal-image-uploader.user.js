@@ -897,7 +897,8 @@
     } catch (e) {}
   }
   var SITE_KEY = normalizeHost(location.hostname || '')
-  var getSiteSettingsMap = async () => getValue(SITE_SETTINGS_MAP_KEY, {})
+  var getSiteSettingsMap = async () =>
+    (await getValue(SITE_SETTINGS_MAP_KEY, {})) || {}
   var setSiteSettingsMap = async (map) => {
     await setValue(SITE_SETTINGS_MAP_KEY, map)
   }
@@ -1182,7 +1183,7 @@
       typeof GM !== 'undefined' && (GM == null ? void 0 : GM.xmlHttpRequest)
         ? GM.xmlHttpRequest
         : typeof GM_xmlhttpRequest === 'undefined'
-          ? null
+          ? void 0
           : GM_xmlhttpRequest
     if (!req) throw new Error('GM.xmlHttpRequest unavailable')
     return new Promise((resolve, reject) => {
@@ -1328,7 +1329,7 @@
       throw new Error('8mb limit')
     }
     const formData = new FormData()
-    formData.append('upload', true)
+    formData.append('upload', 'true')
     formData.append('file', file)
     const data = await gmRequest({
       method: 'POST',
@@ -1351,7 +1352,7 @@
     if (host === 'appinn') return uploadToAppinn(file)
     return uploadToImgur(file)
   }
-  var lastEditableEl = null
+  var lastEditableEl
   function getDeepActiveElement() {
     let el = document.activeElement
     try {
@@ -1360,14 +1361,14 @@
       }
       while (
         el &&
-        el.tagName === 'IFRAME' &&
+        el instanceof HTMLIFrameElement &&
         el.contentDocument &&
         el.contentDocument.activeElement
       ) {
         el = el.contentDocument.activeElement
       }
     } catch (e) {}
-    return el
+    return el || void 0
   }
   function isInsideUIPanel(node) {
     try {
@@ -1420,7 +1421,7 @@
     if (!isEditable(el) || isInsideUIPanel(el)) {
       el = lastEditableEl
       try {
-        if (el && typeof el.focus === 'function') el.focus()
+        if (el instanceof HTMLElement) el.focus()
       } catch (e) {}
     }
     if (!isEditable(el) || isInsideUIPanel(el)) return false
@@ -1459,7 +1460,7 @@
   function getActiveEditableTarget() {
     let el = getDeepActiveElement()
     if (!isEditable(el) || isInsideUIPanel(el)) el = lastEditableEl
-    return isEditable(el) && !isInsideUIPanel(el) ? el : null
+    return isEditable(el) && !isInsideUIPanel(el) ? el : void 0
   }
   function createUploadPlaceholder(name) {
     const safe = String(name || t('default_image_name'))
@@ -1693,7 +1694,7 @@
       placeholder: t('placeholder_css_selector'),
     })
     const posSel = createEl('select')
-    buildPositionOptions(posSel)
+    buildPositionOptions(posSel, void 0)
     const textInput = createEl('input', {
       type: 'text',
       placeholder: t('placeholder_button_content'),
@@ -1707,7 +1708,7 @@
         text: textInput.value,
       })
       selInput.value = ''
-      buildPositionOptions(posSel)
+      buildPositionOptions(posSel, void 0)
       textInput.value = t('insert_image_button_default')
       await renderSettingsList()
       for (const el of document.querySelectorAll('.uiu-insert-btn')) el.remove()
@@ -1961,7 +1962,7 @@
     }
     async function refreshSettingsUI() {
       selInput.value = ''
-      buildPositionOptions(posSel)
+      buildPositionOptions(posSel, void 0)
       textInput.value = t('insert_image_button_default')
       await renderSettingsList()
       try {
@@ -2000,7 +2001,8 @@
             ? 'inside'
             : 'after'
       const content = (cfg.text || t('insert_image_button_default')).trim()
-      for (const target of Array.from(targets)) {
+      for (const t2 of Array.from(targets)) {
+        const target = t2
         const exists =
           pos === 'inside'
             ? Boolean(target.querySelector('.uiu-insert-btn'))
@@ -2068,7 +2070,7 @@
       } catch (e) {}
       const list2 = await getSiteBtnSettingsList()
       if (list2.length === 0) {
-        siteBtnObserver = null
+        siteBtnObserver = void 0
         return
       }
       const checkAndInsertAll = () => {
@@ -2088,11 +2090,11 @@
       })
     }
     await restartSiteButtonObserver()
-    let drop = null
-    let pasteHandler = null
-    let dragoverHandler = null
-    let dragleaveHandler = null
-    let dropHandler = null
+    let drop
+    let pasteHandler
+    let dragoverHandler
+    let dragleaveHandler
+    let dropHandler
     function enablePaste() {
       if (pasteHandler) return
       pasteHandler = (event) => {
@@ -2134,28 +2136,20 @@
     function disablePaste() {
       if (!pasteHandler) return
       document.removeEventListener('paste', pasteHandler, true)
-      pasteHandler = null
+      pasteHandler = void 0
     }
     function enableDrag() {
       if (!drop) {
         drop = createEl('div', { id: 'uiu-drop', text: t('drop_overlay') })
-        document.body.append(drop)
+        if (drop) document.body.append(drop)
       }
       if (!dragoverHandler) {
         dragoverHandler = (e) => {
-          var _a, _b
           const dt = e.dataTransfer
           const types = (dt == null ? void 0 : dt.types)
             ? Array.from(dt.types)
             : []
-          const hasFileType =
-            types.includes('Files') ||
-            ((_b =
-              (_a = dt == null ? void 0 : dt.types) == null
-                ? void 0
-                : _a.contains) == null
-              ? void 0
-              : _b.call(_a, 'Files'))
+          const hasFileType = types.includes('Files')
           const hasFileItem = (dt == null ? void 0 : dt.items)
             ? Array.from(dt.items).some((it) => it.kind === 'file')
             : false
@@ -2187,21 +2181,21 @@
     function disableDrag() {
       if (dragoverHandler) {
         document.removeEventListener('dragover', dragoverHandler)
-        dragoverHandler = null
+        dragoverHandler = void 0
       }
       if (dragleaveHandler) {
         document.removeEventListener('dragleave', dragleaveHandler)
-        dragleaveHandler = null
+        dragleaveHandler = void 0
       }
       if (dropHandler) {
         document.removeEventListener('drop', dropHandler)
-        dropHandler = null
+        dropHandler = void 0
       }
       if (drop) {
         try {
           drop.remove()
         } catch (e) {}
-        drop = null
+        drop = void 0
       }
     }
     const queue = []
@@ -2442,7 +2436,9 @@
       await applyPresetConfig()
       const enabled = await getEnabled()
       if (enabled && !document.querySelector('#uiu-panel')) {
-        const { handleFiles } = await createPanel()
+        const panelApi = await createPanel()
+        if (!panelApi) return
+        const { handleFiles } = panelApi
         globalThis.addEventListener('iu:uploadFiles', (e) => {
           var _a
           const files = (_a = e.detail) == null ? void 0 : _a.files

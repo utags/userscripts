@@ -13,7 +13,7 @@ import { isTopFrame } from '../../utils/is-top-frame'
 // - host: default image provider ('imgur' | 'tikolu')
 // - proxy: default proxy for non-Imgur links ('none' | 'wsrv.nl')
 // - buttons: site-specific button injection rules
-const CONFIG = {
+const CONFIG: Record<string, any> = {
   // Examples: local preview page and common sites; add/remove as needed
   localhost: {
     enabled: true,
@@ -336,11 +336,11 @@ const I18N = {
   },
 }
 
-function detectLanguage() {
+function detectLanguage(): string {
   try {
     const browserLang = (
       navigator.language ||
-      navigator.userLanguage ||
+      (navigator as Navigator & { userLanguage?: string }).userLanguage ||
       'en'
     ).toLowerCase()
     const supported = Object.keys(I18N)
@@ -354,12 +354,18 @@ function detectLanguage() {
 }
 
 const USER_LANG = detectLanguage()
-function t(key) {
+function t(key: string): string {
   return (I18N[USER_LANG] && I18N[USER_LANG][key]) || I18N.en[key] || key
 }
 
-function tpl(str, params) {
-  return String(str).replaceAll(/{(\w+)}/g, (_, k) => `${params?.[k] ?? ''}`)
+function tpl(
+  str: string,
+  params?: Record<string, string | number | boolean | undefined>
+): string {
+  return String(str).replaceAll(
+    /{(\w+)}/g,
+    (_: string, k: string) => `${params?.[k] ?? ''}`
+  )
 }
 
 // Imgur Client ID pool (see upload-image.ts)
@@ -462,10 +468,11 @@ function ensureAllowedValue(
   return set.has(value) ? value : defaultValue
 }
 
-// Global custom formats: [{ name: string, template: string }]
+type CustomFormat = { name: string; template: string }
+
 async function getCustomFormats() {
   try {
-    const list = (await getValue(CUSTOM_FORMATS_KEY, [])) || []
+    const list = (await getValue<CustomFormat[]>(CUSTOM_FORMATS_KEY, [])) || []
     if (!Array.isArray(list)) return []
     return list
       .map((it) => ({
@@ -478,7 +485,7 @@ async function getCustomFormats() {
   }
 }
 
-async function setCustomFormats(list) {
+async function setCustomFormats(list: CustomFormat[]): Promise<void> {
   try {
     const arr = Array.isArray(list) ? list : []
     const normalized = arr
@@ -498,7 +505,10 @@ async function setCustomFormats(list) {
   } catch {}
 }
 
-async function upsertCustomFormat(name, template) {
+async function upsertCustomFormat(
+  name: string,
+  template: string
+): Promise<void> {
   try {
     name = String(name || '').trim()
     template = String(template || '')
@@ -515,7 +525,7 @@ async function upsertCustomFormat(name, template) {
   } catch {}
 }
 
-async function removeCustomFormat(name) {
+async function removeCustomFormat(name: string): Promise<void> {
   try {
     name = String(name || '').trim()
     if (!name) return
@@ -549,19 +559,23 @@ async function migrateToUnifiedSiteMap() {
     // Only migrate if the unified map is empty to avoid overwriting user settings
     if (!isEmpty) return
 
-    const formatMap = (await getValue(FORMAT_MAP_KEY, {})) || {}
-    const hostMap = (await getValue(HOST_MAP_KEY, {})) || {}
-    const proxyMap = (await getValue(PROXY_MAP_KEY, {})) || {}
-    const btnMap = (await getValue(BTN_SETTINGS_MAP_KEY, {})) || {}
+    const formatMap =
+      (await getValue<Record<string, any>>(FORMAT_MAP_KEY, {})) || {}
+    const hostMap =
+      (await getValue<Record<string, any>>(HOST_MAP_KEY, {})) || {}
+    const proxyMap =
+      (await getValue<Record<string, any>>(PROXY_MAP_KEY, {})) || {}
+    const btnMap =
+      (await getValue<Record<string, any>>(BTN_SETTINGS_MAP_KEY, {})) || {}
 
-    const rawKeys = new Set([
+    const rawKeys = new Set<string>([
       ...Object.keys(formatMap),
       ...Object.keys(hostMap),
       ...Object.keys(proxyMap),
       ...Object.keys(btnMap),
       ...Object.keys(CONFIG || {}),
     ])
-    const keys = new Set()
+    const keys = new Set<string>()
     for (const k of rawKeys) keys.add(normalizeHost(k))
 
     for (const key of keys) {
@@ -728,17 +742,22 @@ async function applyPresetConfig() {
 // applyPresetConfig() // Moved to init
 
 const SITE_KEY = normalizeHost(location.hostname || '')
-const getSiteSettingsMap = async () => getValue(SITE_SETTINGS_MAP_KEY, {})
-const setSiteSettingsMap = async (map) => {
+const getSiteSettingsMap = async (): Promise<Record<string, any>> =>
+  (await getValue<Record<string, any>>(SITE_SETTINGS_MAP_KEY, {})) || {}
+const setSiteSettingsMap = async (map: Record<string, any>): Promise<void> => {
   await setValue(SITE_SETTINGS_MAP_KEY, map)
 }
 
-const getCurrentSiteSettings = async () => {
+const getCurrentSiteSettings = async (): Promise<Record<string, any>> => {
   const map = await getSiteSettingsMap()
   return map[SITE_KEY] || {}
 }
 
-const updateCurrentSiteSettings = async (updater) => {
+const updateCurrentSiteSettings = async (
+  updater:
+    | Record<string, any>
+    | ((current: Record<string, any>) => Record<string, any>)
+): Promise<void> => {
   const map = await getSiteSettingsMap()
   const key = SITE_KEY
   const current = map[key] || {}
@@ -1121,15 +1140,21 @@ async function applyProxy(url, providerKey) {
   }
 }
 
-async function gmRequest(opts) {
-  const req =
-    typeof GM !== 'undefined' && GM?.xmlHttpRequest
-      ? GM.xmlHttpRequest
+async function gmRequest(opts: {
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  url: string
+  headers?: Record<string, string>
+  data?: string | ArrayBuffer | FormData
+  responseType?: 'text' | 'json'
+}): Promise<any> {
+  const req: ((details: any) => void) | undefined =
+    typeof GM !== 'undefined' && (GM as any)?.xmlHttpRequest
+      ? (GM as any).xmlHttpRequest
       : typeof GM_xmlhttpRequest === 'undefined'
-        ? null
+        ? undefined
         : GM_xmlhttpRequest
   if (!req) throw new Error('GM.xmlHttpRequest unavailable')
-  return new Promise((resolve, reject) => {
+  return new Promise<any>((resolve, reject) => {
     try {
       req({
         method: opts.method || 'GET',
@@ -1137,7 +1162,7 @@ async function gmRequest(opts) {
         headers: opts.headers,
         data: opts.data,
         responseType: opts.responseType || 'text',
-        onload(res) {
+        onload(res: any) {
           try {
             if ((opts.responseType || 'text') === 'json') {
               resolve(res.response ?? JSON.parse(res.responseText || '{}'))
@@ -1164,7 +1189,6 @@ async function gmRequest(opts) {
 async function getMjjAuthToken() {
   const html = await gmRequest({ url: 'https://mjj.today/upload' })
   const m = /PF\.obj\.config\.auth_token\s*=\s*["']([A-Za-z\d]+)["']/.exec(
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     String(html || '')
   )
   if (!m || !m[1]) throw new Error(t('error_network'))
@@ -1272,7 +1296,7 @@ async function uploadToTikolu(file) {
   }
 
   const formData = new FormData()
-  formData.append('upload', true)
+  formData.append('upload', 'true')
   formData.append('file', file)
   const data = await gmRequest({
     method: 'POST',
@@ -1297,9 +1321,13 @@ async function uploadImage(file) {
 }
 
 // Track last visited editable element to support insertion after focus is lost
-let lastEditableEl = null
+let lastEditableEl:
+  | HTMLTextAreaElement
+  | HTMLInputElement
+  | HTMLElement
+  | undefined
 // Helper: get deepest active element across Shadow DOM and same-origin iframes
-function getDeepActiveElement() {
+function getDeepActiveElement(): Element | undefined {
   let el = document.activeElement
   try {
     // Traverse into open shadow roots
@@ -1310,7 +1338,7 @@ function getDeepActiveElement() {
     // Traverse into same-origin iframes
     while (
       el &&
-      el.tagName === 'IFRAME' &&
+      el instanceof HTMLIFrameElement &&
       el.contentDocument &&
       el.contentDocument.activeElement
     ) {
@@ -1318,11 +1346,11 @@ function getDeepActiveElement() {
     }
   } catch {}
 
-  return el
+  return el || undefined
 }
 
 // Helper: check if node is inside our UI panel (including its Shadow DOM)
-function isInsideUIPanel(node) {
+function isInsideUIPanel(node: Node | undefined): boolean {
   try {
     const host = document.querySelector('#uiu-panel')
     if (!host || !node) return false
@@ -1335,7 +1363,7 @@ function isInsideUIPanel(node) {
   return false
 }
 
-function isTextInput(el) {
+function isTextInput(el: unknown): el is HTMLInputElement {
   if (!(el instanceof HTMLInputElement)) return false
   const type = (el.type || '').toLowerCase()
   return (
@@ -1347,7 +1375,9 @@ function isTextInput(el) {
   )
 }
 
-function isEditable(el) {
+function isEditable(
+  el: unknown
+): el is HTMLTextAreaElement | HTMLInputElement | HTMLElement {
   return (
     el instanceof HTMLTextAreaElement ||
     isTextInput(el) ||
@@ -1369,13 +1399,13 @@ document.addEventListener(
   true
 )
 
-function insertIntoFocused(text) {
+function insertIntoFocused(text: string): boolean {
   let el = getDeepActiveElement()
   // Fallback to last editable target if current focus is not usable (or inside our panel)
   if (!isEditable(el) || isInsideUIPanel(el)) {
     el = lastEditableEl
     try {
-      if (el && typeof el.focus === 'function') el.focus()
+      if (el instanceof HTMLElement) el.focus()
     } catch {}
   }
 
@@ -1412,7 +1442,7 @@ function insertIntoFocused(text) {
   return false
 }
 
-function copyAndInsert(text) {
+function copyAndInsert(text: string): void {
   try {
     GM_setClipboard(text)
   } catch {}
@@ -1420,13 +1450,17 @@ function copyAndInsert(text) {
   insertIntoFocused(`\n${text}\n`)
 }
 
-function getActiveEditableTarget() {
+function getActiveEditableTarget():
+  | HTMLTextAreaElement
+  | HTMLInputElement
+  | HTMLElement
+  | undefined {
   let el = getDeepActiveElement()
   if (!isEditable(el) || isInsideUIPanel(el)) el = lastEditableEl
-  return isEditable(el) && !isInsideUIPanel(el) ? el : null
+  return isEditable(el) && !isInsideUIPanel(el) ? el : undefined
 }
 
-function createUploadPlaceholder(name) {
+function createUploadPlaceholder(name: string): string {
   const safe = String(name || t('default_image_name'))
   return `<!-- ${tpl(t('placeholder_uploading'), { name: safe })} -->`
 }
@@ -1465,7 +1499,12 @@ function replacePlaceholder(el, placeholder, replacement) {
   return false
 }
 
-async function createPanel() {
+async function createPanel(): Promise<
+  | {
+      handleFiles: (files: File[]) => void
+    }
+  | undefined
+> {
   if (!isTopFrame()) {
     return
   }
@@ -1678,7 +1717,7 @@ async function createPanel() {
     placeholder: t('placeholder_css_selector'),
   })
   const posSel = createEl('select')
-  buildPositionOptions(posSel)
+  buildPositionOptions(posSel, undefined)
   const textInput = createEl('input', {
     type: 'text',
     placeholder: t('placeholder_button_content'),
@@ -1693,7 +1732,7 @@ async function createPanel() {
     })
 
     selInput.value = ''
-    buildPositionOptions(posSel)
+    buildPositionOptions(posSel, undefined)
     textInput.value = t('insert_image_button_default')
     await renderSettingsList()
 
@@ -1959,7 +1998,7 @@ async function createPanel() {
 
   async function refreshSettingsUI() {
     selInput.value = ''
-    buildPositionOptions(posSel)
+    buildPositionOptions(posSel, undefined)
     textInput.value = t('insert_image_button_default')
     await renderSettingsList()
     try {
@@ -2001,7 +2040,8 @@ async function createPanel() {
     const pos =
       posRaw === 'before' ? 'before' : posRaw === 'inside' ? 'inside' : 'after'
     const content = (cfg.text || t('insert_image_button_default')).trim()
-    for (const target of Array.from(targets)) {
+    for (const t of Array.from(targets)) {
+      const target = t as HTMLElement
       const exists =
         pos === 'inside'
           ? Boolean(target.querySelector('.uiu-insert-btn'))
@@ -2074,7 +2114,7 @@ async function createPanel() {
 
     const list = await getSiteBtnSettingsList()
     if (list.length === 0) {
-      siteBtnObserver = null
+      siteBtnObserver = undefined
       return
     }
 
@@ -2098,19 +2138,19 @@ async function createPanel() {
 
   await restartSiteButtonObserver()
 
-  let drop = null
-  let pasteHandler = null
-  let dragoverHandler = null
-  let dragleaveHandler = null
-  let dropHandler = null
+  let drop: HTMLElement | undefined
+  let pasteHandler: ((event: ClipboardEvent) => void) | undefined
+  let dragoverHandler: ((event: DragEvent) => void) | undefined
+  let dragleaveHandler: ((event: DragEvent) => void) | undefined
+  let dropHandler: ((event: DragEvent) => void) | undefined
   function enablePaste() {
     if (pasteHandler) return
     pasteHandler = (event) => {
       const cd = event.clipboardData
       if (!cd) return
-      const list = []
-      const seen = new Set()
-      const addIfNew = (f) => {
+      const list: File[] = []
+      const seen = new Set<string>()
+      const addIfNew = (f: File) => {
         const sig = `${f.name}|${f.size}|${f.type}|${f.lastModified || 0}`
         if (!seen.has(sig)) {
           seen.add(sig)
@@ -2144,21 +2184,20 @@ async function createPanel() {
   function disablePaste() {
     if (!pasteHandler) return
     document.removeEventListener('paste', pasteHandler, true)
-    pasteHandler = null
+    pasteHandler = undefined
   }
 
   function enableDrag() {
     if (!drop) {
       drop = createEl('div', { id: 'uiu-drop', text: t('drop_overlay') })
-      document.body.append(drop)
+      if (drop) document.body.append(drop)
     }
 
     if (!dragoverHandler) {
       dragoverHandler = (e) => {
         const dt = e.dataTransfer
         const types = dt?.types ? Array.from(dt.types) : []
-        const hasFileType =
-          types.includes('Files') || dt?.types?.contains?.('Files')
+        const hasFileType = types.includes('Files')
         const hasFileItem = dt?.items
           ? Array.from(dt.items).some((it) => it.kind === 'file')
           : false
@@ -2194,17 +2233,17 @@ async function createPanel() {
   function disableDrag() {
     if (dragoverHandler) {
       document.removeEventListener('dragover', dragoverHandler)
-      dragoverHandler = null
+      dragoverHandler = undefined
     }
 
     if (dragleaveHandler) {
       document.removeEventListener('dragleave', dragleaveHandler)
-      dragleaveHandler = null
+      dragleaveHandler = undefined
     }
 
     if (dropHandler) {
       document.removeEventListener('drop', dropHandler)
-      dropHandler = null
+      dropHandler = undefined
     }
 
     if (drop) {
@@ -2212,7 +2251,7 @@ async function createPanel() {
         drop.remove()
       } catch {}
 
-      drop = null
+      drop = undefined
     }
   }
 
@@ -2285,7 +2324,7 @@ async function createPanel() {
     }
   }
 
-  function handleFiles(files) {
+  function handleFiles(files: File[]): void {
     const imgs = files.filter((f) => f.type.includes('image'))
     if (imgs.length === 0) return
     total += imgs.length
@@ -2473,9 +2512,11 @@ async function createPanel() {
 
     const enabled = await getEnabled()
     if (enabled && !document.querySelector('#uiu-panel')) {
-      const { handleFiles } = await createPanel()
-      globalThis.addEventListener('iu:uploadFiles', (e) => {
-        const files = e.detail?.files
+      const panelApi = await createPanel()
+      if (!panelApi) return
+      const { handleFiles } = panelApi
+      globalThis.addEventListener('iu:uploadFiles', (e: Event) => {
+        const files = (e as CustomEvent<{ files?: File[] }>).detail?.files
         if (files?.length) handleFiles(files)
       })
     }
