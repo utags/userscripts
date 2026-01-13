@@ -15,6 +15,8 @@
 ![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-22-16-52-20.png)
 ![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-22-17-03-52.gif)
 
+![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2026-01-13-21-25-22.gif)
+
 ## 核心功能
 
 - **按站点智能分组**：根据当前访问的网站自动显示相关的导航组。你可以配置特定分组仅在特定的域名或 URL 模式下显示。

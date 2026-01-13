@@ -15,6 +15,8 @@
 ![screenshot](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-22-16-52-20.png)
 ![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2025-12-22-17-03-52.gif)
 
+![screenshot](https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2026-01-13-21-25-22.gif)
+
 ## Key Features
 
 - **Per-Site Grouping**: Automatically displays relevant navigation groups based on the website you are currently visiting. Configure groups to appear on specific domains or URL patterns.
