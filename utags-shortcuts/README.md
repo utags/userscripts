@@ -110,6 +110,7 @@ You can use the following variables in the URL field. They will be replaced with
 
 ### v0.7.x
 
+- **Selection-Based Filtering**: Automatically filters navigation items when text is selected. Only items containing the `{selected}` variable will be displayed, helping you quickly find relevant actions.
 - **Variable Enhancement**: Optimized the variable update mechanism. Relevant variables now automatically update and trigger a rerender when the page title (`{current_title}`) or selected text (`{selected}`) changes.
 - **Global Selection State**: Introduced global selection state management. The main page can now detect text selection changes within iframes, ensuring the `{selected}` variable always reflects the user's latest selection, whether in the main page or an iframe.
 - **Smart Debounce**: Added debounce mechanism for state updates to prevent excessive rerenders caused by frequent title or selection changes.

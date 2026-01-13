@@ -103,6 +103,7 @@ const selectedItemsByGroup = new Map<string, Set<string>>()
 let draggingItem: { groupId: string; itemId: string } | undefined
 let lastDragTarget: Element | undefined
 let lastDragPos: 'before' | 'after' | undefined
+let hasSelectedVarInCurrentGroups = false
 
 function matchPattern(url: string, pattern: string) {
   try {
@@ -854,6 +855,23 @@ async function handleDropOnGroup(
   rerender(root, cfg)
 }
 
+function hasSelectedVar(text: string) {
+  return /{selected(?:\|\|.*?)?}/.test(text)
+}
+
+function hasSelectedVarInGroups(groups: ShortcutsGroup[]) {
+  for (const g of groups) {
+    const isEditing = editingGroups.has(g.id)
+    for (const it of g.items) {
+      if (it.hidden && !showHiddenItems && !isEditing) continue
+      const val = String(it.data || '')
+      if (hasSelectedVar(val)) return true
+    }
+  }
+
+  return false
+}
+
 function renderGroupSection(
   root: ShadowRoot,
   cfg: ShortcutsConfig,
@@ -1200,8 +1218,17 @@ function renderGroupSection(
 
   items.style.display = g.collapsed ? 'none' : ''
   let visibleCount = 0
+  const selectedText = (globalThis as any).__utags_shortcuts_selected_text__
+  const isSelectionFiltering = Boolean(selectedText)
+
   for (const it of g.items) {
     if (it.hidden && !showHiddenItems && !isEditing) continue
+
+    if (isSelectionFiltering) {
+      const val = String(it.data || '')
+      if (!hasSelectedVar(val)) continue
+    }
+
     visibleCount++
     const wrap = renderShortcutsItem(root, cfg, g, it, section, isEditing)
     items.append(wrap)
@@ -1219,10 +1246,15 @@ function renderGroupSection(
   }
 
   if (visibleCount === 0) {
-    const msg = document.createElement('div')
-    msg.className = 'empty-msg'
-    msg.textContent = g.items.length === 0 ? '无项目' : '项目已被隐藏'
-    items.append(msg)
+    if (isSelectionFiltering) {
+      section.style.display = 'none'
+      div.style.display = 'none'
+    } else {
+      const msg = document.createElement('div')
+      msg.className = 'empty-msg'
+      msg.textContent = g.items.length === 0 ? '无项目' : '项目已被隐藏'
+      items.append(msg)
+    }
   }
 
   section.append(items)
@@ -1463,6 +1495,8 @@ function renderPanel(root: ShadowRoot, cfg: ShortcutsConfig, animIn: boolean) {
   const body = renderPanelHeader(root, cfg, panel)
 
   const groupsToShow = currentGroups(cfg)
+  hasSelectedVarInCurrentGroups = hasSelectedVarInGroups(groupsToShow)
+
   for (const g of groupsToShow) renderGroupSection(root, cfg, g, body)
 
   wrapper.append(panel)
@@ -1636,6 +1670,11 @@ function rerender(root: ShadowRoot, cfg: ShortcutsConfig) {
 
       lastCollapsed = true
       suppressCollapse = false
+
+      // Check if there is any shortcuts which contains the `{selected}` variable in the current groups
+      const groupsToShow = currentGroups(cfg)
+      hasSelectedVarInCurrentGroups = hasSelectedVarInGroups(groupsToShow)
+
       try {
         if (isIframeMode) {
           updateIframeLayout(false)
@@ -1669,7 +1708,7 @@ function rerender(root: ShadowRoot, cfg: ShortcutsConfig) {
 
   setTimeout(() => {
     for (const n of toRemove) n.remove()
-  }, 200)
+  }, 100)
 
   if (!lastCollapsed) {
     try {
@@ -1860,7 +1899,11 @@ function registerUrlChangeListener(root: ShadowRoot, cfg: ShortcutsConfig) {
       return
     }
 
-    const text = (selection || '').toString().trim()
+    let text = (selection || '').toString().trim()
+    if (!hasSelectedVarInCurrentGroups) {
+      text = ''
+    }
+
     if (text === lastSelectedText) return
     lastSelectedText = text
     ;(globalThis as any).__utags_shortcuts_selected_text__ = text
@@ -1870,7 +1913,11 @@ function registerUrlChangeListener(root: ShadowRoot, cfg: ShortcutsConfig) {
   // Watch for iframe selection changes
   window.addEventListener('message', (e) => {
     if (e.data?.type === 'USHORTCUTS_SELECTION_CHANGE') {
-      const text = (e.data.text || '').trim()
+      let text = (e.data.text || '').trim()
+      if (!hasSelectedVarInCurrentGroups) {
+        text = ''
+      }
+
       if (text === lastSelectedText) return
       lastSelectedText = text
       ;(globalThis as any).__utags_shortcuts_selected_text__ = text

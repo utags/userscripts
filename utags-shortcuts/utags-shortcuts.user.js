@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.7.0
+// @version              0.7.1
 // @description          Floating or sidebar quick navigation with per-site groups, icons, JS script execution, and editable items.
 // @description:zh-CN    悬浮或侧边栏快速导航，支持按站点分组、图标、执行JS脚本与可编辑导航项。
 // @icon                 data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2212%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M22%2032h20M22%2042h16M22%2022h12%22%20stroke%3D%22%231f2937%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E
@@ -6135,6 +6135,7 @@
   var draggingItem
   var lastDragTarget
   var lastDragPos
+  var hasSelectedVarInCurrentGroups = false
   function matchPattern(url, pattern) {
     try {
       const t = String(pattern || '')
@@ -6758,6 +6759,20 @@
     await saveConfig(cfg)
     rerender(root, cfg)
   }
+  function hasSelectedVar(text) {
+    return /{selected(?:\|\|.*?)?}/.test(text)
+  }
+  function hasSelectedVarInGroups(groups) {
+    for (const g of groups) {
+      const isEditing = editingGroups.has(g.id)
+      for (const it of g.items) {
+        if (it.hidden && !showHiddenItems && !isEditing) continue
+        const val = String(it.data || '')
+        if (hasSelectedVar(val)) return true
+      }
+    }
+    return false
+  }
   function renderGroupSection(root, cfg, g, body) {
     var _a
     const isEditing = editingGroups.has(g.id)
@@ -7087,8 +7102,14 @@
     }
     items.style.display = g.collapsed ? 'none' : ''
     let visibleCount = 0
+    const selectedText = globalThis.__utags_shortcuts_selected_text__
+    const isSelectionFiltering = Boolean(selectedText)
     for (const it of g.items) {
       if (it.hidden && !showHiddenItems && !isEditing) continue
+      if (isSelectionFiltering) {
+        const val = String(it.data || '')
+        if (!hasSelectedVar(val)) continue
+      }
       visibleCount++
       const wrap = renderShortcutsItem(root, cfg, g, it, section, isEditing)
       items.append(wrap)
@@ -7104,13 +7125,18 @@
       )
     }
     if (visibleCount === 0) {
-      const msg = document.createElement('div')
-      msg.className = 'empty-msg'
-      msg.textContent =
-        g.items.length === 0
-          ? '\u65E0\u9879\u76EE'
-          : '\u9879\u76EE\u5DF2\u88AB\u9690\u85CF'
-      items.append(msg)
+      if (isSelectionFiltering) {
+        section.style.display = 'none'
+        div.style.display = 'none'
+      } else {
+        const msg = document.createElement('div')
+        msg.className = 'empty-msg'
+        msg.textContent =
+          g.items.length === 0
+            ? '\u65E0\u9879\u76EE'
+            : '\u9879\u76EE\u5DF2\u88AB\u9690\u85CF'
+        items.append(msg)
+      }
     }
     section.append(items)
     section.classList.add('fade-in')
@@ -7317,6 +7343,7 @@
       )
     const body = renderPanelHeader(root, cfg, panel)
     const groupsToShow = currentGroups(cfg)
+    hasSelectedVarInCurrentGroups = hasSelectedVarInGroups(groupsToShow)
     for (const g of groupsToShow) renderGroupSection(root, cfg, g, body)
     wrapper.append(panel)
     wrapper.addEventListener('mouseenter', () => {
@@ -7462,6 +7489,8 @@
         }
         lastCollapsed = true
         suppressCollapse = false
+        const groupsToShow = currentGroups(cfg)
+        hasSelectedVarInCurrentGroups = hasSelectedVarInGroups(groupsToShow)
         try {
           if (isIframeMode) {
             updateIframeLayout(false)
@@ -7488,7 +7517,7 @@
     }
     setTimeout(() => {
       for (const n of toRemove) n.remove()
-    }, 200)
+    }, 100)
     if (!lastCollapsed) {
       try {
         const cur =
@@ -7639,7 +7668,10 @@
       if (anchorNode && anchorNode instanceof HTMLHtmlElement) {
         return
       }
-      const text = (selection || '').toString().trim()
+      let text = (selection || '').toString().trim()
+      if (!hasSelectedVarInCurrentGroups) {
+        text = ''
+      }
       if (text === lastSelectedText) return
       lastSelectedText = text
       globalThis.__utags_shortcuts_selected_text__ = text
@@ -7651,7 +7683,10 @@
         ((_a = e.data) == null ? void 0 : _a.type) ===
         'USHORTCUTS_SELECTION_CHANGE'
       ) {
-        const text = (e.data.text || '').trim()
+        let text = (e.data.text || '').trim()
+        if (!hasSelectedVarInCurrentGroups) {
+          text = ''
+        }
         if (text === lastSelectedText) return
         lastSelectedText = text
         globalThis.__utags_shortcuts_selected_text__ = text
