@@ -4,6 +4,7 @@ import { shouldOpenInCurrentTab } from '../../utils/dom'
 import { isTopFrame } from '../../utils/is-top-frame'
 import { navigateUrl } from '../../utils/navigate'
 import { isSameOrigin } from '../../utils/url'
+import { watchTitleChange } from '../../utils/watch-title'
 import { createUshortcutsSettingsStore } from './settings-panel'
 import { isEditableTarget } from './utils'
 
@@ -377,35 +378,9 @@ export function initIframeChild() {
   initialOrigin = location.origin
 
   // Monitor title changes
-  try {
-    const titleObserver = new MutationObserver(() => {
-      notify()
-    })
-
-    let currentTitle: Element | undefined
-
-    const updateTitleObserver = () => {
-      const titleEl = document.querySelector('title') ?? undefined
-      if (titleEl === currentTitle) return
-
-      if (currentTitle) {
-        titleObserver.disconnect()
-      }
-
-      currentTitle = titleEl
-      if (currentTitle) {
-        titleObserver.observe(currentTitle, { childList: true })
-        notify()
-      }
-    }
-
-    updateTitleObserver()
-
-    const headObserver = new MutationObserver(updateTitleObserver)
-    if (document.head) {
-      headObserver.observe(document.head, { childList: true })
-    }
-  } catch {}
+  watchTitleChange(() => {
+    notify()
+  })
 
   // Hook pushState/replaceState
   const originalPushState = history.pushState

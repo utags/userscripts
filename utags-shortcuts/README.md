@@ -108,6 +108,13 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.7.x
+
+- **Variable Enhancement**: Optimized the variable update mechanism. Relevant variables now automatically update and trigger a rerender when the page title (`{current_title}`) or selected text (`{selected}`) changes.
+- **Global Selection State**: Introduced global selection state management. The main page can now detect text selection changes within iframes, ensuring the `{selected}` variable always reflects the user's latest selection, whether in the main page or an iframe.
+- **Smart Debounce**: Added debounce mechanism for state updates to prevent excessive rerenders caused by frequent title or selection changes.
+- **Code Optimization**: Extracted common title listening logic, improved the stability of SPA (Single Page Application) title change detection, and fixed cross-origin iframe communication issues.
+
 ### v0.6.x
 
 - **Performance**: Implemented icon cache persistence to local storage, reducing network requests and speeding up initialization.

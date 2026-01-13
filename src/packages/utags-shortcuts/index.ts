@@ -8,6 +8,7 @@ import { isTopFrame } from '../../utils/is-top-frame'
 import { navigateUrl } from '../../utils/navigate'
 import { uid } from '../../utils/uid'
 import { isSameOrigin } from '../../utils/url'
+import { watchTitleChange } from '../../utils/watch-title'
 import { openAddGroupModal } from './add-group-modal'
 import {
   addCurrentPageLinkToGroup,
@@ -1830,6 +1831,53 @@ function registerUrlChangeListener(root: ShadowRoot, cfg: ShortcutsConfig) {
     rerender(root, cfg)
   }
 
+  // Debounced rerender for title and selection changes
+  let rerenderTimer: any = null
+  function scheduleRerender() {
+    if (rerenderTimer) clearTimeout(rerenderTimer)
+    rerenderTimer = setTimeout(() => {
+      rerender(root, cfg)
+    }, 200)
+  }
+
+  let lastTitle = document.title.trim()
+  // Watch for title changes
+  watchTitleChange(() => {
+    const currentTitle = document.title.trim()
+    if (currentTitle === lastTitle) return
+    lastTitle = currentTitle
+    scheduleRerender()
+  })
+
+  let lastSelectedText = ''
+  // Watch for selection changes
+  document.addEventListener('selectionchange', () => {
+    const selection = document.getSelection()
+    if (!selection) return
+    const anchorNode = selection.anchorNode
+    // Ignore selection changes inside the shortcuts panel
+    if (anchorNode && anchorNode instanceof HTMLHtmlElement) {
+      return
+    }
+
+    const text = (selection || '').toString().trim()
+    if (text === lastSelectedText) return
+    lastSelectedText = text
+    ;(globalThis as any).__utags_shortcuts_selected_text__ = text
+    scheduleRerender()
+  })
+
+  // Watch for iframe selection changes
+  window.addEventListener('message', (e) => {
+    if (e.data?.type === 'USHORTCUTS_SELECTION_CHANGE') {
+      const text = (e.data.text || '').trim()
+      if (text === lastSelectedText) return
+      lastSelectedText = text
+      ;(globalThis as any).__utags_shortcuts_selected_text__ = text
+      scheduleRerender()
+    }
+  })
+
   try {
     const origPush = history.pushState.bind(history)
     history.pushState = function (...args: any[]) {
@@ -1925,6 +1973,18 @@ function main() {
   } catch {}
 
   if (!isTopFrame()) {
+    // Notify top frame about selection changes in iframes
+    let timer: any
+    document.addEventListener('selectionchange', () => {
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => {
+        const text = (document.getSelection() || '').toString()
+        window.top?.postMessage(
+          { type: 'USHORTCUTS_SELECTION_CHANGE', text },
+          '*'
+        )
+      }, 200)
+    })
     return
   }
 

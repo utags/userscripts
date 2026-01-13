@@ -69,21 +69,19 @@ export function resolveUrlTemplate(
         return encodeURIComponent(href)
       },
       current_title() {
-        return encodeURIComponent(doc.title || '')
+        return encodeURIComponent(doc.title.trim() || '')
       },
       selected() {
         try {
-          let text = (win.getSelection() || '').toString()
-          if (!text) {
-            const iframe = doc.querySelector<HTMLIFrameElement>(
-              'iframe[name="utags-shortcuts-iframe"]'
-            )
-            if (iframe?.contentWindow) {
-              try {
-                text = (iframe.contentWindow.getSelection() || '').toString()
-              } catch {}
-            }
+          // Use global variable to store selected text from iframes
+          // This variable is updated by the main script
+          const globalSelected = (globalThis as any)
+            .__utags_shortcuts_selected_text__
+          if (globalSelected) {
+            return encodeURIComponent(globalSelected)
           }
+
+          const text = (win.getSelection() || '').toString().trim()
 
           return encodeURIComponent(text)
         } catch {}
