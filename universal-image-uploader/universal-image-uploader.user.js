@@ -568,34 +568,6 @@
       placeholder_upload_failed: '\u4E0A\u50B3\u5931\u6557\uFF1A{name}',
     },
   }
-  function detectLanguage() {
-    try {
-      const browserLang = (
-        navigator.language ||
-        navigator.userLanguage ||
-        'en'
-      ).toLowerCase()
-      const supported = Object.keys(I18N)
-      if (supported.includes(browserLang)) return browserLang
-      const base = browserLang.split('-')[0]
-      const match = supported.find((l) => l.startsWith(base + '-'))
-      return match || 'en'
-    } catch (e) {
-      return 'en'
-    }
-  }
-  var USER_LANG = detectLanguage()
-  function t(key) {
-    return (I18N[USER_LANG] && I18N[USER_LANG][key]) || I18N.en[key] || key
-  }
-  function tpl(str, params) {
-    return String(str).replaceAll(/{(\w+)}/g, (_, k) => {
-      var _a
-      return ''.concat(
-        (_a = params == null ? void 0 : params[k]) != null ? _a : ''
-      )
-    })
-  }
   var IMGUR_CLIENT_IDS = [
     '3107b9ef8b316f3',
     '442b04f26eefc8a',
@@ -630,24 +602,33 @@
     uploadNameType: 'default',
     autoRetry: true,
   }
-  async function migrateLegacyStorage() {
+  function detectLanguage() {
     try {
-      const maybeMove = async (oldKey, newKey) => {
-        const newVal = await getValue(newKey)
-        const hasNew = newVal !== void 0
-        const oldVal = await getValue(oldKey)
-        const hasOld = oldVal !== void 0
-        if (!hasNew && hasOld) {
-          await setValue(newKey, oldVal)
-          try {
-            await deleteValue(oldKey)
-          } catch (e) {}
-        }
-      }
-      await maybeMove('iu_history', HISTORY_KEY)
-      await maybeMove('iu_format_map', FORMAT_MAP_KEY)
-      await maybeMove('iu_site_btn_settings_map', BTN_SETTINGS_MAP_KEY)
-    } catch (e) {}
+      const browserLang = (
+        navigator.language ||
+        navigator.userLanguage ||
+        'en'
+      ).toLowerCase()
+      const supported = Object.keys(I18N)
+      if (supported.includes(browserLang)) return browserLang
+      const base = browserLang.split('-')[0]
+      const match = supported.find((l) => l.startsWith(base + '-'))
+      return match || 'en'
+    } catch (e) {
+      return 'en'
+    }
+  }
+  var USER_LANG = detectLanguage()
+  function t(key) {
+    return (I18N[USER_LANG] && I18N[USER_LANG][key]) || I18N.en[key] || key
+  }
+  function tpl(str, params) {
+    return String(str).replaceAll(/{(\w+)}/g, (_, k) => {
+      var _a
+      return ''.concat(
+        (_a = params == null ? void 0 : params[k]) != null ? _a : ''
+      )
+    })
   }
   function normalizeHost(h) {
     try {
@@ -734,8 +715,27 @@
   async function ensureAllowedFormat(fmt) {
     return ensureAllowedValue(fmt, await getAllowedFormats(), DEFAULT_FORMAT)
   }
+  async function migrateLegacyStorage() {
+    try {
+      const maybeMove = async (oldKey, newKey) => {
+        const newVal = await getValue(newKey)
+        const hasNew = newVal !== void 0
+        const oldVal = await getValue(oldKey)
+        const hasOld = oldVal !== void 0
+        if (!hasNew && hasOld) {
+          await setValue(newKey, oldVal)
+          try {
+            await deleteValue(oldKey)
+          } catch (e) {}
+        }
+      }
+      await maybeMove('iu_history', HISTORY_KEY)
+      await maybeMove('iu_format_map', FORMAT_MAP_KEY)
+      await maybeMove('iu_site_btn_settings_map', BTN_SETTINGS_MAP_KEY)
+    } catch (e) {}
+  }
   async function migrateToUnifiedSiteMap() {
-    var _a, _b, _c, _d, _e, _f
+    var _a, _b, _c, _d, _e, _f, _g
     try {
       const existing = await getValue(SITE_SETTINGS_MAP_KEY, void 0)
       const siteMap = existing && typeof existing === 'object' ? existing : {}
@@ -756,30 +756,30 @@
       for (const k of rawKeys) keys.add(normalizeHost(k))
       for (const key of keys) {
         if (!key) continue
-        const preset = (CONFIG == null ? void 0 : CONFIG[key]) || {}
+        const preset = ((_a = CONFIG) == null ? void 0 : _a[key]) || {}
         const s = siteMap[key] || {}
         if (s.format === void 0) {
-          const fmt = (_a = formatMap[key]) != null ? _a : preset.format
+          const fmt = (_b = formatMap[key]) != null ? _b : preset.format
           const normalizedFormat = await ensureAllowedFormat(fmt)
           if (normalizedFormat) s.format = normalizedFormat
         }
         if (s.host === void 0) {
-          const h = (_b = hostMap[key]) != null ? _b : preset.host
+          const h = (_c = hostMap[key]) != null ? _c : preset.host
           const normalizedHost = ensureAllowedValue(h, ALLOWED_HOSTS)
           if (normalizedHost) s.host = normalizedHost
         }
         if (s.proxy === void 0) {
-          const px = (_c = proxyMap[key]) != null ? _c : preset.proxy
+          const px = (_d = proxyMap[key]) != null ? _d : preset.proxy
           const resolved = ensureAllowedValue(px, ALLOWED_PROXIES)
           if (resolved && resolved !== 'none') s.proxy = resolved
         }
         if (s.buttons === void 0) {
           const raw =
-            (_f =
-              (_e = (_d = btnMap[key]) != null ? _d : preset.buttons) != null
-                ? _e
+            (_g =
+              (_f = (_e = btnMap[key]) != null ? _e : preset.buttons) != null
+                ? _f
                 : preset.button) != null
-              ? _f
+              ? _g
               : []
           const arr = Array.isArray(raw) ? raw : raw ? [raw] : []
           const list = arr
