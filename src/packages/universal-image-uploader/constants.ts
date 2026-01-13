@@ -183,6 +183,8 @@ export const I18N: Record<string, any> = {
     default_image_name: 'image',
     proxy_none: 'No proxy',
     proxy_wsrv_nl: 'wsrv.nl',
+    proxy_duckduckgo: 'DuckDuckGo',
+    proxy_wsrv_nl_duckduckgo: 'wsrv.nl -> DuckDuckGo',
     error_network: 'Network error',
     error_upload_failed: 'Upload failed',
     placeholder_uploading: 'Uploading "{name}"...',
@@ -248,6 +250,7 @@ export const I18N: Record<string, any> = {
     default_image_name: '图片',
     proxy_none: '无代理',
     proxy_wsrv_nl: 'wsrv.nl',
+    proxy_duckduckgo: 'DuckDuckGo',
     error_network: '网络错误',
     error_upload_failed: '上传失败',
     placeholder_uploading: '正在上传「{name}」...',
@@ -313,6 +316,7 @@ export const I18N: Record<string, any> = {
     default_image_name: '圖片',
     proxy_none: '不使用代理',
     proxy_wsrv_nl: 'wsrv.nl',
+    proxy_duckduckgo: 'DuckDuckGo',
     error_network: '網路錯誤',
     error_upload_failed: '上傳失敗',
     placeholder_uploading: '正在上傳「{name}」...',
@@ -346,7 +350,12 @@ export const DEFAULT_PROXY = 'wsrv.nl'
 // Global allowed value lists
 export const ALLOWED_FORMATS = ['markdown', 'html', 'bbcode', 'link']
 export const ALLOWED_HOSTS = ['imgur', 'tikolu', 'mjj', 'appinn']
-export const ALLOWED_PROXIES = ['none', 'wsrv.nl']
+export const ALLOWED_PROXIES = [
+  'none',
+  'wsrv.nl',
+  'duckduckgo',
+  'wsrv.nl-duckduckgo',
+]
 export const ALLOWED_BUTTON_POSITIONS = ['before', 'inside', 'after']
 export const DEFAULT_BUTTON_POSITION = 'after'
 

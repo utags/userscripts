@@ -45,7 +45,7 @@ Install one of the following user script managers:
 - Open any site, paste or drop images onto the page, or use the panel’s file picker
 - Watch the upload queue and progress
 - Choose upload provider via the panel’s host selector (Imgur/Tikolu/MJJ.Today/Appinn)
-- Choose proxy via the panel’s proxy selector (default None; Imgur not supported)
+- Choose proxy via the panel’s proxy selector (default `None`)
 - When finished, the script auto-copies based on your selected format
 - Use history to quickly copy past uploads
 
@@ -55,13 +55,6 @@ Install one of the following user script managers:
 - `HTML`: `<img src="url" alt="alt" />`
 - `BBCode`: `[img]url[/img]`
 - `Link`: `url`
-
-## Configuration
-
-- Per-site upload provider: remember `Imgur` / `Tikolu` / `MJJ.Today` / `Appinn`
-- Per-site proxy: remember `None` / `wsrv.nl` (Imgur not supported; when `wsrv.nl` is selected, outputs and history copy/open use `https://wsrv.nl/?url=${encodeURIComponent(url)}`)
-- Per-site output format: remember `Markdown` / `HTML` / `BBCode` / `Link`
-- Per-site button injection (optional): selector, position (`before` | `inside` | `after`), text
 
 ## Site Button Settings
 
@@ -84,6 +77,12 @@ Install one of the following user script managers:
 - 🗂 History enhancements: filters by time/provider/tags, batch copy, faster reuse
 
 ## Changelog
+
+### v0.9.x
+
+- Added new proxy options: `DuckDuckGo` and `wsrv.nl -> DuckDuckGo`.
+- Enabled proxy selection for Imgur (supports `DuckDuckGo` and `wsrv.nl -> DuckDuckGo`; `wsrv.nl` automatically switches to `wsrv.nl -> DuckDuckGo`).
+- Refactored proxy configuration logic for better extensibility.
 
 ### v0.8.x
 

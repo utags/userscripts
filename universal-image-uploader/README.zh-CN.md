@@ -45,7 +45,7 @@
 - 在页面中粘贴/拖拽图片，或使用面板选择文件
 - 队列中可查看上传进度
 - 在面板的图床选择器中选择上传平台（Imgur/Tikolu/MJJ.Today/Appinn）
-- 在面板的代理选择器中选择是否使用代理（默认“无”；Imgur 不支持）
+- 在面板的代理选择器中选择是否使用代理（默认“无”）
 - 完成后按所选格式自动复制
 - 历史记录中可快速再次复制
 
@@ -55,13 +55,6 @@
 - `HTML`：`<img src="url" alt="alt" />`
 - `BBCode`：`[img]url[/img]`
 - `Link`：`url`
-
-## 配置项
-
-- 站点记忆图床：`Imgur` / `Tikolu`
-- 站点记忆代理：`无` / `wsrv.nl`（Imgur 不支持；当选择 `wsrv.nl` 时，输出与历史复制/打开将使用 `https://wsrv.nl/?url=${encodeURIComponent(url)}`）
-- 站点记忆输出格式：`Markdown` / `HTML` / `BBCode` / `Link`
-- 可选站点按钮注入：选择器、位置（`before` | `inside` | `after`）、按钮文案
 
 ## 站点按钮设置
 
@@ -84,6 +77,12 @@
 - 🗂 历史增强：按时间/平台/标签过滤，批量复制，更快复用
 
 ## 更新记录
+
+### v0.9.x
+
+- 新增代理选项：`DuckDuckGo` 和 `wsrv.nl -> DuckDuckGo`。
+- 允许 Imgur 使用代理（支持 `DuckDuckGo` 和 `wsrv.nl -> DuckDuckGo`；`wsrv.nl` 自动转为 `wsrv.nl -> DuckDuckGo`）。
+- 重构代理配置逻辑，提升扩展性。
 
 ### v0.8.x
 

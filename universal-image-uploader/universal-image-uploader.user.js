@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.8.2
+// @version              0.9.0
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -426,6 +426,8 @@
       default_image_name: 'image',
       proxy_none: 'No proxy',
       proxy_wsrv_nl: 'wsrv.nl',
+      proxy_duckduckgo: 'DuckDuckGo',
+      proxy_wsrv_nl_duckduckgo: 'wsrv.nl -> DuckDuckGo',
       error_network: 'Network error',
       error_upload_failed: 'Upload failed',
       placeholder_uploading: 'Uploading "{name}"...',
@@ -494,6 +496,7 @@
       default_image_name: '\u56FE\u7247',
       proxy_none: '\u65E0\u4EE3\u7406',
       proxy_wsrv_nl: 'wsrv.nl',
+      proxy_duckduckgo: 'DuckDuckGo',
       error_network: '\u7F51\u7EDC\u9519\u8BEF',
       error_upload_failed: '\u4E0A\u4F20\u5931\u8D25',
       placeholder_uploading: '\u6B63\u5728\u4E0A\u4F20\u300C{name}\u300D...',
@@ -562,6 +565,7 @@
       default_image_name: '\u5716\u7247',
       proxy_none: '\u4E0D\u4F7F\u7528\u4EE3\u7406',
       proxy_wsrv_nl: 'wsrv.nl',
+      proxy_duckduckgo: 'DuckDuckGo',
       error_network: '\u7DB2\u8DEF\u932F\u8AA4',
       error_upload_failed: '\u4E0A\u50B3\u5931\u6557',
       placeholder_uploading: '\u6B63\u5728\u4E0A\u50B3\u300C{name}\u300D...',
@@ -591,7 +595,7 @@
   var DEFAULT_PROXY = 'wsrv.nl'
   var ALLOWED_FORMATS = ['markdown', 'html', 'bbcode', 'link']
   var ALLOWED_HOSTS = ['imgur', 'tikolu', 'mjj', 'appinn']
-  var ALLOWED_PROXIES = ['none', 'wsrv.nl']
+  var ALLOWED_PROXIES = ['none', 'wsrv.nl', 'duckduckgo', 'wsrv.nl-duckduckgo']
   var ALLOWED_BUTTON_POSITIONS = ['before', 'inside', 'after']
   var DEFAULT_BUTTON_POSITION = 'after'
   var APPINN_UPLOAD_ENDPOINT = 'https://h1.appinn.me/upload'
@@ -1095,18 +1099,18 @@
       selectEl.append(opt)
     }
   }
+  var getProxyLabelKey = (val) =>
+    'proxy_'.concat(val.replaceAll('.', '_').replaceAll('-', '_'))
   var buildProxyOptions = (selectEl, selectedValue) => {
     if (!selectEl) return
     selectEl.textContent = ''
     const selected = selectedValue
       ? ensureAllowedValue(selectedValue, ALLOWED_PROXIES, DEFAULT_PROXY)
       : DEFAULT_PROXY
-    const proxyLabelKey = (val) =>
-      val === 'wsrv.nl' ? 'proxy_wsrv_nl' : 'proxy_none'
     for (const val of ALLOWED_PROXIES) {
       const opt = createEl('option', {
         value: val,
-        text: t(proxyLabelKey(val)),
+        text: t(getProxyLabelKey(val)),
       })
       if (val === selected) opt.selected = true
       selectEl.append(opt)
@@ -1166,12 +1170,23 @@
   }
   async function applyProxy(url, providerKey) {
     try {
-      const px = await getProxy()
+      let px = await getProxy()
       if (px === 'none') return url
-      const provider = providerKey || (await getHost())
-      if (provider === 'imgur' || isImgurUrl(url)) return url
       if (px === 'wsrv.nl') {
-        return 'https://wsrv.nl/?url='.concat(encodeURIComponent(url))
+        const provider = providerKey || (await getHost())
+        if (provider === 'imgur' || isImgurUrl(url)) px = 'wsrv.nl-duckduckgo'
+        else return 'https://wsrv.nl/?url='.concat(encodeURIComponent(url))
+      }
+      if (px === 'duckduckgo') {
+        return 'https://external-content.duckduckgo.com/iu/?u='.concat(
+          encodeURIComponent(url)
+        )
+      }
+      if (px === 'wsrv.nl-duckduckgo') {
+        const ddgUrl = 'https://external-content.duckduckgo.com/iu/?u='.concat(
+          encodeURIComponent(url)
+        )
+        return 'https://wsrv.nl/?url='.concat(encodeURIComponent(ddgUrl))
       }
       return url
     } catch (e) {
@@ -1563,25 +1578,10 @@
     buildHostOptions(hostSel, host)
     hostSel.addEventListener('change', async () => {
       await setHost(hostSel.value)
-      await updateProxyState()
     })
     const proxy = await getProxy()
     const proxySel = createEl('select')
     buildProxyOptions(proxySel, proxy)
-    async function updateProxyState() {
-      const currentHost = hostSel.value
-      if (currentHost === 'imgur') {
-        proxySel.value = 'none'
-        proxySel.disabled = true
-        await setProxy('none')
-        try {
-          await renderHistory()
-        } catch (e) {}
-      } else {
-        proxySel.disabled = false
-      }
-    }
-    await updateProxyState()
     proxySel.addEventListener('change', async () => {
       await setProxy(proxySel.value)
       try {

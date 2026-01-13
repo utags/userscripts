@@ -383,6 +383,10 @@ const buildHostOptions = (selectEl, selectedValue) => {
   }
 }
 
+// Helper: get proxy label key
+const getProxyLabelKey = (val: string) =>
+  `proxy_${val.replaceAll('.', '_').replaceAll('-', '_')}`
+
 // Helper: build proxy options
 const buildProxyOptions = (selectEl, selectedValue) => {
   if (!selectEl) return
@@ -391,12 +395,10 @@ const buildProxyOptions = (selectEl, selectedValue) => {
   const selected = selectedValue
     ? ensureAllowedValue(selectedValue, ALLOWED_PROXIES, DEFAULT_PROXY)
     : DEFAULT_PROXY
-  const proxyLabelKey = (val) =>
-    val === 'wsrv.nl' ? 'proxy_wsrv_nl' : 'proxy_none'
   for (const val of ALLOWED_PROXIES) {
     const opt = createEl('option', {
       value: val,
-      text: t(proxyLabelKey(val)),
+      text: t(getProxyLabelKey(val)),
     })
     if (val === selected) opt.selected = true
     selectEl.append(opt)
@@ -529,12 +531,22 @@ function isImgurUrl(url) {
 
 async function applyProxy(url, providerKey) {
   try {
-    const px = await getProxy()
+    let px = await getProxy()
     if (px === 'none') return url
-    const provider = providerKey || (await getHost())
-    if (provider === 'imgur' || isImgurUrl(url)) return url
+
     if (px === 'wsrv.nl') {
-      return `https://wsrv.nl/?url=${encodeURIComponent(url)}`
+      const provider = providerKey || (await getHost())
+      if (provider === 'imgur' || isImgurUrl(url)) px = 'wsrv.nl-duckduckgo'
+      else return `https://wsrv.nl/?url=${encodeURIComponent(url)}`
+    }
+
+    if (px === 'duckduckgo') {
+      return `https://external-content.duckduckgo.com/iu/?u=${encodeURIComponent(url)}`
+    }
+
+    if (px === 'wsrv.nl-duckduckgo') {
+      const ddgUrl = `https://external-content.duckduckgo.com/iu/?u=${encodeURIComponent(url)}`
+      return `https://wsrv.nl/?url=${encodeURIComponent(ddgUrl)}`
     }
 
     return url
@@ -979,27 +991,11 @@ async function createPanel(): Promise<
   buildHostOptions(hostSel, host)
   hostSel.addEventListener('change', async () => {
     await setHost(hostSel.value)
-    await updateProxyState()
   })
 
   const proxy = await getProxy()
   const proxySel = createEl('select')
   buildProxyOptions(proxySel, proxy)
-  async function updateProxyState() {
-    const currentHost = hostSel.value
-    if (currentHost === 'imgur') {
-      proxySel.value = 'none'
-      proxySel.disabled = true
-      await setProxy('none')
-      try {
-        await renderHistory()
-      } catch {}
-    } else {
-      proxySel.disabled = false
-    }
-  }
-
-  await updateProxyState()
   proxySel.addEventListener('change', async () => {
     await setProxy(proxySel.value)
     try {
