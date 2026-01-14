@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.10.0
+// @version              0.10.1
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -1520,6 +1520,141 @@
       (el instanceof HTMLElement && el.isContentEditable)
     )
   }
+  function isOverEditableOrPanel(target) {
+    if (!(target instanceof Node)) return false
+    if (isInsideUIPanel(target)) return true
+    let el =
+      target instanceof Element
+        ? target
+        : target.parentNode instanceof Element
+          ? target.parentNode
+          : void 0
+    while (el) {
+      if (isEditable(el)) return true
+      el = el.parentElement || void 0
+    }
+    return false
+  }
+  function initDragAndDrop(initialEnabled = true) {
+    let drop
+    let dragoverHandler
+    let dragleaveHandler
+    let dropHandler
+    const enableDrag = () => {
+      if (!drop) {
+        drop = createEl('div', { id: 'uiu-drop', text: t('drop_overlay') })
+        if (drop) document.body.append(drop)
+      }
+      if (!dragoverHandler) {
+        dragoverHandler = (e) => {
+          const dt = e.dataTransfer
+          const types = (dt == null ? void 0 : dt.types)
+            ? Array.from(dt.types)
+            : []
+          const hasFileType = types.includes('Files')
+          const hasFileItem = (dt == null ? void 0 : dt.items)
+            ? Array.from(dt.items).some((it) => it.kind === 'file')
+            : false
+          const firstTarget =
+            typeof e.composedPath === 'function'
+              ? e.composedPath()[0]
+              : e.target || void 0
+          const allowedTarget = isOverEditableOrPanel(firstTarget)
+          if ((hasFileType || hasFileItem) && allowedTarget) {
+            if (drop) drop.classList.add('show')
+            e.preventDefault()
+          } else if (drop) {
+            drop.classList.remove('show')
+          }
+        }
+        document.addEventListener('dragover', dragoverHandler)
+      }
+      if (!dragleaveHandler) {
+        dragleaveHandler = () => {
+          if (drop) drop.classList.remove('show')
+        }
+        document.addEventListener('dragleave', dragleaveHandler)
+      }
+      if (!dropHandler) {
+        dropHandler = (event) => {
+          var _a, _b
+          if (drop) drop.classList.remove('show')
+          const firstTarget =
+            typeof event.composedPath === 'function'
+              ? event.composedPath()[0]
+              : event.target || void 0
+          const allowedTarget = isOverEditableOrPanel(firstTarget)
+          if (!allowedTarget) return
+          try {
+            let el =
+              firstTarget instanceof Element
+                ? firstTarget
+                : firstTarget instanceof Node && firstTarget.parentElement
+                  ? firstTarget.parentElement
+                  : void 0
+            while (el) {
+              if (isEditable(el)) {
+                lastEditableEl = el
+                lastEditableFrame = globalThis
+                break
+              }
+              el = el.parentElement || void 0
+            }
+            const files = (_a = event.dataTransfer) == null ? void 0 : _a.files
+            if (!(files == null ? void 0 : files.length)) return
+            const imgs = Array.from(files).filter((f) =>
+              f.type.includes('image')
+            )
+            if (imgs.length === 0) return
+            event.preventDefault()
+            event.stopPropagation()
+            const detail = { files: imgs }
+            if (isTopFrame()) {
+              globalThis.dispatchEvent(
+                new CustomEvent('iu:uploadFiles', { detail })
+              )
+            } else {
+              ;(_b = globalThis.top) == null
+                ? void 0
+                : _b.postMessage(
+                    {
+                      type: 'iu:uploadFiles',
+                      detail,
+                    },
+                    '*'
+                  )
+            }
+          } catch (e) {}
+        }
+        document.addEventListener('drop', dropHandler)
+      }
+    }
+    const disableDrag = () => {
+      if (dragoverHandler) {
+        document.removeEventListener('dragover', dragoverHandler)
+        dragoverHandler = void 0
+      }
+      if (dragleaveHandler) {
+        document.removeEventListener('dragleave', dragleaveHandler)
+        dragleaveHandler = void 0
+      }
+      if (dropHandler) {
+        document.removeEventListener('drop', dropHandler)
+        dropHandler = void 0
+      }
+      if (drop) {
+        try {
+          drop.remove()
+        } catch (e) {}
+        drop = void 0
+      }
+    }
+    if (initialEnabled) enableDrag()
+    globalThis.addEventListener('beforeunload', () => {
+      disableDrag()
+    })
+    return { enable: enableDrag, disable: disableDrag }
+  }
   function findNearestEditableElement(from) {
     let parent = from == null ? void 0 : from.parentElement
     while (parent) {
@@ -1877,8 +2012,6 @@
     } catch (e) {}
     dragChk.addEventListener('change', async () => {
       await setDragAndDropEnabled(Boolean(dragChk.checked))
-      if (dragChk.checked) enableDrag()
-      else disableDrag()
     })
     dragLabel.append(dragChk)
     dragLabel.append(
@@ -2203,9 +2336,20 @@
       } catch (e) {}
     })
     globalThis.addEventListener('message', (event) => {
-      var _a
+      var _a, _b
       const type = (_a = event.data) == null ? void 0 : _a.type
       switch (type) {
+        case 'iu:uploadFiles': {
+          if (!isTopFrame()) break
+          try {
+            lastEditableFrame = event.source
+            const detail = (_b = event.data) == null ? void 0 : _b.detail
+            globalThis.dispatchEvent(
+              new CustomEvent('iu:uploadFiles', { detail })
+            )
+          } catch (e) {}
+          break
+        }
         case 'uiu:request-open-file-picker': {
           lastEditableFrame = event.source
           globalThis.dispatchEvent(new CustomEvent(type))
@@ -2225,11 +2369,7 @@
         }
       }
     })
-    let drop
     let pasteHandler
-    let dragoverHandler
-    let dragleaveHandler
-    let dropHandler
     function enablePaste() {
       if (pasteHandler) return
       pasteHandler = (event) => {
@@ -2272,66 +2412,6 @@
       if (!pasteHandler) return
       document.removeEventListener('paste', pasteHandler, true)
       pasteHandler = void 0
-    }
-    function enableDrag() {
-      if (!drop) {
-        drop = createEl('div', { id: 'uiu-drop', text: t('drop_overlay') })
-        if (drop) document.body.append(drop)
-      }
-      if (!dragoverHandler) {
-        dragoverHandler = (e) => {
-          const dt = e.dataTransfer
-          const types = (dt == null ? void 0 : dt.types)
-            ? Array.from(dt.types)
-            : []
-          const hasFileType = types.includes('Files')
-          const hasFileItem = (dt == null ? void 0 : dt.items)
-            ? Array.from(dt.items).some((it) => it.kind === 'file')
-            : false
-          if (hasFileType || hasFileItem) {
-            if (drop) drop.classList.add('show')
-            e.preventDefault()
-          } else if (drop) drop.classList.remove('show')
-        }
-        document.addEventListener('dragover', dragoverHandler)
-      }
-      if (!dragleaveHandler) {
-        dragleaveHandler = () => {
-          if (drop) drop.classList.remove('show')
-        }
-        document.addEventListener('dragleave', dragleaveHandler)
-      }
-      if (!dropHandler) {
-        dropHandler = (event) => {
-          var _a
-          if (drop) drop.classList.remove('show')
-          event.preventDefault()
-          const files = (_a = event.dataTransfer) == null ? void 0 : _a.files
-          if (files == null ? void 0 : files.length)
-            handleFiles(Array.from(files))
-        }
-        document.addEventListener('drop', dropHandler)
-      }
-    }
-    function disableDrag() {
-      if (dragoverHandler) {
-        document.removeEventListener('dragover', dragoverHandler)
-        dragoverHandler = void 0
-      }
-      if (dragleaveHandler) {
-        document.removeEventListener('dragleave', dragleaveHandler)
-        dragleaveHandler = void 0
-      }
-      if (dropHandler) {
-        document.removeEventListener('drop', dropHandler)
-        dropHandler = void 0
-      }
-      if (drop) {
-        try {
-          drop.remove()
-        } catch (e) {}
-        drop = void 0
-      }
     }
     const queue = []
     let running = 0
@@ -2463,8 +2543,6 @@
     }
     const pasteEnabled = await getPasteEnabled()
     if (pasteEnabled) enablePaste()
-    const dragEnabled = await getDragAndDropEnabled()
-    if (dragEnabled) enableDrag()
     async function renderHistory() {
       history.textContent = ''
       const header2 = createEl('div', { class: 'uiu-controls' })
@@ -2600,6 +2678,31 @@
       const enabled = await getEnabled()
       if (enabled) {
         await restartSiteButtonObserver()
+      }
+      if (enabled) {
+        const dragEnabled = await getDragAndDropEnabled()
+        const dragControls = initDragAndDrop(dragEnabled)
+        void addValueChangeListener(
+          SITE_SETTINGS_MAP_KEY,
+          (name, oldValue, newValue, remote) => {
+            var _a, _b
+            const oldMap = oldValue || {}
+            const newMap = newValue || {}
+            const oldState =
+              ((_a = oldMap[SITE_KEY]) == null
+                ? void 0
+                : _a.dragAndDropEnabled) === true
+            const newState =
+              ((_b = newMap[SITE_KEY]) == null
+                ? void 0
+                : _b.dragAndDropEnabled) === true
+            if (oldState !== newState) {
+              if (newState)
+                dragControls == null ? void 0 : dragControls.enable()
+              else dragControls == null ? void 0 : dragControls.disable()
+            }
+          }
+        )
       }
       if (enabled && isTopFrame() && !document.querySelector('#uiu-panel')) {
         const panelApi = await createPanel()

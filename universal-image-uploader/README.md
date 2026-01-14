@@ -87,6 +87,9 @@ Install one of the following user script managers:
 - Fix: Cross-frame focus tracking.
   - Correctly handles file picker requests and image pasting from iframes.
   - "Copy" button correctly targets the last focused element, even inside iframes.
+- Optimization: Refactored drag-and-drop logic.
+  - Unified drag-and-drop initialization for both main frame and iframes, reducing code duplication.
+  - Drag-and-drop settings changes now sync instantly across frames via `addValueChangeListener`.
 
 ### v0.9.x
 
