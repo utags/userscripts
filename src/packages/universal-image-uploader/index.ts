@@ -650,8 +650,15 @@ async function applyProxy(url, providerKey) {
 
     if (px === 'wsrv.nl') {
       const provider = providerKey || (await getHost())
-      if (provider === 'imgur' || isImgurUrl(url)) px = 'wsrv.nl-duckduckgo'
-      else return `https://wsrv.nl/?url=${encodeURIComponent(url)}`
+      if (
+        provider === 'imgur' ||
+        provider === '111666_best' ||
+        isImgurUrl(url)
+      ) {
+        px = 'wsrv.nl-duckduckgo'
+      } else {
+        return `https://wsrv.nl/?url=${encodeURIComponent(url)}`
+      }
     }
 
     if (px === 'duckduckgo') {
@@ -752,6 +759,100 @@ async function uploadToMjj(file) {
   }
 
   throw new Error(t('error_upload_failed'))
+}
+
+async function getImgbbAuthToken() {
+  const html = await gmRequest({ url: 'https://imgbb.com/upload' })
+  const m = /PF\.obj\.config\.auth_token\s*=\s*["']([A-Za-z\d]+)["']/.exec(
+    String(html || '')
+  )
+  if (!m || !m[1]) throw new Error(t('error_network'))
+  return m[1]
+}
+
+async function uploadToImgbb(file) {
+  if (Math.floor(file.size / 1000) > 32_000) {
+    throw new Error('32mb limit')
+  }
+
+  const token = await getImgbbAuthToken()
+  const formData = new FormData()
+  formData.append('source', file)
+  formData.append('type', 'file')
+  formData.append('action', 'upload')
+  formData.append('timestamp', String(Date.now()))
+  formData.append('auth_token', token)
+  formData.append('expiration', '')
+  formData.append('nsfw', '0')
+  const data = await gmRequest({
+    method: 'POST',
+    url: 'https://imgbb.com/json',
+    data: formData,
+    responseType: 'json',
+  })
+  if (data?.status_code === 200 && data?.image?.url) {
+    return String(data.image.url)
+  }
+
+  throw new Error(t('error_upload_failed'))
+}
+
+async function uploadToPhotoLily(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  const data = await gmRequest({
+    method: 'POST',
+    url: 'https://photo.lily.lat/upload',
+    data: formData,
+    responseType: 'json',
+  })
+  if (Array.isArray(data) && data[0]?.src) {
+    const src = String(data[0].src)
+    return /^https?:\/\//i.test(src) ? src : `https://photo.lily.lat${src}`
+  }
+
+  throw new Error(t('error_upload_failed'))
+}
+
+const HOST_111666_TOKENS = [
+  '6Fqz4pDz949bhzMOvUj2Ytgiy17ARsWz',
+  'FcyNm0KvmHx73qOcwbm0uZ89rXOQFuIT',
+  'yHF9Br2kXZqEC0sQR2hOSKlGv0A6hyMU',
+  'B56UgFSDhGeXpK1WSNBd6NakwuWHEmGP',
+  'qFxuIgXxCTOY0cj5VDiZPZW7uwPVbT7L',
+]
+
+async function uploadTo111666Best(file) {
+  const tokens = [...HOST_111666_TOKENS]
+  for (let i = tokens.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[tokens[i], tokens[j]] = [tokens[j], tokens[i]]
+  }
+
+  let lastError
+  for (const token of tokens) {
+    const formData = new FormData()
+    formData.append('payload', file)
+    try {
+      const data = await gmRequest({
+        method: 'POST',
+        url: 'https://i.111666.best/image',
+        headers: { 'auth-token': token },
+        data: formData,
+        responseType: 'json',
+      })
+      if (data?.ok && data?.src) {
+        const src = String(data.src)
+        return /^https?:\/\//i.test(src) ? src : `https://i.111666.best${src}`
+      }
+
+      lastError = new Error(t('error_upload_failed'))
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  throw (lastError as Error) || new Error(t('error_upload_failed'))
 }
 
 async function uploadToAppinn(file) {
@@ -858,7 +959,10 @@ async function uploadImage(file) {
 
   if (host === 'tikolu') return uploadToTikolu(file)
   if (host === 'mjj') return uploadToMjj(file)
+  if (host === 'imgbb') return uploadToImgbb(file)
   if (host === 'appinn') return uploadToAppinn(file)
+  if (host === 'photo_lily') return uploadToPhotoLily(file)
+  if (host === '111666_best') return uploadTo111666Best(file)
   // Default
   return uploadToImgur(file)
 }

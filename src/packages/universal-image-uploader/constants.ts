@@ -134,8 +134,11 @@ export const I18N: Record<string, any> = {
     host_imgur: 'Imgur',
     host_tikolu: 'Tikolu',
     host_mjj: 'MJJ.Today',
+    host_imgbb: 'ImgBB',
     host_appinn: 'Appinn',
-    btn_select_images: 'Select Images',
+    host_photo_lily: 'Photo.Lily',
+    host_111666_best: '111666.best',
+    btn_select_images: 'Select images',
     progress_initial: 'Done 0/0',
     progress_done: 'Done {done}/{total}',
     hint_text:
@@ -202,7 +205,10 @@ export const I18N: Record<string, any> = {
     host_imgur: 'Imgur',
     host_tikolu: 'Tikolu',
     host_mjj: 'MJJ.Today',
+    host_imgbb: 'ImgBB',
     host_appinn: 'Appinn',
+    host_photo_lily: 'Photo.Lily',
+    host_111666_best: '111666.best',
     btn_select_images: '选择图片',
     progress_initial: '完成 0/0',
     progress_done: '完成 {done}/{total}',
@@ -268,7 +274,10 @@ export const I18N: Record<string, any> = {
     host_imgur: 'Imgur',
     host_tikolu: 'Tikolu',
     host_mjj: 'MJJ.Today',
+    host_imgbb: 'ImgBB',
     host_appinn: 'Appinn',
+    host_photo_lily: 'Photo.Lily',
+    host_111666_best: '111666.best',
     btn_select_images: '選擇圖片',
     progress_initial: '完成 0/0',
     progress_done: '完成 {done}/{total}',
@@ -350,8 +359,17 @@ export const DEFAULT_PROXY = 'wsrv.nl'
 const ENABLE_MOCK_HOST = false
 export const ALLOWED_FORMATS = ['markdown', 'html', 'bbcode', 'link']
 export const ALLOWED_HOSTS = ENABLE_MOCK_HOST
-  ? ['imgur', 'tikolu', 'mjj', 'appinn', 'mock']
-  : ['imgur', 'tikolu', 'mjj', 'appinn']
+  ? [
+      'imgur',
+      'tikolu',
+      'mjj',
+      'imgbb',
+      'appinn',
+      'photo_lily',
+      '111666_best',
+      'mock',
+    ]
+  : ['imgur', 'tikolu', 'mjj', 'imgbb', 'appinn', 'photo_lily', '111666_best']
 export const ALLOWED_PROXIES = [
   'none',
   'wsrv.nl',

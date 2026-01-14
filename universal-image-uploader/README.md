@@ -19,7 +19,7 @@ A user script that lets you paste, drag, or select images and batch-upload them 
 ## Features (MVP)
 
 - 📥 Paste, drag-and-drop, or file picker to collect images
-- 📤 Batch upload to Imgur/Tikolu/MJJ.Today/Appinn with progress display
+- 📤 Batch upload to Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best with progress display
 - 📋 Auto-copy output in `Markdown` / `HTML` / `BBCode` / `Link`
 - 🕘 Local history to quickly re-copy and reuse uploads
 - 🔘 Optional site button injection with SPA observer (per-site settings)
@@ -44,7 +44,7 @@ Install one of the following user script managers:
 
 - Open any site, paste or drop images onto the page, or use the panel’s file picker
 - Watch the upload queue and progress
-- Choose upload provider via the panel’s host selector (Imgur/Tikolu/MJJ.Today/Appinn)
+- Choose upload provider via the panel’s host selector (Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best)
 - Choose proxy via the panel’s proxy selector (default `None`)
 - When finished, the script auto-copies based on your selected format
 - Use history to quickly copy past uploads
@@ -77,6 +77,11 @@ Install one of the following user script managers:
 - 🗂 History enhancements: filters by time/provider/tags, batch copy, faster reuse
 
 ## Changelog
+
+### v0.11.x
+
+- Added new upload providers: ImgBB, Photo.Lily, and 111666.best.
+- Updated documentation and host selector to include the new providers.
 
 ### v0.10.x
 

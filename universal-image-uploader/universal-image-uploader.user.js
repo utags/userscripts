@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.10.3
+// @version              0.11.0
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -22,7 +22,10 @@
 // @connect              api.imgur.com
 // @connect              tikolu.net
 // @connect              mjj.today
+// @connect              imgbb.com
 // @connect              h1.appinn.me
+// @connect              photo.lily.lat
+// @connect              i.111666.best
 // @grant                GM_registerMenuCommand
 // @grant                GM_info
 // @grant                GM.info
@@ -377,8 +380,11 @@
       host_imgur: 'Imgur',
       host_tikolu: 'Tikolu',
       host_mjj: 'MJJ.Today',
+      host_imgbb: 'ImgBB',
       host_appinn: 'Appinn',
-      btn_select_images: 'Select Images',
+      host_photo_lily: 'Photo.Lily',
+      host_111666_best: '111666.best',
+      btn_select_images: 'Select images',
       progress_initial: 'Done 0/0',
       progress_done: 'Done {done}/{total}',
       hint_text:
@@ -445,7 +451,10 @@
       host_imgur: 'Imgur',
       host_tikolu: 'Tikolu',
       host_mjj: 'MJJ.Today',
+      host_imgbb: 'ImgBB',
       host_appinn: 'Appinn',
+      host_photo_lily: 'Photo.Lily',
+      host_111666_best: '111666.best',
       btn_select_images: '\u9009\u62E9\u56FE\u7247',
       progress_initial: '\u5B8C\u6210 0/0',
       progress_done: '\u5B8C\u6210 {done}/{total}',
@@ -514,7 +523,10 @@
       host_imgur: 'Imgur',
       host_tikolu: 'Tikolu',
       host_mjj: 'MJJ.Today',
+      host_imgbb: 'ImgBB',
       host_appinn: 'Appinn',
+      host_photo_lily: 'Photo.Lily',
+      host_111666_best: '111666.best',
       btn_select_images: '\u9078\u64C7\u5716\u7247',
       progress_initial: '\u5B8C\u6210 0/0',
       progress_done: '\u5B8C\u6210 {done}/{total}',
@@ -596,8 +608,17 @@
   var ENABLE_MOCK_HOST = false
   var ALLOWED_FORMATS = ['markdown', 'html', 'bbcode', 'link']
   var ALLOWED_HOSTS = ENABLE_MOCK_HOST
-    ? ['imgur', 'tikolu', 'mjj', 'appinn', 'mock']
-    : ['imgur', 'tikolu', 'mjj', 'appinn']
+    ? [
+        'imgur',
+        'tikolu',
+        'mjj',
+        'imgbb',
+        'appinn',
+        'photo_lily',
+        '111666_best',
+        'mock',
+      ]
+    : ['imgur', 'tikolu', 'mjj', 'imgbb', 'appinn', 'photo_lily', '111666_best']
   var ALLOWED_PROXIES = ['none', 'wsrv.nl', 'duckduckgo', 'wsrv.nl-duckduckgo']
   var ALLOWED_BUTTON_POSITIONS = ['before', 'inside', 'after']
   var DEFAULT_BUTTON_POSITION = 'after'
@@ -1282,8 +1303,15 @@
       if (px === 'none') return url
       if (px === 'wsrv.nl') {
         const provider = providerKey || (await getHost())
-        if (provider === 'imgur' || isImgurUrl(url)) px = 'wsrv.nl-duckduckgo'
-        else return 'https://wsrv.nl/?url='.concat(encodeURIComponent(url))
+        if (
+          provider === 'imgur' ||
+          provider === '111666_best' ||
+          isImgurUrl(url)
+        ) {
+          px = 'wsrv.nl-duckduckgo'
+        } else {
+          return 'https://wsrv.nl/?url='.concat(encodeURIComponent(url))
+        }
       }
       if (px === 'duckduckgo') {
         return 'https://external-content.duckduckgo.com/iu/?u='.concat(
@@ -1383,6 +1411,101 @@
         : url
     }
     throw new Error(t('error_upload_failed'))
+  }
+  async function getImgbbAuthToken() {
+    const html = await gmRequest({ url: 'https://imgbb.com/upload' })
+    const m = /PF\.obj\.config\.auth_token\s*=\s*["']([A-Za-z\d]+)["']/.exec(
+      String(html || '')
+    )
+    if (!m || !m[1]) throw new Error(t('error_network'))
+    return m[1]
+  }
+  async function uploadToImgbb(file) {
+    var _a
+    if (Math.floor(file.size / 1e3) > 32e3) {
+      throw new Error('32mb limit')
+    }
+    const token = await getImgbbAuthToken()
+    const formData = new FormData()
+    formData.append('source', file)
+    formData.append('type', 'file')
+    formData.append('action', 'upload')
+    formData.append('timestamp', String(Date.now()))
+    formData.append('auth_token', token)
+    formData.append('expiration', '')
+    formData.append('nsfw', '0')
+    const data = await gmRequest({
+      method: 'POST',
+      url: 'https://imgbb.com/json',
+      data: formData,
+      responseType: 'json',
+    })
+    if (
+      (data == null ? void 0 : data.status_code) === 200 &&
+      ((_a = data == null ? void 0 : data.image) == null ? void 0 : _a.url)
+    ) {
+      return String(data.image.url)
+    }
+    throw new Error(t('error_upload_failed'))
+  }
+  async function uploadToPhotoLily(file) {
+    var _a
+    const formData = new FormData()
+    formData.append('file', file)
+    const data = await gmRequest({
+      method: 'POST',
+      url: 'https://photo.lily.lat/upload',
+      data: formData,
+      responseType: 'json',
+    })
+    if (Array.isArray(data) && ((_a = data[0]) == null ? void 0 : _a.src)) {
+      const src = String(data[0].src)
+      return /^https?:\/\//i.test(src)
+        ? src
+        : 'https://photo.lily.lat'.concat(src)
+    }
+    throw new Error(t('error_upload_failed'))
+  }
+  var HOST_111666_TOKENS = [
+    '6Fqz4pDz949bhzMOvUj2Ytgiy17ARsWz',
+    'FcyNm0KvmHx73qOcwbm0uZ89rXOQFuIT',
+    'yHF9Br2kXZqEC0sQR2hOSKlGv0A6hyMU',
+    'B56UgFSDhGeXpK1WSNBd6NakwuWHEmGP',
+    'qFxuIgXxCTOY0cj5VDiZPZW7uwPVbT7L',
+  ]
+  async function uploadTo111666Best(file) {
+    const tokens = [...HOST_111666_TOKENS]
+    for (let i = tokens.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[tokens[i], tokens[j]] = [tokens[j], tokens[i]]
+    }
+    let lastError
+    for (const token of tokens) {
+      const formData = new FormData()
+      formData.append('payload', file)
+      try {
+        const data = await gmRequest({
+          method: 'POST',
+          url: 'https://i.111666.best/image',
+          headers: { 'auth-token': token },
+          data: formData,
+          responseType: 'json',
+        })
+        if (
+          (data == null ? void 0 : data.ok) &&
+          (data == null ? void 0 : data.src)
+        ) {
+          const src = String(data.src)
+          return /^https?:\/\//i.test(src)
+            ? src
+            : 'https://i.111666.best'.concat(src)
+        }
+        lastError = new Error(t('error_upload_failed'))
+      } catch (error) {
+        lastError = error
+      }
+    }
+    throw lastError || new Error(t('error_upload_failed'))
   }
   async function uploadToAppinn(file) {
     var _a
@@ -1485,7 +1608,10 @@
     }
     if (host === 'tikolu') return uploadToTikolu(file)
     if (host === 'mjj') return uploadToMjj(file)
+    if (host === 'imgbb') return uploadToImgbb(file)
     if (host === 'appinn') return uploadToAppinn(file)
+    if (host === 'photo_lily') return uploadToPhotoLily(file)
+    if (host === '111666_best') return uploadTo111666Best(file)
     return uploadToImgur(file)
   }
   var lastEditableEl

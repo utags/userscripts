@@ -19,7 +19,7 @@
 ## 功能（MVP）
 
 - 📥 支持粘贴、拖拽、文件选择收集图片
-- 📤 批量上传到 Imgur/Tikolu/MJJ.Today/Appinn，实时显示进度
+- 📤 批量上传到 Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best，实时显示进度
 - 📋 自动复制输出：`Markdown` / `HTML` / `BBCode` / `Link`
 - 🕘 本地历史记录，便于再次复制与复用
 - 🔘 可选站点按钮注入，兼容 SPA（按站点配置）
@@ -44,7 +44,7 @@
 
 - 在页面中粘贴/拖拽图片，或使用面板选择文件
 - 队列中可查看上传进度
-- 在面板的图床选择器中选择上传平台（Imgur/Tikolu/MJJ.Today/Appinn）
+- 在面板的图床选择器中选择上传平台（Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best）
 - 在面板的代理选择器中选择是否使用代理（默认“无”）
 - 完成后按所选格式自动复制
 - 历史记录中可快速再次复制
@@ -77,6 +77,11 @@
 - 🗂 历史增强：按时间/平台/标签过滤，批量复制，更快复用
 
 ## 更新记录
+
+### v0.11.x
+
+- 新增三种图床：ImgBB、Photo.Lily、111666.best。
+- 更新面板图床选择器与文档，支持选择并说明上述图床。
 
 ### v0.10.x
 
