@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.10.2
+// @version              0.10.3
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -1551,6 +1551,74 @@
     }
     return false
   }
+  function initPasteUpload(initialEnabled = true) {
+    let pasteHandler
+    const enablePaste = () => {
+      if (pasteHandler) return
+      pasteHandler = (event) => {
+        var _a, _b
+        const cd = event.clipboardData
+        if (!cd) return
+        const list = []
+        const seen = /* @__PURE__ */ new Set()
+        const addIfNew = (f) => {
+          const sig = ''
+            .concat(f.name, '|')
+            .concat(f.size, '|')
+            .concat(f.type, '|')
+            .concat(f.lastModified || 0)
+          if (!seen.has(sig)) {
+            seen.add(sig)
+            list.push(f)
+          }
+        }
+        const items = cd.items ? Array.from(cd.items) : []
+        for (const i of items) {
+          if (i && i.type && i.type.includes('image')) {
+            const f = (_a = i.getAsFile) == null ? void 0 : _a.call(i)
+            if (f) addIfNew(f)
+          }
+        }
+        const files = cd.files ? Array.from(cd.files) : []
+        for (const f of files) {
+          if (f && f.type && f.type.includes('image')) addIfNew(f)
+        }
+        if (list.length > 0) {
+          event.preventDefault()
+          event.stopPropagation()
+          const detail = { files: list }
+          if (isTopFrame()) {
+            globalThis.dispatchEvent(
+              new CustomEvent('iu:uploadFiles', { detail })
+            )
+          } else {
+            try {
+              ;(_b = globalThis.top) == null
+                ? void 0
+                : _b.postMessage(
+                    {
+                      type: 'iu:uploadFiles',
+                      detail,
+                    },
+                    '*'
+                  )
+            } catch (e) {}
+          }
+        }
+      }
+      document.addEventListener('paste', pasteHandler, true)
+    }
+    const disablePaste = () => {
+      if (!pasteHandler) return
+      document.removeEventListener('paste', pasteHandler, true)
+      pasteHandler = void 0
+    }
+    if (initialEnabled) enablePaste()
+    globalThis.addEventListener('beforeunload', () => {
+      disablePaste()
+    })
+    return { enable: enablePaste, disable: disablePaste }
+  }
   function initDragAndDrop(initialEnabled = true) {
     let drop
     let dragoverHandler
@@ -2035,8 +2103,6 @@
     } catch (e) {}
     pasteChk.addEventListener('change', async () => {
       await setPasteEnabled(Boolean(pasteChk.checked))
-      if (pasteChk.checked) enablePaste()
-      else disablePaste()
     })
     pasteLabel.append(pasteChk)
     pasteLabel.append(
@@ -2409,50 +2475,6 @@
         }
       }
     })
-    let pasteHandler
-    function enablePaste() {
-      if (pasteHandler) return
-      pasteHandler = (event) => {
-        var _a
-        const cd = event.clipboardData
-        if (!cd) return
-        const list2 = []
-        const seen = /* @__PURE__ */ new Set()
-        const addIfNew = (f) => {
-          const sig = ''
-            .concat(f.name, '|')
-            .concat(f.size, '|')
-            .concat(f.type, '|')
-            .concat(f.lastModified || 0)
-          if (!seen.has(sig)) {
-            seen.add(sig)
-            list2.push(f)
-          }
-        }
-        const items = cd.items ? Array.from(cd.items) : []
-        for (const i of items) {
-          if (i && i.type && i.type.includes('image')) {
-            const f = (_a = i.getAsFile) == null ? void 0 : _a.call(i)
-            if (f) addIfNew(f)
-          }
-        }
-        const files = cd.files ? Array.from(cd.files) : []
-        for (const f of files) {
-          if (f && f.type && f.type.includes('image')) addIfNew(f)
-        }
-        if (list2.length > 0) {
-          event.preventDefault()
-          event.stopPropagation()
-          handleFiles(list2)
-        }
-      }
-      document.addEventListener('paste', pasteHandler, true)
-    }
-    function disablePaste() {
-      if (!pasteHandler) return
-      document.removeEventListener('paste', pasteHandler, true)
-      pasteHandler = void 0
-    }
     const queue = []
     let running = 0
     let done = 0
@@ -2581,8 +2603,6 @@
       }
       void processQueue()
     }
-    const pasteEnabled = await getPasteEnabled()
-    if (pasteEnabled) enablePaste()
     async function renderHistory() {
       history.textContent = ''
       const header2 = createEl('div', { class: 'uiu-controls' })
@@ -2721,25 +2741,37 @@
       }
       if (enabled) {
         const dragEnabled = await getDragAndDropEnabled()
+        const pasteEnabled = await getPasteEnabled()
         const dragControls = initDragAndDrop(dragEnabled)
+        const pasteControls = initPasteUpload(pasteEnabled)
         void addValueChangeListener(
           SITE_SETTINGS_MAP_KEY,
           (name, oldValue, newValue, remote) => {
-            var _a, _b
+            var _a, _b, _c, _d
             const oldMap = oldValue || {}
             const newMap = newValue || {}
-            const oldState =
+            const oldDrag =
               ((_a = oldMap[SITE_KEY]) == null
                 ? void 0
                 : _a.dragAndDropEnabled) === true
-            const newState =
+            const newDrag =
               ((_b = newMap[SITE_KEY]) == null
                 ? void 0
                 : _b.dragAndDropEnabled) === true
-            if (oldState !== newState) {
-              if (newState)
-                dragControls == null ? void 0 : dragControls.enable()
+            if (oldDrag !== newDrag) {
+              if (newDrag) dragControls == null ? void 0 : dragControls.enable()
               else dragControls == null ? void 0 : dragControls.disable()
+            }
+            const oldPaste =
+              ((_c = oldMap[SITE_KEY]) == null ? void 0 : _c.pasteEnabled) ===
+              true
+            const newPaste =
+              ((_d = newMap[SITE_KEY]) == null ? void 0 : _d.pasteEnabled) ===
+              true
+            if (oldPaste !== newPaste) {
+              if (newPaste)
+                pasteControls == null ? void 0 : pasteControls.enable()
+              else pasteControls == null ? void 0 : pasteControls.disable()
             }
           }
         )

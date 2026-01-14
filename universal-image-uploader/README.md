@@ -90,6 +90,8 @@ Install one of the following user script managers:
 - Optimization: Refactored drag-and-drop logic.
   - Unified drag-and-drop initialization for both main frame and iframes, reducing code duplication.
   - Drag-and-drop settings changes now sync instantly across frames via `addValueChangeListener`.
+- Optimization: Unified paste upload behavior across frames.
+  - Paste events in both the main frame and iframes now use the same `iu:uploadFiles` pipeline as drag-and-drop, so behavior is consistent regardless of where you paste.
 - Feature: Mock upload host for testing.
   - Optional test host that simulates a 1-second delay and returns a random demo image URL.
   - Controlled via an internal flag and disabled by default for normal users.

@@ -946,6 +946,76 @@ function isOverEditableOrPanel(target: EventTarget | undefined): boolean {
   return false
 }
 
+function initPasteUpload(initialEnabled = true) {
+  let pasteHandler: ((event: ClipboardEvent) => void) | undefined
+
+  const enablePaste = () => {
+    if (pasteHandler) return
+    pasteHandler = (event) => {
+      const cd = event.clipboardData
+      if (!cd) return
+      const list: File[] = []
+      const seen = new Set<string>()
+      const addIfNew = (f: File) => {
+        const sig = `${f.name}|${f.size}|${f.type}|${f.lastModified || 0}`
+        if (!seen.has(sig)) {
+          seen.add(sig)
+          list.push(f)
+        }
+      }
+
+      const items = cd.items ? Array.from(cd.items) : []
+      for (const i of items) {
+        if (i && i.type && i.type.includes('image')) {
+          const f = i.getAsFile?.()
+          if (f) addIfNew(f)
+        }
+      }
+
+      const files = cd.files ? Array.from(cd.files) : []
+      for (const f of files) {
+        if (f && f.type && f.type.includes('image')) addIfNew(f)
+      }
+
+      if (list.length > 0) {
+        event.preventDefault()
+        event.stopPropagation()
+        const detail = { files: list }
+        if (isTopFrame()) {
+          globalThis.dispatchEvent(
+            new CustomEvent('iu:uploadFiles', { detail })
+          )
+        } else {
+          try {
+            globalThis.top?.postMessage(
+              {
+                type: 'iu:uploadFiles',
+                detail,
+              },
+              '*'
+            )
+          } catch {}
+        }
+      }
+    }
+
+    document.addEventListener('paste', pasteHandler, true)
+  }
+
+  const disablePaste = () => {
+    if (!pasteHandler) return
+    document.removeEventListener('paste', pasteHandler, true)
+    pasteHandler = undefined
+  }
+
+  if (initialEnabled) enablePaste()
+  globalThis.addEventListener('beforeunload', () => {
+    disablePaste()
+  })
+
+  return { enable: enablePaste, disable: disablePaste }
+}
+
 function initDragAndDrop(initialEnabled = true) {
   let drop: HTMLElement | undefined
   let dragoverHandler: ((event: DragEvent) => void) | undefined
@@ -1501,8 +1571,6 @@ async function createPanel(): Promise<
 
   pasteChk.addEventListener('change', async () => {
     await setPasteEnabled(Boolean(pasteChk.checked))
-    if (pasteChk.checked) enablePaste()
-    else disablePaste()
   })
   pasteLabel.append(pasteChk)
   pasteLabel.append(
@@ -1905,51 +1973,6 @@ async function createPanel(): Promise<
     }
   })
 
-  let pasteHandler: ((event: ClipboardEvent) => void) | undefined
-  function enablePaste() {
-    if (pasteHandler) return
-    pasteHandler = (event) => {
-      const cd = event.clipboardData
-      if (!cd) return
-      const list: File[] = []
-      const seen = new Set<string>()
-      const addIfNew = (f: File) => {
-        const sig = `${f.name}|${f.size}|${f.type}|${f.lastModified || 0}`
-        if (!seen.has(sig)) {
-          seen.add(sig)
-          list.push(f)
-        }
-      }
-
-      const items = cd.items ? Array.from(cd.items) : []
-      for (const i of items) {
-        if (i && i.type && i.type.includes('image')) {
-          const f = i.getAsFile?.()
-          if (f) addIfNew(f)
-        }
-      }
-
-      const files = cd.files ? Array.from(cd.files) : []
-      for (const f of files) {
-        if (f && f.type && f.type.includes('image')) addIfNew(f)
-      }
-
-      if (list.length > 0) {
-        event.preventDefault()
-        event.stopPropagation()
-        handleFiles(list)
-      }
-    }
-
-    document.addEventListener('paste', pasteHandler, true)
-  }
-
-  function disablePaste() {
-    if (!pasteHandler) return
-    document.removeEventListener('paste', pasteHandler, true)
-    pasteHandler = undefined
-  }
-
   type QueueItem = {
     file: File
     placeholder: string | undefined
@@ -2078,9 +2101,6 @@ async function createPanel(): Promise<
 
     void processQueue()
   }
-
-  const pasteEnabled = await getPasteEnabled()
-  if (pasteEnabled) enablePaste()
 
   async function renderHistory() {
     // Avoid Trusted Types violation: clear without using innerHTML
@@ -2237,20 +2257,32 @@ async function createPanel(): Promise<
 
     if (enabled) {
       const dragEnabled = await getDragAndDropEnabled()
+      const pasteEnabled = await getPasteEnabled()
       const dragControls:
         | { enable: () => void; disable: () => void }
         | undefined = initDragAndDrop(dragEnabled)
+      const pasteControls:
+        | { enable: () => void; disable: () => void }
+        | undefined = initPasteUpload(pasteEnabled)
 
       void addValueChangeListener(
         SITE_SETTINGS_MAP_KEY,
         (name, oldValue, newValue, remote) => {
           const oldMap = (oldValue as Record<string, any>) || {}
           const newMap = (newValue as Record<string, any>) || {}
-          const oldState = oldMap[SITE_KEY]?.dragAndDropEnabled === true
-          const newState = newMap[SITE_KEY]?.dragAndDropEnabled === true
-          if (oldState !== newState) {
-            if (newState) dragControls?.enable()
+
+          const oldDrag = oldMap[SITE_KEY]?.dragAndDropEnabled === true
+          const newDrag = newMap[SITE_KEY]?.dragAndDropEnabled === true
+          if (oldDrag !== newDrag) {
+            if (newDrag) dragControls?.enable()
             else dragControls?.disable()
+          }
+
+          const oldPaste = oldMap[SITE_KEY]?.pasteEnabled === true
+          const newPaste = newMap[SITE_KEY]?.pasteEnabled === true
+          if (oldPaste !== newPaste) {
+            if (newPaste) pasteControls?.enable()
+            else pasteControls?.disable()
           }
         }
       )
