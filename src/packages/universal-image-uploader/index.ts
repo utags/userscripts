@@ -842,6 +842,19 @@ async function uploadToTikolu(file) {
 
 async function uploadImage(file) {
   const host = await getHost()
+  if (host === 'mock') {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000)
+    })
+    const samples = [
+      'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d',
+      'https://images.unsplash.com/photo-1518770660439-4636190af475',
+      'https://images.unsplash.com/photo-1513151233558-d860c5398176',
+      'https://images.unsplash.com/photo-1526045612212-70caf35c14df',
+    ]
+    const idx = Math.floor(Math.random() * samples.length)
+    return samples[idx]
+  }
   if (host === 'tikolu') return uploadToTikolu(file)
   if (host === 'mjj') return uploadToMjj(file)
   if (host === 'appinn') return uploadToAppinn(file)

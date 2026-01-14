@@ -347,9 +347,11 @@ export const CUSTOM_FORMATS_KEY = 'uiu_custom_formats'
 export const DEFAULT_FORMAT = 'markdown'
 export const DEFAULT_HOST = 'tikolu'
 export const DEFAULT_PROXY = 'wsrv.nl'
-// Global allowed value lists
+const ENABLE_MOCK_HOST = false
 export const ALLOWED_FORMATS = ['markdown', 'html', 'bbcode', 'link']
-export const ALLOWED_HOSTS = ['imgur', 'tikolu', 'mjj', 'appinn']
+export const ALLOWED_HOSTS = ENABLE_MOCK_HOST
+  ? ['imgur', 'tikolu', 'mjj', 'appinn', 'mock']
+  : ['imgur', 'tikolu', 'mjj', 'appinn']
 export const ALLOWED_PROXIES = [
   'none',
   'wsrv.nl',

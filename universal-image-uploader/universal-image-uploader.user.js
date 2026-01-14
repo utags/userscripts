@@ -593,8 +593,11 @@
   var DEFAULT_FORMAT = 'markdown'
   var DEFAULT_HOST = 'tikolu'
   var DEFAULT_PROXY = 'wsrv.nl'
+  var ENABLE_MOCK_HOST = false
   var ALLOWED_FORMATS = ['markdown', 'html', 'bbcode', 'link']
-  var ALLOWED_HOSTS = ['imgur', 'tikolu', 'mjj', 'appinn']
+  var ALLOWED_HOSTS = ENABLE_MOCK_HOST
+    ? ['imgur', 'tikolu', 'mjj', 'appinn', 'mock']
+    : ['imgur', 'tikolu', 'mjj', 'appinn']
   var ALLOWED_PROXIES = ['none', 'wsrv.nl', 'duckduckgo', 'wsrv.nl-duckduckgo']
   var ALLOWED_BUTTON_POSITIONS = ['before', 'inside', 'after']
   var DEFAULT_BUTTON_POSITION = 'after'
@@ -1467,6 +1470,19 @@
   }
   async function uploadImage(file) {
     const host = await getHost()
+    if (host === 'mock') {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1e3)
+      })
+      const samples = [
+        'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d',
+        'https://images.unsplash.com/photo-1518770660439-4636190af475',
+        'https://images.unsplash.com/photo-1513151233558-d860c5398176',
+        'https://images.unsplash.com/photo-1526045612212-70caf35c14df',
+      ]
+      const idx = Math.floor(Math.random() * samples.length)
+      return samples[idx]
+    }
     if (host === 'tikolu') return uploadToTikolu(file)
     if (host === 'mjj') return uploadToMjj(file)
     if (host === 'appinn') return uploadToAppinn(file)
