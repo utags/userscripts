@@ -552,7 +552,7 @@ const css = `
   #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item input[type="text"] { flex:1; min-width:0; }
   #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item select { flex:0 0 auto; }
   #uiu-panel .uiu-settings .uiu-settings-row .uiu-ops { display:flex; gap:6px; flex-shrink:0; white-space:nowrap; }
-  #uiu-drop { position: fixed; inset: 0; background: rgba(37,99,235,.12); border: 2px dashed #2563eb; display:none; align-items:center; justify-content:center; z-index: 999998; color:#2563eb; font-size: 18px; font-weight: 600; }
+  #uiu-drop { position: fixed; inset: 0; background: rgba(37,99,235,.12); border: 2px dashed #2563eb; display:none; align-items:center; justify-content:center; z-index: 999998; color:#2563eb; font-size: 18px; font-weight: 600; pointer-events:none; }
   #uiu-drop.show { display:flex; }
   .uiu-insert-btn { cursor:pointer; }
   .uiu-insert-btn.uiu-default { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; cursor:pointer; }
@@ -855,6 +855,7 @@ async function uploadImage(file) {
     const idx = Math.floor(Math.random() * samples.length)
     return samples[idx]
   }
+
   if (host === 'tikolu') return uploadToTikolu(file)
   if (host === 'mjj') return uploadToMjj(file)
   if (host === 'appinn') return uploadToAppinn(file)
@@ -950,29 +951,50 @@ function initDragAndDrop(initialEnabled = true) {
   let dragoverHandler: ((event: DragEvent) => void) | undefined
   let dragleaveHandler: ((event: DragEvent) => void) | undefined
   let dropHandler: ((event: DragEvent) => void) | undefined
+  let lastDragoverVisible = false
+  let lastDragoverTarget: EventTarget | undefined
 
   const enableDrag = () => {
     if (!drop) {
       drop = createEl('div', { id: 'uiu-drop', text: t('drop_overlay') })
-      if (drop) document.body.append(drop)
+      if (drop) document.documentElement.append(drop)
     }
 
     if (!dragoverHandler) {
-      dragoverHandler = (e) => {
-        const dt = e.dataTransfer
+      dragoverHandler = (event) => {
+        const dt = event.dataTransfer
         const types = dt?.types ? Array.from(dt.types) : []
         const hasFileType = types.includes('Files')
         const hasFileItem = dt?.items
           ? Array.from(dt.items).some((it) => it.kind === 'file')
           : false
         const firstTarget =
-          typeof e.composedPath === 'function'
-            ? e.composedPath()[0]
-            : e.target || undefined
+          typeof event.composedPath === 'function'
+            ? event.composedPath()[0]
+            : event.target || undefined
+
+        if (firstTarget === lastDragoverTarget) {
+          if (lastDragoverVisible) {
+            event.preventDefault()
+          }
+
+          return
+        }
+
+        lastDragoverTarget = firstTarget
+
         const allowedTarget = isOverEditableOrPanel(firstTarget)
-        if ((hasFileType || hasFileItem) && allowedTarget) {
+        const shouldShow = (hasFileType || hasFileItem) && allowedTarget
+
+        if (shouldShow) {
+          event.preventDefault()
+        }
+
+        if (shouldShow === lastDragoverVisible) return
+        lastDragoverVisible = shouldShow
+
+        if (shouldShow) {
           if (drop) drop.classList.add('show')
-          e.preventDefault()
         } else if (drop) {
           drop.classList.remove('show')
         }
@@ -982,8 +1004,14 @@ function initDragAndDrop(initialEnabled = true) {
     }
 
     if (!dragleaveHandler) {
-      dragleaveHandler = () => {
-        if (drop) drop.classList.remove('show')
+      dragleaveHandler = (event) => {
+        if (!drop) return
+        const target = event.target
+        if (target === document.documentElement || target === document.body) {
+          lastDragoverVisible = false
+          lastDragoverTarget = undefined
+          drop.classList.remove('show')
+        }
       }
 
       document.addEventListener('dragleave', dragleaveHandler)
@@ -991,6 +1019,8 @@ function initDragAndDrop(initialEnabled = true) {
 
     if (!dropHandler) {
       dropHandler = (event) => {
+        lastDragoverVisible = false
+        lastDragoverTarget = undefined
         if (drop) drop.classList.remove('show')
         const firstTarget =
           typeof event.composedPath === 'function'
@@ -1066,12 +1096,16 @@ function initDragAndDrop(initialEnabled = true) {
 
       drop = undefined
     }
+
+    lastDragoverVisible = false
+    lastDragoverTarget = undefined
   }
 
   if (initialEnabled) enableDrag()
   globalThis.addEventListener('beforeunload', () => {
     disableDrag()
   })
+
   return { enable: enableDrag, disable: disableDrag }
 }
 

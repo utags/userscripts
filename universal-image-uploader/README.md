@@ -90,6 +90,11 @@ Install one of the following user script managers:
 - Optimization: Refactored drag-and-drop logic.
   - Unified drag-and-drop initialization for both main frame and iframes, reducing code duplication.
   - Drag-and-drop settings changes now sync instantly across frames via `addValueChangeListener`.
+- Feature: Mock upload host for testing.
+  - Optional test host that simulates a 1-second delay and returns a random demo image URL.
+  - Controlled via an internal flag and disabled by default for normal users.
+- Fix: Drag overlay flicker over inputs.
+  - The drop overlay is now `pointer-events: none` and only toggles visibility on valid drag targets, avoiding oscillation when dragging across input fields.
 
 ### v0.9.x
 
