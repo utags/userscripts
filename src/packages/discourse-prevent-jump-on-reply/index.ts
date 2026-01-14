@@ -6,6 +6,50 @@ const I18N_LABEL = {
   en: 'Prevent jump to latest post',
   'zh-CN': '防止跳转到最新帖子',
 }
+
+function isReplySaving() {
+  return Boolean(
+    document.querySelector('#reply-control > div.saving-text > div.spinner')
+  )
+}
+
+function waitForReplySent(onDone: () => void) {
+  if (!isReplySaving()) {
+    onDone()
+    return
+  }
+
+  const start = Date.now()
+  const maxWait = 30_000
+  const check = () => {
+    if (!isReplySaving()) {
+      onDone()
+      return
+    }
+
+    if (Date.now() - start >= maxWait) return
+    setTimeout(check, 200)
+  }
+
+  setTimeout(check, 200)
+}
+
+function handleAfterPosting() {
+  if (checkPermissionPlaceholder()) {
+    setTimeout(() => {
+      waitForReplySent(() => {
+        location.reload()
+      })
+    }, 500)
+  }
+}
+
+// https://github.com/utags/userscripts/issues/3
+// 检测是否存在权限回复占位符
+function checkPermissionPlaceholder() {
+  return Boolean(document.querySelector('span.permission-reply-placeholder'))
+}
+
 function getDiscourseLocale() {
   try {
     const htmlLang = (
@@ -62,6 +106,8 @@ function register(button: HTMLElement | undefined) {
         buttons: originalEvent.buttons,
       })
       originalEvent.target.dispatchEvent(newEvent)
+
+      handleAfterPosting()
     },
     true
   )
@@ -99,6 +145,8 @@ document.addEventListener(
           shiftKey: true,
         })
         btn.dispatchEvent(ev)
+
+        handleAfterPosting()
       }
     }
   },
@@ -113,7 +161,7 @@ function getEnabled() {
 
 async function loadEnabled() {
   try {
-    const val = await getValue<string>(KEY, '0')
+    const val = await getValue(KEY, '0')
     enabledFlag = val === '1'
     updateToggleUI()
   } catch {

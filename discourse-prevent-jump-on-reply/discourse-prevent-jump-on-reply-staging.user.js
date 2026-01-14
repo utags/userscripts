@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.2.0
+// @version              0.3.0
 // @description          Prevent Discourse from jumping after posting a reply by intercepting the reply button click and forcing shiftKey, keeping scroll position and context.
 // @description:zh-CN    拦截回复按钮点击并强制 shiftKey，避免发帖后页面跳转，保持当前位置与上下文。
 // @icon                 https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Fmeta.discourse.org%26size%3D64
@@ -143,6 +143,40 @@
     en: 'Prevent jump to latest post',
     'zh-CN': '\u9632\u6B62\u8DF3\u8F6C\u5230\u6700\u65B0\u5E16\u5B50',
   }
+  function isReplySaving() {
+    return Boolean(
+      document.querySelector('#reply-control > div.saving-text > div.spinner')
+    )
+  }
+  function waitForReplySent(onDone) {
+    if (!isReplySaving()) {
+      onDone()
+      return
+    }
+    const start = Date.now()
+    const maxWait = 3e4
+    const check = () => {
+      if (!isReplySaving()) {
+        onDone()
+        return
+      }
+      if (Date.now() - start >= maxWait) return
+      setTimeout(check, 200)
+    }
+    setTimeout(check, 200)
+  }
+  function handleAfterPosting() {
+    if (checkPermissionPlaceholder()) {
+      setTimeout(() => {
+        waitForReplySent(() => {
+          location.reload()
+        })
+      }, 500)
+    }
+  }
+  function checkPermissionPlaceholder() {
+    return Boolean(document.querySelector('span.permission-reply-placeholder'))
+  }
   function getDiscourseLocale() {
     try {
       const htmlLang = (
@@ -196,6 +230,7 @@
           buttons: originalEvent.buttons,
         })
         originalEvent.target.dispatchEvent(newEvent)
+        handleAfterPosting()
       },
       true
     )
@@ -228,6 +263,7 @@
             shiftKey: true,
           })
           btn.dispatchEvent(ev)
+          handleAfterPosting()
         }
       }
     },

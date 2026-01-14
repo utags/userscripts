@@ -49,6 +49,10 @@ Tested on modern browsers with Tampermonkey/Violentmonkey and Discourse‑based 
 
 ## Changelog
 
+### v0.3.0
+
+- Wait for the reply to finish sending before refreshing when a permission placeholder is detected, preventing replies from being lost due to premature reload.
+
 ### v0.2.0
 
 - Add simulated `addValueChangeListener` support for script managers that do not implement it natively, enabling cross-tab data synchronization.
