@@ -78,6 +78,16 @@ Install one of the following user script managers:
 
 ## Changelog
 
+### v0.10.x
+
+- Feature: Comprehensive iframe support.
+  - The upload panel is displayed only in the top frame.
+  - Site buttons are injected into all frames (including iframes).
+  - DOM changes in iframes are monitored for button injection.
+- Fix: Cross-frame focus tracking.
+  - Correctly handles file picker requests and image pasting from iframes.
+  - "Copy" button correctly targets the last focused element, even inside iframes.
+
 ### v0.9.x
 
 - Added new proxy options: `DuckDuckGo` and `wsrv.nl -> DuckDuckGo`.

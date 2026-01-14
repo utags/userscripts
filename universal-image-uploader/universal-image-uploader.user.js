@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.9.0
+// @version              0.10.0
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -1052,6 +1052,111 @@
     for (const c of children) el.append(c)
     return el
   }
+  var requestOpenFilePicker = () => {
+    var _a
+    if (isTopFrame()) {
+      globalThis.dispatchEvent(new CustomEvent('uiu:request-open-file-picker'))
+    } else {
+      ;(_a = window.top) == null
+        ? void 0
+        : _a.postMessage({ type: 'uiu:request-open-file-picker' }, '*')
+    }
+  }
+  function applySingle(cfg) {
+    var _a, _b
+    if (!(cfg == null ? void 0 : cfg.selector)) return
+    let targets
+    try {
+      targets = document.querySelectorAll(cfg.selector)
+    } catch (e) {
+      return
+    }
+    if (!targets || targets.length === 0) return
+    const posRaw = (cfg.position || '').trim()
+    const pos =
+      posRaw === 'before' ? 'before' : posRaw === 'inside' ? 'inside' : 'after'
+    const content = (cfg.text || t('insert_image_button_default')).trim()
+    for (const t2 of Array.from(targets)) {
+      const target = t2
+      const exists =
+        pos === 'inside'
+          ? Boolean(target.querySelector('.uiu-insert-btn'))
+          : pos === 'before'
+            ? Boolean(
+                target.previousElementSibling &&
+                ((_a = target.previousElementSibling.classList) == null
+                  ? void 0
+                  : _a.contains('uiu-insert-btn'))
+              )
+            : Boolean(
+                target.nextElementSibling &&
+                ((_b = target.nextElementSibling.classList) == null
+                  ? void 0
+                  : _b.contains('uiu-insert-btn'))
+              )
+      if (exists) continue
+      let btn
+      try {
+        const range = document.createRange()
+        const ctx = document.createElement('div')
+        range.selectNodeContents(ctx)
+        const frag = range.createContextualFragment(content)
+        if (frag && frag.childElementCount === 1) {
+          btn = frag.firstElementChild
+        }
+      } catch (e) {}
+      if (btn) {
+        btn.classList.add('uiu-insert-btn')
+      } else {
+        btn = createEl('button', {
+          class: 'uiu-insert-btn uiu-default',
+          text: content,
+        })
+      }
+      btn.addEventListener('click', handleSiteButtonClick)
+      if (pos === 'before') {
+        target.before(btn)
+      } else if (pos === 'inside') {
+        target.append(btn)
+      } else {
+        target.after(btn)
+      }
+    }
+  }
+  async function applySiteButtons() {
+    const list = await getSiteBtnSettingsList()
+    for (const cfg of list) {
+      try {
+        applySingle(cfg)
+      } catch (e) {}
+    }
+  }
+  var siteBtnObserver
+  async function restartSiteButtonObserver() {
+    try {
+      if (siteBtnObserver) siteBtnObserver.disconnect()
+    } catch (e) {}
+    const list = await getSiteBtnSettingsList()
+    if (list.length === 0) {
+      siteBtnObserver = void 0
+      return
+    }
+    const checkAndInsertAll = () => {
+      for (const cfg of list) {
+        try {
+          applySingle(cfg)
+        } catch (e) {}
+      }
+    }
+    checkAndInsertAll()
+    siteBtnObserver = new MutationObserver(() => {
+      checkAndInsertAll()
+    })
+    siteBtnObserver.observe(document.body || document.documentElement, {
+      childList: true,
+      subtree: true,
+    })
+  }
   var buildPositionOptions = (selectEl, selectedValue) => {
     if (!selectEl) return
     selectEl.textContent = ''
@@ -1368,6 +1473,7 @@
     return uploadToImgur(file)
   }
   var lastEditableEl
+  var lastEditableFrame
   function getDeepActiveElement() {
     let el = document.activeElement
     try {
@@ -1414,9 +1520,42 @@
       (el instanceof HTMLElement && el.isContentEditable)
     )
   }
+  function findNearestEditableElement(from) {
+    let parent = from == null ? void 0 : from.parentElement
+    while (parent) {
+      const textarea = parent.querySelector('textarea')
+      if (textarea instanceof HTMLTextAreaElement) return textarea
+      const contentEditable = parent.querySelector(
+        '[contenteditable],[contenteditable="true"],[contenteditable="plaintext-only"]'
+      )
+      if (
+        contentEditable instanceof HTMLElement &&
+        contentEditable.isContentEditable
+      ) {
+        return contentEditable
+      }
+      const input = parent.querySelector('input')
+      if (input instanceof HTMLInputElement && isTextInput(input)) return input
+      parent = parent.parentElement
+    }
+    return void 0
+  }
+  function handleSiteButtonClick(event) {
+    event.preventDefault()
+    try {
+      lastEditableFrame = globalThis
+      const target = event.currentTarget
+      if (target instanceof HTMLElement) {
+        const nearest = findNearestEditableElement(target)
+        if (nearest) lastEditableEl = nearest
+      }
+      requestOpenFilePicker()
+    } catch (e) {}
+  }
   document.addEventListener(
     'focusin',
     (e) => {
+      var _a
       const deepTarget =
         getDeepActiveElement() ||
         (typeof e.composedPath === 'function' ? e.composedPath()[0] : e.target)
@@ -1426,10 +1565,50 @@
         !isInsideUIPanel(deepTarget)
       ) {
         lastEditableEl = deepTarget
+        lastEditableFrame = globalThis
+        try {
+          if (isTopFrame()) return
+          ;(_a = globalThis.top) == null
+            ? void 0
+            : _a.postMessage({ type: 'uiu:focus-editable' }, '*')
+        } catch (e2) {}
       }
     },
     true
   )
+  globalThis.addEventListener('message', (event) => {
+    var _a, _b, _c, _d, _e
+    const type = (_a = event.data) == null ? void 0 : _a.type
+    switch (type) {
+      case 'uiu:insert-placeholder': {
+        const ph = String(
+          ((_b = event.data) == null ? void 0 : _b.placeholder) || ''
+        )
+        if (ph) insertIntoFocused('\n'.concat(ph, '\n'))
+        break
+      }
+      case 'uiu:replace-placeholder': {
+        const ph = String(
+          ((_c = event.data) == null ? void 0 : _c.placeholder) || ''
+        )
+        const rep = String(
+          ((_d = event.data) == null ? void 0 : _d.replacement) || ''
+        )
+        const el = getActiveEditableTarget()
+        const ok = el ? replacePlaceholder(el, ph, rep) : false
+        if (!ok && rep) insertIntoFocused('\n'.concat(rep, '\n'))
+        break
+      }
+      case 'uiu:insert-text': {
+        const txt = String(((_e = event.data) == null ? void 0 : _e.text) || '')
+        if (txt) insertIntoFocused('\n'.concat(txt, '\n'))
+        break
+      }
+      default: {
+        break
+      }
+    }
+  })
   function insertIntoFocused(text) {
     var _a, _b
     let el = getDeepActiveElement()
@@ -1446,7 +1625,12 @@
         const end = (_b = el.selectionEnd) != null ? _b : el.value.length
         const v = el.value
         el.value = v.slice(0, start) + text + v.slice(end)
-        el.dispatchEvent(new Event('input', { bubbles: true }))
+        const bubbles = { bubbles: true }
+        el.dispatchEvent(new Event('input', bubbles))
+        el.dispatchEvent(new Event('change', bubbles))
+        el.dispatchEvent(new KeyboardEvent('keydown', bubbles))
+        el.dispatchEvent(new KeyboardEvent('keypress', bubbles))
+        el.dispatchEvent(new KeyboardEvent('keyup', bubbles))
         return true
       }
       if (el instanceof HTMLElement && el.isContentEditable) {
@@ -1472,6 +1656,29 @@
     } catch (e) {}
     insertIntoFocused('\n'.concat(text, '\n'))
   }
+  async function handleCopyClick(it) {
+    const fmt = await getFormat()
+    const proxied = await applyProxy(
+      it.link,
+      it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
+    )
+    const out = await formatText(
+      proxied,
+      it.name || t('default_image_name'),
+      fmt
+    )
+    if (lastEditableFrame && lastEditableFrame !== globalThis) {
+      try {
+        GM_setClipboard(out)
+        lastEditableFrame.postMessage(
+          { type: 'uiu:insert-text', text: out },
+          '*'
+        )
+      } catch (e) {}
+    } else {
+      copyAndInsert(out)
+    }
+  }
   function getActiveEditableTarget() {
     let el = getDeepActiveElement()
     if (!isEditable(el) || isInsideUIPanel(el)) el = lastEditableEl
@@ -1488,12 +1695,18 @@
     if (!el || !placeholder) return false
     try {
       if (el instanceof HTMLTextAreaElement || isTextInput(el)) {
+        el.focus()
         const v = el.value
         const idx = v.indexOf(placeholder)
         if (idx !== -1) {
           el.value =
             v.slice(0, idx) + replacement + v.slice(idx + placeholder.length)
-          el.dispatchEvent(new Event('input', { bubbles: true }))
+          const bubbles = { bubbles: true }
+          el.dispatchEvent(new Event('input', bubbles))
+          el.dispatchEvent(new Event('change', bubbles))
+          el.dispatchEvent(new KeyboardEvent('keydown', bubbles))
+          el.dispatchEvent(new KeyboardEvent('keypress', bubbles))
+          el.dispatchEvent(new KeyboardEvent('keyup', bubbles))
           return true
         }
         return false
@@ -1983,113 +2196,35 @@
       panel.style.display = 'block'
       document.documentElement.append(panel)
     }
-    function applySingle(cfg) {
-      var _a, _b
-      if (!(cfg == null ? void 0 : cfg.selector)) return
-      let targets
+    globalThis.addEventListener('uiu:request-open-file-picker', () => {
+      showPanel()
       try {
-        targets = document.querySelectorAll(cfg.selector)
-      } catch (e) {
-        return
-      }
-      if (!targets || targets.length === 0) return
-      const posRaw = (cfg.position || '').trim()
-      const pos =
-        posRaw === 'before'
-          ? 'before'
-          : posRaw === 'inside'
-            ? 'inside'
-            : 'after'
-      const content = (cfg.text || t('insert_image_button_default')).trim()
-      for (const t2 of Array.from(targets)) {
-        const target = t2
-        const exists =
-          pos === 'inside'
-            ? Boolean(target.querySelector('.uiu-insert-btn'))
-            : pos === 'before'
-              ? Boolean(
-                  target.previousElementSibling &&
-                  ((_a = target.previousElementSibling.classList) == null
-                    ? void 0
-                    : _a.contains('uiu-insert-btn'))
-                )
-              : Boolean(
-                  target.nextElementSibling &&
-                  ((_b = target.nextElementSibling.classList) == null
-                    ? void 0
-                    : _b.contains('uiu-insert-btn'))
-                )
-        if (exists) continue
-        let btn
-        try {
-          const range = document.createRange()
-          const ctx = document.createElement('div')
-          range.selectNodeContents(ctx)
-          const frag = range.createContextualFragment(content)
-          if (frag && frag.childElementCount === 1) {
-            btn = frag.firstElementChild
-          }
-        } catch (e) {}
-        if (btn) {
-          btn.classList.add('uiu-insert-btn')
-        } else {
-          btn = createEl('button', {
-            class: 'uiu-insert-btn uiu-default',
-            text: content,
-          })
-        }
-        btn.addEventListener('click', (event) => {
-          showPanel()
-          event.preventDefault()
-          try {
-            openFilePicker()
-          } catch (e) {}
-        })
-        if (pos === 'before') {
-          target.before(btn)
-        } else if (pos === 'inside') {
-          target.append(btn)
-        } else {
-          target.after(btn)
-        }
-      }
-    }
-    async function applySiteButtons() {
-      const list2 = await getSiteBtnSettingsList()
-      for (const cfg of list2) {
-        try {
-          applySingle(cfg)
-        } catch (e) {}
-      }
-    }
-    await applySiteButtons()
-    let siteBtnObserver
-    async function restartSiteButtonObserver() {
-      try {
-        if (siteBtnObserver) siteBtnObserver.disconnect()
+        openFilePicker()
       } catch (e) {}
-      const list2 = await getSiteBtnSettingsList()
-      if (list2.length === 0) {
-        siteBtnObserver = void 0
-        return
-      }
-      const checkAndInsertAll = () => {
-        for (const cfg of list2) {
-          try {
-            applySingle(cfg)
-          } catch (e) {}
+    })
+    globalThis.addEventListener('message', (event) => {
+      var _a
+      const type = (_a = event.data) == null ? void 0 : _a.type
+      switch (type) {
+        case 'uiu:request-open-file-picker': {
+          lastEditableFrame = event.source
+          globalThis.dispatchEvent(new CustomEvent(type))
+          break
+        }
+        case 'uiu:focus-editable': {
+          lastEditableFrame = event.source
+          break
+        }
+        case 'uiu:blur-editable': {
+          if (lastEditableFrame === event.source) {
+          }
+          break
+        }
+        default: {
+          break
         }
       }
-      checkAndInsertAll()
-      siteBtnObserver = new MutationObserver(() => {
-        checkAndInsertAll()
-      })
-      siteBtnObserver.observe(document.body || document.documentElement, {
-        childList: true,
-        subtree: true,
-      })
-    }
-    await restartSiteButtonObserver()
+    })
     let drop
     let pasteHandler
     let dragoverHandler
@@ -2227,6 +2362,17 @@
               ''.concat(out)
             )
             if (!ok) copyAndInsert(out)
+          } else if (item.placeholder && item.targetFrame) {
+            try {
+              item.targetFrame.postMessage(
+                {
+                  type: 'uiu:replace-placeholder',
+                  placeholder: item.placeholder,
+                  replacement: ''.concat(out),
+                },
+                '*'
+              )
+            } catch (e) {}
           } else {
             copyAndInsert(out)
           }
@@ -2252,6 +2398,21 @@
             try {
               replacePlaceholder(item.targetEl, item.placeholder, failNote)
             } catch (e) {}
+          } else if (item.placeholder && item.targetFrame) {
+            const failNote = '<!-- '.concat(
+              tpl(t('placeholder_upload_failed'), { name: item.file.name }),
+              ' -->'
+            )
+            try {
+              item.targetFrame.postMessage(
+                {
+                  type: 'uiu:replace-placeholder',
+                  placeholder: item.placeholder,
+                  replacement: failNote,
+                },
+                '*'
+              )
+            } catch (e) {}
           }
           addLog(
             ''
@@ -2275,16 +2436,28 @@
       total += imgs.length
       updateProgress()
       const targetEl = getActiveEditableTarget()
+      const targetFrame =
+        lastEditableFrame && lastEditableFrame !== globalThis
+          ? lastEditableFrame
+          : void 0
       for (const file of imgs) {
         let placeholder
-        if (targetEl) {
+        if (targetEl && !targetFrame) {
           try {
             targetEl.focus()
           } catch (e) {}
           placeholder = createUploadPlaceholder(file.name)
           insertIntoFocused('\n'.concat(placeholder, '\n'))
+        } else if (targetFrame) {
+          placeholder = createUploadPlaceholder(file.name)
+          try {
+            targetFrame.postMessage(
+              { type: 'uiu:insert-placeholder', placeholder },
+              '*'
+            )
+          } catch (e) {}
         }
-        queue.push({ file, placeholder, targetEl })
+        queue.push({ file, placeholder, targetEl, targetFrame })
       }
       void processQueue()
     }
@@ -2360,18 +2533,8 @@
         row.append(info)
         const ops = createEl('div', { class: 'uiu-ops' })
         const copyBtn = createEl('button', { text: t('btn_copy') })
-        copyBtn.addEventListener('click', async () => {
-          const fmt = await getFormat()
-          const proxied = await applyProxy(
-            it.link,
-            it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
-          )
-          const out = await formatText(
-            proxied,
-            it.name || t('default_image_name'),
-            fmt
-          )
-          copyAndInsert(out)
+        copyBtn.addEventListener('click', () => {
+          void handleCopyClick(it)
         })
         const openBtn = createEl('button', { text: t('btn_open') })
         openBtn.addEventListener('click', async () => {
@@ -2435,25 +2598,31 @@
       await migrateToUnifiedSiteMap()
       await applyPresetConfig()
       const enabled = await getEnabled()
-      if (enabled && !document.querySelector('#uiu-panel')) {
-        const panelApi = await createPanel()
-        if (!panelApi) return
-        const { handleFiles } = panelApi
-        globalThis.addEventListener('iu:uploadFiles', (e) => {
-          var _a
-          const files = (_a = e.detail) == null ? void 0 : _a.files
-          if (files == null ? void 0 : files.length) handleFiles(files)
-        })
+      if (enabled) {
+        await restartSiteButtonObserver()
       }
-      registerMenu(
-        enabled ? t('menu_disable_site') : t('menu_enable_site'),
-        async () => {
-          await setEnabled(!enabled)
-          try {
-            location.reload()
-          } catch (e) {}
+      if (enabled && isTopFrame() && !document.querySelector('#uiu-panel')) {
+        const panelApi = await createPanel()
+        if (panelApi) {
+          const { handleFiles } = panelApi
+          globalThis.addEventListener('iu:uploadFiles', (e) => {
+            var _a
+            const files = (_a = e.detail) == null ? void 0 : _a.files
+            if (files == null ? void 0 : files.length) handleFiles(files)
+          })
         }
-      )
+      }
+      if (isTopFrame()) {
+        registerMenu(
+          enabled ? t('menu_disable_site') : t('menu_enable_site'),
+          async () => {
+            await setEnabled(!enabled)
+            try {
+              location.reload()
+            } catch (e) {}
+          }
+        )
+      }
     } catch (e) {}
   })()
 })()
