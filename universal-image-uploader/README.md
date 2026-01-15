@@ -1,6 +1,6 @@
 # Universal Image Uploader
 
-A user script that lets you paste, drag, or select images and batch-upload them to Imgur or Tikolu or MJJ.Today or Appinn (selectable provider), then auto-copy the result in Markdown/HTML/BBCode/plain link. It also integrates configurable site buttons (works with SPA pages) and keeps a local upload history for quick reuse.
+A user script that lets you paste, drag, or select images and batch-upload them to Imgur or Tikolu or MJJ.Today or Appinn (selectable provider), optionally converting to WebP, then auto-copy the result in Markdown/HTML/BBCode/plain link. It also integrates configurable site buttons (works with SPA pages) and keeps a local upload history for quick reuse.
 
 [中文版](https://github.com/utags/userscripts/blob/main/universal-image-uploader/README.zh-CN.md)
 
@@ -20,6 +20,7 @@ A user script that lets you paste, drag, or select images and batch-upload them 
 
 - 📥 Paste, drag-and-drop, or file picker to collect images
 - 📤 Batch upload to Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best/Skyimg with progress display
+- 🖼️ Optional WebP conversion via proxy or supported hosts
 - 📋 Auto-copy output in `Markdown` / `HTML` / `BBCode` / `Link`
 - 🕘 Local history to quickly re-copy and reuse uploads
 - 🔘 Optional site button injection with SPA observer (per-site settings)
@@ -46,6 +47,7 @@ Install one of the following user script managers:
 - Watch the upload queue and progress
 - Choose upload provider via the panel’s host selector (Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best/Skyimg)
 - Choose proxy via the panel’s proxy selector (default `None`)
+- Toggle WebP option to convert images via proxy
 - When finished, the script auto-copies based on your selected format
 - Use history to quickly copy past uploads
 
@@ -77,6 +79,10 @@ Install one of the following user script managers:
 - 🗂 History enhancements: filters by time/provider/tags, batch copy, faster reuse
 
 ## Changelog
+
+### v0.12.x
+
+- Enhanced `wsrv.nl` proxy: appends `&output=webp` when WebP option is enabled.
 
 ### v0.11.x
 

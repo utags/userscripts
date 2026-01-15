@@ -234,6 +234,15 @@ const setProxy = async (proxy) => {
   await updateCurrentSiteSettings({ proxy })
 }
 
+const getWebpEnabled = async () => {
+  const s = await getCurrentSiteSettings()
+  return s.webp === true
+}
+
+const setWebpEnabled = async (val) => {
+  await updateCurrentSiteSettings({ webp: Boolean(val) })
+}
+
 const getEnabled = async () => {
   const s = await getCurrentSiteSettings()
   return s.enabled === true
@@ -529,6 +538,7 @@ const css = `
   #uiu-panel header.uiu-show-settings .uiu-actions .uiu-toggle-settings { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }
   #uiu-panel .uiu-body { padding: 8px 12px; }
   #uiu-panel .uiu-controls { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }
+  #uiu-panel .uiu-controls label { display:inline-flex; align-items:center; }
   #uiu-panel select, #uiu-panel button { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; }
   #uiu-panel button.uiu-primary { background:#2563eb; border-color:#1d4ed8; }
   #uiu-panel .uiu-list { margin-top:8px; max-height: 140px; overflow-y:auto; overflow-x:hidden; font-size: 12px; }
@@ -645,11 +655,23 @@ function isImgurUrl(url) {
   }
 }
 
-async function applyProxy(url, providerKey, originalName?) {
+async function applyProxy(
+  url: string,
+  providerKey?: string,
+  originalName?: string,
+  proxy?: string
+) {
   try {
     const isGif =
       typeof originalName === 'string' && /\.gif$/i.test(originalName.trim())
-    let px = await getProxy()
+
+    let useWebp = false
+
+    try {
+      useWebp = await getWebpEnabled()
+    } catch {}
+
+    let px = proxy || (await getProxy())
     if (px === 'none') return url
 
     if (px === 'wsrv.nl') {
@@ -661,17 +683,22 @@ async function applyProxy(url, providerKey, originalName?) {
       ) {
         px = 'wsrv.nl-duckduckgo'
       } else {
-        return `https://wsrv.nl/?url=${encodeURIComponent(url)}${isGif ? '&n=-1' : ''}`
+        const qp = `${isGif ? '&n=-1' : ''}${useWebp ? '&output=webp' : ''}`
+        return `https://wsrv.nl/?url=${encodeURIComponent(url)}${qp}`
       }
     }
 
     if (px === 'duckduckgo') {
-      return `https://external-content.duckduckgo.com/iu/?u=${encodeURIComponent(url)}`
+      const convertedUrl = useWebp
+        ? await applyProxy(url, providerKey, originalName, 'wsrv.nl')
+        : url
+      return `https://external-content.duckduckgo.com/iu/?u=${encodeURIComponent(convertedUrl)}`
     }
 
     if (px === 'wsrv.nl-duckduckgo') {
       const ddgUrl = `https://external-content.duckduckgo.com/iu/?u=${encodeURIComponent(url)}`
-      return `https://wsrv.nl/?url=${encodeURIComponent(ddgUrl)}${isGif ? '&n=-1' : ''}`
+      const qp = `${isGif ? '&n=-1' : ''}${useWebp ? '&output=webp' : ''}`
+      return `https://wsrv.nl/?url=${encodeURIComponent(ddgUrl)}${qp}`
     }
 
     return url
@@ -1644,7 +1671,9 @@ async function createPanel(): Promise<
   header.append(actions)
 
   const body = createEl('div', { class: 'uiu-body' })
-  const controls = createEl('div', { class: 'uiu-controls' })
+  const controls = createEl('div', {
+    style: 'display:flex; flex-direction:column; gap:4px;',
+  })
 
   const format = await getFormat()
   const formatSel = createEl('select')
@@ -1663,12 +1692,30 @@ async function createPanel(): Promise<
   const proxy = await getProxy()
   const proxySel = createEl('select')
   buildProxyOptions(proxySel, proxy)
+
+  const webpLabel = createEl('label')
+  const webpChk = createEl('input', { type: 'checkbox' })
+  try {
+    webpChk.checked = await getWebpEnabled()
+  } catch {}
+
+  webpChk.disabled = proxy === 'none'
+
   proxySel.addEventListener('change', async () => {
     await setProxy(proxySel.value)
-    try {
-      await renderHistory()
-    } catch {}
+    webpChk.disabled = proxySel.value === 'none'
   })
+
+  webpChk.addEventListener('change', async () => {
+    await setWebpEnabled(Boolean(webpChk.checked))
+  })
+  webpLabel.append(webpChk)
+  webpLabel.append(
+    createEl('span', {
+      text: t('toggle_webp_enabled'),
+      style: 'margin-left:6px;',
+    })
+  )
 
   function openFilePicker() {
     const input = createEl('input', {
@@ -1694,11 +1741,21 @@ async function createPanel(): Promise<
     text: t('progress_initial'),
   })
 
-  controls.append(formatSel)
-  controls.append(hostSel)
-  controls.append(proxySel)
-  controls.append(selectBtn)
-  controls.append(progressEl)
+  const row1 = createEl('div', { class: 'uiu-controls' })
+  row1.append(formatSel)
+  row1.append(hostSel)
+
+  const row2 = createEl('div', { class: 'uiu-controls' })
+  row2.append(proxySel)
+  row2.append(webpLabel)
+
+  const row3 = createEl('div', { class: 'uiu-controls' })
+  row3.append(selectBtn)
+  row3.append(progressEl)
+
+  controls.append(row1)
+  controls.append(row2)
+  controls.append(row3)
   body.append(controls)
 
   const list = createEl('div', { class: 'uiu-list' })
@@ -2267,10 +2324,12 @@ async function createPanel(): Promise<
   }
 
   async function renderHistory() {
+    if (!header.classList.contains('uiu-show-history')) return
+
     history.textContent = ''
-    const header = createEl('div', { class: 'uiu-controls' })
+    const historyControls = createEl('div', { class: 'uiu-controls' })
     const historyItems = await loadHistory()
-    header.append(
+    historyControls.append(
       createEl('span', {
         text: tpl(t('btn_history_count'), { count: historyItems.length }),
       })
@@ -2280,8 +2339,8 @@ async function createPanel(): Promise<
       await saveHistory([])
       await renderHistory()
     })
-    header.append(clearBtn)
-    history.append(header)
+    historyControls.append(clearBtn)
+    history.append(historyControls)
 
     const hoverPreviewWrap = createEl('div', {
       style:
@@ -2422,6 +2481,39 @@ async function createPanel(): Promise<
       )
     } catch {}
   })
+
+  void addValueChangeListener(
+    SITE_SETTINGS_MAP_KEY,
+    async (name, oldValue, newValue, remote) => {
+      const newMap = (newValue as Record<string, any>) || {}
+      const s = newMap[SITE_KEY] || {}
+
+      if (s.format && formatSel.value !== s.format) {
+        formatSel.value = s.format
+      }
+
+      if (s.host && hostSel.value !== s.host) {
+        hostSel.value = s.host
+      }
+
+      if (s.proxy) {
+        if (proxySel.value !== s.proxy) {
+          proxySel.value = s.proxy
+        }
+
+        webpChk.disabled = s.proxy === 'none'
+      }
+
+      const webpEnabled = s.webp === true
+      if (webpChk.checked !== webpEnabled) {
+        webpChk.checked = webpEnabled
+      }
+
+      try {
+        await renderHistory()
+      } catch {}
+    }
+  )
 
   return { handleFiles }
 }

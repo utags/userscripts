@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.11.3
+// @version              0.12.0
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -414,6 +414,7 @@
       menu_disable_site: 'Disable uploader for this site',
       toggle_paste_enabled: 'Enable paste upload',
       toggle_drag_enabled: 'Enable drag-and-drop upload',
+      toggle_webp_enabled: 'Convert to WebP',
       formats_section_title: 'Custom Formats',
       placeholder_format_name: 'Format name',
       placeholder_format_template: 'Format template',
@@ -489,6 +490,7 @@
       menu_disable_site: '\u4E3A\u6B64\u7AD9\u70B9\u7981\u7528\u4E0A\u4F20',
       toggle_paste_enabled: '\u542F\u7528\u7C98\u8D34\u4E0A\u4F20',
       toggle_drag_enabled: '\u542F\u7528\u62D6\u62FD\u4E0A\u4F20',
+      toggle_webp_enabled: '\u8F6C\u4E3A WebP',
       formats_section_title: '\u81EA\u5B9A\u4E49\u683C\u5F0F',
       placeholder_format_name: '\u683C\u5F0F\u540D\u79F0',
       placeholder_format_template: '\u683C\u5F0F\u5185\u5BB9',
@@ -563,6 +565,7 @@
       menu_disable_site: '\u70BA\u6B64\u7AD9\u9EDE\u505C\u7528\u4E0A\u50B3',
       toggle_paste_enabled: '\u555F\u7528\u8CBC\u4E0A\u4E0A\u50B3',
       toggle_drag_enabled: '\u555F\u7528\u62D6\u66F3\u4E0A\u50B3',
+      toggle_webp_enabled: '\u8F49\u70BA WebP',
       formats_section_title: '\u81EA\u8A02\u683C\u5F0F',
       placeholder_format_name: '\u683C\u5F0F\u540D\u7A31',
       placeholder_format_template: '\u683C\u5F0F\u5167\u5BB9',
@@ -1001,6 +1004,13 @@
   var setProxy = async (proxy) => {
     await updateCurrentSiteSettings({ proxy })
   }
+  var getWebpEnabled = async () => {
+    const s = await getCurrentSiteSettings()
+    return s.webp === true
+  }
+  var setWebpEnabled = async (val) => {
+    await updateCurrentSiteSettings({ webp: Boolean(val) })
+  }
   var getEnabled = async () => {
     const s = await getCurrentSiteSettings()
     return s.enabled === true
@@ -1255,7 +1265,7 @@
     }
   }
   var css =
-    '\n  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 440px; max-height: calc(100vh - 32px); overflow: auto; background: #111827cc; color: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }\n  #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; background-color: unset; box-shadow: unset; transition: unset; }\n  #uiu-panel header .uiu-actions { display:flex; gap:8px; }\n  #uiu-panel header .uiu-actions button { font-size: 12px; }\n  /* Active styles for toggles when sections are open */\n  #uiu-panel header.uiu-show-history .uiu-actions .uiu-toggle-history { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }\n  #uiu-panel header.uiu-show-settings .uiu-actions .uiu-toggle-settings { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }\n  #uiu-panel .uiu-body { padding: 8px 12px; }\n  #uiu-panel .uiu-controls { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }\n  #uiu-panel select, #uiu-panel button { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; }\n  #uiu-panel button.uiu-primary { background:#2563eb; border-color:#1d4ed8; }\n  #uiu-panel .uiu-list { margin-top:8px; max-height: 140px; overflow-y:auto; overflow-x:hidden; font-size: 12px; }\n  #uiu-panel .uiu-list .uiu-item { padding:6px 0; border-bottom: 1px dashed #334155; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }\n  #uiu-panel .uiu-list .uiu-log-item { padding: 6px 8px; background: #1e293b; border: 1px solid #334155; border-radius: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); transition: all .15s; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }\n  #uiu-panel .uiu-list .uiu-log-item:hover { background: #334155; border-color: #475569; }\n  #uiu-panel .uiu-history { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel header.uiu-show-history + .uiu-body .uiu-history { display:block; }\n  #uiu-panel .uiu-history .uiu-controls > span { font-size: 16px; font-weight: 600;}\n  #uiu-panel .uiu-history .uiu-list { max-height: 240px; }\n  #uiu-panel .uiu-history .uiu-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }\n  #uiu-panel .uiu-history .uiu-row .uiu-ops { display:flex; gap:6px; }\n  #uiu-panel .uiu-history .uiu-row .uiu-name { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #uiu-panel .uiu-hint { font-size: 11px; opacity:.85; margin-top:6px; }\n  /* Settings container toggling */\n  #uiu-panel .uiu-settings-container { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel header.uiu-show-settings + .uiu-body .uiu-settings-container { display:block; }\n  #uiu-panel .uiu-settings .uiu-controls > span { font-size: 16px; font-weight: 600;}\n  #uiu-panel .uiu-settings .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }\n  #uiu-panel .uiu-settings .uiu-settings-list { margin-top:6px; max-height: 240px; overflow-y:auto; overflow-x:hidden; }\n  #uiu-panel .uiu-settings .uiu-settings-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; font-size: 12px; flex-wrap: nowrap; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item { flex:1; display:flex; align-items:center; gap:6px; min-width:0; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item input[type="text"] { flex:1; min-width:0; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item select { flex:0 0 auto; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-ops { display:flex; gap:6px; flex-shrink:0; white-space:nowrap; }\n  #uiu-drop { position: fixed; inset: 0; background: rgba(37,99,235,.12); border: 2px dashed #2563eb; display:none; align-items:center; justify-content:center; z-index: 999998; color:#2563eb; font-size: 18px; font-weight: 600; pointer-events:none; }\n  #uiu-drop.show { display:flex; }\n  .uiu-insert-btn { cursor:pointer; }\n  .uiu-insert-btn.uiu-default { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; cursor:pointer; }\n  /* Hover effects for all buttons */\n  #uiu-panel button { transition: background-color .12s ease, box-shadow .12s ease, transform .06s ease, opacity .12s ease, border-color .12s ease; }\n  #uiu-panel button:hover { background:#334155; border-color:#475569; box-shadow: 0 0 0 1px #475569 inset; transform: translateY(-0.5px); }\n  #uiu-panel button.uiu-primary:hover { background:#1d4ed8; border-color:#1e40af; }\n  #uiu-panel button:active { transform: translateY(0); }\n  /* Disabled style for proxy selector */\n  #uiu-panel select:disabled { opacity:.55; cursor:not-allowed; filter: grayscale(80%); background:#111827; color:#9ca3af; border-color:#475569; }\n  /* Custom Formats layout */\n  #uiu-panel .uiu-formats { margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel .uiu-formats .uiu-controls > span { font-size: 16px; font-weight: 600; }\n  #uiu-panel .uiu-formats .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }\n  #uiu-panel .uiu-formats .uiu-formats-list { margin-top:6px; max-height: 200px; overflow-y:auto; overflow-x:hidden; }\n  #uiu-panel .uiu-formats .uiu-formats-row { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }\n  #uiu-panel .uiu-formats .uiu-formats-row .uiu-ops { display:flex; gap:6px; justify-content:flex-end; }\n  #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-template { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-template { overflow: visible; text-overflow: clip; white-space: normal; }\n  #uiu-panel .uiu-formats .uiu-form-add { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; }\n  #uiu-panel .uiu-formats .uiu-formats-row input[type="text"] { width:100%; }\n  #uiu-panel .uiu-formats .uiu-form-add input[type="text"] { width:100%; }\n  #uiu-panel .uiu-formats .uiu-form-add button { justify-self: end; }\n  #uiu-panel .uiu-formats .uiu-formats-header { font-weight: 600; color:#e5e7eb; }\n  #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-template { display:block; min-width:0; }\n  #uiu-panel .uiu-formats .uiu-format-example-row { padding-top:4px; border-bottom: none; }\n  #uiu-panel .uiu-formats .uiu-format-example-row .uiu-fmt-template { font-size:12px; color:#cbd5e1; white-space: normal; overflow: visible; text-overflow: clip; }\n  '
+    '\n  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 440px; max-height: calc(100vh - 32px); overflow: auto; background: #111827cc; color: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }\n  #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; background-color: unset; box-shadow: unset; transition: unset; }\n  #uiu-panel header .uiu-actions { display:flex; gap:8px; }\n  #uiu-panel header .uiu-actions button { font-size: 12px; }\n  /* Active styles for toggles when sections are open */\n  #uiu-panel header.uiu-show-history .uiu-actions .uiu-toggle-history { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }\n  #uiu-panel header.uiu-show-settings .uiu-actions .uiu-toggle-settings { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }\n  #uiu-panel .uiu-body { padding: 8px 12px; }\n  #uiu-panel .uiu-controls { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }\n  #uiu-panel .uiu-controls label { display:inline-flex; align-items:center; }\n  #uiu-panel select, #uiu-panel button { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; }\n  #uiu-panel button.uiu-primary { background:#2563eb; border-color:#1d4ed8; }\n  #uiu-panel .uiu-list { margin-top:8px; max-height: 140px; overflow-y:auto; overflow-x:hidden; font-size: 12px; }\n  #uiu-panel .uiu-list .uiu-item { padding:6px 0; border-bottom: 1px dashed #334155; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }\n  #uiu-panel .uiu-list .uiu-log-item { padding: 6px 8px; background: #1e293b; border: 1px solid #334155; border-radius: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); transition: all .15s; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }\n  #uiu-panel .uiu-list .uiu-log-item:hover { background: #334155; border-color: #475569; }\n  #uiu-panel .uiu-history { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel header.uiu-show-history + .uiu-body .uiu-history { display:block; }\n  #uiu-panel .uiu-history .uiu-controls > span { font-size: 16px; font-weight: 600;}\n  #uiu-panel .uiu-history .uiu-list { max-height: 240px; }\n  #uiu-panel .uiu-history .uiu-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }\n  #uiu-panel .uiu-history .uiu-row .uiu-ops { display:flex; gap:6px; }\n  #uiu-panel .uiu-history .uiu-row .uiu-name { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #uiu-panel .uiu-hint { font-size: 11px; opacity:.85; margin-top:6px; }\n  /* Settings container toggling */\n  #uiu-panel .uiu-settings-container { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel header.uiu-show-settings + .uiu-body .uiu-settings-container { display:block; }\n  #uiu-panel .uiu-settings .uiu-controls > span { font-size: 16px; font-weight: 600;}\n  #uiu-panel .uiu-settings .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }\n  #uiu-panel .uiu-settings .uiu-settings-list { margin-top:6px; max-height: 240px; overflow-y:auto; overflow-x:hidden; }\n  #uiu-panel .uiu-settings .uiu-settings-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; font-size: 12px; flex-wrap: nowrap; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item { flex:1; display:flex; align-items:center; gap:6px; min-width:0; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item input[type="text"] { flex:1; min-width:0; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item select { flex:0 0 auto; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-ops { display:flex; gap:6px; flex-shrink:0; white-space:nowrap; }\n  #uiu-drop { position: fixed; inset: 0; background: rgba(37,99,235,.12); border: 2px dashed #2563eb; display:none; align-items:center; justify-content:center; z-index: 999998; color:#2563eb; font-size: 18px; font-weight: 600; pointer-events:none; }\n  #uiu-drop.show { display:flex; }\n  .uiu-insert-btn { cursor:pointer; }\n  .uiu-insert-btn.uiu-default { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; cursor:pointer; }\n  /* Hover effects for all buttons */\n  #uiu-panel button { transition: background-color .12s ease, box-shadow .12s ease, transform .06s ease, opacity .12s ease, border-color .12s ease; }\n  #uiu-panel button:hover { background:#334155; border-color:#475569; box-shadow: 0 0 0 1px #475569 inset; transform: translateY(-0.5px); }\n  #uiu-panel button.uiu-primary:hover { background:#1d4ed8; border-color:#1e40af; }\n  #uiu-panel button:active { transform: translateY(0); }\n  /* Disabled style for proxy selector */\n  #uiu-panel select:disabled { opacity:.55; cursor:not-allowed; filter: grayscale(80%); background:#111827; color:#9ca3af; border-color:#475569; }\n  /* Custom Formats layout */\n  #uiu-panel .uiu-formats { margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel .uiu-formats .uiu-controls > span { font-size: 16px; font-weight: 600; }\n  #uiu-panel .uiu-formats .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }\n  #uiu-panel .uiu-formats .uiu-formats-list { margin-top:6px; max-height: 200px; overflow-y:auto; overflow-x:hidden; }\n  #uiu-panel .uiu-formats .uiu-formats-row { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }\n  #uiu-panel .uiu-formats .uiu-formats-row .uiu-ops { display:flex; gap:6px; justify-content:flex-end; }\n  #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-template { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-template { overflow: visible; text-overflow: clip; white-space: normal; }\n  #uiu-panel .uiu-formats .uiu-form-add { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; }\n  #uiu-panel .uiu-formats .uiu-formats-row input[type="text"] { width:100%; }\n  #uiu-panel .uiu-formats .uiu-form-add input[type="text"] { width:100%; }\n  #uiu-panel .uiu-formats .uiu-form-add button { justify-self: end; }\n  #uiu-panel .uiu-formats .uiu-formats-header { font-weight: 600; color:#e5e7eb; }\n  #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-template { display:block; min-width:0; }\n  #uiu-panel .uiu-formats .uiu-format-example-row { padding-top:4px; border-bottom: none; }\n  #uiu-panel .uiu-formats .uiu-format-example-row .uiu-fmt-template { font-size:12px; color:#cbd5e1; white-space: normal; overflow: visible; text-overflow: clip; }\n  '
   GM_addStyle(css)
   async function loadHistory() {
     return (await getValue(HISTORY_KEY, [])) || []
@@ -1306,11 +1316,15 @@
       return false
     }
   }
-  async function applyProxy(url, providerKey, originalName) {
+  async function applyProxy(url, providerKey, originalName, proxy) {
     try {
       const isGif =
         typeof originalName === 'string' && /\.gif$/i.test(originalName.trim())
-      let px = await getProxy()
+      let useWebp = false
+      try {
+        useWebp = await getWebpEnabled()
+      } catch (e) {}
+      let px = proxy || (await getProxy())
       if (px === 'none') return url
       if (px === 'wsrv.nl') {
         const provider = providerKey || (await getHost())
@@ -1321,23 +1335,32 @@
         ) {
           px = 'wsrv.nl-duckduckgo'
         } else {
+          const qp = ''
+            .concat(isGif ? '&n=-1' : '')
+            .concat(useWebp ? '&output=webp' : '')
           return 'https://wsrv.nl/?url='
             .concat(encodeURIComponent(url))
-            .concat(isGif ? '&n=-1' : '')
+            .concat(qp)
         }
       }
       if (px === 'duckduckgo') {
+        const convertedUrl = useWebp
+          ? await applyProxy(url, providerKey, originalName, 'wsrv.nl')
+          : url
         return 'https://external-content.duckduckgo.com/iu/?u='.concat(
-          encodeURIComponent(url)
+          encodeURIComponent(convertedUrl)
         )
       }
       if (px === 'wsrv.nl-duckduckgo') {
         const ddgUrl = 'https://external-content.duckduckgo.com/iu/?u='.concat(
           encodeURIComponent(url)
         )
+        const qp = ''
+          .concat(isGif ? '&n=-1' : '')
+          .concat(useWebp ? '&output=webp' : '')
         return 'https://wsrv.nl/?url='
           .concat(encodeURIComponent(ddgUrl))
-          .concat(isGif ? '&n=-1' : '')
+          .concat(qp)
       }
       return url
     } catch (e) {
@@ -2215,7 +2238,9 @@
     actions.append(closeBtn)
     header.append(actions)
     const body = createEl('div', { class: 'uiu-body' })
-    const controls = createEl('div', { class: 'uiu-controls' })
+    const controls = createEl('div', {
+      style: 'display:flex; flex-direction:column; gap:4px;',
+    })
     const format = await getFormat()
     const formatSel = createEl('select')
     await buildFormatOptions(formatSel, format)
@@ -2231,12 +2256,26 @@
     const proxy = await getProxy()
     const proxySel = createEl('select')
     buildProxyOptions(proxySel, proxy)
+    const webpLabel = createEl('label')
+    const webpChk = createEl('input', { type: 'checkbox' })
+    try {
+      webpChk.checked = await getWebpEnabled()
+    } catch (e) {}
+    webpChk.disabled = proxy === 'none'
     proxySel.addEventListener('change', async () => {
       await setProxy(proxySel.value)
-      try {
-        await renderHistory()
-      } catch (e) {}
+      webpChk.disabled = proxySel.value === 'none'
     })
+    webpChk.addEventListener('change', async () => {
+      await setWebpEnabled(Boolean(webpChk.checked))
+    })
+    webpLabel.append(webpChk)
+    webpLabel.append(
+      createEl('span', {
+        text: t('toggle_webp_enabled'),
+        style: 'margin-left:6px;',
+      })
+    )
     function openFilePicker() {
       const input = createEl('input', {
         type: 'file',
@@ -2260,11 +2299,18 @@
       class: 'uiu-progress',
       text: t('progress_initial'),
     })
-    controls.append(formatSel)
-    controls.append(hostSel)
-    controls.append(proxySel)
-    controls.append(selectBtn)
-    controls.append(progressEl)
+    const row1 = createEl('div', { class: 'uiu-controls' })
+    row1.append(formatSel)
+    row1.append(hostSel)
+    const row2 = createEl('div', { class: 'uiu-controls' })
+    row2.append(proxySel)
+    row2.append(webpLabel)
+    const row3 = createEl('div', { class: 'uiu-controls' })
+    row3.append(selectBtn)
+    row3.append(progressEl)
+    controls.append(row1)
+    controls.append(row2)
+    controls.append(row3)
     body.append(controls)
     const list = createEl('div', { class: 'uiu-list' })
     body.append(list)
@@ -2797,10 +2843,11 @@
       void processQueue()
     }
     async function renderHistory() {
+      if (!header.classList.contains('uiu-show-history')) return
       history.textContent = ''
-      const header2 = createEl('div', { class: 'uiu-controls' })
+      const historyControls = createEl('div', { class: 'uiu-controls' })
       const historyItems = await loadHistory()
-      header2.append(
+      historyControls.append(
         createEl('span', {
           text: tpl(t('btn_history_count'), { count: historyItems.length }),
         })
@@ -2810,8 +2857,8 @@
         await saveHistory([])
         await renderHistory()
       })
-      header2.append(clearBtn2)
-      history.append(header2)
+      historyControls.append(clearBtn2)
+      history.append(historyControls)
       const hoverPreviewWrap = createEl('div', {
         style:
           'position:absolute;left:12px;top:8px;z-index:50;padding:4px;background:#020617;border:1px solid #475569;border-radius:8px;box-shadow:0 10px 40px rgba(15,23,42,.8);pointer-events:none;display:none;',
@@ -2940,6 +2987,32 @@
         )
       } catch (e) {}
     })
+    void addValueChangeListener(
+      SITE_SETTINGS_MAP_KEY,
+      async (name, oldValue, newValue, remote) => {
+        const newMap = newValue || {}
+        const s = newMap[SITE_KEY] || {}
+        if (s.format && formatSel.value !== s.format) {
+          formatSel.value = s.format
+        }
+        if (s.host && hostSel.value !== s.host) {
+          hostSel.value = s.host
+        }
+        if (s.proxy) {
+          if (proxySel.value !== s.proxy) {
+            proxySel.value = s.proxy
+          }
+          webpChk.disabled = s.proxy === 'none'
+        }
+        const webpEnabled = s.webp === true
+        if (webpChk.checked !== webpEnabled) {
+          webpChk.checked = webpEnabled
+        }
+        try {
+          await renderHistory()
+        } catch (e) {}
+      }
+    )
     return { handleFiles }
   }
   ;(async () => {
