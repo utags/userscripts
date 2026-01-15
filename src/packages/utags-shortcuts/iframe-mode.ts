@@ -44,15 +44,18 @@ const BLACKLIST_DOMAINS = new Set([
   'stackoverflow.com',
   'superuser.com',
   't.me',
+  'external-content.duckduckgo.com',
+  'proxy.duckduckgo.com',
+  'wsrv.nl',
 ])
 const BLACKLIST_URL_PATTERNS = new Set([
   /^https:\/\/www\.google\.com\/search\?.*[&?]udm=50/,
   /^https:\/\/www\.google\.com\/search\?((?![?&]udm=).)*$/,
   /^https:\/\/(.+\.)?stackexchange\.com\//,
-  /^https:\/\/(login|auth)[^.]*\./,
-  /(login|auth|signin|signup)/i,
-  /.+\.user\.js([?#].*)?$/,
-  // /.+\.md([?#].*)?$/,
+  // /^https:\/\/(login|auth)[^.]*\./,
+  /\b(login|auth|signin|signup|raw)/i,
+  /(login|auth|signin|signup|raw)\b/i,
+  /\.(md|png|jpe?g|gif|webp|svg|user\.js)([?#].*)?$/,
 ])
 
 let progressBar: ProgressBar | undefined
@@ -61,7 +64,7 @@ function isUserScript(url: string): boolean {
   return url.endsWith('.user.js')
 }
 
-function isIframeModeDisabledUrl(url: string): boolean {
+export function isIframeModeDisabledUrl(url: string): boolean {
   return Array.from(BLACKLIST_URL_PATTERNS).some((p) => p.test(url))
 }
 

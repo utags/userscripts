@@ -5691,14 +5691,17 @@
     'stackoverflow.com',
     'superuser.com',
     't.me',
+    'external-content.duckduckgo.com',
+    'proxy.duckduckgo.com',
+    'wsrv.nl',
   ])
   var BLACKLIST_URL_PATTERNS = /* @__PURE__ */ new Set([
     /^https:\/\/www\.google\.com\/search\?.*[&?]udm=50/,
     /^https:\/\/www\.google\.com\/search\?((?![?&]udm=).)*$/,
     /^https:\/\/(.+\.)?stackexchange\.com\//,
-    /^https:\/\/(login|auth)[^.]*\./,
-    /(login|auth|signin|signup)/i,
-    /.+\.user\.js([?#].*)?$/,
+    /\b(login|auth|signin|signup|raw)/i,
+    /(login|auth|signin|signup|raw)\b/i,
+    /\.(md|png|jpe?g|gif|webp|svg|user\.js)([?#].*)?$/,
   ])
   var progressBar2
   function isIframeModeDisabledUrl(url) {
