@@ -117,6 +117,8 @@ You can use the following variables in the URL field. They will be replaced with
 - **Global Selection State**: Introduced global selection state management. The main page can now detect text selection changes within iframes, ensuring the `{selected}` variable always reflects the user's latest selection, whether in the main page or an iframe.
 - **Smart Debounce**: Added debounce mechanism for state updates to prevent excessive rerenders caused by frequent title or selection changes.
 - **Code Optimization**: Extracted common title listening logic, improved the stability of SPA (Single Page Application) title change detection, and fixed cross-origin iframe communication issues.
+- **Iframe Stability**: Further improved the parent–iframe message channel by using a singleton message listener and avoiding duplicate registrations, reducing potential memory usage and unexpected event handling.
+- **Iframe Self-Recovery**: Uses a MutationObserver to watch the DOM and automatically re-enable Iframe Mode when the iframe or its container is removed by site scripts, preventing the sidebar from breaking unexpectedly.
 
 ### v0.6.x
 
@@ -221,7 +223,7 @@ You can use the following variables in the URL field. They will be replaced with
 
 ### 🏷️ UTags - Add User Tags to Links
 
-- **Link**: [Greasy Fork](https://greasyfork.org/scripts/460718-utags-add-usertags-to-links)
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/460718-utags-add-usertags-to-links) · [ScriptCat](https://scriptcat.org/script-show-page/2784) · [GitHub](https://github.com/utags/utags/raw/main/packages/extension/build/userscript-prod/utags.user.js)
 - **Features**: Add custom tags and notes to user, post, video and other links
 - **Highlights**: Support special tag filtering (like spam, block, clickbait, etc.), data export/import, auto-mark viewed posts
 - **Supported Sites**: V2EX, X(Twitter), Reddit, GitHub, Bilibili, Zhihu, Linux.do, Youtube and 50+ websites
@@ -229,7 +231,7 @@ You can use the following variables in the URL field. They will be replaced with
 
 ### 🧰 UTags Advanced Filter
 
-- **Link**: [Greasy Fork](https://greasyfork.org/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/en/script-show-page/4653) · [GitHub Raw](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/script-show-page/4653) · [GitHub](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
 - **Features**: Real-time filtering and hiding of scripts on GreasyFork
 - **Highlights**: Available as both a userscript and a browser extension
 - **Supported Sites**: Greasy Fork
@@ -237,7 +239,7 @@ You can use the following variables in the URL field. They will be replaced with
 
 ### 🔗 Links Helper
 
-- **Link**: [Greasy Fork](https://greasyfork.org/scripts/464541-links-helper)
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/464541-links-helper) · [ScriptCat](https://scriptcat.org/script-show-page/4486) · [GitHub](https://github.com/utags/links-helper/raw/refs/heads/main/build/userscript-prod/links-helper.user.js)
 - **Features**: Open third-party website links in new tabs, parse text links into hyperlinks
 - **Highlights**: Support custom rules, parse Markdown and BBCode formats, convert image links to image tags
 - **Supported Sites**: Universal for all websites, including Google, YouTube, GitHub, V2EX, etc.
@@ -250,6 +252,14 @@ You can use the following variables in the URL field. They will be replaced with
 - **Highlights**: Settings dialog, real-time sync, smart domain extraction
 - **Supported Sites**: All websites
 - **Description**: A user script to quickly find scripts for the current site across multiple repositories, now with a settings dialog and real-time sync across tabs
+
+### 🖼️ Universal Image Uploader
+
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/553341-universal-image-uploader) · [ScriptCat](https://scriptcat.org/script-show-page/4467) · [GitHub](https://github.com/utags/userscripts/raw/main/universal-image-uploader/universal-image-uploader.user.js)
+- **Features**: Paste/drag/select images to batch-upload to Imgur/Tikolu/MJJ.Today/Appinn
+- **Highlights**: Auto-copy to Markdown/HTML/BBCode/Link, supports site buttons & local history, SPA-compatible
+- **Supported Sites**: All websites
+- **Description**: A user script that lets you paste, drag, or select images and batch-upload them to various providers, then auto-copy the result in your preferred format
 
 ## License
 

@@ -2,7 +2,7 @@
 
 ### 🏷️ UTags - Add User Tags to Links
 
-- **Link**: [Greasy Fork](https://greasyfork.org/scripts/460718-utags-add-usertags-to-links)
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/460718-utags-add-usertags-to-links) · [ScriptCat](https://scriptcat.org/script-show-page/2784) · [GitHub](https://github.com/utags/utags/raw/main/packages/extension/build/userscript-prod/utags.user.js)
 - **Features**: Add custom tags and notes to user, post, video and other links
 - **Highlights**: Support special tag filtering (like spam, block, clickbait, etc.), data export/import, auto-mark viewed posts
 - **Supported Sites**: V2EX, X(Twitter), Reddit, GitHub, Bilibili, Zhihu, Linux.do, Youtube and 50+ websites
@@ -10,7 +10,7 @@
 
 ### 🧰 UTags Advanced Filter
 
-- **Link**: [Greasy Fork](https://greasyfork.org/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/en/script-show-page/4653) · [GitHub](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/script-show-page/4653) · [GitHub](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
 - **Features**: Real-time filtering and hiding of scripts on GreasyFork
 - **Highlights**: Available as both a userscript and a browser extension
 - **Supported Sites**: Greasy Fork
@@ -26,7 +26,7 @@
 
 ### 🔗 Links Helper
 
-- **Link**: [Greasy Fork](https://greasyfork.org/scripts/464541-links-helper)
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/464541-links-helper) · [ScriptCat](https://scriptcat.org/script-show-page/4486) · [GitHub](https://github.com/utags/links-helper/raw/refs/heads/main/build/userscript-prod/links-helper.user.js)
 - **Features**: Open third-party website links in new tabs, parse text links into hyperlinks
 - **Highlights**: Support custom rules, parse Markdown and BBCode formats, convert image links to image tags
 - **Supported Sites**: Universal for all websites, including Google, YouTube, GitHub, V2EX, etc.
@@ -56,7 +56,7 @@
 
 ### 🏷️ UTags - 为链接添加用户标签
 
-- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/460718-utags-add-usertags-to-links)
+- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/460718-utags-add-usertags-to-links) · [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/2784) · [GitHub](https://github.com/utags/utags/raw/main/packages/extension/build/userscript-prod/utags.user.js)
 - **功能**：为用户、帖子、视频和其他链接添加自定义标签和备注
 - **亮点**：支持特殊标签过滤（如垃圾、屏蔽、标题党等），数据导出/导入，自动标记已查看帖子
 - **支持网站**：V2EX、X(Twitter)、Reddit、GitHub、哔哩哔哩、知乎、Linux.do、Youtube 等 50+ 网站
@@ -64,7 +64,7 @@
 
 ### 🧰 UTags Advanced Filter
 
-- **链接**：[Greasy Fork](https://greasyfork.org/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/en/script-show-page/4653) · [GitHub](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
+- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/4653) · [GitHub](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
 - **功能**：支持在 GreasyFork 实时过滤与隐藏脚本
 - **亮点**：同时提供用户脚本与浏览器扩展两个版本
 - **支持网站**：Greasy Fork
@@ -80,7 +80,7 @@
 
 ### 🔗 链接助手
 
-- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/464541-links-helper)
+- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/464541-links-helper) · [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/4486) · [GitHub](https://github.com/utags/links-helper/raw/refs/heads/main/build/userscript-prod/links-helper.user.js)
 - **功能**：在新标签页中打开第三方网站链接，将文本链接解析为超链接
 - **亮点**：支持自定义规则，解析 Markdown 和 BBCode 格式，将图片链接转换为图片标签
 - **支持网站**：适用于所有网站，包括谷歌、YouTube、GitHub、V2EX 等
@@ -88,7 +88,7 @@
 
 ### 🔍 查找适用于当前网站的脚本
 
-- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/550659-find-scripts-for-this-site)
+- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/550659-find-scripts-for-this-site) · [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/4276) · [GitHub](https://github.com/utags/userscripts/raw/main/find-scripts-for-this-site/find-scripts-for-this-site.user.js)
 - **功能**：快速查找当前网站的用户脚本
 - **亮点**：支持多个流行的脚本仓库，轻松发现有用的脚本
 - **支持网站**：适用于任何网站，查找相关用户脚本

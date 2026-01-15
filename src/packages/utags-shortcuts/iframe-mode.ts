@@ -60,6 +60,69 @@ const BLACKLIST_URL_PATTERNS = new Set([
 
 let progressBar: ProgressBar | undefined
 
+let activeIframe: HTMLIFrameElement | undefined
+let isChildReady = false
+let failTimer: ReturnType<typeof setTimeout> | undefined
+let isMessageListenerAttached = false
+
+const messageHandler = (e: MessageEvent) => {
+  if (!e.source || !e.data || e.source !== activeIframe?.contentWindow) return
+  const data = e.data
+  if (!data || !data.type) return
+
+  switch (data.type) {
+    case 'USHORTCUTS_IFRAME_READY': {
+      isChildReady = true
+      setTimeout(() => {
+        // Remove the check flag
+        localStorage.removeItem(CHECK_IFRAME_KEY)
+      }, 10_000)
+      if (failTimer) clearTimeout(failTimer)
+      break
+    }
+
+    case 'USHORTCUTS_IFRAME_FAILED': {
+      console.warn('[utags-shortcuts] Iframe mode failed:', data.reason)
+      localStorage.setItem(DISABLE_IFRAME_KEY, '1')
+      localStorage.setItem(CHECK_IFRAME_KEY, '4')
+      location.reload()
+      break
+    }
+
+    case 'USHORTCUTS_URL_CHANGE': {
+      syncState(data.url, data.title)
+      progressBar?.finish()
+      break
+    }
+
+    case 'USHORTCUTS_LOADING_START': {
+      progressBar?.start()
+      break
+    }
+
+    case 'USHORTCUTS_FORWARD_KEYDOWN': {
+      const evt = data.event
+      const event = new KeyboardEvent('keydown', {
+        code: evt.code,
+        key: evt.key || evt.code,
+        ctrlKey: evt.ctrlKey,
+        metaKey: evt.metaKey,
+        altKey: evt.altKey,
+        shiftKey: evt.shiftKey,
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+      })
+      document.dispatchEvent(event)
+      break
+    }
+
+    default: {
+      break
+    }
+  }
+}
+
 function isUserScript(url: string): boolean {
   return url.endsWith('.user.js')
 }
@@ -128,7 +191,9 @@ function enableIframeMode(side: 'left' | 'right') {
   document.documentElement.append(iframeContainer)
 
   // Monitor and remove any additional body elements injected by the site
+  // Also restore iframe/container if they are deleted
   const observer = new MutationObserver((mutations) => {
+    let shouldRestore = false
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (
@@ -139,9 +204,25 @@ function enableIframeMode(side: 'left' | 'right') {
           node.remove()
         }
       }
+
+      for (const node of mutation.removedNodes) {
+        if (node === iframeContainer || node === iframe) {
+          shouldRestore = true
+        }
+      }
+    }
+
+    if (shouldRestore) {
+      console.info(
+        '[utags-shortcuts] Iframe mode container or iframe deleted. Restoring...'
+      )
+      // Disconnect observer to avoid infinite loops during restoration
+      observer.disconnect()
+      // Re-enable iframe mode
+      enableIframeMode(side)
     }
   })
-  observer.observe(document.documentElement, { childList: true })
+  observer.observe(document.documentElement, { childList: true, subtree: true })
 
   // Reset html/body styles
   document.documentElement.style.cssText =
@@ -167,9 +248,12 @@ function enableIframeMode(side: 'left' | 'right') {
   iframe.name = 'utags-shortcuts-iframe'
 
   iframeContainer.append(iframe)
+  activeIframe = iframe
 
-  let isChildReady = false
-  let failTimer: ReturnType<typeof setTimeout> | undefined
+  // Reset state
+  if (failTimer) clearTimeout(failTimer)
+  isChildReady = false
+  failTimer = undefined
 
   // Sync URL changes from iframe to top window
   // Since it's same-origin, we can access contentWindow
@@ -185,7 +269,7 @@ function enableIframeMode(side: 'left' | 'right') {
         failTimer = setTimeout(() => {
           if (!isChildReady) {
             console.warn(
-              '[utags] Iframe mode script failed to start. Disabling for this site.'
+              '[utags-shortcuts] Iframe mode script failed to start. Disabling for this site.'
             )
             localStorage.setItem(DISABLE_IFRAME_KEY, '1')
             localStorage.setItem(CHECK_IFRAME_KEY, '3')
@@ -212,63 +296,11 @@ function enableIframeMode(side: 'left' | 'right') {
   })
 
   // Handle messages from child
-  globalThis.addEventListener('message', (e) => {
-    if (e.source !== iframe.contentWindow) return
-    const data = e.data
-    if (!data || !data.type) return
-
-    switch (data.type) {
-      case 'USHORTCUTS_IFRAME_READY': {
-        isChildReady = true
-        setTimeout(() => {
-          // Remove the check flag
-          localStorage.removeItem(CHECK_IFRAME_KEY)
-        }, 10_000)
-        if (failTimer) clearTimeout(failTimer)
-        break
-      }
-
-      case 'USHORTCUTS_IFRAME_FAILED': {
-        console.warn('[utags] Iframe mode failed:', data.reason)
-        localStorage.setItem(DISABLE_IFRAME_KEY, '1')
-        localStorage.setItem(CHECK_IFRAME_KEY, '4')
-        location.reload()
-        break
-      }
-
-      case 'USHORTCUTS_URL_CHANGE': {
-        syncState(data.url, data.title)
-        progressBar?.finish()
-        break
-      }
-
-      case 'USHORTCUTS_LOADING_START': {
-        progressBar?.start()
-        break
-      }
-
-      case 'USHORTCUTS_FORWARD_KEYDOWN': {
-        const evt = data.event
-        const event = new KeyboardEvent('keydown', {
-          code: evt.code,
-          key: evt.key || evt.code,
-          ctrlKey: evt.ctrlKey,
-          metaKey: evt.metaKey,
-          altKey: evt.altKey,
-          shiftKey: evt.shiftKey,
-          bubbles: true,
-          cancelable: true,
-          composed: true,
-        })
-        document.dispatchEvent(event)
-        break
-      }
-
-      default: {
-        break
-      }
-    }
-  })
+  // Ensure global message listener is attached
+  if (!isMessageListenerAttached) {
+    globalThis.addEventListener('message', messageHandler)
+    isMessageListenerAttached = true
+  }
 }
 
 export function updateIframeLayout(sidebarVisible: boolean) {
