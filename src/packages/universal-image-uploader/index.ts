@@ -520,7 +520,7 @@ const buildProxyOptions = (selectEl, selectedValue) => {
 }
 
 const css = `
-  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 440px; max-height: calc(100vh - 32px); overflow: auto; background: #111827cc; color: #fff; backdrop-filter: blur(6px); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }
+  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 440px; max-height: calc(100vh - 32px); overflow: auto; background: #111827cc; color: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }
   #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; background-color: unset; box-shadow: unset; transition: unset; }
   #uiu-panel header .uiu-actions { display:flex; gap:8px; }
   #uiu-panel header .uiu-actions button { font-size: 12px; }
@@ -533,6 +533,8 @@ const css = `
   #uiu-panel button.uiu-primary { background:#2563eb; border-color:#1d4ed8; }
   #uiu-panel .uiu-list { margin-top:8px; max-height: 140px; overflow-y:auto; overflow-x:hidden; font-size: 12px; }
   #uiu-panel .uiu-list .uiu-item { padding:6px 0; border-bottom: 1px dashed #334155; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
+  #uiu-panel .uiu-list .uiu-log-item { padding: 6px 8px; background: #1e293b; border: 1px solid #334155; border-radius: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); transition: all .15s; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
+  #uiu-panel .uiu-list .uiu-log-item:hover { background: #334155; border-color: #475569; }
   #uiu-panel .uiu-history { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }
   #uiu-panel header.uiu-show-history + .uiu-body .uiu-history { display:block; }
   #uiu-panel .uiu-history .uiu-controls > span { font-size: 16px; font-weight: 600;}
@@ -2095,7 +2097,7 @@ async function createPanel(): Promise<
   }
 
   function addLog(text) {
-    list.prepend(createEl('div', { class: 'item', text }))
+    list.prepend(createEl('div', { class: 'uiu-log-item', text }))
   }
 
   async function processQueue() {
@@ -2229,7 +2231,7 @@ async function createPanel(): Promise<
     })
     const hoverPreviewImg = createEl('img', {
       style:
-        'max-width:256px;max-height:256px;object-fit:contain;border-radius:4px;',
+        'max-width:256px;max-height:256px;object-fit:contain;display:block;border-radius:4px;',
     }) as HTMLImageElement
     hoverPreviewWrap.append(hoverPreviewImg)
     body.append(hoverPreviewWrap)

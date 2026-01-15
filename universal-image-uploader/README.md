@@ -84,6 +84,7 @@ Install one of the following user script managers:
 - Updated documentation and host selector to include the new providers.
 - Aligned 111666.best proxy behavior with Imgur (supports `wsrv.nl -> DuckDuckGo`).
 - Improved history panel: larger thumbnails, lazy-loaded previews, and a floating enlarged preview when hovering thumbnails.
+- Optimized log list style: improved spacing, added background/border for better visibility, and hover highlight effects.
 
 ### v0.10.x
 
