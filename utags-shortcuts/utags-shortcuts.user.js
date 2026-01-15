@@ -741,7 +741,7 @@
       this.el = document.createElement('div')
       this.el.style.cssText =
         '\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 0%;\n      height: 3px;\n      background: #0969da;\n      z-index: 2147483647;\n      transition: width 0.2s, opacity 0.2s;\n      opacity: 0;\n      pointer-events: none;\n    '
-      document.body.append(this.el)
+      document.documentElement.append(this.el)
     }
     start() {
       this.el.style.transition = 'width 0.2s, opacity 0.2s'
@@ -5741,6 +5741,8 @@
     document.documentElement.append(newHead)
     const newBody = document.createElement('body')
     document.documentElement.append(newBody)
+    const iframeContainer = document.createElement('div')
+    document.documentElement.append(iframeContainer)
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         for (const node of mutation.addedNodes) {
@@ -5759,6 +5761,8 @@
       'height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden;'
     newBody.style.cssText =
       'height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden;'
+    iframeContainer.style.cssText =
+      'height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; position: absolute; top: 0; left: 0;'
     progressBar2 = new ProgressBar()
     const iframe = document.createElement('iframe')
     iframe.src = currentUrl
@@ -5768,7 +5772,7 @@
         '\n  '
       )
     iframe.name = 'utags-shortcuts-iframe'
-    newBody.append(iframe)
+    iframeContainer.append(iframe)
     let isChildReady = false
     let failTimer
     iframe.addEventListener('load', () => {

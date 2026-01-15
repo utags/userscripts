@@ -120,9 +120,12 @@ function enableIframeMode(side: 'left' | 'right') {
   const newHead = document.createElement('head')
   document.documentElement.append(newHead)
 
-  // Create a new body for the iframe
+  // Create a new body for prevent the site from injecting additional body elements
   const newBody = document.createElement('body')
   document.documentElement.append(newBody)
+  // Create a container for the iframe
+  const iframeContainer = document.createElement('div')
+  document.documentElement.append(iframeContainer)
 
   // Monitor and remove any additional body elements injected by the site
   const observer = new MutationObserver((mutations) => {
@@ -145,6 +148,8 @@ function enableIframeMode(side: 'left' | 'right') {
     'height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden;'
   newBody.style.cssText =
     'height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden;'
+  iframeContainer.style.cssText =
+    'height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; position: absolute; top: 0; left: 0;'
 
   progressBar = new ProgressBar()
 
@@ -161,7 +166,7 @@ function enableIframeMode(side: 'left' | 'right') {
   // Add a marker to identify this iframe as "managed" by us
   iframe.name = 'utags-shortcuts-iframe'
 
-  newBody.append(iframe)
+  iframeContainer.append(iframe)
 
   let isChildReady = false
   let failTimer: ReturnType<typeof setTimeout> | undefined

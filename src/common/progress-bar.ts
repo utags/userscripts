@@ -16,7 +16,7 @@ export class ProgressBar {
       opacity: 0;
       pointer-events: none;
     `
-    document.body.append(this.el)
+    document.documentElement.append(this.el)
   }
 
   start() {
