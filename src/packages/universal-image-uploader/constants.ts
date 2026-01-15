@@ -1,3 +1,7 @@
+export const DEFAULT_FORMAT = 'markdown'
+export const DEFAULT_HOST = 'mjj'
+export const DEFAULT_PROXY = 'wsrv.nl'
+const ENABLE_MOCK_HOST = false
 export const CONFIG: Record<string, any> = {
   // Examples: local preview page and common sites; add/remove as needed
   localhost: {
@@ -39,8 +43,6 @@ export const CONFIG: Record<string, any> = {
     pasteEnabled: true,
     dragAndDropEnabled: true,
     format: 'markdown',
-    host: 'tikolu',
-    proxy: 'wsrv.nl',
     buttons: [
       {
         selector: '.comment-screenshot-control',
@@ -53,8 +55,6 @@ export const CONFIG: Record<string, any> = {
     pasteEnabled: true,
     dragAndDropEnabled: true,
     format: 'markdown',
-    host: 'tikolu',
-    proxy: 'wsrv.nl',
     buttons: [
       {
         selector: '#editor-body > div.mde-toolbar > .toolbar-item:last-of-type',
@@ -68,8 +68,6 @@ export const CONFIG: Record<string, any> = {
     pasteEnabled: true,
     dragAndDropEnabled: true,
     format: 'markdown',
-    host: 'tikolu',
-    proxy: 'wsrv.nl',
     buttons: [
       {
         selector: '#editor-body > div.mde-toolbar > .toolbar-item:last-of-type',
@@ -83,8 +81,6 @@ export const CONFIG: Record<string, any> = {
     pasteEnabled: true,
     dragAndDropEnabled: true,
     format: 'markdown',
-    host: 'tikolu',
-    proxy: 'wsrv.nl',
     buttons: [
       {
         selector:
@@ -116,8 +112,6 @@ export const CONFIG: Record<string, any> = {
     pasteEnabled: false,
     dragAndDropEnabled: false,
     format: 'markdown',
-    host: 'tikolu',
-    proxy: 'wsrv.nl',
   },
 }
 
@@ -353,10 +347,6 @@ export const HOST_MAP_KEY = 'uiu_host_map' // legacy
 export const PROXY_MAP_KEY = 'uiu_proxy_map' // legacy
 export const SITE_SETTINGS_MAP_KEY = 'uiu_site_settings_map'
 export const CUSTOM_FORMATS_KEY = 'uiu_custom_formats'
-export const DEFAULT_FORMAT = 'markdown'
-export const DEFAULT_HOST = 'tikolu'
-export const DEFAULT_PROXY = 'wsrv.nl'
-const ENABLE_MOCK_HOST = false
 export const ALLOWED_FORMATS = ['markdown', 'html', 'bbcode', 'link']
 export const ALLOWED_HOSTS = ENABLE_MOCK_HOST
   ? [
