@@ -645,8 +645,10 @@ function isImgurUrl(url) {
   }
 }
 
-async function applyProxy(url, providerKey) {
+async function applyProxy(url, providerKey, originalName?) {
   try {
+    const isGif =
+      typeof originalName === 'string' && /\.gif$/i.test(originalName.trim())
     let px = await getProxy()
     if (px === 'none') return url
 
@@ -659,7 +661,7 @@ async function applyProxy(url, providerKey) {
       ) {
         px = 'wsrv.nl-duckduckgo'
       } else {
-        return `https://wsrv.nl/?url=${encodeURIComponent(url)}`
+        return `https://wsrv.nl/?url=${encodeURIComponent(url)}${isGif ? '&n=-1' : ''}`
       }
     }
 
@@ -669,7 +671,7 @@ async function applyProxy(url, providerKey) {
 
     if (px === 'wsrv.nl-duckduckgo') {
       const ddgUrl = `https://external-content.duckduckgo.com/iu/?u=${encodeURIComponent(url)}`
-      return `https://wsrv.nl/?url=${encodeURIComponent(ddgUrl)}`
+      return `https://wsrv.nl/?url=${encodeURIComponent(ddgUrl)}${isGif ? '&n=-1' : ''}`
     }
 
     return url
@@ -888,6 +890,59 @@ async function uploadToAppinn(file) {
   throw new Error(t('error_upload_failed'))
 }
 
+async function getSkyimgCsrfToken() {
+  const data = await gmRequest({
+    url: 'https://skyimg.net/csrf-token',
+    responseType: 'json',
+  })
+  const token = data?.csrfToken
+  if (!token) throw new Error(t('error_network'))
+  return String(token)
+}
+
+async function uploadToSkyimg(file, webp = false) {
+  if (Math.floor(file.size / 1000) > 100_000) {
+    throw new Error('100mb limit')
+  }
+
+  const token = await getSkyimgCsrfToken()
+  const formData = new FormData()
+  formData.append('file', file)
+  const data = await gmRequest({
+    method: 'POST',
+    url: webp
+      ? 'https://skyimg.net/upload?webp=true'
+      : 'https://skyimg.net/upload',
+    headers: {
+      origin: 'https://skyimg.net',
+      'x-csrf-token': token,
+      'x-sync-token': webp
+        ? '47e9f97c4c3ea304ef8ff4f232e27c7095d4c1cd7f6930860b083affd03ac831'
+        : 'f68b6cc9282eac325398df4bb608ee14e28219533b350ba3c911abdd3742681a',
+    },
+    data: formData,
+    responseType: 'json',
+  })
+
+  const first = Array.isArray(data) && data.length > 0 ? data[0] : data
+  const rawUrl =
+    first?.url ||
+    first?.thumbnail ||
+    first?.link ||
+    first?.src ||
+    data?.url ||
+    data?.data?.url
+  if (rawUrl) {
+    const src = String(rawUrl).trim().replaceAll(/`+/g, '')
+    const abs = /^https?:\/\//i.test(src)
+      ? src
+      : new URL(src.replace(/^\//, ''), 'https://skyimg.net/').href
+    return abs
+  }
+
+  throw new Error(t('error_upload_failed'))
+}
+
 async function uploadToImgur(file) {
   // Shuffle Client-ID list to ensure a different ID on each retry
   const ids = [...IMGUR_CLIENT_IDS]
@@ -959,6 +1014,8 @@ async function uploadImage(file) {
     return samples[idx]
   }
 
+  if (host === 'skyimg') return uploadToSkyimg(file, false)
+  if (host === 'skyimg_webp') return uploadToSkyimg(file, true)
   if (host === 'tikolu') return uploadToTikolu(file)
   if (host === 'mjj') return uploadToMjj(file)
   if (host === 'imgbb') return uploadToImgbb(file)
@@ -1451,7 +1508,8 @@ async function handleCopyClick(it: any) {
   const fmt = await getFormat()
   const proxied = await applyProxy(
     it.link,
-    it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
+    it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other'),
+    it.name
   )
   const out = await formatText(proxied, it.name || t('default_image_name'), fmt)
 
@@ -2109,7 +2167,7 @@ async function createPanel(): Promise<
         const link = await uploadImage(item.file)
         const fmt = await getFormat()
         const host = await getHost()
-        const proxied = await applyProxy(link, host)
+        const proxied = await applyProxy(link, host, item.file.name)
         const out = await formatText(proxied, item.file.name, fmt)
         if (item.placeholder && item.targetEl) {
           const ok = replacePlaceholder(
@@ -2309,7 +2367,8 @@ async function createPanel(): Promise<
       openBtn.addEventListener('click', async () => {
         const url = await applyProxy(
           it.link,
-          it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
+          it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other'),
+          it.name
         )
         window.open(url, '_blank')
       })

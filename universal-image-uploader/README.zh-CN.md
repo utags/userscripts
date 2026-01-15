@@ -19,7 +19,7 @@
 ## 功能（MVP）
 
 - 📥 支持粘贴、拖拽、文件选择收集图片
-- 📤 批量上传到 Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best，实时显示进度
+- 📤 批量上传到 Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best/Skyimg，实时显示进度
 - 📋 自动复制输出：`Markdown` / `HTML` / `BBCode` / `Link`
 - 🕘 本地历史记录，便于再次复制与复用
 - 🔘 可选站点按钮注入，兼容 SPA（按站点配置）
@@ -44,7 +44,7 @@
 
 - 在页面中粘贴/拖拽图片，或使用面板选择文件
 - 队列中可查看上传进度
-- 在面板的图床选择器中选择上传平台（Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best）
+- 在面板的图床选择器中选择上传平台（Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best/Skyimg）
 - 在面板的代理选择器中选择是否使用代理（默认“无”）
 - 完成后按所选格式自动复制
 - 历史记录中可快速再次复制
@@ -80,11 +80,13 @@
 
 ### v0.11.x
 
-- 新增三种图床：ImgBB、Photo.Lily、111666.best。
+- 新增四种图床：ImgBB、Photo.Lily、111666.best、Skyimg。
 - 更新面板图床选择器与文档，支持上述图床。
 - 调整 111666.best 代理逻辑，与 Imgur 保持一致（支持 `wsrv.nl -> DuckDuckGo`）。
 - 优化历史列表：放大缩略图、为预览图添加懒加载，并在悬浮时显示更大的浮层预览。
 - 优化日志列表样式：调整间距、背景色与边框，增加鼠标悬浮高亮效果，提升视觉体验。
+- 新增 Skyimg (WebP) 图床，上传接口带 `?webp=true` 参数。
+- 优化 `wsrv.nl` 代理：根据原文件名判断 GIF 时自动追加 `&n=-1` 参数。
 
 ### v0.10.x
 

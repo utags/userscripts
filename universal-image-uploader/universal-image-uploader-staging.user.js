@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.11.2
+// @version              0.11.3
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -26,6 +26,7 @@
 // @connect              h1.appinn.me
 // @connect              photo.lily.lat
 // @connect              i.111666.best
+// @connect              skyimg.net
 // @grant                GM_registerMenuCommand
 // @grant                GM_info
 // @grant                GM.info
@@ -378,6 +379,8 @@
       host_appinn: 'Appinn',
       host_photo_lily: 'Photo.Lily',
       host_111666_best: '111666.best',
+      host_skyimg: 'Skyimg',
+      host_skyimg_webp: 'Skyimg (WebP)',
       btn_select_images: 'Select images',
       progress_initial: 'Done 0/0',
       progress_done: 'Done {done}/{total}',
@@ -449,6 +452,8 @@
       host_appinn: 'Appinn',
       host_photo_lily: 'Photo.Lily',
       host_111666_best: '111666.best',
+      host_skyimg: 'Skyimg',
+      host_skyimg_webp: 'Skyimg (WebP)',
       btn_select_images: '\u9009\u62E9\u56FE\u7247',
       progress_initial: '\u5B8C\u6210 0/0',
       progress_done: '\u5B8C\u6210 {done}/{total}',
@@ -521,6 +526,8 @@
       host_appinn: 'Appinn',
       host_photo_lily: 'Photo.Lily',
       host_111666_best: '111666.best',
+      host_skyimg: 'Skyimg',
+      host_skyimg_webp: 'Skyimg (WebP)',
       btn_select_images: '\u9078\u64C7\u5716\u7247',
       progress_initial: '\u5B8C\u6210 0/0',
       progress_done: '\u5B8C\u6210 {done}/{total}',
@@ -604,11 +611,23 @@
         'mjj',
         'imgbb',
         'appinn',
+        'skyimg',
+        'skyimg_webp',
         'photo_lily',
         '111666_best',
         'mock',
       ]
-    : ['imgur', 'tikolu', 'mjj', 'imgbb', 'appinn', 'photo_lily', '111666_best']
+    : [
+        'imgur',
+        'tikolu',
+        'mjj',
+        'imgbb',
+        'appinn',
+        'skyimg',
+        'skyimg_webp',
+        'photo_lily',
+        '111666_best',
+      ]
   var ALLOWED_PROXIES = ['none', 'wsrv.nl', 'duckduckgo', 'wsrv.nl-duckduckgo']
   var ALLOWED_BUTTON_POSITIONS = ['before', 'inside', 'after']
   var DEFAULT_BUTTON_POSITION = 'after'
@@ -1287,8 +1306,10 @@
       return false
     }
   }
-  async function applyProxy(url, providerKey) {
+  async function applyProxy(url, providerKey, originalName) {
     try {
+      const isGif =
+        typeof originalName === 'string' && /\.gif$/i.test(originalName.trim())
       let px = await getProxy()
       if (px === 'none') return url
       if (px === 'wsrv.nl') {
@@ -1300,7 +1321,9 @@
         ) {
           px = 'wsrv.nl-duckduckgo'
         } else {
-          return 'https://wsrv.nl/?url='.concat(encodeURIComponent(url))
+          return 'https://wsrv.nl/?url='
+            .concat(encodeURIComponent(url))
+            .concat(isGif ? '&n=-1' : '')
         }
       }
       if (px === 'duckduckgo') {
@@ -1312,7 +1335,9 @@
         const ddgUrl = 'https://external-content.duckduckgo.com/iu/?u='.concat(
           encodeURIComponent(url)
         )
-        return 'https://wsrv.nl/?url='.concat(encodeURIComponent(ddgUrl))
+        return 'https://wsrv.nl/?url='
+          .concat(encodeURIComponent(ddgUrl))
+          .concat(isGif ? '&n=-1' : '')
       }
       return url
     } catch (e) {
@@ -1528,6 +1553,55 @@
     }
     throw new Error(t('error_upload_failed'))
   }
+  async function getSkyimgCsrfToken() {
+    const data = await gmRequest({
+      url: 'https://skyimg.net/csrf-token',
+      responseType: 'json',
+    })
+    const token = data == null ? void 0 : data.csrfToken
+    if (!token) throw new Error(t('error_network'))
+    return String(token)
+  }
+  async function uploadToSkyimg(file, webp = false) {
+    var _a
+    if (Math.floor(file.size / 1e3) > 1e5) {
+      throw new Error('100mb limit')
+    }
+    const token = await getSkyimgCsrfToken()
+    const formData = new FormData()
+    formData.append('file', file)
+    const data = await gmRequest({
+      method: 'POST',
+      url: webp
+        ? 'https://skyimg.net/upload?webp=true'
+        : 'https://skyimg.net/upload',
+      headers: {
+        origin: 'https://skyimg.net',
+        'x-csrf-token': token,
+        'x-sync-token': webp
+          ? '47e9f97c4c3ea304ef8ff4f232e27c7095d4c1cd7f6930860b083affd03ac831'
+          : 'f68b6cc9282eac325398df4bb608ee14e28219533b350ba3c911abdd3742681a',
+      },
+      data: formData,
+      responseType: 'json',
+    })
+    const first = Array.isArray(data) && data.length > 0 ? data[0] : data
+    const rawUrl =
+      (first == null ? void 0 : first.url) ||
+      (first == null ? void 0 : first.thumbnail) ||
+      (first == null ? void 0 : first.link) ||
+      (first == null ? void 0 : first.src) ||
+      (data == null ? void 0 : data.url) ||
+      ((_a = data == null ? void 0 : data.data) == null ? void 0 : _a.url)
+    if (rawUrl) {
+      const src = String(rawUrl).trim().replaceAll(/`+/g, '')
+      const abs = /^https?:\/\//i.test(src)
+        ? src
+        : new URL(src.replace(/^\//, ''), 'https://skyimg.net/').href
+      return abs
+    }
+    throw new Error(t('error_upload_failed'))
+  }
   async function uploadToImgur(file) {
     var _a
     const ids = [...IMGUR_CLIENT_IDS]
@@ -1596,6 +1670,8 @@
       const idx = Math.floor(Math.random() * samples.length)
       return samples[idx]
     }
+    if (host === 'skyimg') return uploadToSkyimg(file, false)
+    if (host === 'skyimg_webp') return uploadToSkyimg(file, true)
     if (host === 'tikolu') return uploadToTikolu(file)
     if (host === 'mjj') return uploadToMjj(file)
     if (host === 'imgbb') return uploadToImgbb(file)
@@ -2019,7 +2095,8 @@
     const fmt = await getFormat()
     const proxied = await applyProxy(
       it.link,
-      it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
+      it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other'),
+      it.name
     )
     const out = await formatText(
       proxied,
@@ -2611,7 +2688,7 @@
           const link = await uploadImage(item.file)
           const fmt = await getFormat()
           const host2 = await getHost()
-          const proxied = await applyProxy(link, host2)
+          const proxied = await applyProxy(link, host2, item.file.name)
           const out = await formatText(proxied, item.file.name, fmt)
           if (item.placeholder && item.targetEl) {
             const ok = replacePlaceholder(
@@ -2812,7 +2889,8 @@
         openBtn.addEventListener('click', async () => {
           const url = await applyProxy(
             it.link,
-            it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
+            it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other'),
+            it.name
           )
           window.open(url, '_blank')
         })

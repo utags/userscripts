@@ -19,7 +19,7 @@ A user script that lets you paste, drag, or select images and batch-upload them 
 ## Features (MVP)
 
 - 📥 Paste, drag-and-drop, or file picker to collect images
-- 📤 Batch upload to Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best with progress display
+- 📤 Batch upload to Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best/Skyimg with progress display
 - 📋 Auto-copy output in `Markdown` / `HTML` / `BBCode` / `Link`
 - 🕘 Local history to quickly re-copy and reuse uploads
 - 🔘 Optional site button injection with SPA observer (per-site settings)
@@ -44,7 +44,7 @@ Install one of the following user script managers:
 
 - Open any site, paste or drop images onto the page, or use the panel’s file picker
 - Watch the upload queue and progress
-- Choose upload provider via the panel’s host selector (Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best)
+- Choose upload provider via the panel’s host selector (Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best/Skyimg)
 - Choose proxy via the panel’s proxy selector (default `None`)
 - When finished, the script auto-copies based on your selected format
 - Use history to quickly copy past uploads
@@ -80,11 +80,13 @@ Install one of the following user script managers:
 
 ### v0.11.x
 
-- Added new upload providers: ImgBB, Photo.Lily, and 111666.best.
+- Added new upload providers: ImgBB, Photo.Lily, 111666.best, and Skyimg.
 - Updated documentation and host selector to include the new providers.
 - Aligned 111666.best proxy behavior with Imgur (supports `wsrv.nl -> DuckDuckGo`).
 - Improved history panel: larger thumbnails, lazy-loaded previews, and a floating enlarged preview when hovering thumbnails.
 - Optimized log list style: improved spacing, added background/border for better visibility, and hover highlight effects.
+- Added Skyimg (WebP) variant that uploads with `?webp=true`.
+- Enhanced `wsrv.nl` proxy: for GIF files (based on original filename) append `&n=-1`.
 
 ### v0.10.x
 
