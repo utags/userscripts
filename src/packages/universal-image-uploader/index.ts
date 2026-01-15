@@ -311,7 +311,7 @@ const updateSiteBtnSetting = async (index, cfg) => {
   await setSiteBtnSettingsList(list)
 }
 
-const MAX_HISTORY = 50
+const MAX_HISTORY = 200
 
 const createEl = (
   tag: string,
@@ -2207,7 +2207,6 @@ async function createPanel(): Promise<
   }
 
   async function renderHistory() {
-    // Avoid Trusted Types violation: clear without using innerHTML
     history.textContent = ''
     const header = createEl('div', { class: 'uiu-controls' })
     const historyItems = await loadHistory()
@@ -2224,6 +2223,17 @@ async function createPanel(): Promise<
     header.append(clearBtn)
     history.append(header)
 
+    const hoverPreviewWrap = createEl('div', {
+      style:
+        'position:absolute;left:12px;top:8px;z-index:50;padding:4px;background:#020617;border:1px solid #475569;border-radius:8px;box-shadow:0 10px 40px rgba(15,23,42,.8);pointer-events:none;display:none;',
+    })
+    const hoverPreviewImg = createEl('img', {
+      style:
+        'max-width:256px;max-height:256px;object-fit:contain;border-radius:4px;',
+    }) as HTMLImageElement
+    hoverPreviewWrap.append(hoverPreviewImg)
+    body.append(hoverPreviewWrap)
+
     const listWrap = createEl('div', { class: 'uiu-list' })
     for (const it of historyItems) {
       const row = createEl('div', { class: 'uiu-row' })
@@ -2234,8 +2244,16 @@ async function createPanel(): Promise<
       )
       const preview = createEl('img', {
         src: previewUrl,
+        loading: 'lazy',
         style:
-          'width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid #334155;',
+          'width:72px;height:72px;object-fit:cover;border-radius:4px;border:1px solid #334155;',
+      })
+      preview.addEventListener('mouseenter', () => {
+        hoverPreviewImg.src = previewUrl
+        ;(hoverPreviewWrap as HTMLElement).style.display = 'block'
+      })
+      preview.addEventListener('mouseleave', () => {
+        ;(hoverPreviewWrap as HTMLElement).style.display = 'none'
       })
       row.append(preview)
 

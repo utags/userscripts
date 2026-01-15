@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.11.0
+// @version              0.11.1
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -1065,7 +1065,7 @@
     list[index] = { selector, position: pos, text }
     await setSiteBtnSettingsList(list)
   }
-  var MAX_HISTORY = 50
+  var MAX_HISTORY = 200
   var createEl = (tag, attrs = {}, children = []) => {
     const el = document.createElement(tag)
     for (const [k, v] of Object.entries(attrs)) {
@@ -2745,6 +2745,16 @@
       })
       header2.append(clearBtn2)
       history.append(header2)
+      const hoverPreviewWrap = createEl('div', {
+        style:
+          'position:absolute;left:12px;top:8px;z-index:50;padding:4px;background:#020617;border:1px solid #475569;border-radius:8px;box-shadow:0 10px 40px rgba(15,23,42,.8);pointer-events:none;display:none;',
+      })
+      const hoverPreviewImg = createEl('img', {
+        style:
+          'max-width:256px;max-height:256px;object-fit:contain;border-radius:4px;',
+      })
+      hoverPreviewWrap.append(hoverPreviewImg)
+      body.append(hoverPreviewWrap)
       const listWrap = createEl('div', { class: 'uiu-list' })
       for (const it of historyItems) {
         const row = createEl('div', { class: 'uiu-row' })
@@ -2754,8 +2764,16 @@
         )
         const preview = createEl('img', {
           src: previewUrl,
+          loading: 'lazy',
           style:
-            'width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid #334155;',
+            'width:72px;height:72px;object-fit:cover;border-radius:4px;border:1px solid #334155;',
+        })
+        preview.addEventListener('mouseenter', () => {
+          hoverPreviewImg.src = previewUrl
+          hoverPreviewWrap.style.display = 'block'
+        })
+        preview.addEventListener('mouseleave', () => {
+          hoverPreviewWrap.style.display = 'none'
         })
         row.append(preview)
         const info = createEl('div', {
