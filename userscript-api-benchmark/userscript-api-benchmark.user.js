@@ -2,7 +2,7 @@
 // @name                 Userscript API Benchmark
 // @name:zh-CN           用户脚本 API 基准测试
 // @namespace            https://github.com/utags/userscripts
-// @version              0.1.6
+// @version              0.1.7
 // @description          Comprehensive benchmark tool for UserScript Manager APIs (GM.* and GM_*)
 // @description:zh-CN    用户脚本管理器 API (GM.* 和 GM_*) 的综合基准测试工具，用于检查兼容性与准确性
 // @author               Pipecraft
@@ -1068,7 +1068,7 @@
     const shadow = host.attachShadow({ mode: 'open' })
     const style = document.createElement('style')
     style.textContent =
-      '\n    :host {\n      position: fixed; top: 20px; right: 20px; z-index: 2147483647;\n      background: #fff; color: #333; padding: 16px; border-radius: 8px;\n      box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-family: sans-serif;\n      max-height: 90vh; overflow-y: auto; width: 600px;\n      font-size: 13px;\n    }\n    table { width: 100%; border-collapse: collapse; margin-top: 10px; }\n    th, td { border: 1px solid #eee; padding: 6px 8px; text-align: left; }\n    th { background: #f9f9f9; font-weight: 600; }\n    .pass { color: #2ecc71; font-weight: bold; }\n    .fail { color: #e74c3c; font-weight: bold; }\n    .na { color: #f59e0b; font-weight: bold; }\n    .header h3 { margin: 0 0 8px 0; font-size: 16px; }\n    .close { position: absolute; top: 10px; right: 10px; cursor: pointer; font-size: 16px; color: #999; }\n    .close:hover { color: #333; }\n    .copy-btn {\n      position: absolute; top: 10px; right: 40px;\n      cursor: pointer; font-size: 13px; color: #007aff; border: 1px solid #007aff;\n      padding: 2px 8px; border-radius: 4px; background: transparent;\n    }\n    .copy-btn:hover { background: #007aff; color: #fff; }\n    .copy-btn:active { transform: translateY(1px); }\n    .log-area {\n      margin-top: 16px;\n      padding: 10px;\n      background: #f5f5f5;\n      border: 1px solid #ddd;\n      border-radius: 4px;\n      font-family: monospace;\n      font-size: 11px;\n      max-height: 150px;\n      overflow-y: auto;\n      white-space: pre-wrap;\n    }\n    .log-entry { margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 4px; }\n    .log-entry:last-child { border-bottom: none; margin-bottom: 0; }\n    .log-entry.error { color: #e74c3c; }\n    .log-entry.warning { color: #f59e0b; }\n  '
+      '\n    :host {\n      position: fixed;\n      top: 20px;\n      right: 20px;\n      z-index: 2147483647;\n      background: #fff;\n      color: #333;\n      padding: 16px;\n      border-radius: 8px;\n      box-shadow: 0 4px 12px rgba(0,0,0,0.2);\n      font-family: sans-serif;\n      max-height: 90vh;\n      overflow-y: auto;\n      width: 600px;\n      font-size: 13px;\n    }\n    table {\n      width: 100%;\n      border-collapse: collapse;\n      margin-top: 10px;\n    }\n    th,\n    td {\n      border: 1px solid #eee;\n      padding: 6px 8px;\n      text-align: left;\n      word-break: break-word;\n    }\n    th { background: #f9f9f9; font-weight: 600; }\n    .pass { color: #2ecc71; font-weight: bold; }\n    .fail { color: #e74c3c; font-weight: bold; }\n    .na { color: #f59e0b; font-weight: bold; }\n    .header h3 { margin: 0 0 8px 0; font-size: 16px; }\n    .close {\n      position: absolute;\n      top: 10px;\n      right: 10px;\n      cursor: pointer;\n      font-size: 16px;\n      color: #999;\n    }\n    .close:hover { color: #333; }\n    .copy-btn {\n      position: absolute;\n      top: 10px;\n      right: 40px;\n      cursor: pointer;\n      font-size: 13px;\n      color: #007aff;\n      border: 1px solid #007aff;\n      padding: 2px 8px;\n      border-radius: 4px;\n      background: transparent;\n    }\n    .copy-btn:hover { background: #007aff; color: #fff; }\n    .copy-btn:active { transform: translateY(1px); }\n    .log-area {\n      margin-top: 16px;\n      padding: 10px;\n      background: #f5f5f5;\n      border: 1px solid #ddd;\n      border-radius: 4px;\n      font-family: monospace;\n      font-size: 11px;\n      max-height: 150px;\n      overflow-y: auto;\n      white-space: pre-wrap;\n    }\n    .log-entry { margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 4px; }\n    .log-entry:last-child { border-bottom: none; margin-bottom: 0; }\n    .log-entry.error { color: #e74c3c; }\n    .log-entry.warning { color: #f59e0b; }\n    @media (max-width: 640px) {\n      :host {\n        top: 10px;\n        right: 10px;\n        left: 10px;\n        width: auto;\n        max-width: none;\n        max-height: calc(100vh - 20px);\n        padding: 12px;\n        font-size: 12px;\n      }\n      .header h3 { font-size: 14px; }\n      table { font-size: 12px; }\n      .copy-btn {\n        top: 8px;\n        right: 36px;\n        padding: 2px 6px;\n      }\n      .close {\n        top: 8px;\n        right: 8px;\n      }\n    }\n  '
     shadow.append(style)
     const wrapper = document.createElement('div')
     let handler = 'Unknown'
@@ -1087,13 +1087,17 @@
     if (ua.includes('Chrome')) browser = 'Chrome'
     else if (ua.includes('Firefox')) browser = 'Firefox'
     else if (ua.includes('Safari')) browser = 'Safari'
+    const isMobile = /mobile|android|ip(hone|od|ad)/i.test(ua)
+    const platform = isMobile ? 'Mobile' : 'Desktop'
     const browserInfo = ''
       .concat(browser, ' ')
       .concat(
         ((_a = /(Chrome|Firefox|Safari)\/([\d.]+)/.exec(ua)) == null
           ? void 0
-          : _a[2]) || ''
+          : _a[2]) || '',
+        ' ('
       )
+      .concat(platform, ')')
     wrapper.innerHTML =
       '\n    <div class="close" title="Close">\xD7</div>\n    <button class="copy-btn" title="Copy as Markdown">Copy</button>\n    <div class="header">\n      <h3>Userscript API Benchmark</h3>\n      <div><strong>Manager:</strong> '
         .concat(handler, ' (')

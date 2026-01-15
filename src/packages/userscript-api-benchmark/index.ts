@@ -846,25 +846,58 @@ async function render() {
   const style = document.createElement('style')
   style.textContent = `
     :host {
-      position: fixed; top: 20px; right: 20px; z-index: 2147483647;
-      background: #fff; color: #333; padding: 16px; border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-family: sans-serif;
-      max-height: 90vh; overflow-y: auto; width: 600px;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2147483647;
+      background: #fff;
+      color: #333;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      font-family: sans-serif;
+      max-height: 90vh;
+      overflow-y: auto;
+      width: 600px;
       font-size: 13px;
     }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid #eee; padding: 6px 8px; text-align: left; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th,
+    td {
+      border: 1px solid #eee;
+      padding: 6px 8px;
+      text-align: left;
+      word-break: break-word;
+    }
     th { background: #f9f9f9; font-weight: 600; }
     .pass { color: #2ecc71; font-weight: bold; }
     .fail { color: #e74c3c; font-weight: bold; }
     .na { color: #f59e0b; font-weight: bold; }
     .header h3 { margin: 0 0 8px 0; font-size: 16px; }
-    .close { position: absolute; top: 10px; right: 10px; cursor: pointer; font-size: 16px; color: #999; }
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      color: #999;
+    }
     .close:hover { color: #333; }
     .copy-btn {
-      position: absolute; top: 10px; right: 40px;
-      cursor: pointer; font-size: 13px; color: #007aff; border: 1px solid #007aff;
-      padding: 2px 8px; border-radius: 4px; background: transparent;
+      position: absolute;
+      top: 10px;
+      right: 40px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #007aff;
+      border: 1px solid #007aff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: transparent;
     }
     .copy-btn:hover { background: #007aff; color: #fff; }
     .copy-btn:active { transform: translateY(1px); }
@@ -884,6 +917,29 @@ async function render() {
     .log-entry:last-child { border-bottom: none; margin-bottom: 0; }
     .log-entry.error { color: #e74c3c; }
     .log-entry.warning { color: #f59e0b; }
+    @media (max-width: 640px) {
+      :host {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        max-width: none;
+        max-height: calc(100vh - 20px);
+        padding: 12px;
+        font-size: 12px;
+      }
+      .header h3 { font-size: 14px; }
+      table { font-size: 12px; }
+      .copy-btn {
+        top: 8px;
+        right: 36px;
+        padding: 2px 6px;
+      }
+      .close {
+        top: 8px;
+        right: 8px;
+      }
+    }
   `
   shadow.append(style)
 
@@ -910,7 +966,10 @@ async function render() {
   else if (ua.includes('Firefox')) browser = 'Firefox'
   else if (ua.includes('Safari')) browser = 'Safari'
 
-  const browserInfo = `${browser} ${/(Chrome|Firefox|Safari)\/([\d.]+)/.exec(ua)?.[2] || ''}`
+  const isMobile = /mobile|android|ip(hone|od|ad)/i.test(ua)
+  const platform = isMobile ? 'Mobile' : 'Desktop'
+
+  const browserInfo = `${browser} ${/(Chrome|Firefox|Safari)\/([\d.]+)/.exec(ua)?.[2] || ''} (${platform})`
 
   wrapper.innerHTML = `
     <div class="close" title="Close">×</div>
