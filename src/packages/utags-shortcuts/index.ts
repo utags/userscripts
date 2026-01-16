@@ -258,26 +258,32 @@ function createRoot() {
   return { host, root }
 }
 
+function getNormalizedPos() {
+  const pos = settings.position
+
+  if (settings.layoutMode !== 'sidebar') return pos
+
+  const sidebarSide = settings.sidebarSide || SIDEBAR_SIDE_DEFAULT
+  const posParts = pos.split('-')
+  if (posParts.length !== 2) return ''
+
+  let [p1, p2] = posParts
+  if (p1 === 'top' || p1 === 'bottom') {
+    p2 = p1
+    p1 = sidebarSide
+  } else {
+    // left-xxx or right-xxx
+    p1 = sidebarSide
+  }
+
+  return p1 + '-' + p2
+}
+
 function place(el: HTMLElement, cfg: ShortcutsConfig) {
   el.style.position = 'fixed'
   el.style.inset = 'auto'
-  if (settings.layoutMode === 'sidebar') {
-    el.style.top = '0'
-    el.style.bottom = '0'
-    el.style.left = 'auto'
-    el.style.right = 'auto'
-    el.style.transform = ''
-    if ((settings.sidebarSide || SIDEBAR_SIDE_DEFAULT) === 'left') {
-      el.style.left = '0'
-    } else {
-      el.style.right = '0'
-    }
 
-    return
-  }
-
-  const p = settings.position
-  switch (p) {
+  switch (getNormalizedPos()) {
     case 'left-top': {
       el.style.top = '0'
       el.style.left = '0'
@@ -988,8 +994,8 @@ function renderGroupSection(
   })
   const actions = document.createElement('div')
   actions.className = 'header-actions'
-  const editMenuRightSide =
-    isRightSide(settings.position) || settings.position.endsWith('-right')
+  const pos = getNormalizedPos()
+  const editMenuRightSide = isRightSide(pos) || pos.endsWith('-right')
   const groupMenuRightSide = editMenuRightSide
 
   if (isEditing) {
@@ -1477,7 +1483,7 @@ function renderPanel(root: ShadowRoot, cfg: ShortcutsConfig, animIn: boolean) {
     } catch {}
   }
 
-  const pos = settings.position
+  const pos = getNormalizedPos()
   const isRight = isRightSide(pos)
   const isHoriz = isHorizontalPos(pos)
   const isTop = isTopSide(pos)
@@ -1547,8 +1553,8 @@ function openQuickAddMenu(
 ) {
   suppressCollapse = true
   tempOpen = true
-  const rightSide =
-    isRightSide(settings.position) || settings.position.endsWith('-right')
+  const pos = getNormalizedPos()
+  const rightSide = isRightSide(pos) || pos.endsWith('-right')
   showDropdownMenu(
     root,
     anchor,
@@ -1639,9 +1645,10 @@ function rerender(root: ShadowRoot, cfg: ShortcutsConfig) {
 
     if (isCollapsed) {
       const effectiveEdgeHidden =
-        (settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
-          ? true
-          : Boolean(settings.edgeHidden)
+        // (settings.layoutMode || LAYOUT_DEFAULT) === 'sidebar'
+        //   ? true
+        // :
+        Boolean(settings.edgeHidden)
       if (!effectiveEdgeHidden) {
         const tab = document.createElement('div')
         tab.className = 'collapsed-tab'
@@ -1650,7 +1657,7 @@ function rerender(root: ShadowRoot, cfg: ShortcutsConfig) {
           const gw = settings.edgeWidth ?? EDGE_DEFAULT_WIDTH
           const gh = settings.edgeHeight ?? EDGE_DEFAULT_HEIGHT
           const go = settings.edgeOpacity ?? EDGE_DEFAULT_OPACITY
-          const horiz = isHorizontalPos(settings.position)
+          const horiz = isHorizontalPos(getNormalizedPos())
           const thickness = Math.max(1, Math.min(24, gw))
           const length = Math.max(24, Math.min(320, gh))
           tab.style.width = horiz ? `${length}px` : `${thickness}px`
@@ -1815,7 +1822,7 @@ function scheduleAutoCollapse(root: ShadowRoot, cfg: ShortcutsConfig) {
 
 function collapseWithAnim(root: ShadowRoot, cfg: ShortcutsConfig) {
   try {
-    const p = settings.position
+    const p = getNormalizedPos()
     const sel = root.querySelector('.ushortcuts .panel')
     if (sel) {
       if (isHorizontalPos(p)) {

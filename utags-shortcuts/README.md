@@ -110,6 +110,11 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.8.x
+
+- **Layout Position Normalization**: In Sidebar mode, added a position normalization step that automatically maps the `position` setting to the actual sidebar side (left/right), keeping the edge strip, panel, and menus consistent across different layout configurations.
+- **Edge Strip Behavior**: No longer forces the edge strip to be hidden in Sidebar mode; instead, always respects the `edgeHidden` setting so you can freely choose whether the edge trigger is visible.
+
 ### v0.7.x
 
 - **Selection-Based Filtering**: Automatically filters navigation items when text is selected. Only items containing the `{selected}` variable will be displayed, helping you quickly find relevant actions.
