@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.3.0
+// @version              0.3.1
 // @description          Prevent Discourse from jumping after posting a reply by intercepting the reply button click and forcing shiftKey, keeping scroll position and context.
 // @description:zh-CN    拦截回复按钮点击并强制 shiftKey，避免发帖后页面跳转，保持当前位置与上下文。
 // @icon                 https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Fmeta.discourse.org%26size%3D64
@@ -16,14 +16,11 @@
 // @match                https://www.nodeloc.com/*
 // @match                https://meta.appinn.net/*
 // @run-at               document-idle
-// @grant                GM_info
 // @grant                GM.info
 // @grant                GM.addValueChangeListener
-// @grant                GM_addValueChangeListener
 // @grant                GM.getValue
-// @grant                GM_getValue
+// @grant                GM.deleteValue
 // @grant                GM.setValue
-// @grant                GM_setValue
 // ==/UserScript==
 //
 ;(() => {
@@ -75,9 +72,6 @@
   )
   var lastKnownValues = /* @__PURE__ */ new Map()
   var getScriptHandler = () => {
-    if (typeof GM_info !== 'undefined') {
-      return GM_info.scriptHandler || ''
-    }
     if (typeof GM !== 'undefined' && GM.info) {
       return GM.info.scriptHandler || ''
     }
@@ -86,11 +80,13 @@
   var scriptHandler = getScriptHandler().toLowerCase()
   var isIgnoredHandler =
     scriptHandler === 'tamp' || scriptHandler.includes('stay')
-  var isNativeListenerSupported =
+  var shouldCloneValue = () =>
+    scriptHandler === 'tamp' || // ScriptCat support addValueChangeListener, don't need to clone
+    scriptHandler.includes('stay')
+  var isNativeListenerSupported = () =>
     !isIgnoredHandler &&
-    ((typeof GM !== 'undefined' &&
-      typeof GM.addValueChangeListener === 'function') ||
-      typeof GM_addValueChangeListener === 'function')
+    typeof GM !== 'undefined' &&
+    typeof GM.addValueChangeListener === 'function'
   function triggerValueChangeListeners(key, oldValue, newValue, remote) {
     const list = Array.from(valueChangeListeners.values()).filter(
       (l) => l.key === key
@@ -101,25 +97,34 @@
   }
   valueChangeBroadcastChannel.addEventListener('message', (event) => {
     const { key, oldValue, newValue } = event.data
-    lastKnownValues.set(key, newValue)
-    triggerValueChangeListeners(key, oldValue, newValue, true)
+    if (shouldCloneValue()) {
+      void setValue(key, newValue)
+    } else {
+      lastKnownValues.set(key, newValue)
+      triggerValueChangeListeners(key, oldValue, newValue, true)
+    }
   })
   async function getValue(key, defaultValue) {
     if (typeof GM !== 'undefined' && typeof GM.getValue === 'function') {
-      return GM.getValue(key, defaultValue)
-    }
-    if (typeof GM_getValue === 'function') {
-      return GM_getValue(key, defaultValue)
+      try {
+        const value = await GM.getValue(key, defaultValue)
+        if (value && typeof value === 'object' && shouldCloneValue()) {
+          return JSON.parse(JSON.stringify(value))
+        }
+        return value
+      } catch (error) {
+        console.warn('GM.getValue failed', error)
+      }
     }
     return defaultValue
   }
   async function updateValue(key, newValue, updater) {
     let oldValue
-    if (!isNativeListenerSupported) {
+    if (!isNativeListenerSupported()) {
       oldValue = await getValue(key)
     }
     await updater()
-    if (!isNativeListenerSupported) {
+    if (!isNativeListenerSupported()) {
       if (deepEqual(oldValue, newValue)) {
         return
       }
@@ -130,10 +135,14 @@
   }
   async function setValue(key, value) {
     await updateValue(key, value, async () => {
-      if (typeof GM !== 'undefined' && typeof GM.setValue === 'function') {
-        await GM.setValue(key, value)
-      } else if (typeof GM_setValue === 'function') {
-        GM_setValue(key, value)
+      if (typeof GM !== 'undefined') {
+        if (value === void 0 || value === null) {
+          if (typeof GM.deleteValue === 'function') {
+            await GM.deleteValue(key)
+          }
+        } else if (typeof GM.setValue === 'function') {
+          await GM.setValue(key, value)
+        }
       }
     })
   }

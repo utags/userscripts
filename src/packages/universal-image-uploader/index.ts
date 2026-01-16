@@ -1,10 +1,11 @@
-import { addStyle, registerMenu, unregisterMenu } from '../../common/gm'
 import {
   addValueChangeListener,
   deleteValue,
   getValue,
   setValue,
-} from '../../common/gm/storage'
+} from 'browser-extension-storage'
+
+import { addStyle, registerMenu, unregisterMenu } from '../../common/gm'
 import { isTopFrame } from '../../utils/is-top-frame'
 import {
   ALLOWED_BUTTON_POSITIONS,

@@ -1,10 +1,14 @@
+import {
+  addValueChangeListener,
+  getValue,
+  setValue,
+} from 'browser-extension-storage'
 import styleText from 'css:./style.css'
 
 import { c } from '../../utils/c'
 import { ensureShadowRoot } from '../../utils/dom'
 import { isTopFrame } from '../../utils/is-top-frame'
 import { normalizeToDefaultType, setOrDelete } from '../../utils/obj'
-import { addValueChangeListener, getValue, setValue } from '../gm/storage'
 
 export type FieldOption = { value: string; label: string }
 type FieldToggle = {

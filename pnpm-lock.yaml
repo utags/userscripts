@@ -15,8 +15,8 @@ importers:
         specifier: ^0.8.9
         version: 0.8.9
       browser-extension-storage:
-        specifier: ^0.2.8
-        version: 0.2.8
+        specifier: ^0.2.10
+        version: 0.2.10
       browser-extension-utils:
         specifier: ^0.3.4
         version: 0.3.4
@@ -1326,8 +1326,8 @@ packages:
     resolution: {integrity: sha512-xHVESDkMGgbKMUgqISjYH7IgHHHuiA4CjSM56oONYywAbDMhoZiTzFC//IOj91ChbVZ/fW4uvaya75lwbe+Ytw==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
 
-  browser-extension-storage@0.2.8:
-    resolution: {integrity: sha512-jEX8Ze7rG65DZLuzofxBA2xLlo0VzS59tpuWwkwK//1VTjWQN93NCCn6LWHhaqUJWnZ4I1aHRLnvdttaAVINYA==}
+  browser-extension-storage@0.2.10:
+    resolution: {integrity: sha512-olsUC49NkoIpXbp/tT7S+b7zav6WLfuP7QmqE/mOcseTqwz0aGWHr+qvTZN2Bog5aI0C3sSBNggp7NbBaNuvSQ==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
 
   browser-extension-utils@0.3.4:
@@ -4692,12 +4692,12 @@ snapshots:
   browser-extension-settings@0.8.9:
     dependencies:
       browser-extension-i18n: 0.1.3
-      browser-extension-storage: 0.2.8
+      browser-extension-storage: 0.2.10
       browser-extension-utils: 0.3.4
     transitivePeerDependencies:
       - react
 
-  browser-extension-storage@0.2.8:
+  browser-extension-storage@0.2.10:
     dependencies:
       '@plasmohq/storage': 1.15.0
     transitivePeerDependencies:

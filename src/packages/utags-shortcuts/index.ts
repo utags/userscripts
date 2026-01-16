@@ -1,7 +1,7 @@
+import { addValueChangeListener } from 'browser-extension-storage'
 import styleText from 'css:./style.css'
 
 import { addStyle, registerMenu, unregisterMenu } from '../../common/gm'
-import { addValueChangeListener } from '../../common/gm/storage'
 import { ensureShadowRoot } from '../../utils/dom'
 import { setIcon } from '../../utils/icon'
 import { isTopFrame } from '../../utils/is-top-frame'

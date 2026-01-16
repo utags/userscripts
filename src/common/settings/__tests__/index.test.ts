@@ -1,10 +1,10 @@
+import * as gm from 'browser-extension-storage'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import * as gm from '../../gm/storage'
 import { createSettingsStore } from '../index'
 
 // Mock gm module
-vi.mock('../../gm/storage', () => ({
+vi.mock('browser-extension-storage', () => ({
   getValue: vi.fn(),
   setValue: vi.fn(),
   addValueChangeListener: vi.fn(),

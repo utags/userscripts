@@ -1,4 +1,4 @@
-import { scriptHandler } from '../../common/gm/storage'
+import { scriptHandler } from '../../common/gm/script-handler'
 import { ProgressBar } from '../../common/progress-bar'
 import { shouldOpenInCurrentTab } from '../../utils/dom'
 import { isTopFrame } from '../../utils/is-top-frame'

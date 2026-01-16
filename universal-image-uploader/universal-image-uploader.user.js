@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.12.0
+// @version              0.12.1
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -27,17 +27,12 @@
 // @connect              photo.lily.lat
 // @connect              i.111666.best
 // @connect              skyimg.net
-// @grant                GM_registerMenuCommand
-// @grant                GM_info
 // @grant                GM.info
 // @grant                GM.addValueChangeListener
-// @grant                GM_addValueChangeListener
 // @grant                GM.getValue
-// @grant                GM_getValue
-// @grant                GM.setValue
-// @grant                GM_setValue
 // @grant                GM.deleteValue
-// @grant                GM_deleteValue
+// @grant                GM.setValue
+// @grant                GM_registerMenuCommand
 // @grant                GM_addStyle
 // @grant                GM.xmlHttpRequest
 // @grant                GM_xmlhttpRequest
@@ -67,12 +62,6 @@
         if (__propIsEnum.call(b, prop)) __defNormalProp(a, prop, b[prop])
       }
     return a
-  }
-  function registerMenu(caption, onClick, options) {
-    if (typeof GM_registerMenuCommand === 'function') {
-      return GM_registerMenuCommand(caption, onClick, options)
-    }
-    return 0
   }
   function deepEqual(a, b) {
     if (a === b) {
@@ -122,8 +111,10 @@
   )
   var lastKnownValues = /* @__PURE__ */ new Map()
   var pollingIntervalId = null
+  var pollingEnabled = false
   function startPolling() {
-    if (pollingIntervalId || isNativeListenerSupported) return
+    if (pollingIntervalId || isNativeListenerSupported() || !pollingEnabled)
+      return
     pollingIntervalId = setInterval(async () => {
       const keys = new Set(
         Array.from(valueChangeListeners.values()).map((l) => l.key)
@@ -144,9 +135,6 @@
     }, 1500)
   }
   var getScriptHandler = () => {
-    if (typeof GM_info !== 'undefined') {
-      return GM_info.scriptHandler || ''
-    }
     if (typeof GM !== 'undefined' && GM.info) {
       return GM.info.scriptHandler || ''
     }
@@ -155,11 +143,13 @@
   var scriptHandler = getScriptHandler().toLowerCase()
   var isIgnoredHandler =
     scriptHandler === 'tamp' || scriptHandler.includes('stay')
-  var isNativeListenerSupported =
+  var shouldCloneValue = () =>
+    scriptHandler === 'tamp' || // ScriptCat support addValueChangeListener, don't need to clone
+    scriptHandler.includes('stay')
+  var isNativeListenerSupported = () =>
     !isIgnoredHandler &&
-    ((typeof GM !== 'undefined' &&
-      typeof GM.addValueChangeListener === 'function') ||
-      typeof GM_addValueChangeListener === 'function')
+    typeof GM !== 'undefined' &&
+    typeof GM.addValueChangeListener === 'function'
   function triggerValueChangeListeners(key, oldValue, newValue, remote) {
     const list = Array.from(valueChangeListeners.values()).filter(
       (l) => l.key === key
@@ -170,25 +160,34 @@
   }
   valueChangeBroadcastChannel.addEventListener('message', (event) => {
     const { key, oldValue, newValue } = event.data
-    lastKnownValues.set(key, newValue)
-    triggerValueChangeListeners(key, oldValue, newValue, true)
+    if (shouldCloneValue()) {
+      void setValue(key, newValue)
+    } else {
+      lastKnownValues.set(key, newValue)
+      triggerValueChangeListeners(key, oldValue, newValue, true)
+    }
   })
   async function getValue(key, defaultValue) {
     if (typeof GM !== 'undefined' && typeof GM.getValue === 'function') {
-      return GM.getValue(key, defaultValue)
-    }
-    if (typeof GM_getValue === 'function') {
-      return GM_getValue(key, defaultValue)
+      try {
+        const value = await GM.getValue(key, defaultValue)
+        if (value && typeof value === 'object' && shouldCloneValue()) {
+          return JSON.parse(JSON.stringify(value))
+        }
+        return value
+      } catch (error) {
+        console.warn('GM.getValue failed', error)
+      }
     }
     return defaultValue
   }
   async function updateValue(key, newValue, updater) {
     let oldValue
-    if (!isNativeListenerSupported) {
+    if (!isNativeListenerSupported()) {
       oldValue = await getValue(key)
     }
     await updater()
-    if (!isNativeListenerSupported) {
+    if (!isNativeListenerSupported()) {
       if (deepEqual(oldValue, newValue)) {
         return
       }
@@ -199,10 +198,14 @@
   }
   async function setValue(key, value) {
     await updateValue(key, value, async () => {
-      if (typeof GM !== 'undefined' && typeof GM.setValue === 'function') {
-        await GM.setValue(key, value)
-      } else if (typeof GM_setValue === 'function') {
-        GM_setValue(key, value)
+      if (typeof GM !== 'undefined') {
+        if (value === void 0 || value === null) {
+          if (typeof GM.deleteValue === 'function') {
+            await GM.deleteValue(key)
+          }
+        } else if (typeof GM.setValue === 'function') {
+          await GM.setValue(key, value)
+        }
       }
     })
   }
@@ -210,22 +213,16 @@
     await updateValue(key, void 0, async () => {
       if (typeof GM !== 'undefined' && typeof GM.deleteValue === 'function') {
         await GM.deleteValue(key)
-      } else if (typeof GM_deleteValue === 'function') {
-        GM_deleteValue(key)
       }
     })
   }
   async function addValueChangeListener(key, callback) {
-    if (isNativeListenerSupported) {
-      if (
-        typeof GM !== 'undefined' &&
-        typeof GM.addValueChangeListener === 'function'
-      ) {
-        return GM.addValueChangeListener(key, callback)
-      }
-      if (typeof GM_addValueChangeListener === 'function') {
-        return GM_addValueChangeListener(key, callback)
-      }
+    if (
+      isNativeListenerSupported() &&
+      typeof GM !== 'undefined' &&
+      typeof GM.addValueChangeListener === 'function'
+    ) {
+      return GM.addValueChangeListener(key, callback)
     }
     const id = ++valueChangeListenerIdCounter
     valueChangeListeners.set(id, { key, callback })
@@ -236,6 +233,12 @@
     }
     startPolling()
     return id
+  }
+  function registerMenu(caption, onClick, options) {
+    if (typeof GM_registerMenuCommand === 'function') {
+      return GM_registerMenuCommand(caption, onClick, options)
+    }
+    return 0
   }
   var win = globalThis
   function isTopFrame() {

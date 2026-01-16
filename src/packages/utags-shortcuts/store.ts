@@ -1,5 +1,6 @@
+import { getValue, setValue } from 'browser-extension-storage'
+
 import { fetchWithGmFallback } from '../../common/fetch'
-import { getValue, setValue } from '../../common/gm/storage'
 import { uid } from '../../utils/uid'
 import { importAndSave } from './importer'
 import { type OpenMode, type Variable } from './types'

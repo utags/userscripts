@@ -4,7 +4,7 @@
 // @namespace            {namespace}
 // @homepageURL          {homepage}
 // @supportURL           {bugs.url}
-// @version              0.3.0
+// @version              0.3.1
 // @description          Prevent Discourse from jumping after posting a reply by intercepting the reply button click and forcing shiftKey, keeping scroll position and context.
 // @description:zh-CN    拦截回复按钮点击并强制 shiftKey，避免发帖后页面跳转，保持当前位置与上下文。
 // @icon                 https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Fmeta.discourse.org%26size%3D64

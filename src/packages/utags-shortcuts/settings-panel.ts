@@ -1,7 +1,7 @@
+import { getValue, setValue } from 'browser-extension-storage'
 import styleText from 'css:./style.css'
 
 import { fetchWithGmFallback } from '../../common/fetch'
-import { getValue, setValue } from '../../common/gm/storage'
 import {
   closeSettingsPanel,
   createSettingsStore,

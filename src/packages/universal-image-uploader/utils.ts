@@ -1,4 +1,5 @@
-import { getValue, setValue } from '../../common/gm/storage'
+import { getValue, setValue } from 'browser-extension-storage'
+
 import {
   ALLOWED_FORMATS,
   CUSTOM_FORMATS_KEY,

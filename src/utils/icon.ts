@@ -1,5 +1,6 @@
+import { getValue, setValue } from 'browser-extension-storage'
+
 import { fetchWithGmFallback } from '../common/fetch'
-import { getValue, setValue } from '../common/gm/storage'
 import { c } from './c'
 import { clearChildren } from './dom'
 import { getWrappedIconUrl } from './favicon'

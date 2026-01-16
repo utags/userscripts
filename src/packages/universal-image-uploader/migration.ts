@@ -1,4 +1,5 @@
-import { deleteValue, getValue, setValue } from '../../common/gm/storage'
+import { deleteValue, getValue, setValue } from 'browser-extension-storage'
+
 import {
   ALLOWED_BUTTON_POSITIONS,
   ALLOWED_HOSTS,
