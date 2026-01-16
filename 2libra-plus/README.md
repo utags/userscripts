@@ -2,6 +2,10 @@
 
 专为 2Libra.com 打造的增强工具，旨在提升日常使用的效率与体验。
 
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2026-01-16-13-26-10.png)
+
+![screencapture](https://wsrv.nl/?url=https://raw.githubusercontent.com/utags/userscripts/main/assets/screenshot-2026-01-16-13-27-49.png)
+
 ## ✨ 主要功能
 
 ### 1. 通知中心增强
@@ -9,7 +13,11 @@
 - **未读消息高亮**：自动检测通知列表中的未读条目，并在左侧添加醒目的**橙色竖线**标记，帮助你快速定位未处理的通知。
 - **自动已读（可选）**：支持进入通知页后自动将当前页消息标记为已读，减少重复点击操作（默认开启，可在设置中关闭）。
 
-### 2. 个性化设置
+### 2. 主题列表增强
+
+- **回复时间颜色渐变**：根据你上次在首页查看时间，将最新回复显示得更醒目，较久之前的回复颜色更浅，帮助你一眼区分「最近更新」和「很久没动」的帖子。为了避免频繁刷新带来的视觉抖动，「上次查看时间」在 5 分钟内不会更新；最新回复会使用 `--color-primary` 颜色展示，更加醒目。
+
+### 3. 个性化设置
 
 - 提供可视化的设置面板，可随时开启或关闭特定功能，按需定制你的使用体验。
 
@@ -24,6 +32,10 @@
 - **环境要求**：需要安装油猴脚本管理器（如 [Tampermonkey](https://www.tampermonkey.net/)、[Violentmonkey](https://violentmonkey.github.io/)、[ScriptCat](https://scriptcat.org/)）。
 
 ## 📝 更新日志
+
+### v0.0.2
+
+- ✨ 新增主题列表回复时间颜色渐变功能。
 
 ### v0.0.1
 

@@ -7,22 +7,29 @@ import {
   type Field,
   type PanelSchema,
 } from '../../common/settings'
-import { initAutoMarkNotificationsRead } from './auto-mark-notifications-read'
+import {
+  initAutoMarkNotificationsRead,
+  runAutoMarkNotificationsRead,
+} from './auto-mark-notifications-read'
+import { initReplyTimeColor, runReplyTimeColor } from './reply-time-color'
 
 type Settings = {
   enabled: boolean
   autoMarkNotificationsRead: boolean
+  replyTimeColor: boolean
 }
 
 const DEFAULT_SETTINGS: Settings = {
   enabled: true,
   autoMarkNotificationsRead: true,
+  replyTimeColor: true,
 }
 
 const store = createSettingsStore('settings', DEFAULT_SETTINGS)
 
 let enabled = DEFAULT_SETTINGS.enabled
 let autoMarkNotificationsRead = DEFAULT_SETTINGS.autoMarkNotificationsRead
+let replyTimeColor = DEFAULT_SETTINGS.replyTimeColor
 
 function buildSettingsSchema(): PanelSchema {
   const fields: Field[] = [
@@ -31,6 +38,11 @@ function buildSettingsSchema(): PanelSchema {
       type: 'toggle',
       key: 'autoMarkNotificationsRead',
       label: '自动将通知页设为已读',
+    },
+    {
+      type: 'toggle',
+      key: 'replyTimeColor',
+      label: '回复时间颜色渐变',
     },
   ]
   return {
@@ -79,8 +91,12 @@ async function applySettingsFromStore(): Promise<void> {
     const obj = await store.getAll<Settings>()
     enabled = Boolean(obj.enabled)
     autoMarkNotificationsRead = Boolean(obj.autoMarkNotificationsRead)
-    if (!prevEnabled && enabled) {
+    replyTimeColor = Boolean(obj.replyTimeColor)
+    if (!prevEnabled && enabled && !featuresInitialized) {
       initFeatures()
+    } else if (featuresInitialized) {
+      runAutoMarkNotificationsRead(getSettingsSnapshot)
+      runReplyTimeColor(getSettingsSnapshot)
     }
   } catch {}
 }
@@ -89,6 +105,7 @@ function getSettingsSnapshot(): Settings {
   return {
     enabled,
     autoMarkNotificationsRead,
+    replyTimeColor,
   }
 }
 
@@ -98,6 +115,7 @@ function initFeatures(): void {
   if (featuresInitialized) return
   featuresInitialized = true
   initAutoMarkNotificationsRead(getSettingsSnapshot)
+  initReplyTimeColor(getSettingsSnapshot)
 }
 
 function bootstrap(): void {

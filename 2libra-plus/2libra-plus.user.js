@@ -3,7 +3,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.0.1
+// @version              0.0.2
 // @description          2Libra.com 增强工具
 // @icon                 https://2libra.com/favicon.ico
 // @author               Pipecraft
@@ -970,11 +970,11 @@
     globalThis.addEventListener('keydown', onKeyDown, true)
   }
   function createSettingsStore(
-    storageKey,
+    storageKey2,
     defaults,
     isSupportSitePref = false
   ) {
-    const rootKey = storageKey || 'settings'
+    const rootKey = storageKey2 || 'settings'
     let cache
     let globalCache
     let siteCache
@@ -1258,20 +1258,23 @@
     )
     btn.click()
   }
+  function scheduleClick(getSettings) {
+    if (clickTimer !== void 0) {
+      globalThis.clearTimeout(clickTimer)
+    }
+    clickTimer = globalThis.setTimeout(() => {
+      clickTimer = void 0
+      tryClickMarkButton(getSettings)
+    }, 800)
+  }
+  function runAutoMarkNotificationsRead(getSettings) {
+    scheduleClick(getSettings)
+  }
   function initAutoMarkNotificationsRead(getSettings) {
     if (initialized) return
     initialized = true
-    const scheduleClick = () => {
-      if (clickTimer !== void 0) {
-        globalThis.clearTimeout(clickTimer)
-      }
-      clickTimer = globalThis.setTimeout(() => {
-        clickTimer = void 0
-        tryClickMarkButton(getSettings)
-      }, 800)
-    }
     const check = () => {
-      scheduleClick()
+      scheduleClick(getSettings)
     }
     if (document.readyState === 'loading') {
       document.addEventListener(
@@ -1287,13 +1290,191 @@
     onUrlChange(check)
     onDomChange(check)
   }
+  var storageKey = '2libraPlus:lastHomeViewTime'
+  var initialized2 = false
+  var lastHomeViewBase
+  function getListContainer() {
+    return document.querySelector('[data-main-left="true"] ul.card') || void 0
+  }
+  function getLastHomeViewTime() {
+    try {
+      const raw = globalThis.localStorage.getItem(storageKey)
+      if (raw) {
+        const n = Number.parseInt(raw, 10)
+        if (Number.isFinite(n) && n > 0) {
+          return n
+        }
+      }
+    } catch (e) {}
+    return void 0
+  }
+  function logLastHomeViewTime(base) {
+    if (!base) return
+    const now = Date.now()
+    const diffSeconds = Math.max(0, Math.floor((now - base) / 1e3))
+    const minute = 60
+    const hour = 60 * minute
+    const day = 24 * hour
+    let unit = '\u79D2'
+    let value = diffSeconds
+    if (diffSeconds >= minute && diffSeconds < hour) {
+      unit = '\u5206'
+      value = Math.floor(diffSeconds / minute)
+    } else if (diffSeconds >= hour && diffSeconds < day) {
+      unit = '\u5C0F\u65F6'
+      value = Math.floor(diffSeconds / hour)
+    } else if (diffSeconds >= day) {
+      unit = '\u5929'
+      value = Math.floor(diffSeconds / day)
+    }
+    const date = new Date(base)
+    const pad = (n) => String(n).padStart(2, '0')
+    const year = date.getFullYear()
+    const month = pad(date.getMonth() + 1)
+    const dayOfMonth = pad(date.getDate())
+    const hours = pad(date.getHours())
+    const minutes = pad(date.getMinutes())
+    const seconds = pad(date.getSeconds())
+    const formatted = ''
+      .concat(year, '-')
+      .concat(month, '-')
+      .concat(dayOfMonth, ' ')
+      .concat(hours, ':')
+      .concat(minutes, ':')
+      .concat(seconds)
+    console.log(
+      '[2libra-plus] \u{1F559} \u4E0A\u6B21\u9996\u9875\u8BBF\u95EE\u65F6\u95F4\uFF1A'
+        .concat(value, ' ')
+        .concat(unit, ' \u524D\uFF08')
+        .concat(formatted, '\uFF09')
+    )
+  }
+  function updateReplyTimeColor(getSettings) {
+    var _a
+    let lastHomeViewTime = lastHomeViewBase
+    const settings = getSettings()
+    if (!settings.enabled || !settings.replyTimeColor) {
+      const timeElements2 = Array.from(
+        ((_a = getListContainer()) == null
+          ? void 0
+          : _a.querySelectorAll('li time')) || []
+      )
+      for (const el of timeElements2) {
+        el.style.removeProperty('color')
+      }
+      return
+    }
+    const list = getListContainer()
+    if (!list) return
+    const timeElements = Array.from(list.querySelectorAll('li time'))
+    if (timeElements.length === 0) return
+    const now = Date.now()
+    const timestamps = []
+    if (lastHomeViewTime && lastHomeViewTime > now) {
+      lastHomeViewTime = void 0
+    }
+    for (const el of timeElements) {
+      const dt = el.getAttribute('datetime')
+      if (!dt) continue
+      const t = Date.parse(dt)
+      if (Number.isNaN(t)) continue
+      if (t > now) continue
+      timestamps.push(t)
+    }
+    if (timestamps.length === 0) return
+    const min = Math.min(...timestamps)
+    const max = Math.max(...timestamps)
+    if (!lastHomeViewTime) {
+      lastHomeViewTime = min
+    }
+    if (lastHomeViewTime < min) {
+      lastHomeViewTime = min
+    } else if (lastHomeViewTime > max) {
+      lastHomeViewTime = max
+    }
+    for (const el of timeElements) {
+      const dt = el.getAttribute('datetime')
+      if (!dt) continue
+      const t = Date.parse(dt)
+      if (Number.isNaN(t)) continue
+      if (t > now) continue
+      let opacity
+      if (t >= lastHomeViewTime) {
+        const rangeNew = now - lastHomeViewTime || 1
+        const ageNew = now - t
+        const ratioNew = Math.min(Math.max(ageNew / rangeNew, 0), 1)
+        const eased = Math.sqrt(ratioNew)
+        opacity = 1 - eased * 0.3
+        const percent = Math.round(opacity * 100)
+        el.style.color = 'color-mix(in oklab,var(--color-primary) '.concat(
+          percent,
+          '%,transparent)'
+        )
+      } else {
+        const rangeOld = lastHomeViewTime - min || 1
+        const ageOld = lastHomeViewTime - t
+        const ratioOld = Math.min(Math.max(ageOld / rangeOld, 0), 1)
+        const eased = Math.sqrt(ratioOld)
+        const maxOld = 0.69
+        const minOld = 0.3
+        opacity = maxOld - eased * (maxOld - minOld)
+        const percent = Math.round(opacity * 100)
+        el.style.color = 'color-mix(in oklab,var(--color-base-content) '.concat(
+          percent,
+          '%,transparent)'
+        )
+      }
+    }
+  }
+  function runReplyTimeColor(getSettings) {
+    updateReplyTimeColor(getSettings)
+  }
+  function initReplyTimeColor(getSettings) {
+    if (initialized2) return
+    initialized2 = true
+    const runUpdateColor = () => {
+      updateReplyTimeColor(getSettings)
+    }
+    const handleHomeView = () => {
+      const last = getLastHomeViewTime()
+      lastHomeViewBase = last
+      logLastHomeViewTime(last)
+      runUpdateColor()
+      if (globalThis.location.pathname === '/') {
+        try {
+          const now = Date.now()
+          const fiveMinutes = 5 * 60 * 1e3
+          if ((!last || now - last >= fiveMinutes) && getListContainer()) {
+            globalThis.localStorage.setItem(storageKey, String(now))
+          }
+        } catch (e) {}
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener(
+        'DOMContentLoaded',
+        () => {
+          handleHomeView()
+        },
+        { once: true }
+      )
+    } else {
+      handleHomeView()
+    }
+    onUrlChange(() => {
+      handleHomeView()
+    })
+    onDomChange(runUpdateColor)
+  }
   var DEFAULT_SETTINGS = {
     enabled: true,
     autoMarkNotificationsRead: true,
+    replyTimeColor: true,
   }
   var store = createSettingsStore('settings', DEFAULT_SETTINGS)
   var enabled = DEFAULT_SETTINGS.enabled
   var autoMarkNotificationsRead = DEFAULT_SETTINGS.autoMarkNotificationsRead
+  var replyTimeColor = DEFAULT_SETTINGS.replyTimeColor
   function buildSettingsSchema() {
     const fields = [
       { type: 'toggle', key: 'enabled', label: '\u542F\u7528' },
@@ -1301,6 +1482,11 @@
         type: 'toggle',
         key: 'autoMarkNotificationsRead',
         label: '\u81EA\u52A8\u5C06\u901A\u77E5\u9875\u8BBE\u4E3A\u5DF2\u8BFB',
+      },
+      {
+        type: 'toggle',
+        key: 'replyTimeColor',
+        label: '\u56DE\u590D\u65F6\u95F4\u989C\u8272\u6E10\u53D8',
       },
     ]
     return {
@@ -1345,8 +1531,12 @@
       const obj = await store.getAll()
       enabled = Boolean(obj.enabled)
       autoMarkNotificationsRead = Boolean(obj.autoMarkNotificationsRead)
-      if (!prevEnabled && enabled) {
+      replyTimeColor = Boolean(obj.replyTimeColor)
+      if (!prevEnabled && enabled && !featuresInitialized) {
         initFeatures()
+      } else if (featuresInitialized) {
+        runAutoMarkNotificationsRead(getSettingsSnapshot)
+        runReplyTimeColor(getSettingsSnapshot)
       }
     } catch (e) {}
   }
@@ -1354,6 +1544,7 @@
     return {
       enabled,
       autoMarkNotificationsRead,
+      replyTimeColor,
     }
   }
   var featuresInitialized = false
@@ -1361,6 +1552,7 @@
     if (featuresInitialized) return
     featuresInitialized = true
     initAutoMarkNotificationsRead(getSettingsSnapshot)
+    initReplyTimeColor(getSettingsSnapshot)
   }
   function bootstrap() {
     const d = document.documentElement

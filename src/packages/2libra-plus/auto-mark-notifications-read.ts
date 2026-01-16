@@ -53,23 +53,27 @@ function tryClickMarkButton(getSettings: GetSettings): void {
   btn.click()
 }
 
+function scheduleClick(getSettings: GetSettings): void {
+  if (clickTimer !== undefined) {
+    globalThis.clearTimeout(clickTimer)
+  }
+
+  clickTimer = globalThis.setTimeout(() => {
+    clickTimer = undefined
+    tryClickMarkButton(getSettings)
+  }, 800)
+}
+
+export function runAutoMarkNotificationsRead(getSettings: GetSettings): void {
+  scheduleClick(getSettings)
+}
+
 export function initAutoMarkNotificationsRead(getSettings: GetSettings): void {
   if (initialized) return
   initialized = true
 
-  const scheduleClick = () => {
-    if (clickTimer !== undefined) {
-      globalThis.clearTimeout(clickTimer)
-    }
-
-    clickTimer = globalThis.setTimeout(() => {
-      clickTimer = undefined
-      tryClickMarkButton(getSettings)
-    }, 800)
-  }
-
   const check = () => {
-    scheduleClick()
+    scheduleClick(getSettings)
   }
 
   if (document.readyState === 'loading') {
