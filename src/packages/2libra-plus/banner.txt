@@ -1,0 +1,14 @@
+// ==UserScript==
+// @name                 2Libra Plus
+// @namespace            {namespace}
+// @homepageURL          {homepage}
+// @supportURL           {bugs.url}
+// @version              0.0.1
+// @description          2Libra.com 增强工具
+// @icon                 https://2libra.com/favicon.ico
+// @author               {author}
+// @license              {license}
+// @match                https://2libra.com/*
+// @run-at               document-end
+// ==/UserScript==
+//

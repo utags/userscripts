@@ -1,0 +1,89 @@
+import { onDomChange, onUrlChange } from '../../utils/dom-watcher'
+
+type SettingsSnapshot = {
+  enabled: boolean
+  autoMarkNotificationsRead: boolean
+}
+
+type GetSettings = () => SettingsSnapshot
+
+let initialized = false
+let clickTimer: number | undefined
+
+function isNotificationsPage(): boolean {
+  const loc = globalThis.location
+  if (!loc) return false
+  return loc.pathname === '/notifications'
+}
+
+function markUnreadItems(): void {
+  if (!isNotificationsPage()) return
+
+  const items = document.querySelectorAll<HTMLDivElement>(
+    'div[data-main-left] .card > div.flex'
+  )
+  for (const item of items) {
+    if (item.dataset.unreadMark === '1') continue
+
+    const spans = item.querySelectorAll('span')
+    let isUnread = false
+    for (const span of spans) {
+      if (span.textContent && span.textContent.trim() === '未读') {
+        isUnread = true
+        break
+      }
+    }
+
+    if (!isUnread) continue
+    item.dataset.unreadMark = '1'
+  }
+}
+
+function tryClickMarkButton(getSettings: GetSettings): void {
+  const settings = getSettings()
+  if (!settings.enabled || !settings.autoMarkNotificationsRead) return
+  if (!isNotificationsPage()) return
+
+  markUnreadItems()
+  const btn = document.querySelector<HTMLButtonElement>(
+    'div[data-main-left] button.btn-primary:not(.btn-disabled)'
+  )
+  if (!btn) return
+  console.info('[2libra-plus] 🔘 自动点击"已读当前页"按钮')
+  btn.click()
+}
+
+export function initAutoMarkNotificationsRead(getSettings: GetSettings): void {
+  if (initialized) return
+  initialized = true
+
+  const scheduleClick = () => {
+    if (clickTimer !== undefined) {
+      globalThis.clearTimeout(clickTimer)
+    }
+
+    clickTimer = globalThis.setTimeout(() => {
+      clickTimer = undefined
+      tryClickMarkButton(getSettings)
+    }, 800)
+  }
+
+  const check = () => {
+    scheduleClick()
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      () => {
+        check()
+      },
+      { once: true }
+    )
+  } else {
+    check()
+  }
+
+  onUrlChange(check)
+  onDomChange(check)
+}
