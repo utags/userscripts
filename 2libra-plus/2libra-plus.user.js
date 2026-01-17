@@ -3,7 +3,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.0.3
+// @version              0.1.1
 // @description          2Libra.com 增强工具
 // @icon                 https://2libra.com/favicon.ico
 // @author               Pipecraft
@@ -45,7 +45,7 @@
     return a
   }
   var style_default =
-    '[data-unread-mark="1"]{position:relative}[data-unread-mark="1"]:before{background-color:#f97316;border-radius:9999px;bottom:0;content:"";left:-1px;position:absolute;top:0;width:4px}'
+    '[data-unread-mark="1"]{position:relative}[data-unread-mark="1"]:before{background-color:#f97316;border-radius:9999px;bottom:0;content:"";left:-1px;position:absolute;top:0;width:4px}[data-libra-plus-post-list-sort="1"] .breadcrumbs{flex-basis:28px;flex-grow:1;margin-right:16px;min-width:28px}[data-libra-plus-post-list-sort="1"] [data-libra-plus-sort]{display:flex;flex-basis:28px;flex-grow:1;justify-content:flex-end;margin-left:16px;min-width:28px}[data-libra-plus-post-list-sort="1"] [data-libra-plus-sort]>div{min-width:176px;top:22px}@media(max-width:480px){[data-libra-plus-post-list-sort="1"] .breadcrumbs ul{display:none}}'
   function registerMenu(caption, onClick, options) {
     if (typeof GM_registerMenuCommand === 'function') {
       return GM_registerMenuCommand(caption, onClick, options)
@@ -259,6 +259,15 @@
       }
     }
     return el
+  }
+  function clearChildren(el) {
+    try {
+      el.textContent = ''
+    } catch (e) {
+      try {
+        while (el.firstChild) el.firstChild.remove()
+      } catch (e2) {}
+    }
   }
   function addStyleToShadow(shadowRoot, css) {
     try {
@@ -1297,10 +1306,351 @@
     onUrlChange(check)
     onDomChange(check)
   }
-  var storageKey = '2libraPlus:lastHomeViewTime'
+  var sortState = {
+    mode: 'default',
+  }
   var initialized2 = false
-  var lastHomeViewBase
   function getListContainer() {
+    const list = document.querySelector('[data-main-left="true"] ul.card')
+    return list || void 0
+  }
+  function getItems(list) {
+    var _a, _b
+    const children = Array.from(list.children)
+    const items = []
+    let nextIndex = 0
+    for (const child of children) {
+      if (!(child instanceof HTMLLIElement)) continue
+      let index
+      const stored = child.dataset.replySortIndex
+      if (stored) {
+        const n = Number.parseInt(stored, 10)
+        index = Number.isFinite(n) ? n : nextIndex
+      } else {
+        index = nextIndex
+        child.dataset.replySortIndex = String(index)
+      }
+      nextIndex = index + 1
+      const timeEl = child.querySelector('time[datetime]')
+      let time
+      if (timeEl) {
+        const dt = timeEl.getAttribute('datetime')
+        if (dt) {
+          const t = Date.parse(dt)
+          if (!Number.isNaN(t)) {
+            time = t
+          }
+        }
+      }
+      let replyCount
+      const badges = child.querySelectorAll('.badge')
+      for (let i = badges.length - 1; i >= 0; i -= 1) {
+        const text =
+          (_b = (_a = badges[i].textContent) == null ? void 0 : _a.trim()) !=
+          null
+            ? _b
+            : ''
+        if (!text) continue
+        const n = Number.parseInt(text, 10)
+        if (Number.isFinite(n)) {
+          replyCount = n
+          break
+        }
+      }
+      items.push({
+        el: child,
+        time,
+        index,
+        replyCount,
+      })
+    }
+    return items
+  }
+  function applySort(list) {
+    const items = getItems(list)
+    if (items.length === 0) return
+    let ordered
+    if (sortState.mode === 'default') {
+      ordered = [...items].sort((a, b) => a.index - b.index)
+    } else if (sortState.mode === 'newToOld' || sortState.mode === 'oldToNew') {
+      const withTime = items.filter((item) => typeof item.time === 'number')
+      const withoutTime = items.filter((item) => typeof item.time !== 'number')
+      withTime.sort((a, b) => {
+        const ta = a.time
+        const tb = b.time
+        if (ta === tb) return a.index - b.index
+        if (sortState.mode === 'newToOld') {
+          return tb - ta
+        }
+        return ta - tb
+      })
+      withoutTime.sort((a, b) => a.index - b.index)
+      ordered = [...withTime, ...withoutTime]
+    } else {
+      const withCount = items.filter(
+        (item) => typeof item.replyCount === 'number'
+      )
+      const withoutCount = items.filter(
+        (item) => typeof item.replyCount !== 'number'
+      )
+      withCount.sort((a, b) => {
+        const ca = a.replyCount
+        const cb = b.replyCount
+        if (ca === cb) return a.index - b.index
+        if (sortState.mode === 'replyDesc') {
+          return cb - ca
+        }
+        return ca - cb
+      })
+      withoutCount.sort((a, b) => a.index - b.index)
+      ordered = [...withCount, ...withoutCount]
+    }
+    let insertBeforeNode
+    const children = Array.from(list.childNodes)
+    for (let index = children.length - 1; index >= 0; index -= 1) {
+      const node = children[index]
+      if (
+        !(node instanceof HTMLLIElement) &&
+        node instanceof Element &&
+        !node.querySelector('[data-libra-plus-sort="reply-time"]')
+      ) {
+        insertBeforeNode = node
+        break
+      }
+    }
+    if (insertBeforeNode) {
+      for (const item of ordered) {
+        list.insertBefore(item.el, insertBeforeNode)
+      }
+    } else {
+      for (const item of ordered) {
+        list.append(item.el)
+      }
+    }
+  }
+  function hasUnindexedItems(list) {
+    for (const child of list.children) {
+      if (child instanceof HTMLLIElement && !child.dataset.replySortIndex) {
+        return true
+      }
+    }
+    return false
+  }
+  function updateActiveButtons(container) {
+    const buttons = Array.from(container.querySelectorAll('[data-sort-mode]'))
+    for (const btn of buttons) {
+      const mode = btn.dataset.sortMode
+      if (mode && mode === sortState.mode) {
+        btn.classList.add('btn-active')
+      } else {
+        btn.classList.remove('btn-active')
+      }
+    }
+  }
+  function createSortControls() {
+    const list = getListContainer()
+    if (!list || list.children.length === 0) return void 0
+    const root = list
+    const sortContainer = document.createElement('div')
+    sortContainer.className = 'relative inline-block'
+    sortContainer.dataset.libraPlusSort = 'reply-time'
+    const toggleButton = document.createElement('button')
+    toggleButton.type = 'button'
+    toggleButton.className = 'btn btn-xs btn-ghost'
+    toggleButton.title = '\u6392\u5E8F'
+    toggleButton.textContent = '\u21C5'
+    sortContainer.append(toggleButton)
+    const menu = document.createElement('div')
+    menu.className =
+      'hidden absolute right-0 z-20 mt-1 flex flex-col gap-1 rounded bg-base-100 border border-base-content/10 shadow-xs p-1'
+    sortContainer.append(menu)
+    let menuOpen = false
+    const openMenu = () => {
+      if (menuOpen) return
+      menuOpen = true
+      menu.classList.remove('hidden')
+    }
+    const closeMenu = () => {
+      if (!menuOpen) return
+      menuOpen = false
+      menu.classList.add('hidden')
+    }
+    toggleButton.addEventListener('click', (event) => {
+      event.stopPropagation()
+      if (menuOpen) {
+        closeMenu()
+      } else {
+        openMenu()
+      }
+    })
+    document.addEventListener('click', (event) => {
+      const target = event.target
+      if (!(target instanceof Node)) return
+      if (!sortContainer.contains(target)) {
+        closeMenu()
+      }
+    })
+    const modes = [
+      { mode: 'default', label: '\u6309\u9ED8\u8BA4\u987A\u5E8F' },
+      {
+        mode: 'newToOld',
+        label: '\u6309\u56DE\u590D\u65F6\u95F4\uFF08\u65B0\u2192\u8001\uFF09',
+      },
+      {
+        mode: 'oldToNew',
+        label: '\u6309\u56DE\u590D\u65F6\u95F4\uFF08\u8001\u2192\u65B0\uFF09',
+      },
+      {
+        mode: 'replyDesc',
+        label: '\u6309\u56DE\u590D\u6570\u91CF\uFF08\u591A\u2192\u5C11\uFF09',
+      },
+      {
+        mode: 'replyAsc',
+        label: '\u6309\u56DE\u590D\u6570\u91CF\uFF08\u5C11\u2192\u591A\uFF09',
+      },
+    ]
+    for (const { mode, label } of modes) {
+      const btn = document.createElement('button')
+      btn.type = 'button'
+      btn.textContent = label
+      btn.className = 'btn btn-xs btn-ghost justify-start w-full'
+      btn.dataset.sortMode = mode
+      menu.append(btn)
+    }
+    sortContainer.addEventListener('click', (event) => {
+      const target = event.target
+      if (!(target instanceof HTMLButtonElement)) return
+      const mode = target.dataset.sortMode
+      if (!mode || mode === sortState.mode) return
+      sortState.mode = mode
+      updateActiveButtons(sortContainer)
+      const listEl = getListContainer()
+      if (listEl && listEl.children.length > 0) {
+        applySort(listEl)
+      }
+      closeMenu()
+    })
+    updateActiveButtons(sortContainer)
+    let header = root.querySelector(
+      ':scope > div.flex.items-center.justify-between'
+    )
+    if (header) {
+      header.append(sortContainer)
+    } else {
+      header = document.createElement('div')
+      header.className =
+        'px-2 py-1 border-b border-base-content/10 flex items-center justify-between'
+      header.append(sortContainer)
+      list.firstChild.before(header)
+    }
+    ensureBreadcrumbs(header)
+    return header
+  }
+  function ensureBreadcrumbs(header) {
+    let isHome = false
+    try {
+      const loc = globalThis.location
+      isHome = Boolean(loc && loc.pathname === '/')
+    } catch (e) {}
+    const fullTitle = document.title || ''
+    const prefix = '2Libra \u203A '
+    let pageTitle = fullTitle.startsWith(prefix)
+      ? fullTitle.slice(prefix.length).trim()
+      : fullTitle.trim()
+    if (!pageTitle) {
+      pageTitle = '\u9996\u9875'
+    }
+    let breadcrumbs = header.querySelector(':scope > .breadcrumbs')
+    const breadcrumbsOutside = document.querySelector('.breadcrumbs')
+    if (!breadcrumbs) {
+      breadcrumbs = document.createElement('div')
+      breadcrumbs.className = 'breadcrumbs text-sm'
+      header.insertBefore(breadcrumbs, header.firstChild)
+      if (breadcrumbsOutside) {
+        return
+      }
+    }
+    let ul = breadcrumbs.querySelector('ul')
+    if (!ul) {
+      ul = document.createElement('ul')
+      breadcrumbs.append(ul)
+    }
+    clearChildren(ul)
+    if (isHome) {
+      const li = document.createElement('li')
+      li.className = 'text-base-content/60'
+      li.textContent = '\u9996\u9875'
+      ul.append(li)
+      return
+    }
+    const liHome = document.createElement('li')
+    const a = document.createElement('a')
+    a.href = '/'
+    a.textContent = '\u9996\u9875'
+    liHome.append(a)
+    ul.append(liHome)
+    const liTitle = document.createElement('li')
+    liTitle.className = 'text-base-content/60'
+    liTitle.textContent = pageTitle
+    ul.append(liTitle)
+  }
+  function ensureControls() {
+    const list = getListContainer()
+    if (!list || list.children.length === 0) return
+    list.dataset.libraPlusPostListSort = '1'
+    const root = list.closest('section') || list.parentElement || list
+    const existing = root.querySelector('[data-libra-plus-sort="reply-time"]')
+    if (existing) {
+      updateActiveButtons(existing)
+      return
+    }
+    createSortControls()
+  }
+  function runInternal(getSettings) {
+    const settings = getSettings()
+    if (!settings.enabled || !settings.postListSort) return
+    ensureControls()
+    const list = getListContainer()
+    if (!list || list.children.length === 0) return
+    applySort(list)
+  }
+  function runPostListSort(getSettings) {
+    runInternal(getSettings)
+  }
+  function initPostListSort(getSettings) {
+    if (initialized2) return
+    initialized2 = true
+    const run = () => {
+      runInternal(getSettings)
+    }
+    const handleUrlChange = () => {
+      sortState.mode = 'default'
+      runInternal(getSettings)
+    }
+    const handleDomChange = () => {
+      const list = getListContainer()
+      if (!list || list.children.length === 0) return
+      if (!hasUnindexedItems(list)) return
+      runInternal(getSettings)
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener(
+        'DOMContentLoaded',
+        () => {
+          run()
+        },
+        { once: true }
+      )
+    } else {
+      run()
+    }
+    onUrlChange(handleUrlChange)
+    onDomChange(handleDomChange)
+  }
+  var storageKey = '2libraPlus:lastHomeViewTime'
+  var initialized3 = false
+  var lastHomeViewBase
+  function getListContainer2() {
     return document.querySelector('[data-main-left="true"] ul.card') || void 0
   }
   function getLastHomeViewTime() {
@@ -1362,7 +1712,7 @@
     const settings = getSettings()
     if (!settings.enabled || !settings.replyTimeColor) {
       const timeElements2 = Array.from(
-        ((_a = getListContainer()) == null
+        ((_a = getListContainer2()) == null
           ? void 0
           : _a.querySelectorAll('li time')) || []
       )
@@ -1371,7 +1721,7 @@
       }
       return
     }
-    const list = getListContainer()
+    const list = getListContainer2()
     if (!list) return
     const timeElements = Array.from(list.querySelectorAll('li time'))
     if (timeElements.length === 0) return
@@ -1437,8 +1787,8 @@
     updateReplyTimeColor(getSettings)
   }
   function initReplyTimeColor(getSettings) {
-    if (initialized2) return
-    initialized2 = true
+    if (initialized3) return
+    initialized3 = true
     const runUpdateColor = () => {
       updateReplyTimeColor(getSettings)
     }
@@ -1451,7 +1801,7 @@
         try {
           const now = Date.now()
           const fiveMinutes = 5 * 60 * 1e3
-          if ((!last || now - last >= fiveMinutes) && getListContainer()) {
+          if ((!last || now - last >= fiveMinutes) && getListContainer2()) {
             globalThis.localStorage.setItem(storageKey, String(now))
           }
         } catch (e) {}
@@ -1477,11 +1827,13 @@
     enabled: true,
     autoMarkNotificationsRead: true,
     replyTimeColor: true,
+    postListSort: true,
   }
   var store = createSettingsStore('settings', DEFAULT_SETTINGS)
   var enabled = DEFAULT_SETTINGS.enabled
   var autoMarkNotificationsRead = DEFAULT_SETTINGS.autoMarkNotificationsRead
   var replyTimeColor = DEFAULT_SETTINGS.replyTimeColor
+  var postListSort = DEFAULT_SETTINGS.postListSort
   function buildSettingsSchema() {
     const fields = [
       { type: 'toggle', key: 'enabled', label: '\u542F\u7528' },
@@ -1494,6 +1846,11 @@
         type: 'toggle',
         key: 'replyTimeColor',
         label: '\u56DE\u590D\u65F6\u95F4\u989C\u8272\u6E10\u53D8',
+      },
+      {
+        type: 'toggle',
+        key: 'postListSort',
+        label: '\u5F53\u524D\u9875\u5E16\u5B50\u5217\u8868\u6392\u5E8F',
       },
     ]
     return {
@@ -1539,11 +1896,13 @@
       enabled = Boolean(obj.enabled)
       autoMarkNotificationsRead = Boolean(obj.autoMarkNotificationsRead)
       replyTimeColor = Boolean(obj.replyTimeColor)
+      postListSort = Boolean(obj.postListSort)
       if (!prevEnabled && enabled && !featuresInitialized) {
         initFeatures()
       } else if (featuresInitialized) {
         runAutoMarkNotificationsRead(getSettingsSnapshot)
         runReplyTimeColor(getSettingsSnapshot)
+        runPostListSort(getSettingsSnapshot)
       }
     } catch (e) {}
   }
@@ -1552,6 +1911,7 @@
       enabled,
       autoMarkNotificationsRead,
       replyTimeColor,
+      postListSort,
     }
   }
   var featuresInitialized = false
@@ -1560,6 +1920,7 @@
     featuresInitialized = true
     initAutoMarkNotificationsRead(getSettingsSnapshot)
     initReplyTimeColor(getSettingsSnapshot)
+    initPostListSort(getSettingsSnapshot)
   }
   function bootstrap() {
     const d = document.documentElement
