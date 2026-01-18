@@ -656,7 +656,7 @@ function isImgurUrl(url) {
   }
 }
 
-async function applyProxy(
+export async function applyProxy(
   url: string,
   providerKey?: string,
   originalName?: string,
@@ -684,8 +684,9 @@ async function applyProxy(
       ) {
         px = 'wsrv.nl-duckduckgo'
       } else {
-        const qp = `${isGif ? '&n=-1' : ''}${useWebp ? '&output=webp' : ''}`
-        return `https://wsrv.nl/?url=${encodeURIComponent(url)}${qp}`
+        const urlEncoded = encodeURIComponent(url)
+        const qp = `${isGif ? '&n=-1' : ''}${useWebp ? '&output=webp' : ''}&default=${urlEncoded}`
+        return `https://wsrv.nl/?url=${urlEncoded}${qp}`
       }
     }
 
@@ -697,8 +698,9 @@ async function applyProxy(
     }
 
     if (px === 'wsrv.nl-duckduckgo') {
-      const ddgUrl = `https://external-content.duckduckgo.com/iu/?u=${encodeURIComponent(url)}`
-      const qp = `${isGif ? '&n=-1' : ''}${useWebp ? '&output=webp' : ''}`
+      const urlEncoded = encodeURIComponent(url)
+      const ddgUrl = `https://external-content.duckduckgo.com/iu/?u=${urlEncoded}`
+      const qp = `${isGif ? '&n=-1' : ''}${useWebp ? '&output=webp' : ''}&default=${urlEncoded}`
       return `https://wsrv.nl/?url=${encodeURIComponent(ddgUrl)}${qp}`
     }
 
