@@ -135,5 +135,5 @@ MIT License — 详见 [LICENSE](https://github.com/utags/userscripts/blob/main/
 
 ## 相关链接
 
-- 项目主页：https://github.com/utags/userscripts
-- 问题反馈：https://github.com/utags/userscripts/issues
+- [项目主页](https://github.com/utags/userscripts)
+- [问题反馈](https://github.com/utags/userscripts/issues)

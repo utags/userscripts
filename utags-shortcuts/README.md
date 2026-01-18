@@ -272,5 +272,5 @@ MIT License — see [LICENSE](https://github.com/utags/userscripts/blob/main/LIC
 
 ## Related Links
 
-- Project: https://github.com/utags/userscripts
-- Issues: https://github.com/utags/userscripts/issues
+- [Project Homepage](https://github.com/utags/userscripts)
+- [Issue Reporting](https://github.com/utags/userscripts/issues)
