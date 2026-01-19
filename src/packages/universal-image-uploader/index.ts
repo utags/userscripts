@@ -7,11 +7,13 @@ import {
 
 import { addStyle, registerMenu, unregisterMenu } from '../../common/gm'
 import { isTopFrame } from '../../utils/is-top-frame'
+import { applyProxy, applyProxyChain } from './apply-proxy'
 import {
   ALLOWED_BUTTON_POSITIONS,
   ALLOWED_FORMATS,
   ALLOWED_HOSTS,
   ALLOWED_PROXIES,
+  ALLOWED_PROXIES_MULTI_HOST,
   APPINN_UPLOAD_ENDPOINT,
   APPINN_UPLOAD_PARAMS,
   BTN_SETTINGS_MAP_KEY,
@@ -182,6 +184,16 @@ const updateCurrentSiteSettings = async (
     else delete next.host
   }
 
+  // sanitize secondary host
+  if (Object.prototype.hasOwnProperty.call(next, 'secondaryHost')) {
+    const resolvedSecondaryHost = ensureAllowedValue(
+      next.secondaryHost,
+      ALLOWED_HOSTS
+    )
+    if (resolvedSecondaryHost) next.secondaryHost = resolvedSecondaryHost
+    else delete next.secondaryHost
+  }
+
   // sanitize proxy
   if (Object.prototype.hasOwnProperty.call(next, 'proxy')) {
     const resolved = ensureAllowedValue(next.proxy, ALLOWED_PROXIES)
@@ -219,20 +231,78 @@ const setFormat = async (format) => {
 
 const getHost = async () => {
   const s = await getCurrentSiteSettings()
-  return s.host || DEFAULT_HOST
+  return ensureAllowedValue(s.host, ALLOWED_HOSTS, DEFAULT_HOST)
 }
 
-const setHost = async (host) => {
-  await updateCurrentSiteSettings({ host })
+const setHost = async (host: string) => {
+  const resolvedHost = ensureAllowedValue(host, ALLOWED_HOSTS, DEFAULT_HOST)
+  const s = await getCurrentSiteSettings()
+  let secondaryHost = s.secondaryHost
+  if (resolvedHost === secondaryHost) {
+    secondaryHost = undefined
+  }
+
+  let proxy = s.proxy
+  if (secondaryHost) {
+    proxy = ensureAllowedValue(proxy, ALLOWED_PROXIES_MULTI_HOST, DEFAULT_PROXY)
+  }
+
+  await updateCurrentSiteSettings({ host: resolvedHost, secondaryHost, proxy })
+}
+
+const getSecondaryHost = async (): Promise<string> => {
+  const s = await getCurrentSiteSettings()
+  const primaryHost = ensureAllowedValue(s.host, ALLOWED_HOSTS, DEFAULT_HOST)
+  const secondaryHost = ensureAllowedValue(
+    s.secondaryHost,
+    ALLOWED_HOSTS,
+    undefined
+  )
+  return secondaryHost && secondaryHost !== primaryHost ? secondaryHost : ''
+}
+
+const setSecondaryHost = async (host: string | undefined) => {
+  const s = await getCurrentSiteSettings()
+  const secondaryHost = ensureAllowedValue(host, ALLOWED_HOSTS, undefined)
+  let proxy = s.proxy
+  if (secondaryHost) {
+    proxy = ensureAllowedValue(proxy, ALLOWED_PROXIES_MULTI_HOST, DEFAULT_PROXY)
+  }
+
+  await updateCurrentSiteSettings({
+    secondaryHost,
+    proxy,
+  })
 }
 
 const getProxy = async () => {
   const s = await getCurrentSiteSettings()
-  return s.proxy || DEFAULT_PROXY
+  const secondaryHost = ensureAllowedValue(
+    s.secondaryHost,
+    ALLOWED_HOSTS,
+    undefined
+  )
+  const resolvedProxy = ensureAllowedValue(
+    s.proxy,
+    secondaryHost ? ALLOWED_PROXIES_MULTI_HOST : ALLOWED_PROXIES,
+    DEFAULT_PROXY
+  )
+  return resolvedProxy
 }
 
-const setProxy = async (proxy) => {
-  await updateCurrentSiteSettings({ proxy })
+const setProxy = async (proxy: string) => {
+  const s = await getCurrentSiteSettings()
+  const secondaryHost = ensureAllowedValue(
+    s.secondaryHost,
+    ALLOWED_HOSTS,
+    undefined
+  )
+  const resolvedProxy = ensureAllowedValue(
+    proxy,
+    secondaryHost ? ALLOWED_PROXIES_MULTI_HOST : ALLOWED_PROXIES,
+    DEFAULT_PROXY
+  )
+  await updateCurrentSiteSettings({ proxy: resolvedProxy })
 }
 
 const getWebpEnabled = async () => {
@@ -507,19 +577,48 @@ const buildHostOptions = (selectEl, selectedValue) => {
   }
 }
 
+const buildSecondaryHostOptions = (
+  selectEl: HTMLSelectElement,
+  selectedValue: string | undefined,
+  primaryHost: string
+) => {
+  if (!selectEl) return
+  selectEl.textContent = ''
+  const placeholder = createEl('option', {
+    value: '',
+    text: t('multi_host_none'),
+  })
+  selectEl.append(placeholder)
+  const candidates = ALLOWED_HOSTS.filter((h) => h !== primaryHost)
+  const selected =
+    selectedValue && candidates.includes(selectedValue) ? selectedValue : ''
+  for (const val of candidates) {
+    const opt = createEl('option', { value: val, text: t('host_' + val) })
+    if (val === selected) opt.selected = true
+    selectEl.append(opt)
+  }
+}
+
 // Helper: get proxy label key
 const getProxyLabelKey = (val: string) =>
   `proxy_${val.replaceAll('.', '_').replaceAll('-', '_')}`
 
 // Helper: build proxy options
-const buildProxyOptions = (selectEl, selectedValue) => {
+const buildProxyOptions = (selectEl, selectedValue, limitToWsrv = false) => {
   if (!selectEl) return
   // Avoid Trusted Types violation: clear without using innerHTML
   selectEl.textContent = ''
   const selected = selectedValue
-    ? ensureAllowedValue(selectedValue, ALLOWED_PROXIES, DEFAULT_PROXY)
+    ? ensureAllowedValue(
+        selectedValue,
+        limitToWsrv ? ALLOWED_PROXIES_MULTI_HOST : ALLOWED_PROXIES,
+        DEFAULT_PROXY
+      )
     : DEFAULT_PROXY
-  for (const val of ALLOWED_PROXIES) {
+  const visibleProxies = limitToWsrv
+    ? ALLOWED_PROXIES_MULTI_HOST
+    : ALLOWED_PROXIES
+  for (const val of visibleProxies) {
     const opt = createEl('option', {
       value: val,
       text: t(getProxyLabelKey(val)),
@@ -646,68 +745,49 @@ async function formatText(link, name, fmt) {
   }
 }
 
-function isImgurUrl(url) {
-  try {
-    const u = new URL(url)
-    const h = u.hostname.toLowerCase()
-    return h.includes('imgur.com')
-  } catch {
-    return false
-  }
-}
-
-export async function applyProxy(
+async function applyProxyForCurrentSite(
   url: string,
   providerKey?: string,
   originalName?: string,
-  proxy?: string
-) {
-  try {
-    const isGif =
-      typeof originalName === 'string' && /\.gif$/i.test(originalName.trim())
-
-    let useWebp = false
-
-    try {
-      useWebp = await getWebpEnabled()
-    } catch {}
-
-    let px = proxy || (await getProxy())
-    if (px === 'none') return url
-
-    if (px === 'wsrv.nl') {
-      const provider = providerKey || (await getHost())
-      if (
-        provider === 'imgur' ||
-        provider === '111666_best' ||
-        isImgurUrl(url)
-      ) {
-        px = 'wsrv.nl-duckduckgo'
-      } else {
-        const urlEncoded = encodeURIComponent(url)
-        const qp = `${isGif ? '&n=-1' : ''}${useWebp ? '&output=webp' : ''}&default=${urlEncoded}`
-        return `https://wsrv.nl/?url=${urlEncoded}${qp}`
-      }
-    }
-
-    if (px === 'duckduckgo') {
-      const convertedUrl = useWebp
-        ? await applyProxy(url, providerKey, originalName, 'wsrv.nl')
-        : url
-      return `https://external-content.duckduckgo.com/iu/?u=${encodeURIComponent(convertedUrl)}`
-    }
-
-    if (px === 'wsrv.nl-duckduckgo') {
-      const urlEncoded = encodeURIComponent(url)
-      const ddgUrl = `https://external-content.duckduckgo.com/iu/?u=${urlEncoded}`
-      const qp = `${isGif ? '&n=-1' : ''}${useWebp ? '&output=webp' : ''}&default=${urlEncoded}`
-      return `https://wsrv.nl/?url=${encodeURIComponent(ddgUrl)}${qp}`
-    }
-
-    return url
-  } catch {
-    return url
+  defaultUrl?: string,
+  secondary?: {
+    url: string
+    providerKey?: string
   }
+) {
+  let useWebp = false
+  try {
+    useWebp = await getWebpEnabled()
+  } catch {}
+
+  const proxy = await getProxy()
+
+  if (secondary) {
+    return applyProxyChain([
+      {
+        url,
+        providerKey,
+        originalName,
+        proxy,
+        useWebp,
+      },
+      {
+        url: secondary.url,
+        providerKey: secondary.providerKey,
+        originalName,
+        proxy,
+        useWebp,
+      },
+    ])
+  }
+
+  return applyProxy(url, {
+    providerKey,
+    originalName,
+    proxy,
+    defaultUrl,
+    useWebp,
+  })
 }
 
 async function gmRequest(opts: {
@@ -1028,9 +1108,8 @@ async function uploadToTikolu(file) {
   throw new Error(t('error_upload_failed'))
 }
 
-async function uploadImage(file) {
-  const host = await getHost()
-  if (host === 'mock') {
+async function uploadImageToHost(file, host: string) {
+  if (host === 'mock' || host === 'mock2') {
     await new Promise((resolve) => {
       setTimeout(resolve, 1000)
     })
@@ -1054,6 +1133,11 @@ async function uploadImage(file) {
   if (host === '111666_best') return uploadTo111666Best(file)
   // Default
   return uploadToImgur(file)
+}
+
+async function uploadImage(file) {
+  const host = await getHost()
+  return uploadImageToHost(file, host)
 }
 
 // Track last visited editable element to support insertion after focus is lost
@@ -1536,10 +1620,15 @@ function copyAndInsert(text: string): void {
 
 async function handleCopyClick(it: any) {
   const fmt = await getFormat()
-  const proxied = await applyProxy(
+  const secondary = it.extra?.[0]
+  const proxied = await applyProxyForCurrentSite(
     it.link,
-    it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other'),
-    it.name
+    it.provider,
+    it.name,
+    undefined,
+    secondary
+      ? { url: secondary.link, providerKey: secondary.provider }
+      : undefined
   )
   const out = await formatText(proxied, it.name || t('default_image_name'), fmt)
 
@@ -1686,15 +1775,26 @@ async function createPanel(): Promise<
   })
 
   const host = await getHost()
-  const hostSel = createEl('select')
+  const hostSel = createEl('select', {
+    style: 'border-left: 3px solid #3b82f6;',
+  })
   buildHostOptions(hostSel, host)
+  const secondaryHostValue = await getSecondaryHost()
+  const secondaryHostSel = createEl('select', {
+    style: 'border-left: 3px solid #a855f7;',
+  })
+  buildSecondaryHostOptions(secondaryHostSel, secondaryHostValue, host)
+
   hostSel.addEventListener('change', async () => {
     await setHost(hostSel.value)
+  })
+  secondaryHostSel.addEventListener('change', async () => {
+    await setSecondaryHost(secondaryHostSel.value)
   })
 
   const proxy = await getProxy()
   const proxySel = createEl('select')
-  buildProxyOptions(proxySel, proxy)
+  buildProxyOptions(proxySel, proxy, Boolean(secondaryHostValue))
 
   const webpLabel = createEl('label')
   const webpChk = createEl('input', { type: 'checkbox' })
@@ -1706,7 +1806,6 @@ async function createPanel(): Promise<
 
   proxySel.addEventListener('change', async () => {
     await setProxy(proxySel.value)
-    webpChk.disabled = proxySel.value === 'none'
   })
 
   webpChk.addEventListener('change', async () => {
@@ -1747,6 +1846,7 @@ async function createPanel(): Promise<
   const row1 = createEl('div', { class: 'uiu-controls' })
   row1.append(formatSel)
   row1.append(hostSel)
+  row1.append(secondaryHostSel)
 
   const row2 = createEl('div', { class: 'uiu-controls' })
   row2.append(proxySel)
@@ -2224,10 +2324,78 @@ async function createPanel(): Promise<
       running++
       addLog(`${t('log_uploading')}${item.file.name}`)
       try {
-        const link = await uploadImage(item.file)
-        const fmt = await getFormat()
         const host = await getHost()
-        const proxied = await applyProxy(link, host, item.file.name)
+        const secondaryHost = await getSecondaryHost()
+        const hasSecondaryHost = Boolean(
+          secondaryHost && secondaryHost !== host
+        )
+
+        let primaryLink = ''
+        let secondaryLink: string | undefined
+
+        if (hasSecondaryHost) {
+          const [primaryResult, secondaryResult] = await Promise.allSettled([
+            uploadImageToHost(item.file, host),
+            uploadImageToHost(item.file, secondaryHost),
+          ])
+
+          if (primaryResult.status === 'fulfilled') {
+            primaryLink = primaryResult.value
+            addLog(
+              `${t('log_success')} [1/2] ${item.file.name} → ${primaryLink}（${t(
+                'host_' + host
+              )}）`
+            )
+          }
+
+          if (primaryResult.status === 'rejected') {
+            const error = primaryResult.reason
+            addLog(
+              `${t('log_failed')} [1/2] ${item.file.name}（${String(
+                error?.message || error
+              )}：${t('host_' + host)}）`
+            )
+          }
+
+          if (secondaryResult.status === 'fulfilled') {
+            secondaryLink = secondaryResult.value
+            addLog(
+              `${t('log_success')} [2/2] ${item.file.name} → ${secondaryLink}（${t(
+                'host_' + secondaryHost
+              )}）`
+            )
+          }
+
+          if (secondaryResult.status === 'rejected') {
+            const error = secondaryResult.reason
+            addLog(
+              `${t('log_failed')} [2/2] ${item.file.name}（${String(
+                error?.message || error
+              )}：${t('host_' + secondaryHost)}）`
+            )
+          }
+
+          if (
+            primaryResult.status === 'rejected' ||
+            secondaryResult.status === 'rejected'
+          ) {
+            throw new Error(t('error_upload_failed'))
+          }
+        } else {
+          primaryLink = await uploadImageToHost(item.file, host)
+          addLog(`${t('log_success')}${item.file.name} → ${primaryLink}`)
+        }
+
+        const fmt = await getFormat()
+        const proxied = await applyProxyForCurrentSite(
+          primaryLink,
+          host,
+          item.file.name,
+          undefined,
+          secondaryLink
+            ? { url: secondaryLink, providerKey: secondaryHost }
+            : undefined
+        )
         const out = await formatText(proxied, item.file.name, fmt)
         if (item.placeholder && item.targetEl) {
           const ok = replacePlaceholder(
@@ -2251,14 +2419,23 @@ async function createPanel(): Promise<
           copyAndInsert(out)
         }
 
-        await addToHistory({
-          link,
+        const historyEntry: any = {
+          link: primaryLink,
           name: item.file.name,
           ts: Date.now(),
           pageUrl: location.href,
           provider: host,
-        })
-        addLog(`${t('log_success')}${item.file.name} → ${link}`)
+        }
+        if (secondaryLink) {
+          historyEntry.extra = [
+            {
+              link: secondaryLink,
+              provider: secondaryHost,
+            },
+          ]
+        }
+
+        await addToHistory(historyEntry)
       } catch (error) {
         if (item.placeholder && item.targetEl) {
           const failNote = `<!-- ${tpl(t('placeholder_upload_failed'), { name: item.file.name })} -->`
@@ -2360,9 +2537,15 @@ async function createPanel(): Promise<
     for (const it of historyItems) {
       const row = createEl('div', { class: 'uiu-row' })
 
-      const previewUrl = await applyProxy(
+      const secondary = it.extra?.[0]
+      const previewUrl = await applyProxyForCurrentSite(
         it.link,
-        it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other')
+        it.provider,
+        it.name,
+        undefined,
+        secondary
+          ? { url: secondary.link, providerKey: secondary.provider }
+          : undefined
       )
       const preview = createEl('img', {
         src: previewUrl,
@@ -2391,15 +2574,34 @@ async function createPanel(): Promise<
         })
       )
       try {
-        const providerKey = it.provider || 'imgur'
-        const providerText = t('host_' + providerKey)
-        info.append(
+        const primaryProviderKey = it.provider || 'imgur'
+        const primaryProviderText = t('host_' + primaryProviderKey)
+        const providerWrap = createEl('div', {
+          style:
+            'display:flex;flex-wrap:wrap;gap:4px;font-size:11px;color:#cbd5e1;',
+        })
+        providerWrap.append(
           createEl('span', {
-            text: providerText,
+            text: primaryProviderText,
             style:
-              'font-size:11px;color:#cbd5e1;border:1px solid #334155;border-radius:4px;padding:1px 6px;width:fit-content;',
+              'border:1px solid #3b82f6;color:#93c5fd;border-radius:4px;padding:1px 6px;width:fit-content;',
           })
         )
+        if (Array.isArray(it.extra)) {
+          for (const extra of it.extra) {
+            const key = extra?.provider || 'imgur'
+            const text = t('host_' + key)
+            providerWrap.append(
+              createEl('span', {
+                text,
+                style:
+                  'border:1px solid #a855f7;color:#e9d5ff;border-radius:4px;padding:1px 6px;width:fit-content;',
+              })
+            )
+          }
+        }
+
+        info.append(providerWrap)
       } catch {}
 
       if (it.pageUrl) {
@@ -2425,17 +2627,48 @@ async function createPanel(): Promise<
       copyBtn.addEventListener('click', () => {
         void handleCopyClick(it)
       })
-      const openBtn = createEl('button', { text: t('btn_open') })
+      const openBtn = createEl('button', {
+        text: t('btn_open'),
+        style: 'border:1px solid #3b82f6;color:#93c5fd;',
+      })
+      // Primary provider fallback to secondary provider
       openBtn.addEventListener('click', async () => {
-        const url = await applyProxy(
+        const secondary = it.extra?.[0]
+        const url = await applyProxyForCurrentSite(
           it.link,
-          it.provider || (isImgurUrl(it.link) ? 'imgur' : 'other'),
-          it.name
+          it.provider,
+          it.name,
+          undefined,
+          secondary
+            ? { url: secondary.link, providerKey: secondary.provider }
+            : undefined
         )
         window.open(url, '_blank')
       })
       ops.append(copyBtn)
       ops.append(openBtn)
+      if (Array.isArray(it.extra)) {
+        for (const extra of it.extra) {
+          if (!extra?.link) continue
+          const openExtraBtn = createEl('button', {
+            text: t('btn_open'),
+            style: 'border:1px solid #a855f7;color:#e9d5ff;',
+          })
+          openExtraBtn.addEventListener('click', async () => {
+            // Secondary provider fallback to primary provider
+            const url = await applyProxyForCurrentSite(
+              extra.link,
+              extra.provider,
+              it.name,
+              undefined,
+              { url: it.link, providerKey: it.provider }
+            )
+            window.open(url, '_blank')
+          })
+          ops.append(openExtraBtn)
+        }
+      }
+
       row.append(ops)
       listWrap.append(row)
     }
@@ -2488,6 +2721,8 @@ async function createPanel(): Promise<
   void addValueChangeListener(
     SITE_SETTINGS_MAP_KEY,
     async (name, oldValue, newValue, remote) => {
+      const oldMap = (oldValue as Record<string, any>) || {}
+      const oldSite = oldMap[SITE_KEY] || {}
       const newMap = (newValue as Record<string, any>) || {}
       const s = newMap[SITE_KEY] || {}
 
@@ -2499,22 +2734,39 @@ async function createPanel(): Promise<
         hostSel.value = s.host
       }
 
-      if (s.proxy) {
-        if (proxySel.value !== s.proxy) {
-          proxySel.value = s.proxy
-        }
+      const storedSecondaryHost =
+        typeof s.secondaryHost === 'string' ? s.secondaryHost : ''
+      const secondaryHostValue =
+        storedSecondaryHost && storedSecondaryHost !== hostSel.value
+          ? storedSecondaryHost
+          : ''
 
-        webpChk.disabled = s.proxy === 'none'
-      }
+      buildSecondaryHostOptions(
+        secondaryHostSel,
+        secondaryHostValue,
+        hostSel.value
+      )
+
+      buildProxyOptions(proxySel, s.proxy, Boolean(secondaryHostValue))
+
+      webpChk.disabled = proxySel.value === 'none'
 
       const webpEnabled = s.webp === true
       if (webpChk.checked !== webpEnabled) {
         webpChk.checked = webpEnabled
       }
 
-      try {
-        await renderHistory()
-      } catch {}
+      const oldProxy = oldSite.proxy
+      const newProxy = proxySel.value
+      const oldWebpEnabled = oldSite.webp === true
+      const proxyChanged = oldProxy !== newProxy
+      const webpChanged = oldWebpEnabled !== webpEnabled
+
+      if (proxyChanged || webpChanged) {
+        try {
+          await renderHistory()
+        } catch {}
+      }
     }
   )
 

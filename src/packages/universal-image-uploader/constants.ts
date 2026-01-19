@@ -185,6 +185,7 @@ export const I18N: Record<string, any> = {
     proxy_wsrv_nl: 'wsrv.nl',
     proxy_duckduckgo: 'DuckDuckGo',
     proxy_wsrv_nl_duckduckgo: 'wsrv.nl -> DuckDuckGo',
+    multi_host_none: 'Also upload to',
     error_network: 'Network error',
     error_upload_failed: 'Upload failed',
     placeholder_uploading: 'Uploading "{name}"...',
@@ -257,6 +258,8 @@ export const I18N: Record<string, any> = {
     proxy_none: '无代理',
     proxy_wsrv_nl: 'wsrv.nl',
     proxy_duckduckgo: 'DuckDuckGo',
+    proxy_wsrv_nl_duckduckgo: 'wsrv.nl → DuckDuckGo',
+    multi_host_none: '同时上传至',
     error_network: '网络错误',
     error_upload_failed: '上传失败',
     placeholder_uploading: '正在上传「{name}」...',
@@ -329,6 +332,8 @@ export const I18N: Record<string, any> = {
     proxy_none: '不使用代理',
     proxy_wsrv_nl: 'wsrv.nl',
     proxy_duckduckgo: 'DuckDuckGo',
+    proxy_wsrv_nl_duckduckgo: 'wsrv.nl → DuckDuckGo',
+    multi_host_none: '同時上傳至',
     error_network: '網路錯誤',
     error_upload_failed: '上傳失敗',
     placeholder_uploading: '正在上傳「{name}」...',
@@ -369,6 +374,7 @@ export const ALLOWED_HOSTS = ENABLE_MOCK_HOST
       'photo_lily',
       '111666_best',
       'mock',
+      'mock2',
     ]
   : [
       'imgur',
@@ -387,6 +393,7 @@ export const ALLOWED_PROXIES = [
   'duckduckgo',
   'wsrv.nl-duckduckgo',
 ]
+export const ALLOWED_PROXIES_MULTI_HOST = ['wsrv.nl', 'wsrv.nl-duckduckgo']
 export const ALLOWED_BUTTON_POSITIONS = ['before', 'inside', 'after']
 export const DEFAULT_BUTTON_POSITION = 'after'
 

@@ -20,6 +20,7 @@ A user script that lets you paste, drag, or select images and batch-upload them 
 
 - 📥 Paste, drag-and-drop, or file picker to collect images
 - 📤 Batch upload to Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best/Skyimg with progress display
+- 🔄 Support concurrent upload to a secondary backup host (Dual-upload)
 - 🖼️ Optional WebP conversion via proxy or supported hosts
 - 📋 Auto-copy output in `Markdown` / `HTML` / `BBCode` / `Link`
 - 🕘 Local history to quickly re-copy and reuse uploads
@@ -46,6 +47,7 @@ Install one of the following user script managers:
 - Open any site, paste or drop images onto the page, or use the panel’s file picker
 - Watch the upload queue and progress
 - Choose upload provider via the panel’s host selector (Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best/Skyimg)
+- (Optional) Choose a secondary host for dual-upload and automatic fallback
 - Choose proxy via the panel’s proxy selector (default `None`)
 - Toggle WebP option to convert images via proxy
 - When finished, the script auto-copies based on your selected format
@@ -79,6 +81,12 @@ Install one of the following user script managers:
 - 🗂 History enhancements: filters by time/provider/tags, batch copy, faster reuse
 
 ## Changelog
+
+### v0.13.x
+
+- **Multi-host support**:
+  - Added ability to upload to a secondary host concurrently.
+  - Implemented proxy chain fallback: uses primary host by default, falls back to secondary host if primary fails or via proxy chain.
 
 ### v0.12.x
 
