@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { applyProxy, applyProxyChain } from '../apply-proxy.js'
+import {
+  applyProxy,
+  applyProxyFallback,
+  applyProxyForDualHost,
+} from '../apply-proxy.js'
 
 describe('applyProxy', () => {
   const baseUrl = 'https://example.com/image.png'
@@ -281,13 +285,13 @@ describe('applyProxy', () => {
   })
 })
 
-describe('applyProxyChain', () => {
+describe('applyProxyFallback', () => {
   const url1 = 'https://example.com/1.png'
   const url2 = 'https://example.com/2.png'
   const url3 = 'https://example.com/3.png'
 
   it('works with single item chain (same as applyProxy)', () => {
-    const result = applyProxyChain([
+    const result = applyProxyFallback([
       {
         url: url1,
         proxy: 'wsrv.nl',
@@ -300,7 +304,7 @@ describe('applyProxyChain', () => {
   })
 
   it('uses second item as defaultUrl for the first item', () => {
-    const result = applyProxyChain([
+    const result = applyProxyFallback([
       {
         url: url1,
         proxy: 'wsrv.nl',
@@ -328,7 +332,7 @@ describe('applyProxyChain', () => {
     // 2. wsrv.nl (url2) -> default: result of 3
     // 3. none (url3)
 
-    const result = applyProxyChain([
+    const result = applyProxyFallback([
       {
         url: url1,
         proxy: 'wsrv.nl',
@@ -362,7 +366,7 @@ describe('applyProxyChain', () => {
   })
 
   it('handles options like useWebp correctly in chain', () => {
-    const result = applyProxyChain([
+    const result = applyProxyFallback([
       {
         url: url1,
         proxy: 'wsrv.nl',
@@ -386,7 +390,7 @@ describe('applyProxyChain', () => {
     // 2. wsrv.nl (url2.gif) -> default: result of 3
     // 3. wsrv.nl (url3.gif) -> default: origin url of 3
 
-    const result = applyProxyChain([
+    const result = applyProxyFallback([
       {
         url: url1,
         originalName: '1.gif',
@@ -428,7 +432,7 @@ describe('applyProxyChain', () => {
     // 2. wsrv.nl (url2) [webp] -> default: result of 3
     // 3. wsrv.nl (url3) [webp] -> default: origin url of 3
 
-    const result = applyProxyChain([
+    const result = applyProxyFallback([
       {
         url: url1,
         proxy: 'wsrv.nl',
@@ -462,5 +466,59 @@ describe('applyProxyChain', () => {
     expect(level3.searchParams.get('output')).toBe('webp')
     const level3DefaultParam = level3.searchParams.get('default')
     expect(level3DefaultParam).toBe(url3)
+  })
+})
+
+describe('applyProxyForDualHost', () => {
+  const primaryUrl = 'https://example.com/p.png'
+  const secondaryUrl = 'https://example.com/s.png'
+  const primary = { url: primaryUrl, providerKey: 'p' }
+  const secondary = { url: secondaryUrl, providerKey: 's' }
+
+  it('constructs a 3-level chain', () => {
+    // Chain expectation:
+    // 1. Primary (proxy) -> default: 2
+    // 2. Secondary (proxy) -> default: 3
+    // 3. Secondary (none) -> final fallback
+
+    const result = applyProxyForDualHost(primary, secondary, {
+      proxy: 'wsrv.nl',
+      useWebp: false,
+    })
+
+    // 1. Primary
+    expect(result.startsWith('https://wsrv.nl/?url=')).toBe(true)
+    const level1 = new URL(result)
+    expect(level1.searchParams.get('url')).toBe(primaryUrl)
+
+    // 2. Secondary (proxy)
+    const level2Url = level1.searchParams.get('default')!
+    expect(level2Url.startsWith('https://wsrv.nl/?url=')).toBe(true)
+    const level2 = new URL(level2Url)
+    expect(level2.searchParams.get('url')).toBe(secondaryUrl)
+
+    // 3. Primary (none)
+    const level3Url = level2.searchParams.get('default')!
+    expect(level3Url).toBe(primaryUrl)
+  })
+
+  it('handles webp option correctly across the chain', () => {
+    const result = applyProxyForDualHost(primary, secondary, {
+      proxy: 'wsrv.nl',
+      useWebp: true,
+    })
+
+    // 1. Primary (webp)
+    const level1 = new URL(result)
+    expect(level1.searchParams.get('output')).toBe('webp')
+
+    // 2. Secondary (webp)
+    const level2Url = level1.searchParams.get('default')!
+    const level2 = new URL(level2Url)
+    expect(level2.searchParams.get('output')).toBe('webp')
+
+    // 3. Primary (none) - no webp processing since it's direct
+    const level3Url = level2.searchParams.get('default')!
+    expect(level3Url).toBe(primaryUrl)
   })
 })

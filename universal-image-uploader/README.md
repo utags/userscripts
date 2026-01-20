@@ -87,6 +87,8 @@ Install one of the following user script managers:
 - **Multi-host support**:
   - Added ability to upload to a secondary host concurrently.
   - Implemented proxy chain fallback: uses primary host by default, falls back to secondary host if primary fails or via proxy chain.
+  - Updated proxy chain strategy: `Primary(Proxy) -> Secondary(Proxy) -> Primary(Direct)`.
+  - UI Improvements: Distinct color themes for primary (blue) and secondary (purple) host controls and tags.
 
 ### v0.12.x
 

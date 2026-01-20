@@ -7,7 +7,7 @@ import {
 
 import { addStyle, registerMenu, unregisterMenu } from '../../common/gm'
 import { isTopFrame } from '../../utils/is-top-frame'
-import { applyProxy, applyProxyChain } from './apply-proxy'
+import { applyProxy, applyProxyForDualHost } from './apply-proxy.js'
 import {
   ALLOWED_BUTTON_POSITIONS,
   ALLOWED_FORMATS,
@@ -763,22 +763,18 @@ async function applyProxyForCurrentSite(
   const proxy = await getProxy()
 
   if (secondary) {
-    return applyProxyChain([
+    return applyProxyForDualHost(
       {
         url,
         providerKey,
         originalName,
-        proxy,
-        useWebp,
       },
+      secondary,
       {
-        url: secondary.url,
-        providerKey: secondary.providerKey,
-        originalName,
         proxy,
         useWebp,
-      },
-    ])
+      }
+    )
   }
 
   return applyProxy(url, {

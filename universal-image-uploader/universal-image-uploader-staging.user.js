@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.13.1
+// @version              0.13.2
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -313,10 +313,10 @@
       return url
     }
   }
-  function applyProxyChain(chains) {
+  function applyProxyFallback(chains) {
     if (chains.length > 1) {
       const head2 = chains[0]
-      const defaultUrl = applyProxyChain(chains.slice(1))
+      const defaultUrl = applyProxyFallback(chains.slice(1))
       const proxied2 = applyProxy(head2.url, {
         providerKey: head2.providerKey,
         originalName: head2.originalName,
@@ -335,6 +335,32 @@
       useWebp: head.useWebp,
     })
     return proxied
+  }
+  function applyProxyForDualHost(primary, secondary, options) {
+    const { proxy, useWebp } = options
+    return applyProxyFallback([
+      {
+        url: primary.url,
+        providerKey: primary.providerKey,
+        originalName: primary.originalName,
+        proxy,
+        useWebp,
+      },
+      {
+        url: secondary.url,
+        providerKey: secondary.providerKey,
+        originalName: primary.originalName,
+        proxy,
+        useWebp,
+      },
+      {
+        url: primary.url,
+        providerKey: primary.providerKey,
+        originalName: primary.originalName,
+        proxy: 'none',
+        useWebp,
+      },
+    ])
   }
   var DEFAULT_FORMAT = 'markdown'
   var DEFAULT_HOST = 'mjj'
@@ -1519,22 +1545,18 @@
     } catch (e) {}
     const proxy = await getProxy()
     if (secondary) {
-      return applyProxyChain([
+      return applyProxyForDualHost(
         {
           url,
           providerKey,
           originalName,
-          proxy,
-          useWebp,
         },
+        secondary,
         {
-          url: secondary.url,
-          providerKey: secondary.providerKey,
-          originalName,
           proxy,
           useWebp,
-        },
-      ])
+        }
+      )
     }
     return applyProxy(url, {
       providerKey,

@@ -71,7 +71,7 @@ export function applyProxy(url: string, options: ApplyProxyOptions = {}) {
   }
 }
 
-export function applyProxyChain(
+export function applyProxyFallback(
   chains: Array<{
     url: string
     providerKey?: string
@@ -83,7 +83,7 @@ export function applyProxyChain(
 ) {
   if (chains.length > 1) {
     const head = chains[0]
-    const defaultUrl = applyProxyChain(chains.slice(1))
+    const defaultUrl = applyProxyFallback(chains.slice(1))
     const proxied = applyProxy(head.url, {
       providerKey: head.providerKey,
       originalName: head.originalName,
@@ -103,4 +103,45 @@ export function applyProxyChain(
     useWebp: head.useWebp,
   })
   return proxied
+}
+
+export function applyProxyForDualHost(
+  primary: {
+    url: string
+    providerKey?: string
+    originalName?: string
+  },
+  secondary: {
+    url: string
+    providerKey?: string
+  },
+  options: {
+    proxy: string
+    useWebp: boolean
+  }
+) {
+  const { proxy, useWebp } = options
+  return applyProxyFallback([
+    {
+      url: primary.url,
+      providerKey: primary.providerKey,
+      originalName: primary.originalName,
+      proxy,
+      useWebp,
+    },
+    {
+      url: secondary.url,
+      providerKey: secondary.providerKey,
+      originalName: primary.originalName,
+      proxy,
+      useWebp,
+    },
+    {
+      url: primary.url,
+      providerKey: primary.providerKey,
+      originalName: primary.originalName,
+      proxy: 'none',
+      useWebp,
+    },
+  ])
 }
