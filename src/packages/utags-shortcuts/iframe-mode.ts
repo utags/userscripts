@@ -44,9 +44,11 @@ const BLACKLIST_DOMAINS = new Set([
   'stackoverflow.com',
   'superuser.com',
   't.me',
+  'discord.com',
+  'wsrv.nl',
   'external-content.duckduckgo.com',
   'proxy.duckduckgo.com',
-  'wsrv.nl',
+  'images.unsplash.com',
 ])
 const BLACKLIST_URL_PATTERNS = new Set([
   /^https:\/\/www\.google\.com\/search\?.*[&?]udm=50/,
