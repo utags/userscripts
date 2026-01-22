@@ -21,6 +21,7 @@ type Settings = {
   autoMarkNotificationsRead: boolean
   replyTimeColor: boolean
   postListSort: boolean
+  rememberSortMode: boolean
   stickyHeader: boolean
   hideSidebarEmail: boolean
   hideSidebarExperience: boolean
@@ -33,6 +34,7 @@ const DEFAULT_SETTINGS: Settings = {
   autoMarkNotificationsRead: true,
   replyTimeColor: true,
   postListSort: true,
+  rememberSortMode: false,
   stickyHeader: false,
   hideSidebarEmail: false,
   hideSidebarExperience: false,
@@ -46,6 +48,7 @@ let enabled = DEFAULT_SETTINGS.enabled
 let autoMarkNotificationsRead = DEFAULT_SETTINGS.autoMarkNotificationsRead
 let replyTimeColor = DEFAULT_SETTINGS.replyTimeColor
 let postListSort = DEFAULT_SETTINGS.postListSort
+let rememberSortMode = DEFAULT_SETTINGS.rememberSortMode
 let stickyHeader = DEFAULT_SETTINGS.stickyHeader
 let hideSidebarEmail = DEFAULT_SETTINGS.hideSidebarEmail
 let hideSidebarExperience = DEFAULT_SETTINGS.hideSidebarExperience
@@ -69,6 +72,11 @@ function buildSettingsSchema(): PanelSchema {
       type: 'toggle',
       key: 'postListSort',
       label: '当前页帖子列表排序',
+    },
+    {
+      type: 'toggle',
+      key: 'rememberSortMode',
+      label: '记住排序选项，每次自动排序',
     },
     {
       type: 'toggle',
@@ -135,6 +143,7 @@ async function applySettingsFromStore(): Promise<void> {
     autoMarkNotificationsRead = Boolean(obj.autoMarkNotificationsRead)
     replyTimeColor = Boolean(obj.replyTimeColor)
     postListSort = Boolean(obj.postListSort)
+    rememberSortMode = Boolean(obj.rememberSortMode)
     stickyHeader = Boolean(obj.stickyHeader)
     hideSidebarEmail = Boolean(obj.hideSidebarEmail)
     hideSidebarExperience = Boolean(obj.hideSidebarExperience)
@@ -159,6 +168,7 @@ function getSettingsSnapshot(): Settings {
     autoMarkNotificationsRead,
     replyTimeColor,
     postListSort,
+    rememberSortMode,
     stickyHeader,
     hideSidebarEmail,
     hideSidebarExperience,

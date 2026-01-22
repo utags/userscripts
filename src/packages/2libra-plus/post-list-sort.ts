@@ -4,6 +4,7 @@ import { onDomChange, onUrlChange } from '../../utils/dom-watcher'
 type SettingsSnapshot = {
   enabled: boolean
   postListSort: boolean
+  rememberSortMode: boolean
 }
 
 type GetSettings = () => SettingsSnapshot
@@ -17,6 +18,8 @@ type ItemInfo = {
   replyCount: number | undefined
 }
 
+const STORAGE_KEY_SORT_MODE = '2libra_plus_sort_mode'
+
 const sortState: {
   mode: SortMode
 } = {
@@ -24,6 +27,22 @@ const sortState: {
 }
 
 let initialized = false
+
+function saveSortMode(mode: SortMode): void {
+  try {
+    localStorage.setItem(STORAGE_KEY_SORT_MODE, mode)
+  } catch {}
+}
+
+function loadSortMode(): SortMode | undefined {
+  try {
+    return (
+      (localStorage.getItem(STORAGE_KEY_SORT_MODE) as SortMode) || undefined
+    )
+  } catch {
+    return undefined
+  }
+}
 
 function getListContainer(): HTMLUListElement | undefined {
   const list = document.querySelector<HTMLUListElement>(
@@ -189,7 +208,7 @@ function updateActiveButtons(container: HTMLElement): void {
   }
 }
 
-function createSortControls(): HTMLElement | undefined {
+function createSortControls(getSettings: GetSettings): HTMLElement | undefined {
   const list = getListContainer()
   if (!list || list.children.length === 0) return undefined
   const root = list
@@ -268,6 +287,11 @@ function createSortControls(): HTMLElement | undefined {
     const listEl = getListContainer()
     if (listEl && listEl.children.length > 0) {
       applySort(listEl)
+    }
+
+    const settings = getSettings()
+    if (settings.rememberSortMode) {
+      saveSortMode(mode)
     }
 
     closeMenu()
@@ -353,7 +377,7 @@ function ensureBreadcrumbs(header: HTMLElement): void {
   ul.append(liTitle)
 }
 
-function ensureControls(): void {
+function ensureControls(getSettings: GetSettings): void {
   const list = getListContainer()
   if (!list || list.children.length === 0) return
 
@@ -369,13 +393,25 @@ function ensureControls(): void {
     return
   }
 
-  createSortControls()
+  createSortControls(getSettings)
 }
+
+let modeRestored = false
 
 function runInternal(getSettings: GetSettings): void {
   const settings = getSettings()
   if (!settings.enabled || !settings.postListSort) return
-  ensureControls()
+
+  if (!modeRestored && settings.rememberSortMode) {
+    const stored = loadSortMode()
+    if (stored) {
+      sortState.mode = stored
+    }
+
+    modeRestored = true
+  }
+
+  ensureControls(getSettings)
   const list = getListContainer()
   if (!list || list.children.length === 0) return
   applySort(list)
@@ -394,7 +430,14 @@ export function initPostListSort(getSettings: GetSettings): void {
   }
 
   const handleUrlChange = () => {
-    sortState.mode = 'default'
+    const currentSettings = getSettings()
+    if (currentSettings.rememberSortMode) {
+      const stored = loadSortMode()
+      sortState.mode = stored || 'default'
+    } else {
+      sortState.mode = 'default'
+    }
+
     runInternal(getSettings)
   }
 

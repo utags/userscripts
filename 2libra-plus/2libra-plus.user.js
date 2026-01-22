@@ -3,7 +3,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.2.0
+// @version              0.2.1
 // @description          2Libra.com 增强工具
 // @icon                 https://2libra.com/favicon.ico
 // @author               Pipecraft
@@ -1306,10 +1306,23 @@
     onUrlChange(check)
     onDomChange(check)
   }
+  var STORAGE_KEY_SORT_MODE = '2libra_plus_sort_mode'
   var sortState = {
     mode: 'default',
   }
   var initialized2 = false
+  function saveSortMode(mode) {
+    try {
+      localStorage.setItem(STORAGE_KEY_SORT_MODE, mode)
+    } catch (e) {}
+  }
+  function loadSortMode() {
+    try {
+      return localStorage.getItem(STORAGE_KEY_SORT_MODE) || void 0
+    } catch (e) {
+      return void 0
+    }
+  }
   function getListContainer() {
     const list = document.querySelector('[data-main-left="true"] ul.card')
     return list || void 0
@@ -1447,7 +1460,7 @@
       }
     }
   }
-  function createSortControls() {
+  function createSortControls(getSettings) {
     const list = getListContainer()
     if (!list || list.children.length === 0) return void 0
     const root = list
@@ -1528,6 +1541,10 @@
       if (listEl && listEl.children.length > 0) {
         applySort(listEl)
       }
+      const settings = getSettings()
+      if (settings.rememberSortMode) {
+        saveSortMode(mode)
+      }
       closeMenu()
     })
     updateActiveButtons(sortContainer)
@@ -1594,7 +1611,7 @@
     liTitle.textContent = pageTitle
     ul.append(liTitle)
   }
-  function ensureControls() {
+  function ensureControls(getSettings) {
     const list = getListContainer()
     if (!list || list.children.length === 0) return
     list.dataset.libraPlusPostListSort = '1'
@@ -1604,12 +1621,20 @@
       updateActiveButtons(existing)
       return
     }
-    createSortControls()
+    createSortControls(getSettings)
   }
+  var modeRestored = false
   function runInternal(getSettings) {
     const settings = getSettings()
     if (!settings.enabled || !settings.postListSort) return
-    ensureControls()
+    if (!modeRestored && settings.rememberSortMode) {
+      const stored = loadSortMode()
+      if (stored) {
+        sortState.mode = stored
+      }
+      modeRestored = true
+    }
+    ensureControls(getSettings)
     const list = getListContainer()
     if (!list || list.children.length === 0) return
     applySort(list)
@@ -1624,7 +1649,13 @@
       runInternal(getSettings)
     }
     const handleUrlChange = () => {
-      sortState.mode = 'default'
+      const currentSettings = getSettings()
+      if (currentSettings.rememberSortMode) {
+        const stored = loadSortMode()
+        sortState.mode = stored || 'default'
+      } else {
+        sortState.mode = 'default'
+      }
       runInternal(getSettings)
     }
     const handleDomChange = () => {
@@ -1951,6 +1982,7 @@
     autoMarkNotificationsRead: true,
     replyTimeColor: true,
     postListSort: true,
+    rememberSortMode: false,
     stickyHeader: false,
     hideSidebarEmail: false,
     hideSidebarExperience: false,
@@ -1962,6 +1994,7 @@
   var autoMarkNotificationsRead = DEFAULT_SETTINGS.autoMarkNotificationsRead
   var replyTimeColor = DEFAULT_SETTINGS.replyTimeColor
   var postListSort = DEFAULT_SETTINGS.postListSort
+  var rememberSortMode = DEFAULT_SETTINGS.rememberSortMode
   var stickyHeader = DEFAULT_SETTINGS.stickyHeader
   var hideSidebarEmail = DEFAULT_SETTINGS.hideSidebarEmail
   var hideSidebarExperience = DEFAULT_SETTINGS.hideSidebarExperience
@@ -1984,6 +2017,12 @@
         type: 'toggle',
         key: 'postListSort',
         label: '\u5F53\u524D\u9875\u5E16\u5B50\u5217\u8868\u6392\u5E8F',
+      },
+      {
+        type: 'toggle',
+        key: 'rememberSortMode',
+        label:
+          '\u8BB0\u4F4F\u6392\u5E8F\u9009\u9879\uFF0C\u6BCF\u6B21\u81EA\u52A8\u6392\u5E8F',
       },
       {
         type: 'toggle',
@@ -2068,6 +2107,7 @@
       autoMarkNotificationsRead = Boolean(obj.autoMarkNotificationsRead)
       replyTimeColor = Boolean(obj.replyTimeColor)
       postListSort = Boolean(obj.postListSort)
+      rememberSortMode = Boolean(obj.rememberSortMode)
       stickyHeader = Boolean(obj.stickyHeader)
       hideSidebarEmail = Boolean(obj.hideSidebarEmail)
       hideSidebarExperience = Boolean(obj.hideSidebarExperience)
@@ -2090,6 +2130,7 @@
       autoMarkNotificationsRead,
       replyTimeColor,
       postListSort,
+      rememberSortMode,
       stickyHeader,
       hideSidebarEmail,
       hideSidebarExperience,

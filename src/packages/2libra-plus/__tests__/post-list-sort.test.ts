@@ -84,7 +84,11 @@ describe('post-list-sort', () => {
     ])
 
     const before = getListIds(list)
-    runPostListSort(() => ({ enabled: true, postListSort: false }))
+    runPostListSort(() => ({
+      enabled: true,
+      postListSort: false,
+      rememberSortMode: false,
+    }))
     const after = getListIds(list)
 
     expect(after).toEqual(before)
@@ -97,7 +101,11 @@ describe('post-list-sort', () => {
       { id: 'c', datetime: '2024-01-02T00:00:00.000Z' },
     ])
 
-    runPostListSort(() => ({ enabled: true, postListSort: true }))
+    runPostListSort(() => ({
+      enabled: true,
+      postListSort: true,
+      rememberSortMode: false,
+    }))
     clickSortMode('newToOld')
 
     expect(getListIds(list)).toEqual(['b', 'c', 'a'])
@@ -114,7 +122,11 @@ describe('post-list-sort', () => {
       true
     )
 
-    runPostListSort(() => ({ enabled: true, postListSort: true }))
+    runPostListSort(() => ({
+      enabled: true,
+      postListSort: true,
+      rememberSortMode: false,
+    }))
     clickSortMode('replyDesc')
 
     expect(getListIds(list)).toEqual(['a', 'd', 'c', 'b'])
@@ -131,7 +143,11 @@ describe('post-list-sort', () => {
       { id: 'c', replyCount: 2 },
     ])
 
-    runPostListSort(() => ({ enabled: true, postListSort: true }))
+    runPostListSort(() => ({
+      enabled: true,
+      postListSort: true,
+      rememberSortMode: false,
+    }))
     clickSortMode('replyAsc')
 
     expect(getListIds(list)).toEqual(['b', 'c', 'a'])
