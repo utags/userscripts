@@ -3,7 +3,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.1.1
+// @version              0.2.0
 // @description          2Libra.com 增强工具
 // @icon                 https://2libra.com/favicon.ico
 // @author               Pipecraft
@@ -1823,19 +1823,152 @@
     })
     onDomChange(runUpdateColor)
   }
+  var initialized4 = false
+  function applyHideEmail(cardBody, settings) {
+    const emailEl = cardBody.querySelector(':scope > h2 .text-gray-400')
+    if (!emailEl) return
+    if (settings.hideSidebarEmail) {
+      emailEl.style.display = 'none'
+    } else {
+      emailEl.style.removeProperty('display')
+    }
+  }
+  function applyHideExperience(h2, settings) {
+    const experienceEl = h2.nextElementSibling
+    if (!experienceEl) return
+    if (settings.hideSidebarExperience) {
+      experienceEl.style.display = 'none'
+    } else {
+      experienceEl.style.removeProperty('display')
+    }
+    return experienceEl
+  }
+  function applyHideActions(experienceEl, settings) {
+    var _a
+    const actionsContainer = experienceEl.nextElementSibling
+    if (!actionsContainer) return
+    const coinsLink = actionsContainer.querySelector('a[href="/coins"]')
+    const checkinBtn =
+      (_a = actionsContainer.querySelector('[data-tip*="\u7B7E\u5230"]')) ==
+      null
+        ? void 0
+        : _a.parentElement
+    const hideCoins = settings.hideSidebarCoins
+    const hideCheckin = settings.hideSidebarCheckin
+    const spans = Array.from(actionsContainer.querySelectorAll(':scope > span'))
+    if (hideCoins || hideCheckin) {
+      actionsContainer.style.justifyContent = 'space-between'
+      for (const span of spans) {
+        span.style.display = 'none'
+      }
+    } else {
+      actionsContainer.style.removeProperty('justify-content')
+      for (const span of spans) {
+        span.style.removeProperty('display')
+      }
+    }
+    if (coinsLink) {
+      if (hideCoins) {
+        coinsLink.style.display = 'none'
+      } else {
+        coinsLink.style.removeProperty('display')
+      }
+    }
+    if (checkinBtn) {
+      if (hideCheckin) {
+        checkinBtn.style.display = 'none'
+      } else {
+        checkinBtn.style.removeProperty('display')
+      }
+    }
+  }
+  function applySidebarHidden(getSettings) {
+    const settings = getSettings()
+    if (!settings.enabled) return
+    const cardBody = document.querySelector(
+      '[data-right-sidebar="true"] .card-body'
+    )
+    if (!cardBody) return
+    applyHideEmail(cardBody, settings)
+    const h2 = cardBody.querySelector(':scope > h2')
+    if (h2) {
+      const experienceEl = applyHideExperience(h2, settings)
+      if (experienceEl) {
+        applyHideActions(experienceEl, settings)
+      }
+    }
+  }
+  function runSidebarHidden(getSettings) {
+    applySidebarHidden(getSettings)
+  }
+  function initSidebarHidden(getSettings) {
+    if (initialized4) return
+    initialized4 = true
+    const run = () => {
+      applySidebarHidden(getSettings)
+    }
+    onDomChange(run)
+    onUrlChange(run)
+    run()
+  }
+  var initialized5 = false
+  function applyStickyHeader(getSettings) {
+    var _a, _b
+    const settings = getSettings()
+    const target =
+      (_b =
+        (_a = document.querySelector('.node-parent-tabs')) == null
+          ? void 0
+          : _a.parentElement) == null
+        ? void 0
+        : _b.parentElement
+    if (!target) return
+    if (settings.enabled && settings.stickyHeader) {
+      target.style.position = 'sticky'
+      target.style.top = '0'
+      target.style.zIndex = '1'
+    } else {
+      target.style.removeProperty('position')
+      target.style.removeProperty('top')
+      target.style.removeProperty('z-index')
+    }
+  }
+  function runStickyHeader(getSettings) {
+    applyStickyHeader(getSettings)
+  }
+  function initStickyHeader(getSettings) {
+    if (initialized5) return
+    initialized5 = true
+    const run = () => {
+      applyStickyHeader(getSettings)
+    }
+    onDomChange(run)
+    onUrlChange(run)
+    run()
+  }
   var DEFAULT_SETTINGS = {
     enabled: true,
     autoMarkNotificationsRead: true,
     replyTimeColor: true,
     postListSort: true,
+    stickyHeader: false,
+    hideSidebarEmail: false,
+    hideSidebarExperience: false,
+    hideSidebarCoins: false,
+    hideSidebarCheckin: false,
   }
   var store = createSettingsStore('settings', DEFAULT_SETTINGS)
   var enabled = DEFAULT_SETTINGS.enabled
   var autoMarkNotificationsRead = DEFAULT_SETTINGS.autoMarkNotificationsRead
   var replyTimeColor = DEFAULT_SETTINGS.replyTimeColor
   var postListSort = DEFAULT_SETTINGS.postListSort
+  var stickyHeader = DEFAULT_SETTINGS.stickyHeader
+  var hideSidebarEmail = DEFAULT_SETTINGS.hideSidebarEmail
+  var hideSidebarExperience = DEFAULT_SETTINGS.hideSidebarExperience
+  var hideSidebarCoins = DEFAULT_SETTINGS.hideSidebarCoins
+  var hideSidebarCheckin = DEFAULT_SETTINGS.hideSidebarCheckin
   function buildSettingsSchema() {
-    const fields = [
+    const generalFields = [
       { type: 'toggle', key: 'enabled', label: '\u542F\u7528' },
       {
         type: 'toggle',
@@ -1852,11 +1985,49 @@
         key: 'postListSort',
         label: '\u5F53\u524D\u9875\u5E16\u5B50\u5217\u8868\u6392\u5E8F',
       },
+      {
+        type: 'toggle',
+        key: 'stickyHeader',
+        label: '\u9876\u90E8\u5BFC\u822A\u680F\u56FA\u5B9A\u663E\u793A',
+      },
+    ]
+    const sidebarFields = [
+      {
+        type: 'toggle',
+        key: 'hideSidebarEmail',
+        label: '\u9690\u85CF\u90AE\u7BB1',
+      },
+      {
+        type: 'toggle',
+        key: 'hideSidebarExperience',
+        label: '\u9690\u85CF\u7ECF\u9A8C\u503C',
+      },
+      {
+        type: 'toggle',
+        key: 'hideSidebarCoins',
+        label: '\u9690\u85CF\u91D1\u5E01\u6570\u91CF',
+      },
+      {
+        type: 'toggle',
+        key: 'hideSidebarCheckin',
+        label: '\u9690\u85CF\u7B7E\u5230',
+      },
     ]
     return {
       type: 'simple',
       title: '2Libra Plus \u8BBE\u7F6E',
-      fields,
+      groups: [
+        {
+          id: 'general',
+          title: '\u901A\u7528\u8BBE\u7F6E',
+          fields: generalFields,
+        },
+        {
+          id: 'sidebar',
+          title: '\u53F3\u4FA7\u680F\u4E2A\u4EBA\u5361\u7247\u8BBE\u7F6E',
+          fields: sidebarFields,
+        },
+      ],
     }
   }
   function openSettings() {
@@ -1897,12 +2068,19 @@
       autoMarkNotificationsRead = Boolean(obj.autoMarkNotificationsRead)
       replyTimeColor = Boolean(obj.replyTimeColor)
       postListSort = Boolean(obj.postListSort)
+      stickyHeader = Boolean(obj.stickyHeader)
+      hideSidebarEmail = Boolean(obj.hideSidebarEmail)
+      hideSidebarExperience = Boolean(obj.hideSidebarExperience)
+      hideSidebarCoins = Boolean(obj.hideSidebarCoins)
+      hideSidebarCheckin = Boolean(obj.hideSidebarCheckin)
       if (!prevEnabled && enabled && !featuresInitialized) {
         initFeatures()
       } else if (featuresInitialized) {
         runAutoMarkNotificationsRead(getSettingsSnapshot)
         runReplyTimeColor(getSettingsSnapshot)
         runPostListSort(getSettingsSnapshot)
+        runStickyHeader(getSettingsSnapshot)
+        runSidebarHidden(getSettingsSnapshot)
       }
     } catch (e) {}
   }
@@ -1912,6 +2090,11 @@
       autoMarkNotificationsRead,
       replyTimeColor,
       postListSort,
+      stickyHeader,
+      hideSidebarEmail,
+      hideSidebarExperience,
+      hideSidebarCoins,
+      hideSidebarCheckin,
     }
   }
   var featuresInitialized = false
@@ -1921,6 +2104,8 @@
     initAutoMarkNotificationsRead(getSettingsSnapshot)
     initReplyTimeColor(getSettingsSnapshot)
     initPostListSort(getSettingsSnapshot)
+    initStickyHeader(getSettingsSnapshot)
+    initSidebarHidden(getSettingsSnapshot)
   }
   function bootstrap() {
     const d = document.documentElement
