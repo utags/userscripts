@@ -3,7 +3,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.3.0
+// @version              0.3.1
 // @description          2Libra.com 增强工具
 // @icon                 https://2libra.com/favicon.ico
 // @author               Pipecraft
@@ -1243,7 +1243,7 @@
       }, delay)
     }
   }
-  var CHECK_INTERVAL = 60 * 1e3
+  var CHECK_INTERVAL = 30 * 1e3
   var LOCK_TIMEOUT = 20 * 1e3
   var KEY_LOCK = 'check_lock'
   var KEY_LAST_CHECK = 'last_check'
@@ -1252,7 +1252,7 @@
   var currentUnreadCount = 0
   var utagsHostObserver
   var utagsShadowObserver
-  function startUtagsObserver() {
+  function startUtagsObserver(getSettings2) {
     const onShadowMutation = (mutations) => {
       let shouldUpdate = false
       for (const mutation of mutations) {
@@ -1262,7 +1262,7 @@
         }
       }
       if (shouldUpdate) {
-        updateUtagsShortcuts(currentUnreadCount)
+        updateUtagsShortcuts(currentUnreadCount, getSettings2)
       }
     }
     const onDocumentMutation = (mutations) => {
@@ -1273,7 +1273,7 @@
             node.dataset.ushortcutsHost === 'utags-shortcuts'
           ) {
             observeShadowRoot(node)
-            updateUtagsShortcuts(currentUnreadCount)
+            updateUtagsShortcuts(currentUnreadCount, getSettings2)
           }
         }
       }
@@ -1347,7 +1347,7 @@
       ctx.clearRect(0, 0, 32, 32)
       ctx.drawImage(img, 0, 0, 32, 32)
       ctx.beginPath()
-      ctx.arc(20, 12, 12, 0, 2 * Math.PI)
+      ctx.arc(20, 20, 12, 0, 2 * Math.PI)
       ctx.fillStyle = '#ff0000'
       ctx.fill()
       const text = count > 99 ? '99+' : count.toString()
@@ -1355,7 +1355,7 @@
       ctx.fillStyle = '#ffffff'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(text, 20, 13)
+      ctx.fillText(text, 20, 21)
       if (link) {
         link.href = canvas.toDataURL('image/png')
         document.head.append(link)
@@ -1363,7 +1363,9 @@
     })
     img.src = originalFavicon
   }
-  var updateUtagsShortcuts = debounce((count) => {
+  var updateUtagsShortcuts = debounce((count, getSettings2) => {
+    const settings = getSettings2()
+    const displayCount = settings.checkUnreadNotificationsUtags ? count : 0
     const host = document.querySelector(
       '[data-ushortcuts-host="utags-shortcuts"]'
     )
@@ -1371,7 +1373,7 @@
     const links = host.shadowRoot.querySelectorAll('a')
     for (const link of links) {
       try {
-        updateUtagsShortcutsLink(link, count)
+        updateUtagsShortcutsLink(link, displayCount)
       } catch (e) {}
     }
   }, 200)
@@ -1408,10 +1410,9 @@
       }
     }
   }
-  function updateUI(count, getSettings) {
+  function updateUI(count, getSettings2) {
     currentUnreadCount = count
-    const settings = getSettings()
-    if (!settings.enabled || !settings.checkUnreadNotifications) return
+    const settings = getSettings2()
     const element = document.querySelector(
       '[data-right-sidebar="true"] .card-body a[href="/notifications"] > div'
     )
@@ -1419,11 +1420,15 @@
       element.textContent = ''.concat(count, ' \u6761\u6D88\u606F')
       element.className = count > 0 ? 'text-primary' : ''
     }
-    updateFavicon(count)
-    updateUtagsShortcuts(count)
+    if (settings.checkUnreadNotificationsFavicon) {
+      updateFavicon(count)
+    } else if (originalFavicon) {
+      updateFavicon(0)
+    }
+    updateUtagsShortcuts(count, getSettings2)
     const title = document.title
     const prefixRegex = /^\(\d+\) /
-    if (count > 0) {
+    if (settings.checkUnreadNotificationsTitle && count > 0) {
       const newPrefix = '('.concat(count, ') ')
       document.title = prefixRegex.test(title)
         ? title.replace(prefixRegex, newPrefix)
@@ -1432,8 +1437,8 @@
       document.title = title.replace(prefixRegex, '')
     }
   }
-  async function check(getSettings, force = false) {
-    const settings = getSettings()
+  async function check(getSettings2, force = false) {
+    const settings = getSettings2()
     if (!settings.enabled || !settings.checkUnreadNotifications) return
     const now = Date.now()
     if (!force) {
@@ -1455,32 +1460,32 @@
       await setValue(KEY_LOCK, 0)
     }
   }
-  function initCheckNotifications(getSettings) {
+  function initCheckNotifications(getSettings2) {
     if (initialized) return
     initialized = true
-    startUtagsObserver()
+    startUtagsObserver(getSettings2)
     void addValueChangeListener(KEY_UNREAD_COUNT, (_key, _old, newValue) => {
       if (typeof newValue === 'number') {
-        updateUI(newValue, getSettings)
+        updateUI(newValue, getSettings2)
       }
     })
     void (async () => {
       const value = await getValue(KEY_UNREAD_COUNT)
       if (typeof value === 'number') {
-        updateUI(value, getSettings)
+        updateUI(value, getSettings2)
       }
     })()
     setInterval(() => {
-      void check(getSettings)
+      void check(getSettings2)
     }, 10 * 1e3)
-    void check(getSettings)
+    void check(getSettings2)
   }
-  function runCheckNotifications(getSettings) {
-    void check(getSettings)
+  function runCheckNotifications(getSettings2) {
+    void check(getSettings2)
     void (async () => {
       const value = await getValue(KEY_UNREAD_COUNT)
       if (typeof value === 'number') {
-        updateUI(value, getSettings)
+        updateUI(value, getSettings2)
       }
     })()
   }
@@ -1510,8 +1515,8 @@
       item.dataset.unreadMark = '1'
     }
   }
-  function tryClickMarkButton(getSettings) {
-    const settings = getSettings()
+  function tryClickMarkButton(getSettings2) {
+    const settings = getSettings2()
     if (!settings.enabled || !settings.autoMarkNotificationsRead) return
     if (!isNotificationsPage()) return
     markUnreadItems()
@@ -1524,8 +1529,8 @@
     )
     btn.click()
   }
-  function bindMarkReadButton(getSettings) {
-    const settings = getSettings()
+  function bindMarkReadButton(getSettings2) {
+    const settings = getSettings2()
     if (!settings.enabled) return
     if (!isNotificationsPage()) return
     const btn = document.querySelector(
@@ -1536,28 +1541,28 @@
     btn.dataset.listenClick = '1'
     btn.addEventListener('click', () => {
       setTimeout(() => {
-        void check(getSettings, true)
+        void check(getSettings2, true)
       }, 1e3)
     })
   }
-  function scheduleClick(getSettings) {
+  function scheduleClick(getSettings2) {
     if (clickTimer !== void 0) {
       globalThis.clearTimeout(clickTimer)
     }
     clickTimer = globalThis.setTimeout(() => {
       clickTimer = void 0
-      tryClickMarkButton(getSettings)
+      tryClickMarkButton(getSettings2)
     }, 800)
   }
-  function runAutoMarkNotificationsRead(getSettings) {
-    scheduleClick(getSettings)
+  function runAutoMarkNotificationsRead(getSettings2) {
+    scheduleClick(getSettings2)
   }
-  function initAutoMarkNotificationsRead(getSettings) {
+  function initAutoMarkNotificationsRead(getSettings2) {
     if (initialized2) return
     initialized2 = true
     const check2 = () => {
-      bindMarkReadButton(getSettings)
-      scheduleClick(getSettings)
+      bindMarkReadButton(getSettings2)
+      scheduleClick(getSettings2)
     }
     if (document.readyState === 'loading') {
       document.addEventListener(
@@ -1727,7 +1732,7 @@
       }
     }
   }
-  function createSortControls(getSettings) {
+  function createSortControls(getSettings2) {
     const list = getListContainer()
     if (!list || list.children.length === 0) return void 0
     const root = list
@@ -1808,7 +1813,7 @@
       if (listEl && listEl.children.length > 0) {
         applySort(listEl)
       }
-      const settings = getSettings()
+      const settings = getSettings2()
       if (settings.rememberSortMode) {
         saveSortMode(mode)
       }
@@ -1878,7 +1883,7 @@
     liTitle.textContent = pageTitle
     ul.append(liTitle)
   }
-  function ensureControls(getSettings) {
+  function ensureControls(getSettings2) {
     const list = getListContainer()
     if (!list || list.children.length === 0) return
     list.dataset.libraPlusPostListSort = '1'
@@ -1888,11 +1893,11 @@
       updateActiveButtons(existing)
       return
     }
-    createSortControls(getSettings)
+    createSortControls(getSettings2)
   }
   var modeRestored = false
-  function runInternal(getSettings) {
-    const settings = getSettings()
+  function runInternal(getSettings2) {
+    const settings = getSettings2()
     if (!settings.enabled || !settings.postListSort) return
     if (!modeRestored && settings.rememberSortMode) {
       const stored = loadSortMode()
@@ -1901,35 +1906,35 @@
       }
       modeRestored = true
     }
-    ensureControls(getSettings)
+    ensureControls(getSettings2)
     const list = getListContainer()
     if (!list || list.children.length === 0) return
     applySort(list)
   }
-  function runPostListSort(getSettings) {
-    runInternal(getSettings)
+  function runPostListSort(getSettings2) {
+    runInternal(getSettings2)
   }
-  function initPostListSort(getSettings) {
+  function initPostListSort(getSettings2) {
     if (initialized3) return
     initialized3 = true
     const run = () => {
-      runInternal(getSettings)
+      runInternal(getSettings2)
     }
     const handleUrlChange = () => {
-      const currentSettings = getSettings()
+      const currentSettings = getSettings2()
       if (currentSettings.rememberSortMode) {
         const stored = loadSortMode()
         sortState.mode = stored || 'default'
       } else {
         sortState.mode = 'default'
       }
-      runInternal(getSettings)
+      runInternal(getSettings2)
     }
     const handleDomChange = () => {
       const list = getListContainer()
       if (!list || list.children.length === 0) return
       if (!hasUnindexedItems(list)) return
-      runInternal(getSettings)
+      runInternal(getSettings2)
     }
     if (document.readyState === 'loading') {
       document.addEventListener(
@@ -2004,10 +2009,10 @@
         .concat(formatted, '\uFF09')
     )
   }
-  function updateReplyTimeColor(getSettings) {
+  function updateReplyTimeColor(getSettings2) {
     var _a
     let lastHomeViewTime = lastHomeViewBase
-    const settings = getSettings()
+    const settings = getSettings2()
     if (!settings.enabled || !settings.replyTimeColor) {
       const timeElements2 = Array.from(
         ((_a = getListContainer2()) == null
@@ -2081,14 +2086,14 @@
       }
     }
   }
-  function runReplyTimeColor(getSettings) {
-    updateReplyTimeColor(getSettings)
+  function runReplyTimeColor(getSettings2) {
+    updateReplyTimeColor(getSettings2)
   }
-  function initReplyTimeColor(getSettings) {
+  function initReplyTimeColor(getSettings2) {
     if (initialized4) return
     initialized4 = true
     const runUpdateColor = () => {
-      updateReplyTimeColor(getSettings)
+      updateReplyTimeColor(getSettings2)
     }
     const handleHomeView = () => {
       const last = getLastHomeViewTime()
@@ -2180,9 +2185,8 @@
       }
     }
   }
-  function applySidebarHidden(getSettings) {
-    const settings = getSettings()
-    if (!settings.enabled) return
+  function applySidebarHidden(getSettings2) {
+    const settings = getSettings2()
     const cardBody = document.querySelector(
       '[data-right-sidebar="true"] .card-body'
     )
@@ -2196,23 +2200,23 @@
       }
     }
   }
-  function runSidebarHidden(getSettings) {
-    applySidebarHidden(getSettings)
+  function runSidebarHidden(getSettings2) {
+    applySidebarHidden(getSettings2)
   }
-  function initSidebarHidden(getSettings) {
+  function initSidebarHidden(getSettings2) {
     if (initialized5) return
     initialized5 = true
     const run = () => {
-      applySidebarHidden(getSettings)
+      applySidebarHidden(getSettings2)
     }
     onDomChange(run)
     onUrlChange(run)
     run()
   }
   var initialized6 = false
-  function applyStickyHeader(getSettings) {
+  function applyStickyHeader(getSettings2) {
     var _a, _b
-    const settings = getSettings()
+    const settings = getSettings2()
     const target =
       (_b =
         (_a = document.querySelector('.node-parent-tabs')) == null
@@ -2231,14 +2235,14 @@
       target.style.removeProperty('z-index')
     }
   }
-  function runStickyHeader(getSettings) {
-    applyStickyHeader(getSettings)
+  function runStickyHeader(getSettings2) {
+    applyStickyHeader(getSettings2)
   }
-  function initStickyHeader(getSettings) {
+  function initStickyHeader(getSettings2) {
     if (initialized6) return
     initialized6 = true
     const run = () => {
-      applyStickyHeader(getSettings)
+      applyStickyHeader(getSettings2)
     }
     onDomChange(run)
     onUrlChange(run)
@@ -2248,6 +2252,9 @@
     enabled: true,
     autoMarkNotificationsRead: true,
     checkUnreadNotifications: true,
+    checkUnreadNotificationsTitle: true,
+    checkUnreadNotificationsFavicon: true,
+    checkUnreadNotificationsUtags: true,
     replyTimeColor: true,
     postListSort: true,
     rememberSortMode: false,
@@ -2261,6 +2268,12 @@
   var enabled = DEFAULT_SETTINGS.enabled
   var autoMarkNotificationsRead = DEFAULT_SETTINGS.autoMarkNotificationsRead
   var checkUnreadNotifications = DEFAULT_SETTINGS.checkUnreadNotifications
+  var checkUnreadNotificationsTitle =
+    DEFAULT_SETTINGS.checkUnreadNotificationsTitle
+  var checkUnreadNotificationsFavicon =
+    DEFAULT_SETTINGS.checkUnreadNotificationsFavicon
+  var checkUnreadNotificationsUtags =
+    DEFAULT_SETTINGS.checkUnreadNotificationsUtags
   var replyTimeColor = DEFAULT_SETTINGS.replyTimeColor
   var postListSort = DEFAULT_SETTINGS.postListSort
   var rememberSortMode = DEFAULT_SETTINGS.rememberSortMode
@@ -2272,16 +2285,6 @@
   function buildSettingsSchema() {
     const generalFields = [
       { type: 'toggle', key: 'enabled', label: '\u542F\u7528' },
-      {
-        type: 'toggle',
-        key: 'autoMarkNotificationsRead',
-        label: '\u81EA\u52A8\u5C06\u901A\u77E5\u9875\u8BBE\u4E3A\u5DF2\u8BFB',
-      },
-      {
-        type: 'toggle',
-        key: 'checkUnreadNotifications',
-        label: '\u5B9A\u65F6\u68C0\u67E5\u672A\u8BFB\u901A\u77E5',
-      },
       {
         type: 'toggle',
         key: 'replyTimeColor',
@@ -2302,6 +2305,33 @@
         type: 'toggle',
         key: 'stickyHeader',
         label: '\u9876\u90E8\u5BFC\u822A\u680F\u56FA\u5B9A\u663E\u793A',
+      },
+    ]
+    const notificationFields = [
+      {
+        type: 'toggle',
+        key: 'autoMarkNotificationsRead',
+        label: '\u81EA\u52A8\u5C06\u901A\u77E5\u9875\u8BBE\u4E3A\u5DF2\u8BFB',
+      },
+      {
+        type: 'toggle',
+        key: 'checkUnreadNotifications',
+        label: '\u5B9A\u65F6\u68C0\u67E5\u672A\u8BFB\u901A\u77E5',
+      },
+      {
+        type: 'toggle',
+        key: 'checkUnreadNotificationsTitle',
+        label: '\u7F51\u9875\u6807\u9898\u663E\u793A\u901A\u77E5\u4E2A\u6570',
+      },
+      {
+        type: 'toggle',
+        key: 'checkUnreadNotificationsFavicon',
+        label: 'Favicon Badge \u663E\u793A\u901A\u77E5\u4E2A\u6570',
+      },
+      {
+        type: 'toggle',
+        key: 'checkUnreadNotificationsUtags',
+        label: 'UTags Shortcuts \u663E\u793A\u901A\u77E5\u4E2A\u6570',
       },
     ]
     const sidebarFields = [
@@ -2334,6 +2364,11 @@
           id: 'general',
           title: '\u901A\u7528\u8BBE\u7F6E',
           fields: generalFields,
+        },
+        {
+          id: 'notifications',
+          title: '\u901A\u77E5\u7BA1\u7406',
+          fields: notificationFields,
         },
         {
           id: 'sidebar',
@@ -2378,17 +2413,25 @@
       const prevEnabled = enabled
       const obj = await store.getAll()
       enabled = Boolean(obj.enabled)
-      autoMarkNotificationsRead = Boolean(obj.autoMarkNotificationsRead)
-      checkUnreadNotifications = Boolean(obj.checkUnreadNotifications)
-      replyTimeColor = Boolean(obj.replyTimeColor)
-      postListSort = Boolean(obj.postListSort)
-      rememberSortMode = Boolean(obj.rememberSortMode)
-      stickyHeader = Boolean(obj.stickyHeader)
-      hideSidebarEmail = Boolean(obj.hideSidebarEmail)
-      hideSidebarExperience = Boolean(obj.hideSidebarExperience)
-      hideSidebarCoins = Boolean(obj.hideSidebarCoins)
-      hideSidebarCheckin = Boolean(obj.hideSidebarCheckin)
-      if (!prevEnabled && enabled && !featuresInitialized) {
+      autoMarkNotificationsRead =
+        enabled && Boolean(obj.autoMarkNotificationsRead)
+      checkUnreadNotifications =
+        enabled && Boolean(obj.checkUnreadNotifications)
+      checkUnreadNotificationsTitle =
+        enabled && Boolean(obj.checkUnreadNotificationsTitle)
+      checkUnreadNotificationsFavicon =
+        enabled && Boolean(obj.checkUnreadNotificationsFavicon)
+      checkUnreadNotificationsUtags =
+        enabled && Boolean(obj.checkUnreadNotificationsUtags)
+      replyTimeColor = enabled && Boolean(obj.replyTimeColor)
+      postListSort = enabled && Boolean(obj.postListSort)
+      rememberSortMode = enabled && Boolean(obj.rememberSortMode)
+      stickyHeader = enabled && Boolean(obj.stickyHeader)
+      hideSidebarEmail = enabled && Boolean(obj.hideSidebarEmail)
+      hideSidebarExperience = enabled && Boolean(obj.hideSidebarExperience)
+      hideSidebarCoins = enabled && Boolean(obj.hideSidebarCoins)
+      hideSidebarCheckin = enabled && Boolean(obj.hideSidebarCheckin)
+      if (enabled && !featuresInitialized) {
         initFeatures()
       } else if (featuresInitialized) {
         runAutoMarkNotificationsRead(getSettingsSnapshot)
@@ -2405,6 +2448,9 @@
       enabled,
       autoMarkNotificationsRead,
       checkUnreadNotifications,
+      checkUnreadNotificationsTitle,
+      checkUnreadNotificationsFavicon,
+      checkUnreadNotificationsUtags,
       replyTimeColor,
       postListSort,
       rememberSortMode,
@@ -2414,6 +2460,9 @@
       hideSidebarCoins,
       hideSidebarCheckin,
     }
+  }
+  function getSettings() {
+    return getSettingsSnapshot()
   }
   var featuresInitialized = false
   function initFeatures() {
@@ -2435,9 +2484,6 @@
     registerMenus()
     listenSettings()
     void applySettingsFromStore()
-    if (enabled) {
-      initFeatures()
-    }
   }
   bootstrap()
 })()

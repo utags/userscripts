@@ -5,6 +5,9 @@ type SettingsSnapshot = {
   enabled: boolean
   autoMarkNotificationsRead: boolean
   checkUnreadNotifications: boolean
+  checkUnreadNotificationsTitle: boolean
+  checkUnreadNotificationsFavicon: boolean
+  checkUnreadNotificationsUtags: boolean
 }
 
 type GetSettings = () => SettingsSnapshot

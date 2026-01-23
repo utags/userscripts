@@ -24,6 +24,9 @@ type Settings = {
   enabled: boolean
   autoMarkNotificationsRead: boolean
   checkUnreadNotifications: boolean
+  checkUnreadNotificationsTitle: boolean
+  checkUnreadNotificationsFavicon: boolean
+  checkUnreadNotificationsUtags: boolean
   replyTimeColor: boolean
   postListSort: boolean
   rememberSortMode: boolean
@@ -38,6 +41,9 @@ const DEFAULT_SETTINGS: Settings = {
   enabled: true,
   autoMarkNotificationsRead: true,
   checkUnreadNotifications: true,
+  checkUnreadNotificationsTitle: true,
+  checkUnreadNotificationsFavicon: true,
+  checkUnreadNotificationsUtags: true,
   replyTimeColor: true,
   postListSort: true,
   rememberSortMode: false,
@@ -53,6 +59,12 @@ const store = createSettingsStore('settings', DEFAULT_SETTINGS)
 let enabled = DEFAULT_SETTINGS.enabled
 let autoMarkNotificationsRead = DEFAULT_SETTINGS.autoMarkNotificationsRead
 let checkUnreadNotifications = DEFAULT_SETTINGS.checkUnreadNotifications
+let checkUnreadNotificationsTitle =
+  DEFAULT_SETTINGS.checkUnreadNotificationsTitle
+let checkUnreadNotificationsFavicon =
+  DEFAULT_SETTINGS.checkUnreadNotificationsFavicon
+let checkUnreadNotificationsUtags =
+  DEFAULT_SETTINGS.checkUnreadNotificationsUtags
 let replyTimeColor = DEFAULT_SETTINGS.replyTimeColor
 let postListSort = DEFAULT_SETTINGS.postListSort
 let rememberSortMode = DEFAULT_SETTINGS.rememberSortMode
@@ -65,16 +77,6 @@ let hideSidebarCheckin = DEFAULT_SETTINGS.hideSidebarCheckin
 function buildSettingsSchema(): PanelSchema {
   const generalFields: Field[] = [
     { type: 'toggle', key: 'enabled', label: '启用' },
-    {
-      type: 'toggle',
-      key: 'autoMarkNotificationsRead',
-      label: '自动将通知页设为已读',
-    },
-    {
-      type: 'toggle',
-      key: 'checkUnreadNotifications',
-      label: '定时检查未读通知',
-    },
     {
       type: 'toggle',
       key: 'replyTimeColor',
@@ -97,6 +99,34 @@ function buildSettingsSchema(): PanelSchema {
     },
   ]
 
+  const notificationFields: Field[] = [
+    {
+      type: 'toggle',
+      key: 'autoMarkNotificationsRead',
+      label: '自动将通知页设为已读',
+    },
+    {
+      type: 'toggle',
+      key: 'checkUnreadNotifications',
+      label: '定时检查未读通知',
+    },
+    {
+      type: 'toggle',
+      key: 'checkUnreadNotificationsTitle',
+      label: '网页标题显示通知个数',
+    },
+    {
+      type: 'toggle',
+      key: 'checkUnreadNotificationsFavicon',
+      label: 'Favicon Badge 显示通知个数',
+    },
+    {
+      type: 'toggle',
+      key: 'checkUnreadNotificationsUtags',
+      label: 'UTags Shortcuts 显示通知个数',
+    },
+  ]
+
   const sidebarFields: Field[] = [
     { type: 'toggle', key: 'hideSidebarEmail', label: '隐藏邮箱' },
     { type: 'toggle', key: 'hideSidebarExperience', label: '隐藏经验值' },
@@ -109,6 +139,7 @@ function buildSettingsSchema(): PanelSchema {
     title: '2Libra Plus 设置',
     groups: [
       { id: 'general', title: '通用设置', fields: generalFields },
+      { id: 'notifications', title: '通知管理', fields: notificationFields },
       { id: 'sidebar', title: '右侧栏个人卡片设置', fields: sidebarFields },
     ],
   }
@@ -152,18 +183,25 @@ async function applySettingsFromStore(): Promise<void> {
     const prevEnabled = enabled
     const obj = await store.getAll<Settings>()
     enabled = Boolean(obj.enabled)
-    autoMarkNotificationsRead = Boolean(obj.autoMarkNotificationsRead)
-    checkUnreadNotifications = Boolean(obj.checkUnreadNotifications)
-    replyTimeColor = Boolean(obj.replyTimeColor)
-    postListSort = Boolean(obj.postListSort)
-    rememberSortMode = Boolean(obj.rememberSortMode)
-    stickyHeader = Boolean(obj.stickyHeader)
-    hideSidebarEmail = Boolean(obj.hideSidebarEmail)
-    hideSidebarExperience = Boolean(obj.hideSidebarExperience)
-    hideSidebarCoins = Boolean(obj.hideSidebarCoins)
-    hideSidebarCheckin = Boolean(obj.hideSidebarCheckin)
+    autoMarkNotificationsRead =
+      enabled && Boolean(obj.autoMarkNotificationsRead)
+    checkUnreadNotifications = enabled && Boolean(obj.checkUnreadNotifications)
+    checkUnreadNotificationsTitle =
+      enabled && Boolean(obj.checkUnreadNotificationsTitle)
+    checkUnreadNotificationsFavicon =
+      enabled && Boolean(obj.checkUnreadNotificationsFavicon)
+    checkUnreadNotificationsUtags =
+      enabled && Boolean(obj.checkUnreadNotificationsUtags)
+    replyTimeColor = enabled && Boolean(obj.replyTimeColor)
+    postListSort = enabled && Boolean(obj.postListSort)
+    rememberSortMode = enabled && Boolean(obj.rememberSortMode)
+    stickyHeader = enabled && Boolean(obj.stickyHeader)
+    hideSidebarEmail = enabled && Boolean(obj.hideSidebarEmail)
+    hideSidebarExperience = enabled && Boolean(obj.hideSidebarExperience)
+    hideSidebarCoins = enabled && Boolean(obj.hideSidebarCoins)
+    hideSidebarCheckin = enabled && Boolean(obj.hideSidebarCheckin)
 
-    if (!prevEnabled && enabled && !featuresInitialized) {
+    if (enabled && !featuresInitialized) {
       initFeatures()
     } else if (featuresInitialized) {
       runAutoMarkNotificationsRead(getSettingsSnapshot)
@@ -176,11 +214,14 @@ async function applySettingsFromStore(): Promise<void> {
   } catch {}
 }
 
-function getSettingsSnapshot(): Settings {
+export function getSettingsSnapshot(): Settings {
   return {
     enabled,
     autoMarkNotificationsRead,
     checkUnreadNotifications,
+    checkUnreadNotificationsTitle,
+    checkUnreadNotificationsFavicon,
+    checkUnreadNotificationsUtags,
     replyTimeColor,
     postListSort,
     rememberSortMode,
@@ -190,6 +231,10 @@ function getSettingsSnapshot(): Settings {
     hideSidebarCoins,
     hideSidebarCheckin,
   }
+}
+
+export function getSettings() {
+  return getSettingsSnapshot()
 }
 
 let featuresInitialized = false
@@ -214,9 +259,6 @@ function bootstrap(): void {
   registerMenus()
   listenSettings()
   void applySettingsFromStore()
-  if (enabled) {
-    initFeatures()
-  }
 }
 
 bootstrap()

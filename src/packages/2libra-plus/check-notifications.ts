@@ -9,11 +9,14 @@ import { debounce } from '../../utils/async'
 type SettingsSnapshot = {
   enabled: boolean
   checkUnreadNotifications: boolean
+  checkUnreadNotificationsTitle: boolean
+  checkUnreadNotificationsFavicon: boolean
+  checkUnreadNotificationsUtags: boolean
 }
 
 type GetSettings = () => SettingsSnapshot
 
-const CHECK_INTERVAL = 60 * 1000
+const CHECK_INTERVAL = 30 * 1000
 const LOCK_TIMEOUT = 20 * 1000
 const KEY_LOCK = 'check_lock'
 const KEY_LAST_CHECK = 'last_check'
@@ -24,7 +27,7 @@ let currentUnreadCount = 0
 let utagsHostObserver: MutationObserver | undefined
 let utagsShadowObserver: MutationObserver | undefined
 
-function startUtagsObserver(): void {
+function startUtagsObserver(getSettings: GetSettings): void {
   // Observer for Shadow Root changes
   const onShadowMutation: MutationCallback = (mutations) => {
     let shouldUpdate = false
@@ -36,7 +39,7 @@ function startUtagsObserver(): void {
     }
 
     if (shouldUpdate) {
-      updateUtagsShortcuts(currentUnreadCount)
+      updateUtagsShortcuts(currentUnreadCount, getSettings)
     }
   }
 
@@ -49,7 +52,7 @@ function startUtagsObserver(): void {
           node.dataset.ushortcutsHost === 'utags-shortcuts'
         ) {
           observeShadowRoot(node)
-          updateUtagsShortcuts(currentUnreadCount)
+          updateUtagsShortcuts(currentUnreadCount, getSettings)
         }
       }
     }
@@ -152,7 +155,7 @@ function updateFavicon(count: number): void {
 
     // Draw red circle
     ctx.beginPath()
-    ctx.arc(20, 12, 12, 0, 2 * Math.PI)
+    ctx.arc(20, 20, 12, 0, 2 * Math.PI)
     ctx.fillStyle = '#ff0000'
     ctx.fill()
 
@@ -162,7 +165,7 @@ function updateFavicon(count: number): void {
     ctx.fillStyle = '#ffffff'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(text, 20, 13)
+    ctx.fillText(text, 20, 21)
 
     if (link) {
       link.href = canvas.toDataURL('image/png')
@@ -174,19 +177,25 @@ function updateFavicon(count: number): void {
   img.src = originalFavicon
 }
 
-const updateUtagsShortcuts = debounce((count: number): void => {
-  const host = document.querySelector(
-    '[data-ushortcuts-host="utags-shortcuts"]'
-  )
-  if (!host || !host.shadowRoot) return
+const updateUtagsShortcuts = debounce(
+  (count: number, getSettings: GetSettings): void => {
+    const settings = getSettings()
+    const displayCount = settings.checkUnreadNotificationsUtags ? count : 0
 
-  const links = host.shadowRoot.querySelectorAll('a')
-  for (const link of links) {
-    try {
-      updateUtagsShortcutsLink(link, count)
-    } catch {}
-  }
-}, 200)
+    const host = document.querySelector(
+      '[data-ushortcuts-host="utags-shortcuts"]'
+    )
+    if (!host || !host.shadowRoot) return
+
+    const links = host.shadowRoot.querySelectorAll('a')
+    for (const link of links) {
+      try {
+        updateUtagsShortcutsLink(link, displayCount)
+      } catch {}
+    }
+  },
+  200
+)
 
 function updateUtagsShortcutsLink(
   link: HTMLAnchorElement,
@@ -235,7 +244,6 @@ function updateUtagsShortcutsLink(
 function updateUI(count: number, getSettings: GetSettings): void {
   currentUnreadCount = count
   const settings = getSettings()
-  if (!settings.enabled || !settings.checkUnreadNotifications) return
 
   const element = document.querySelector(
     '[data-right-sidebar="true"] .card-body a[href="/notifications"] > div'
@@ -245,12 +253,18 @@ function updateUI(count: number, getSettings: GetSettings): void {
     element.className = count > 0 ? 'text-primary' : ''
   }
 
-  updateFavicon(count)
-  updateUtagsShortcuts(count)
+  if (settings.checkUnreadNotificationsFavicon) {
+    updateFavicon(count)
+  } else if (originalFavicon) {
+    // Restore original favicon if setting is disabled
+    updateFavicon(0)
+  }
+
+  updateUtagsShortcuts(count, getSettings)
 
   const title = document.title
   const prefixRegex = /^\(\d+\) /
-  if (count > 0) {
+  if (settings.checkUnreadNotificationsTitle && count > 0) {
     const newPrefix = `(${count}) `
     document.title = prefixRegex.test(title)
       ? title.replace(prefixRegex, newPrefix)
@@ -296,7 +310,7 @@ export function initCheckNotifications(getSettings: GetSettings): void {
   if (initialized) return
   initialized = true
 
-  startUtagsObserver()
+  startUtagsObserver(getSettings)
 
   // Listen for changes
   void addValueChangeListener(KEY_UNREAD_COUNT, (_key, _old, newValue) => {

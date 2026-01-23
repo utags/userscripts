@@ -99,7 +99,6 @@ function applyHideActions(
 
 function applySidebarHidden(getSettings: GetSettings): void {
   const settings = getSettings()
-  if (!settings.enabled) return
 
   const cardBody = document.querySelector<HTMLElement>(
     '[data-right-sidebar="true"] .card-body'
