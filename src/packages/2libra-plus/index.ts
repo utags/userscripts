@@ -11,6 +11,10 @@ import {
   initAutoMarkNotificationsRead,
   runAutoMarkNotificationsRead,
 } from './auto-mark-notifications-read'
+import {
+  initCheckNotifications,
+  runCheckNotifications,
+} from './check-notifications'
 import { initPostListSort, runPostListSort } from './post-list-sort'
 import { initReplyTimeColor, runReplyTimeColor } from './reply-time-color'
 import { initSidebarHidden, runSidebarHidden } from './sidebar-hidden'
@@ -19,6 +23,7 @@ import { initStickyHeader, runStickyHeader } from './sticky-header'
 type Settings = {
   enabled: boolean
   autoMarkNotificationsRead: boolean
+  checkUnreadNotifications: boolean
   replyTimeColor: boolean
   postListSort: boolean
   rememberSortMode: boolean
@@ -32,6 +37,7 @@ type Settings = {
 const DEFAULT_SETTINGS: Settings = {
   enabled: true,
   autoMarkNotificationsRead: true,
+  checkUnreadNotifications: true,
   replyTimeColor: true,
   postListSort: true,
   rememberSortMode: false,
@@ -46,6 +52,7 @@ const store = createSettingsStore('settings', DEFAULT_SETTINGS)
 
 let enabled = DEFAULT_SETTINGS.enabled
 let autoMarkNotificationsRead = DEFAULT_SETTINGS.autoMarkNotificationsRead
+let checkUnreadNotifications = DEFAULT_SETTINGS.checkUnreadNotifications
 let replyTimeColor = DEFAULT_SETTINGS.replyTimeColor
 let postListSort = DEFAULT_SETTINGS.postListSort
 let rememberSortMode = DEFAULT_SETTINGS.rememberSortMode
@@ -62,6 +69,11 @@ function buildSettingsSchema(): PanelSchema {
       type: 'toggle',
       key: 'autoMarkNotificationsRead',
       label: '自动将通知页设为已读',
+    },
+    {
+      type: 'toggle',
+      key: 'checkUnreadNotifications',
+      label: '定时检查未读通知',
     },
     {
       type: 'toggle',
@@ -141,6 +153,7 @@ async function applySettingsFromStore(): Promise<void> {
     const obj = await store.getAll<Settings>()
     enabled = Boolean(obj.enabled)
     autoMarkNotificationsRead = Boolean(obj.autoMarkNotificationsRead)
+    checkUnreadNotifications = Boolean(obj.checkUnreadNotifications)
     replyTimeColor = Boolean(obj.replyTimeColor)
     postListSort = Boolean(obj.postListSort)
     rememberSortMode = Boolean(obj.rememberSortMode)
@@ -154,6 +167,7 @@ async function applySettingsFromStore(): Promise<void> {
       initFeatures()
     } else if (featuresInitialized) {
       runAutoMarkNotificationsRead(getSettingsSnapshot)
+      runCheckNotifications(getSettingsSnapshot)
       runReplyTimeColor(getSettingsSnapshot)
       runPostListSort(getSettingsSnapshot)
       runStickyHeader(getSettingsSnapshot)
@@ -166,6 +180,7 @@ function getSettingsSnapshot(): Settings {
   return {
     enabled,
     autoMarkNotificationsRead,
+    checkUnreadNotifications,
     replyTimeColor,
     postListSort,
     rememberSortMode,
@@ -183,6 +198,7 @@ function initFeatures(): void {
   if (featuresInitialized) return
   featuresInitialized = true
   initAutoMarkNotificationsRead(getSettingsSnapshot)
+  initCheckNotifications(getSettingsSnapshot)
   initReplyTimeColor(getSettingsSnapshot)
   initPostListSort(getSettingsSnapshot)
   initStickyHeader(getSettingsSnapshot)

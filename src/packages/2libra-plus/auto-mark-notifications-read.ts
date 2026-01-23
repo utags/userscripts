@@ -1,8 +1,10 @@
 import { onDomChange, onUrlChange } from '../../utils/dom-watcher'
+import { check as checkUnreadCount } from './check-notifications'
 
 type SettingsSnapshot = {
   enabled: boolean
   autoMarkNotificationsRead: boolean
+  checkUnreadNotifications: boolean
 }
 
 type GetSettings = () => SettingsSnapshot
@@ -53,6 +55,25 @@ function tryClickMarkButton(getSettings: GetSettings): void {
   btn.click()
 }
 
+function bindMarkReadButton(getSettings: GetSettings): void {
+  const settings = getSettings()
+  if (!settings.enabled) return
+  if (!isNotificationsPage()) return
+
+  const btn = document.querySelector<HTMLButtonElement>(
+    'div[data-main-left] button.btn-primary:not(.btn-disabled)'
+  )
+  if (!btn) return
+  if (btn.dataset.listenClick === '1') return
+
+  btn.dataset.listenClick = '1'
+  btn.addEventListener('click', () => {
+    setTimeout(() => {
+      void checkUnreadCount(getSettings, true)
+    }, 1000)
+  })
+}
+
 function scheduleClick(getSettings: GetSettings): void {
   if (clickTimer !== undefined) {
     globalThis.clearTimeout(clickTimer)
@@ -73,6 +94,7 @@ export function initAutoMarkNotificationsRead(getSettings: GetSettings): void {
   initialized = true
 
   const check = () => {
+    bindMarkReadButton(getSettings)
     scheduleClick(getSettings)
   }
 
