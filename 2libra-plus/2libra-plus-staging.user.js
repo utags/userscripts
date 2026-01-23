@@ -3,7 +3,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.3.1
+// @version              0.3.2
 // @description          2Libra.com 增强工具
 // @icon                 https://2libra.com/favicon.ico
 // @author               Pipecraft
@@ -1317,7 +1317,6 @@
   function updateFavicon(count) {
     const links = document.querySelectorAll('link[rel~="icon"]')
     let link = links[0]
-    link.type = 'image/png'
     if (links.length > 1) {
       for (let i = 1; i < links.length; i++) {
         links[i].remove()
@@ -1328,6 +1327,11 @@
       link.rel = 'icon'
       document.head.append(link)
     }
+    if (link.dataset.count === count.toString()) {
+      return
+    }
+    link.type = 'image/png'
+    link.dataset.count = count.toString()
     if (originalFavicon === void 0) {
       originalFavicon = '/favicon.ico'
     }
@@ -1347,7 +1351,7 @@
       ctx.clearRect(0, 0, 32, 32)
       ctx.drawImage(img, 0, 0, 32, 32)
       ctx.beginPath()
-      ctx.arc(20, 20, 12, 0, 2 * Math.PI)
+      ctx.arc(22, 22, 10, 0, 2 * Math.PI)
       ctx.fillStyle = '#ff0000'
       ctx.fill()
       const text = count > 99 ? '99+' : count.toString()
@@ -1355,7 +1359,7 @@
       ctx.fillStyle = '#ffffff'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(text, 20, 21)
+      ctx.fillText(text, 22, 23)
       if (link) {
         link.href = canvas.toDataURL('image/png')
         document.head.append(link)
@@ -1387,7 +1391,9 @@
       if (!textSpan.dataset.originalText) {
         textSpan.dataset.originalText = textSpan.textContent || '\u901A\u77E5'
       }
-      const newText = '\u901A\u77E5 ('.concat(count, ' \u6761\u6D88\u606F)')
+      const newText = ''
+        .concat(textSpan.dataset.originalText, ' (')
+        .concat(count, ' \u6761\u672A\u8BFB)')
       if (textSpan.textContent !== newText) {
         textSpan.textContent = newText
       }
@@ -1417,8 +1423,14 @@
       '[data-right-sidebar="true"] .card-body a[href="/notifications"] > div'
     )
     if (element) {
-      element.textContent = ''.concat(count, ' \u6761\u6D88\u606F')
-      element.className = count > 0 ? 'text-primary' : ''
+      const newText = ''.concat(count, ' \u6761\u6D88\u606F')
+      const className = count > 0 ? 'text-primary' : ''
+      if (element.textContent !== newText) {
+        element.textContent = newText
+      }
+      if (element.className !== className) {
+        element.className = className
+      }
     }
     if (settings.checkUnreadNotificationsFavicon) {
       updateFavicon(count)
@@ -1428,13 +1440,17 @@
     updateUtagsShortcuts(count, getSettings2)
     const title = document.title
     const prefixRegex = /^\(\d+\) /
+    let newTitle = title
     if (settings.checkUnreadNotificationsTitle && count > 0) {
       const newPrefix = '('.concat(count, ') ')
-      document.title = prefixRegex.test(title)
+      newTitle = prefixRegex.test(title)
         ? title.replace(prefixRegex, newPrefix)
         : newPrefix + title
     } else {
-      document.title = title.replace(prefixRegex, '')
+      newTitle = title.replace(prefixRegex, '')
+    }
+    if (newTitle !== title) {
+      document.title = newTitle
     }
   }
   async function check(getSettings2, force = false) {

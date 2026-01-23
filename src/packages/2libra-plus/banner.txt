@@ -3,7 +3,7 @@
 // @namespace            {namespace}
 // @homepageURL          {homepage}
 // @supportURL           {bugs.url}
-// @version              0.3.1
+// @version              0.3.2
 // @description          2Libra.com 增强工具
 // @icon                 https://2libra.com/favicon.ico
 // @author               {author}

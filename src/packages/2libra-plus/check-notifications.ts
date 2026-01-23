@@ -115,7 +115,6 @@ let originalFavicon: string | undefined
 function updateFavicon(count: number): void {
   const links = document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]')
   let link = links[0]
-  link.type = 'image/png'
 
   // Remove other icon links to prevent conflicts
   if (links.length > 1) {
@@ -129,6 +128,13 @@ function updateFavicon(count: number): void {
     link.rel = 'icon'
     document.head.append(link)
   }
+
+  if (link.dataset.count === count.toString()) {
+    return
+  }
+
+  link.type = 'image/png'
+  link.dataset.count = count.toString()
 
   if (originalFavicon === undefined) {
     originalFavicon = '/favicon.ico'
@@ -155,7 +161,7 @@ function updateFavicon(count: number): void {
 
     // Draw red circle
     ctx.beginPath()
-    ctx.arc(20, 20, 12, 0, 2 * Math.PI)
+    ctx.arc(22, 22, 10, 0, 2 * Math.PI)
     ctx.fillStyle = '#ff0000'
     ctx.fill()
 
@@ -165,7 +171,7 @@ function updateFavicon(count: number): void {
     ctx.fillStyle = '#ffffff'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(text, 20, 21)
+    ctx.fillText(text, 22, 23)
 
     if (link) {
       link.href = canvas.toDataURL('image/png')
@@ -213,7 +219,7 @@ function updateUtagsShortcutsLink(
       textSpan.dataset.originalText = textSpan.textContent || '通知'
     }
 
-    const newText = `通知 (${count} 条消息)`
+    const newText = `${textSpan.dataset.originalText} (${count} 条未读)`
     if (textSpan.textContent !== newText) {
       textSpan.textContent = newText
     }
@@ -249,8 +255,15 @@ function updateUI(count: number, getSettings: GetSettings): void {
     '[data-right-sidebar="true"] .card-body a[href="/notifications"] > div'
   )
   if (element) {
-    element.textContent = `${count} 条消息`
-    element.className = count > 0 ? 'text-primary' : ''
+    const newText = `${count} 条消息`
+    const className = count > 0 ? 'text-primary' : ''
+    if (element.textContent !== newText) {
+      element.textContent = newText
+    }
+
+    if (element.className !== className) {
+      element.className = className
+    }
   }
 
   if (settings.checkUnreadNotificationsFavicon) {
@@ -264,13 +277,18 @@ function updateUI(count: number, getSettings: GetSettings): void {
 
   const title = document.title
   const prefixRegex = /^\(\d+\) /
+  let newTitle = title
   if (settings.checkUnreadNotificationsTitle && count > 0) {
     const newPrefix = `(${count}) `
-    document.title = prefixRegex.test(title)
+    newTitle = prefixRegex.test(title)
       ? title.replace(prefixRegex, newPrefix)
       : newPrefix + title
   } else {
-    document.title = title.replace(prefixRegex, '')
+    newTitle = title.replace(prefixRegex, '')
+  }
+
+  if (newTitle !== title) {
+    document.title = newTitle
   }
 }
 
