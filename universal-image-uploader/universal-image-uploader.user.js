@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.13.2
+// @version              0.13.3
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -1307,7 +1307,7 @@
     }
   }
   function applySingle(cfg) {
-    var _a, _b
+    var _a, _b, _c
     if (!(cfg == null ? void 0 : cfg.selector)) return
     let targets
     try {
@@ -1322,22 +1322,40 @@
     const content = (cfg.text || t('insert_image_button_default')).trim()
     for (const t2 of Array.from(targets)) {
       const target = t2
-      const exists =
-        pos === 'inside'
-          ? Boolean(target.querySelector('.uiu-insert-btn'))
-          : pos === 'before'
-            ? Boolean(
-                target.previousElementSibling &&
-                ((_a = target.previousElementSibling.classList) == null
+      let exists = false
+      if (pos === 'inside') {
+        exists = Boolean(target.querySelector('.uiu-insert-btn'))
+      } else {
+        const prev = target.previousElementSibling
+        const next = target.nextElementSibling
+        if (
+          (prev &&
+            ((_a = prev.classList) == null
+              ? void 0
+              : _a.contains('uiu-insert-btn'))) ||
+          (next &&
+            ((_b = next.classList) == null
+              ? void 0
+              : _b.contains('uiu-insert-btn')))
+        ) {
+          exists = true
+        } else {
+          const parent = target.parentElement
+          if (parent) {
+            for (const child of Array.from(parent.children)) {
+              if (child === target) continue
+              if (
+                (_c = child.classList) == null
                   ? void 0
-                  : _a.contains('uiu-insert-btn'))
-              )
-            : Boolean(
-                target.nextElementSibling &&
-                ((_b = target.nextElementSibling.classList) == null
-                  ? void 0
-                  : _b.contains('uiu-insert-btn'))
-              )
+                  : _c.contains('uiu-insert-btn')
+              ) {
+                exists = true
+                break
+              }
+            }
+          }
+        }
+      }
       if (exists) continue
       let btn
       try {

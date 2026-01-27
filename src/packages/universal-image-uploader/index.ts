@@ -433,22 +433,33 @@ function applySingle(cfg: any) {
   const content = (cfg.text || t('insert_image_button_default')).trim()
   for (const t of Array.from(targets)) {
     const target = t as HTMLElement
-    const exists =
-      pos === 'inside'
-        ? Boolean(target.querySelector('.uiu-insert-btn'))
-        : pos === 'before'
-          ? Boolean(
-              target.previousElementSibling &&
-              target.previousElementSibling.classList?.contains(
-                'uiu-insert-btn'
-              )
-            )
-          : Boolean(
-              target.nextElementSibling &&
-              target.nextElementSibling.classList?.contains('uiu-insert-btn')
-            )
+    let exists = false
+    if (pos === 'inside') {
+      exists = Boolean(target.querySelector('.uiu-insert-btn'))
+    } else {
+      const prev = target.previousElementSibling
+      const next = target.nextElementSibling
+      if (
+        (prev && prev.classList?.contains('uiu-insert-btn')) ||
+        (next && next.classList?.contains('uiu-insert-btn'))
+      ) {
+        exists = true
+      } else {
+        const parent = target.parentElement
+        if (parent) {
+          for (const child of Array.from(parent.children)) {
+            if (child === target) continue
+            if (child.classList?.contains('uiu-insert-btn')) {
+              exists = true
+              break
+            }
+          }
+        }
+      }
+    }
+
     if (exists) continue
-    let btn
+    let btn: HTMLElement | undefined
     try {
       // Parse HTML without using innerHTML to comply with Trusted Types
       const range = document.createRange()
@@ -466,7 +477,7 @@ function applySingle(cfg: any) {
       btn = createEl('button', {
         class: 'uiu-insert-btn uiu-default',
         text: content,
-      })
+      }) as HTMLElement
     }
 
     btn.addEventListener('click', handleSiteButtonClick)

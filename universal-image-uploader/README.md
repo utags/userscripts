@@ -84,6 +84,7 @@ Install one of the following user script managers:
 
 ### v0.13.x
 
+- **Fix**: Optimized site button detection logic to prevent duplicate insertions when the page DOM changes (e.g., dynamic toolbar updates).
 - **Multi-host support**:
   - Added ability to upload to a secondary host concurrently.
   - Implemented proxy chain fallback: uses primary host by default, falls back to secondary host if primary fails or via proxy chain.
