@@ -1,5 +1,8 @@
 import { onDomChange, onUrlChange } from '../../utils/dom-watcher'
-import { check as checkUnreadCount } from './check-notifications'
+import {
+  check as checkUnreadCount,
+  setUnreadCount,
+} from './check-notifications'
 
 type SettingsSnapshot = {
   enabled: boolean
@@ -71,6 +74,7 @@ function bindMarkReadButton(getSettings: GetSettings): void {
 
   btn.dataset.listenClick = '1'
   btn.addEventListener('click', () => {
+    void setUnreadCount(0)
     setTimeout(() => {
       void checkUnreadCount(getSettings, true)
     }, 1000)

@@ -3,7 +3,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.3.2
+// @version              0.3.3
 // @description          2Libra.com 增强工具
 // @icon                 https://2libra.com/favicon.ico
 // @author               Pipecraft
@@ -1248,6 +1248,9 @@
   var KEY_LOCK = 'check_lock'
   var KEY_LAST_CHECK = 'last_check'
   var KEY_UNREAD_COUNT = 'unread_count'
+  async function setUnreadCount(count) {
+    return setValue(KEY_UNREAD_COUNT, count)
+  }
   var initialized = false
   var currentUnreadCount = 0
   var utagsHostObserver
@@ -1556,6 +1559,7 @@
     if (btn.dataset.listenClick === '1') return
     btn.dataset.listenClick = '1'
     btn.addEventListener('click', () => {
+      void setUnreadCount(0)
       setTimeout(() => {
         void check(getSettings2, true)
       }, 1e3)

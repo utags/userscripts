@@ -22,6 +22,10 @@ const KEY_LOCK = 'check_lock'
 const KEY_LAST_CHECK = 'last_check'
 const KEY_UNREAD_COUNT = 'unread_count'
 
+export async function setUnreadCount(count: number): Promise<void> {
+  return setValue(KEY_UNREAD_COUNT, count)
+}
+
 let initialized = false
 let currentUnreadCount = 0
 let utagsHostObserver: MutationObserver | undefined
