@@ -1494,10 +1494,12 @@ function handleSiteButtonClick(event: Event) {
   event.preventDefault()
   try {
     lastEditableFrame = globalThis as unknown as Window
-    const target = event.currentTarget
-    if (target instanceof HTMLElement) {
-      const nearest = findNearestEditableElement(target)
-      if (nearest) lastEditableEl = nearest
+    if (!lastEditableEl) {
+      const target = event.currentTarget
+      if (target instanceof HTMLElement) {
+        const nearest = findNearestEditableElement(target)
+        if (nearest) lastEditableEl = nearest
+      }
     }
 
     requestOpenFilePicker()
@@ -2404,7 +2406,7 @@ async function createPanel(): Promise<
             : undefined
         )
         const out = await formatText(proxied, item.file.name, fmt)
-        if (item.placeholder && item.targetEl) {
+        if (item.placeholder && item.targetEl && !item.targetFrame) {
           const ok = replacePlaceholder(
             item.targetEl,
             item.placeholder,
@@ -2444,7 +2446,7 @@ async function createPanel(): Promise<
 
         await addToHistory(historyEntry)
       } catch (error) {
-        if (item.placeholder && item.targetEl) {
+        if (item.placeholder && item.targetEl && !item.targetFrame) {
           const failNote = `<!-- ${tpl(t('placeholder_upload_failed'), { name: item.file.name })} -->`
           try {
             replacePlaceholder(item.targetEl, item.placeholder, failNote)

@@ -5,7 +5,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.13.3
+// @version              0.13.4
 // @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
 // @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
 // @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
@@ -2218,10 +2218,12 @@
     event.preventDefault()
     try {
       lastEditableFrame = globalThis
-      const target = event.currentTarget
-      if (target instanceof HTMLElement) {
-        const nearest = findNearestEditableElement(target)
-        if (nearest) lastEditableEl = nearest
+      if (!lastEditableEl) {
+        const target = event.currentTarget
+        if (target instanceof HTMLElement) {
+          const nearest = findNearestEditableElement(target)
+          if (nearest) lastEditableEl = nearest
+        }
       }
       requestOpenFilePicker()
     } catch (e) {}
@@ -3047,7 +3049,7 @@
               : void 0
           )
           const out = await formatText(proxied, item.file.name, fmt)
-          if (item.placeholder && item.targetEl) {
+          if (item.placeholder && item.targetEl && !item.targetFrame) {
             const ok = replacePlaceholder(
               item.targetEl,
               item.placeholder,
@@ -3085,7 +3087,7 @@
           }
           await addToHistory(historyEntry)
         } catch (error) {
-          if (item.placeholder && item.targetEl) {
+          if (item.placeholder && item.targetEl && !item.targetFrame) {
             const failNote = '<!-- '.concat(
               tpl(t('placeholder_upload_failed'), { name: item.file.name }),
               ' -->'
