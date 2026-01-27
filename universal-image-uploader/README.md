@@ -28,19 +28,11 @@ A user script that lets you paste, drag, or select images and batch-upload them 
 
 ## Installation
 
-### Prerequisites
-
-Install one of the following user script managers:
-
-- [Tampermonkey](https://www.tampermonkey.net/)
-- [Violentmonkey](https://violentmonkey.github.io/)
-- [ScriptCat](https://scriptcat.org/)
-
-### Install Script
-
-1. [Click here to install the script from GitHub](https://github.com/utags/userscripts/raw/main/universal-image-uploader/universal-image-uploader.user.js)
-2. [Click here to install the script from Greasy Fork](https://greasyfork.org/scripts/553341-universal-image-uploader)
-3. [Click here to install the script from ScriptCat](https://scriptcat.org/script-show-page/4467)
+- Requires a user script manager:
+  - [Tampermonkey](https://www.tampermonkey.net/)
+  - [Violentmonkey](https://violentmonkey.github.io/)
+  - [ScriptCat](https://scriptcat.org/)
+- **Install from**: [Greasy Fork](https://greasyfork.org/scripts/553341-universal-image-uploader) · [ScriptCat](https://scriptcat.org/script-show-page/4467) · [GitHub](https://github.com/utags/userscripts/raw/main/universal-image-uploader/universal-image-uploader.user.js)
 
 ## Usage
 
@@ -184,7 +176,7 @@ Install one of the following user script managers:
 
 ### 🏷️ UTags - Add User Tags to Links
 
-- **Link**: [Greasy Fork](https://greasyfork.org/scripts/460718-utags-add-usertags-to-links)
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/460718-utags-add-usertags-to-links) · [ScriptCat](https://scriptcat.org/script-show-page/2784) · [GitHub](https://github.com/utags/utags/raw/main/packages/extension/build/userscript-prod/utags.user.js)
 - **Features**: Add custom tags and notes to user, post, video and other links
 - **Highlights**: Support special tag filtering (like spam, block, clickbait, etc.), data export/import, auto-mark viewed posts
 - **Supported Sites**: V2EX, X(Twitter), Reddit, GitHub, Bilibili, Zhihu, Linux.do, Youtube and 50+ websites
@@ -192,7 +184,7 @@ Install one of the following user script managers:
 
 ### 🧰 UTags Advanced Filter
 
-- **Link**: [Greasy Fork](https://greasyfork.org/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/en/script-show-page/4653) · [GitHub](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/556095-utags-advanced-filter) · [ScriptCat](https://scriptcat.org/script-show-page/4653) · [GitHub](https://github.com/utags/utags-advanced-filter/raw/refs/heads/main/build/userscript-prod/utags-advanced-filter.user.js)
 - **Features**: Real-time filtering and hiding of scripts on GreasyFork
 - **Highlights**: Available as both a userscript and a browser extension
 - **Supported Sites**: Greasy Fork
@@ -208,7 +200,7 @@ Install one of the following user script managers:
 
 ### 🔗 Links Helper
 
-- **Link**: [Greasy Fork](https://greasyfork.org/scripts/464541-links-helper)
+- **Link**: [Greasy Fork](https://greasyfork.org/scripts/464541-links-helper) · [ScriptCat](https://scriptcat.org/script-show-page/4486) · [GitHub](https://github.com/utags/links-helper/raw/refs/heads/main/build/userscript-prod/links-helper.user.js)
 - **Features**: Open third-party website links in new tabs, parse text links into hyperlinks
 - **Highlights**: Support custom rules, parse Markdown and BBCode formats, convert image links to image tags
 - **Supported Sites**: Universal for all websites, including Google, YouTube, GitHub, V2EX, etc.
