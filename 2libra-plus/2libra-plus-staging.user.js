@@ -3,7 +3,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.3.3
+// @version              0.3.5
 // @description          2Libra.com 增强工具
 // @icon                 https://2libra.com/favicon.ico
 // @author               Pipecraft
@@ -1317,12 +1317,28 @@
     return void 0
   }
   var originalFavicon
+  var lastGeneratedFavicon
+  var faviconObserver
   function updateFavicon(count) {
-    const links = document.querySelectorAll('link[rel~="icon"]')
+    const links = Array.from(document.querySelectorAll('link[rel~="icon"]'))
+    const freshLinks = links.filter(
+      (l) =>
+        l.href !== lastGeneratedFavicon &&
+        l.dataset.count === void 0 &&
+        l.getAttribute('href')
+    )
+    if (freshLinks.length > 0) {
+      originalFavicon = freshLinks[freshLinks.length - 1].href
+    } else if (originalFavicon === void 0) {
+      originalFavicon = '/favicon.ico'
+    }
     let link = links[0]
     if (links.length > 1) {
       for (let i = 1; i < links.length; i++) {
-        links[i].remove()
+        const l = links[i]
+        l.removeAttribute('href')
+        l.removeAttribute('rel')
+        delete l.dataset.count
       }
     }
     if (!link) {
@@ -1330,19 +1346,22 @@
       link.rel = 'icon'
       document.head.append(link)
     }
-    if (link.dataset.count === count.toString()) {
+    if (count === 0) {
+      if (link.href !== originalFavicon) {
+        link.href = originalFavicon
+        link.dataset.count = ''
+        lastGeneratedFavicon = void 0
+      }
+      return
+    }
+    if (
+      link.dataset.count === count.toString() &&
+      link.href === lastGeneratedFavicon
+    ) {
       return
     }
     link.type = 'image/png'
     link.dataset.count = count.toString()
-    if (originalFavicon === void 0) {
-      originalFavicon = '/favicon.ico'
-    }
-    if (count === 0) {
-      link.href = originalFavicon
-      document.head.append(link)
-      return
-    }
     const canvas = document.createElement('canvas')
     canvas.width = 32
     canvas.height = 32
@@ -1364,11 +1383,49 @@
       ctx.textBaseline = 'middle'
       ctx.fillText(text, 22, 23)
       if (link) {
-        link.href = canvas.toDataURL('image/png')
-        document.head.append(link)
+        const dataUrl = canvas.toDataURL('image/png')
+        if (link.href === dataUrl) return
+        lastGeneratedFavicon = dataUrl
+        link.href = dataUrl
+        if (link.parentNode === document.head) {
+        }
       }
     })
+    img.addEventListener('error', () => {})
     img.src = originalFavicon
+  }
+  function startFaviconObserver() {
+    if (faviconObserver) return
+    faviconObserver = new MutationObserver((mutations) => {
+      let shouldUpdate = false
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList') {
+          for (const node of mutation.addedNodes) {
+            if (node instanceof HTMLLinkElement && node.rel.includes('icon')) {
+              if (node.href === lastGeneratedFavicon) continue
+              shouldUpdate = true
+            }
+          }
+        } else if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'href'
+        ) {
+          const target = mutation.target
+          if (target.rel && target.rel.includes('icon')) {
+            if (target.href === lastGeneratedFavicon) continue
+            shouldUpdate = true
+          }
+        }
+      }
+      if (shouldUpdate) {
+        updateFavicon(currentUnreadCount)
+      }
+    })
+    faviconObserver.observe(document.head, {
+      childList: true,
+      attributes: true,
+      attributeFilter: ['href'],
+    })
   }
   var updateUtagsShortcuts = debounce((count, getSettings2) => {
     const settings = getSettings2()
@@ -1435,11 +1492,8 @@
         element.className = className
       }
     }
-    if (settings.checkUnreadNotificationsFavicon) {
-      updateFavicon(count)
-    } else if (originalFavicon) {
-      updateFavicon(0)
-    }
+    const faviconCount = settings.checkUnreadNotificationsFavicon ? count : 0
+    updateFavicon(faviconCount)
     updateUtagsShortcuts(count, getSettings2)
     const title = document.title
     const prefixRegex = /^\(\d+\) /
@@ -1483,6 +1537,7 @@
     if (initialized) return
     initialized = true
     startUtagsObserver(getSettings2)
+    startFaviconObserver()
     void addValueChangeListener(KEY_UNREAD_COUNT, (_key, _old, newValue) => {
       if (typeof newValue === 'number') {
         updateUI(newValue, getSettings2)
