@@ -248,9 +248,11 @@ function startFaviconObserver() {
       if (mutation.type === 'childList') {
         // Check if any added node is a link icon
         for (const node of mutation.addedNodes) {
-          if (node instanceof HTMLLinkElement && node.rel.includes('icon')) {
-            // Ignore if it's the one we just generated
-            if (node.href === lastGeneratedFavicon) continue
+          if (
+            node instanceof HTMLLinkElement &&
+            node.rel.includes('icon') &&
+            node.href !== lastGeneratedFavicon
+          ) {
             shouldUpdate = true
           }
         }
