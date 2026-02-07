@@ -168,18 +168,20 @@ function updateFavicon(count: number): void {
     if (link.href !== originalFavicon) {
       link.href = originalFavicon!
       link.dataset.count = '' // Clear count
-      lastGeneratedFavicon = undefined // Reset generated
     }
 
+    lastGeneratedFavicon = link.href // Update generated to current to prevent loop
+    document.head.append(link)
     return
   }
 
   // If count > 0, check if we need to update
-  // If the link is already showing what we want, skip
+  // If the link is already showing what we want, skip but append
   if (
     link.dataset.count === count.toString() &&
     link.href === lastGeneratedFavicon
   ) {
+    document.head.append(link)
     return
   }
 
@@ -215,18 +217,12 @@ function updateFavicon(count: number): void {
     if (link) {
       const dataUrl = canvas.toDataURL('image/png')
       // Check again to prevent loop if something changed during load
-      if (link.href === dataUrl) return
+      // if (link.href === dataUrl) return
 
       lastGeneratedFavicon = dataUrl
       link.href = dataUrl
-      // Force update favicon by re-appending (some browsers need this)
-      // But re-appending triggers childList mutation.
-      // Since we check lastGeneratedFavicon, it should be fine.
-      if (link.parentNode === document.head) {
-        // Just moving it to the end is enough sometimes, or just href change is enough.
-        // Let's stick to href change. If user reports issues, we can re-append.
-        // document.head.append(link)
-      }
+      // Force update favicon by re-appending
+      document.head.append(link)
     }
   })
 
