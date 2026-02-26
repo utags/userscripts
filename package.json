@@ -30,6 +30,7 @@
     "browser-extension-settings": "^0.8.10",
     "browser-extension-storage": "^0.2.10",
     "browser-extension-utils": "^0.3.4",
+    "crypto-js": "^4.2.0",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {

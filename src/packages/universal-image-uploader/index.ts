@@ -39,6 +39,7 @@ import {
   ensureAllowedValue,
   getAllowedFormats,
   getCustomFormats,
+  md5Encode,
   normalizeHost,
   removeCustomFormat,
   setCustomFormats,
@@ -573,6 +574,94 @@ const buildFormatOptions = async (selectEl, selectedValue) => {
   }
 }
 
+var STARDOTS_CONFIG = { key: '', secret: '', bucket: '' }
+
+const injectStarDotsSettings = () => {
+  const hostEl = document.querySelector('#uiu-panel')
+  if (!hostEl) return
+  const shadowRoot = hostEl.shadowRoot
+  if (!shadowRoot) return
+  const container = shadowRoot.querySelectorAll('.uiu-body .uiu-controls')[1]
+  const wrapper = document.createElement('div')
+  wrapper.innerHTML = `
+  <div id="sd-configuration-section" style="width: 100%;border-top: 1px solid #F6C844;border-bottom: 1px solid #F6C844;padding: 8px 0px;">
+    <h3>${t('stardots_config_title')}</h3>
+    <label style="display: inline-block; width: 96%">${t('stardots_key_title')}</label>
+    <input style="display: inline-block; width: 96%" type="text" id="sd-api-key" placeholder="${t('stardots_key_placeholder')}" />
+
+    <label style="display: inline-block; width: 96%">${t('stardots_secret_title')}</label>
+    <input style="display: inline-block; width: 96%" type="password" id="sd-api-secret" placeholder="${t('stardots_secret_placeholder')}" />
+
+    <label style="display: inline-block; width: 96%">${t('stardots_bucket_title')}</label>
+    <input style="display: inline-block; width: 96%" type="text" id="sd-bucket" placeholder="${t('stardots_bucket_placeholder')}" />
+
+    <div style="width: 100%;">
+      <button id="sd-save-config" style="margin-top: 4px">${t('stardots_save_title')}</button>
+      <span id="sd-save-status" style="margin-left:8px;color: #00ff9f;"></span>
+      <a style="color: #F6C844;" href="https://dashboard.stardots.io/openapi/key-and-secret" target="_blank">${t('stardots_get_credentials_title')}</a>
+    </div>
+  </div>
+`
+  const scsEl = container.querySelector('#sd-configuration-section')
+  if (scsEl) {
+    scsEl.remove()
+  }
+
+  container.appendChild(wrapper)
+
+  loadStarDotsConfig()
+
+  shadowRoot
+    .getElementById('sd-save-config')
+    ?.addEventListener('click', async () => {
+      const key = (
+        shadowRoot.getElementById('sd-api-key') as HTMLInputElement
+      )?.value.trim()
+      const secret = (
+        shadowRoot.getElementById('sd-api-secret') as HTMLInputElement
+      )?.value.trim()
+      const bucket = (
+        shadowRoot.getElementById('sd-bucket') as HTMLInputElement
+      )?.value.trim()
+
+      const targetOrigin: string = '*'
+      window.postMessage(
+        {
+          type: 'uiu:stardots-save-config',
+          payload: { key, secret, bucket },
+        },
+        targetOrigin
+      )
+
+      const statusEl = shadowRoot.getElementById(
+        'sd-save-status'
+      ) as HTMLSpanElement
+      if (statusEl) {
+        statusEl.innerText = t('stardots_save_result_title')
+      }
+
+      setTimeout(() => {
+        if (statusEl) {
+          statusEl.innerText = ''
+        }
+        const configSection = shadowRoot.getElementById(
+          'sd-configuration-section'
+        ) as HTMLDivElement
+        if (configSection) {
+          configSection.style.display = 'none'
+        }
+      }, 2000)
+    })
+}
+var loadStarDotsConfig = async () => {
+  window.postMessage(
+    {
+      type: 'uiu:stardots-get-config',
+    },
+    '*'
+  )
+}
+
 // Helper: build host options
 const buildHostOptions = (selectEl, selectedValue) => {
   if (!selectEl) return
@@ -585,6 +674,14 @@ const buildHostOptions = (selectEl, selectedValue) => {
     const opt = createEl('option', { value: val, text: t('host_' + val) })
     if (val === selected) opt.selected = true
     selectEl.append(opt)
+  }
+  selectEl.onchange = (event: Event) => {
+    const selectedValue = (event.target as HTMLSelectElement)?.value.trim()
+    if (selectedValue === 'stardots') {
+      injectStarDotsSettings()
+    } else {
+      //TODO other logic
+    }
   }
 }
 
@@ -607,6 +704,14 @@ const buildSecondaryHostOptions = (
     const opt = createEl('option', { value: val, text: t('host_' + val) })
     if (val === selected) opt.selected = true
     selectEl.append(opt)
+  }
+  selectEl.onchange = (event: Event) => {
+    const selectedValue = (event.target as HTMLSelectElement)?.value.trim()
+    if (selectedValue === 'stardots') {
+      injectStarDotsSettings()
+    } else {
+      //TODO other logic
+    }
   }
 }
 
@@ -650,7 +755,7 @@ const css = `
   #uiu-panel .uiu-body { padding: 8px 12px; }
   #uiu-panel .uiu-controls { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }
   #uiu-panel .uiu-controls label { display:inline-flex; align-items:center; }
-  #uiu-panel select, #uiu-panel button { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; }
+  #uiu-panel select, #uiu-panel button, #uiu-panel input { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; }
   #uiu-panel button.uiu-primary { background:#2563eb; border-color:#1d4ed8; }
   #uiu-panel .uiu-list { margin-top:8px; max-height: 140px; overflow-y:auto; overflow-x:hidden; font-size: 12px; }
   #uiu-panel .uiu-list .uiu-item { padding:6px 0; border-bottom: 1px dashed #334155; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
@@ -1115,6 +1220,56 @@ async function uploadToTikolu(file) {
   throw new Error(t('error_upload_failed'))
 }
 
+const STARDOTS_ENDPOINT = 'https://api.stardots.io'
+async function uploadToStarDots(file) {
+  const apiKey = STARDOTS_CONFIG.key
+  const apiSecret = STARDOTS_CONFIG.secret
+  const bucket = STARDOTS_CONFIG.bucket
+
+  if (!apiKey || !apiSecret) {
+    alert(t('stardots_set_config_tips'))
+    throw new Error('Missing credentials')
+  }
+
+  const timestamp = parseInt((Date.now() / 1000).toString()).toString()
+  const nonce = `${Date.now()}${Math.random().toString(16)}`
+    .replace('.', '')
+    .slice(0, 20)
+
+  const stringToSign = `${timestamp}|${apiSecret}|${nonce}`
+  const signature = md5Encode(stringToSign).toUpperCase()
+
+  console.log(timestamp, nonce, stringToSign, signature)
+
+  const form = new FormData()
+  form.append('file', file)
+  form.append('filename', file.name)
+  form.append('space', bucket)
+
+  try {
+    const data = await gmRequest({
+      method: 'PUT',
+      url: `${STARDOTS_ENDPOINT}/openapi/file/upload`,
+      headers: {
+        'x-stardots-key': apiKey,
+        'x-stardots-nonce': nonce,
+        'x-stardots-timestamp': timestamp,
+        'x-stardots-sign': signature,
+        'x-stardots-assistant-version': 'upload-by-utags',
+      },
+      data: form,
+      responseType: 'json',
+    })
+    if (data.success) {
+      return data.data.url
+    }
+    throw new Error(`${data.message}(${data.requestId})`)
+  } catch (e) {
+    console.log('stardots upload error', e)
+    throw new Error(t('error_upload_failed'))
+  }
+}
+
 async function uploadImageToHost(file, host: string) {
   if (host === 'mock' || host === 'mock2') {
     await new Promise((resolve) => {
@@ -1138,6 +1293,7 @@ async function uploadImageToHost(file, host: string) {
   if (host === 'appinn') return uploadToAppinn(file)
   if (host === 'photo_lily') return uploadToPhotoLily(file)
   if (host === '111666_best') return uploadTo111666Best(file)
+  if (host === 'stardots') return uploadToStarDots(file)
   // Default
   return uploadToImgur(file)
 }
@@ -1541,7 +1697,7 @@ document.addEventListener(
 //   true
 // )
 
-globalThis.addEventListener('message', (event) => {
+globalThis.addEventListener('message', async (event) => {
   const type = event.data?.type
   switch (type) {
     case 'uiu:insert-placeholder': {
@@ -1562,6 +1718,47 @@ globalThis.addEventListener('message', (event) => {
     case 'uiu:insert-text': {
       const txt = String(event.data?.text || '')
       if (txt) insertIntoFocused(`\n${txt}\n`)
+      break
+    }
+
+    case 'uiu:stardots-save-config': {
+      const { key, secret, bucket } = event.data.payload
+      await setValue('stardots_key', key)
+      await setValue('stardots_secret', secret)
+      await setValue('stardots_bucket', bucket)
+      break
+    }
+    case 'uiu:stardots-get-config': {
+      const key = await getValue('stardots_key')
+      const secret = await getValue('stardots_secret')
+      const bucket = await getValue('stardots_bucket')
+      const hostEl = document.querySelector('#uiu-panel')
+      if (!hostEl) return
+      const shadowRoot = hostEl.shadowRoot
+      if (!shadowRoot) return
+      const keyInput = shadowRoot.getElementById(
+        'sd-api-key'
+      ) as HTMLInputElement
+      if (keyInput) {
+        keyInput.value = key ?? ''
+      }
+      const secretInput = shadowRoot.getElementById(
+        'sd-api-secret'
+      ) as HTMLInputElement
+      if (secretInput) {
+        secretInput.value = secret ?? ''
+      }
+      const bucketInput = shadowRoot.getElementById(
+        'sd-bucket'
+      ) as HTMLInputElement
+      if (bucketInput) {
+        bucketInput.value = bucket ?? ''
+      }
+      STARDOTS_CONFIG = {
+        key: key || '',
+        secret: secret || '',
+        bucket: bucket || '',
+      }
       break
     }
 
@@ -2264,7 +2461,7 @@ async function createPanel(): Promise<
     } catch {}
   })
 
-  globalThis.addEventListener('message', (event) => {
+  globalThis.addEventListener('message', async (event) => {
     const type = event.data?.type
     switch (type) {
       case 'iu:uploadFiles': {
@@ -2849,5 +3046,8 @@ async function createPanel(): Promise<
         }
       )
     }
+
+    //init while script loaded
+    loadStarDotsConfig()
   } catch {}
 })()
