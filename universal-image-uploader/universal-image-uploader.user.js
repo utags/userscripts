@@ -5,10 +5,10 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.13.4
-// @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
-// @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
-// @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
+// @version              0.14.0
+// @description          Paste/drag/select images, batch upload to Imgur/Tikolu/MJJ.Today/Appinn/StarDots; auto-copy Markdown/HTML/BBCode/link; site button integration with SPA observer; local history.
+// @description:zh-CN    通用图片上传与插入：支持粘贴/拖拽/选择，批量上传至 Imgur/Tikolu/MJJ.Today/Appinn/StarDots；自动复制 Markdown/HTML/BBCode/链接；可为各站点插入按钮并适配 SPA；保存本地历史。
+// @description:zh-TW    通用圖片上傳與插入：支援貼上/拖曳/選擇，批次上傳至 Imgur/Tikolu/MJJ.Today/Appinn/StarDots；自動複製 Markdown/HTML/BBCode/連結；可為各站點插入按鈕並適配 SPA；保存本地歷史。
 // @author               Pipecraft
 // @license              MIT
 // @icon                 data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+PHJlY3QgeD0iOCIgeT0iOCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTAiIHN0cm9rZT0iIzFmMjkzNyIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHBhdGggZD0iTTMyIDIwbC0xMiAxMmg3djE4aDEwVjMyaDdsLTEyLTEyeiIgZmlsbD0iIzFmMjkzNyIvPjwvc3ZnPg==
@@ -27,6 +27,7 @@
 // @connect              photo.lily.lat
 // @connect              i.111666.best
 // @connect              skyimg.net
+// @connect              api.stardots.io
 // @grant                GM.info
 // @grant                GM.addValueChangeListener
 // @grant                GM.getValue
@@ -41,8 +42,12 @@
 //
 ;(() => {
   'use strict'
+  var __create = Object.create
   var __defProp = Object.defineProperty
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor
+  var __getOwnPropNames = Object.getOwnPropertyNames
   var __getOwnPropSymbols = Object.getOwnPropertySymbols
+  var __getProtoOf = Object.getPrototypeOf
   var __hasOwnProp = Object.prototype.hasOwnProperty
   var __propIsEnum = Object.prototype.propertyIsEnumerable
   var __defNormalProp = (obj, key, value) =>
@@ -63,6 +68,251 @@
       }
     return a
   }
+  var __commonJS = (cb, mod) =>
+    function __require() {
+      return (
+        mod ||
+          (0, cb[__getOwnPropNames(cb)[0]])(
+            (mod = { exports: {} }).exports,
+            mod
+          ),
+        mod.exports
+      )
+    }
+  var __copyProps = (to, from, except, desc) => {
+    if ((from && typeof from === 'object') || typeof from === 'function') {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, {
+            get: () => from[key],
+            enumerable:
+              !(desc = __getOwnPropDesc(from, key)) || desc.enumerable,
+          })
+    }
+    return to
+  }
+  var __toESM = (mod, isNodeMode, target) => (
+    (target = mod != null ? __create(__getProtoOf(mod)) : {}),
+    __copyProps(
+      isNodeMode || !mod || !mod.__esModule
+        ? __defProp(target, 'default', { value: mod, enumerable: true })
+        : target,
+      mod
+    )
+  )
+  var require_md5 = __commonJS({
+    'node_modules/.pnpm/blueimp-md5@2.19.0/node_modules/blueimp-md5/js/md5.js'(
+      exports,
+      module
+    ) {
+      ;(function ($) {
+        'use strict'
+        function safeAdd(x, y) {
+          var lsw = (x & 65535) + (y & 65535)
+          var msw = (x >> 16) + (y >> 16) + (lsw >> 16)
+          return (msw << 16) | (lsw & 65535)
+        }
+        function bitRotateLeft(num, cnt) {
+          return (num << cnt) | (num >>> (32 - cnt))
+        }
+        function md5cmn(q, a, b, x, s, t2) {
+          return safeAdd(
+            bitRotateLeft(safeAdd(safeAdd(a, q), safeAdd(x, t2)), s),
+            b
+          )
+        }
+        function md5ff(a, b, c2, d, x, s, t2) {
+          return md5cmn((b & c2) | (~b & d), a, b, x, s, t2)
+        }
+        function md5gg(a, b, c2, d, x, s, t2) {
+          return md5cmn((b & d) | (c2 & ~d), a, b, x, s, t2)
+        }
+        function md5hh(a, b, c2, d, x, s, t2) {
+          return md5cmn(b ^ c2 ^ d, a, b, x, s, t2)
+        }
+        function md5ii(a, b, c2, d, x, s, t2) {
+          return md5cmn(c2 ^ (b | ~d), a, b, x, s, t2)
+        }
+        function binlMD5(x, len) {
+          x[len >> 5] |= 128 << (len % 32)
+          x[(((len + 64) >>> 9) << 4) + 14] = len
+          var i
+          var olda
+          var oldb
+          var oldc
+          var oldd
+          var a = 1732584193
+          var b = -271733879
+          var c2 = -1732584194
+          var d = 271733878
+          for (i = 0; i < x.length; i += 16) {
+            olda = a
+            oldb = b
+            oldc = c2
+            oldd = d
+            a = md5ff(a, b, c2, d, x[i], 7, -680876936)
+            d = md5ff(d, a, b, c2, x[i + 1], 12, -389564586)
+            c2 = md5ff(c2, d, a, b, x[i + 2], 17, 606105819)
+            b = md5ff(b, c2, d, a, x[i + 3], 22, -1044525330)
+            a = md5ff(a, b, c2, d, x[i + 4], 7, -176418897)
+            d = md5ff(d, a, b, c2, x[i + 5], 12, 1200080426)
+            c2 = md5ff(c2, d, a, b, x[i + 6], 17, -1473231341)
+            b = md5ff(b, c2, d, a, x[i + 7], 22, -45705983)
+            a = md5ff(a, b, c2, d, x[i + 8], 7, 1770035416)
+            d = md5ff(d, a, b, c2, x[i + 9], 12, -1958414417)
+            c2 = md5ff(c2, d, a, b, x[i + 10], 17, -42063)
+            b = md5ff(b, c2, d, a, x[i + 11], 22, -1990404162)
+            a = md5ff(a, b, c2, d, x[i + 12], 7, 1804603682)
+            d = md5ff(d, a, b, c2, x[i + 13], 12, -40341101)
+            c2 = md5ff(c2, d, a, b, x[i + 14], 17, -1502002290)
+            b = md5ff(b, c2, d, a, x[i + 15], 22, 1236535329)
+            a = md5gg(a, b, c2, d, x[i + 1], 5, -165796510)
+            d = md5gg(d, a, b, c2, x[i + 6], 9, -1069501632)
+            c2 = md5gg(c2, d, a, b, x[i + 11], 14, 643717713)
+            b = md5gg(b, c2, d, a, x[i], 20, -373897302)
+            a = md5gg(a, b, c2, d, x[i + 5], 5, -701558691)
+            d = md5gg(d, a, b, c2, x[i + 10], 9, 38016083)
+            c2 = md5gg(c2, d, a, b, x[i + 15], 14, -660478335)
+            b = md5gg(b, c2, d, a, x[i + 4], 20, -405537848)
+            a = md5gg(a, b, c2, d, x[i + 9], 5, 568446438)
+            d = md5gg(d, a, b, c2, x[i + 14], 9, -1019803690)
+            c2 = md5gg(c2, d, a, b, x[i + 3], 14, -187363961)
+            b = md5gg(b, c2, d, a, x[i + 8], 20, 1163531501)
+            a = md5gg(a, b, c2, d, x[i + 13], 5, -1444681467)
+            d = md5gg(d, a, b, c2, x[i + 2], 9, -51403784)
+            c2 = md5gg(c2, d, a, b, x[i + 7], 14, 1735328473)
+            b = md5gg(b, c2, d, a, x[i + 12], 20, -1926607734)
+            a = md5hh(a, b, c2, d, x[i + 5], 4, -378558)
+            d = md5hh(d, a, b, c2, x[i + 8], 11, -2022574463)
+            c2 = md5hh(c2, d, a, b, x[i + 11], 16, 1839030562)
+            b = md5hh(b, c2, d, a, x[i + 14], 23, -35309556)
+            a = md5hh(a, b, c2, d, x[i + 1], 4, -1530992060)
+            d = md5hh(d, a, b, c2, x[i + 4], 11, 1272893353)
+            c2 = md5hh(c2, d, a, b, x[i + 7], 16, -155497632)
+            b = md5hh(b, c2, d, a, x[i + 10], 23, -1094730640)
+            a = md5hh(a, b, c2, d, x[i + 13], 4, 681279174)
+            d = md5hh(d, a, b, c2, x[i], 11, -358537222)
+            c2 = md5hh(c2, d, a, b, x[i + 3], 16, -722521979)
+            b = md5hh(b, c2, d, a, x[i + 6], 23, 76029189)
+            a = md5hh(a, b, c2, d, x[i + 9], 4, -640364487)
+            d = md5hh(d, a, b, c2, x[i + 12], 11, -421815835)
+            c2 = md5hh(c2, d, a, b, x[i + 15], 16, 530742520)
+            b = md5hh(b, c2, d, a, x[i + 2], 23, -995338651)
+            a = md5ii(a, b, c2, d, x[i], 6, -198630844)
+            d = md5ii(d, a, b, c2, x[i + 7], 10, 1126891415)
+            c2 = md5ii(c2, d, a, b, x[i + 14], 15, -1416354905)
+            b = md5ii(b, c2, d, a, x[i + 5], 21, -57434055)
+            a = md5ii(a, b, c2, d, x[i + 12], 6, 1700485571)
+            d = md5ii(d, a, b, c2, x[i + 3], 10, -1894986606)
+            c2 = md5ii(c2, d, a, b, x[i + 10], 15, -1051523)
+            b = md5ii(b, c2, d, a, x[i + 1], 21, -2054922799)
+            a = md5ii(a, b, c2, d, x[i + 8], 6, 1873313359)
+            d = md5ii(d, a, b, c2, x[i + 15], 10, -30611744)
+            c2 = md5ii(c2, d, a, b, x[i + 6], 15, -1560198380)
+            b = md5ii(b, c2, d, a, x[i + 13], 21, 1309151649)
+            a = md5ii(a, b, c2, d, x[i + 4], 6, -145523070)
+            d = md5ii(d, a, b, c2, x[i + 11], 10, -1120210379)
+            c2 = md5ii(c2, d, a, b, x[i + 2], 15, 718787259)
+            b = md5ii(b, c2, d, a, x[i + 9], 21, -343485551)
+            a = safeAdd(a, olda)
+            b = safeAdd(b, oldb)
+            c2 = safeAdd(c2, oldc)
+            d = safeAdd(d, oldd)
+          }
+          return [a, b, c2, d]
+        }
+        function binl2rstr(input) {
+          var i
+          var output = ''
+          var length32 = input.length * 32
+          for (i = 0; i < length32; i += 8) {
+            output += String.fromCharCode((input[i >> 5] >>> (i % 32)) & 255)
+          }
+          return output
+        }
+        function rstr2binl(input) {
+          var i
+          var output = []
+          output[(input.length >> 2) - 1] = void 0
+          for (i = 0; i < output.length; i += 1) {
+            output[i] = 0
+          }
+          var length8 = input.length * 8
+          for (i = 0; i < length8; i += 8) {
+            output[i >> 5] |= (input.charCodeAt(i / 8) & 255) << (i % 32)
+          }
+          return output
+        }
+        function rstrMD5(s) {
+          return binl2rstr(binlMD5(rstr2binl(s), s.length * 8))
+        }
+        function rstrHMACMD5(key, data) {
+          var i
+          var bkey = rstr2binl(key)
+          var ipad = []
+          var opad = []
+          var hash
+          ipad[15] = opad[15] = void 0
+          if (bkey.length > 16) {
+            bkey = binlMD5(bkey, key.length * 8)
+          }
+          for (i = 0; i < 16; i += 1) {
+            ipad[i] = bkey[i] ^ 909522486
+            opad[i] = bkey[i] ^ 1549556828
+          }
+          hash = binlMD5(ipad.concat(rstr2binl(data)), 512 + data.length * 8)
+          return binl2rstr(binlMD5(opad.concat(hash), 512 + 128))
+        }
+        function rstr2hex(input) {
+          var hexTab = '0123456789abcdef'
+          var output = ''
+          var x
+          var i
+          for (i = 0; i < input.length; i += 1) {
+            x = input.charCodeAt(i)
+            output += hexTab.charAt((x >>> 4) & 15) + hexTab.charAt(x & 15)
+          }
+          return output
+        }
+        function str2rstrUTF8(input) {
+          return unescape(encodeURIComponent(input))
+        }
+        function rawMD5(s) {
+          return rstrMD5(str2rstrUTF8(s))
+        }
+        function hexMD5(s) {
+          return rstr2hex(rawMD5(s))
+        }
+        function rawHMACMD5(k, d) {
+          return rstrHMACMD5(str2rstrUTF8(k), str2rstrUTF8(d))
+        }
+        function hexHMACMD5(k, d) {
+          return rstr2hex(rawHMACMD5(k, d))
+        }
+        function md52(string, key, raw) {
+          if (!key) {
+            if (!raw) {
+              return hexMD5(string)
+            }
+            return rawMD5(string)
+          }
+          if (!raw) {
+            return hexHMACMD5(key, string)
+          }
+          return rawHMACMD5(key, string)
+        }
+        if (typeof define === 'function' && define.amd) {
+          define(function () {
+            return md52
+          })
+        } else if (typeof module === 'object' && module.exports) {
+          module.exports = md52
+        } else {
+          $.md5 = md52
+        }
+      })(exports)
+    },
+  })
   function deepEqual(a, b) {
     if (a === b) {
       return true
@@ -239,6 +489,34 @@
       return GM_registerMenuCommand(caption, onClick, options)
     }
     return 0
+  }
+  var doc = document
+  function c(tag, opts) {
+    const el = doc.createElement(tag)
+    if (!opts) return el
+    if (opts.className) el.className = opts.className
+    if (opts.classes) for (const cls of opts.classes) el.classList.add(cls)
+    if (opts.dataset && el.dataset)
+      for (const k of Object.keys(opts.dataset)) el.dataset[k] = opts.dataset[k]
+    if (opts.attrs)
+      for (const k of Object.keys(opts.attrs)) el.setAttribute(k, opts.attrs[k])
+    if (opts.style)
+      for (const k of Object.keys(opts.style)) el.style[k] = opts.style[k]
+    if ('text' in opts) el.textContent = opts.text || ''
+    if (opts.type && 'type' in el) el.type = opts.type
+    if ('value' in opts && 'value' in el) el.value = opts.value || ''
+    if (opts.rows && 'rows' in el) el.rows = opts.rows
+    if (opts.placeholder && 'placeholder' in el)
+      el.placeholder = opts.placeholder
+    if (typeof opts.checked === 'boolean' && 'checked' in el)
+      el.checked = opts.checked
+    if (opts.children) {
+      for (const ch of opts.children) {
+        if (typeof ch === 'string') el.append(doc.createTextNode(ch))
+        else el.append(ch)
+      }
+    }
+    return el
   }
   var win = globalThis
   function isTopFrame() {
@@ -502,6 +780,7 @@
       host_111666_best: '111666.best',
       host_skyimg: 'Skyimg',
       host_skyimg_webp: 'Skyimg (WebP)',
+      host_stardots: 'StarDots',
       btn_select_images: 'Select images',
       progress_initial: 'Done 0/0',
       progress_done: 'Done {done}/{total}',
@@ -558,6 +837,18 @@
       error_upload_failed: 'Upload failed',
       placeholder_uploading: 'Uploading "{name}"...',
       placeholder_upload_failed: 'Upload failed: {name}',
+      stardots_config_title: 'StarDots API Configration',
+      stardots_key_title: 'API Key',
+      stardots_key_placeholder: 'Please Enter API Key',
+      stardots_secret_title: 'API Secret',
+      stardots_secret_placeholder: 'Please Enter API Secret',
+      stardots_bucket_title: 'Bucket',
+      stardots_bucket_placeholder: 'Please Enter Bucket',
+      stardots_save_title: 'Save',
+      stardots_save_result_title: '\u2705 Saved',
+      stardots_get_credentials_title: 'Get StarDots credentails',
+      stardots_set_config_tips:
+        'Please select StarDots and complete the configuration.',
     },
     'zh-CN': {
       header_title: '\u901A\u7528\u56FE\u7247\u4E0A\u4F20\u52A9\u624B',
@@ -577,6 +868,7 @@
       host_111666_best: '111666.best',
       host_skyimg: 'Skyimg',
       host_skyimg_webp: 'Skyimg (WebP)',
+      host_stardots: 'StarDots',
       btn_select_images: '\u9009\u62E9\u56FE\u7247',
       progress_initial: '\u5B8C\u6210 0/0',
       progress_done: '\u5B8C\u6210 {done}/{total}',
@@ -635,6 +927,18 @@
       error_upload_failed: '\u4E0A\u4F20\u5931\u8D25',
       placeholder_uploading: '\u6B63\u5728\u4E0A\u4F20\u300C{name}\u300D...',
       placeholder_upload_failed: '\u4E0A\u4F20\u5931\u8D25\uFF1A{name}',
+      stardots_config_title: 'StarDots API \u914D\u7F6E',
+      stardots_key_title: 'API Key',
+      stardots_key_placeholder: '\u8BF7\u8F93\u5165 API Key',
+      stardots_secret_title: 'API Secret',
+      stardots_secret_placeholder: '\u8BF7\u8F93\u5165 API Secret',
+      stardots_bucket_title: '\u5B58\u50A8\u6876',
+      stardots_bucket_placeholder: '\u8BF7\u8F93\u5165 \u5B58\u50A8\u6876',
+      stardots_save_title: '\u4FDD\u5B58',
+      stardots_save_result_title: '\u2705 \u4FDD\u5B58\u6210\u529F',
+      stardots_get_credentials_title: '\u83B7\u53D6 StarDots \u51ED\u636E',
+      stardots_set_config_tips:
+        '\u8BF7\u9009\u62E9 StarDots \u5E76\u5B8C\u6210\u914D\u7F6E\u3002',
     },
     'zh-TW': {
       header_title: '\u901A\u7528\u5716\u7247\u4E0A\u50B3\u52A9\u624B',
@@ -654,6 +958,7 @@
       host_111666_best: '111666.best',
       host_skyimg: 'Skyimg',
       host_skyimg_webp: 'Skyimg (WebP)',
+      host_stardots: 'StarDots',
       btn_select_images: '\u9078\u64C7\u5716\u7247',
       progress_initial: '\u5B8C\u6210 0/0',
       progress_done: '\u5B8C\u6210 {done}/{total}',
@@ -712,6 +1017,18 @@
       error_upload_failed: '\u4E0A\u50B3\u5931\u6557',
       placeholder_uploading: '\u6B63\u5728\u4E0A\u50B3\u300C{name}\u300D...',
       placeholder_upload_failed: '\u4E0A\u50B3\u5931\u6557\uFF1A{name}',
+      stardots_config_title: 'StarDots API \u8A2D\u5B9A',
+      stardots_key_title: 'API Key',
+      stardots_key_placeholder: '\u8ACB\u8F38\u5165 API Key',
+      stardots_secret_title: 'API Secret',
+      stardots_secret_placeholder: '\u8ACB\u8F38\u5165 API Secret',
+      stardots_bucket_title: '\u5132\u5B58\u6876',
+      stardots_bucket_placeholder: '\u8ACB\u8F38\u5165 \u5132\u5B58\u6876',
+      stardots_save_title: '\u5132\u5B58',
+      stardots_save_result_title: '\u2705 \u5132\u5B58\u6210\u529F',
+      stardots_get_credentials_title: '\u7372\u53D6 StarDots \u6191\u64DA',
+      stardots_set_config_tips:
+        '\u8ACB\u9078\u64C7 StarDots \u4E26\u5B8C\u6210\u8A2D\u5B9A\u3002',
     },
   }
   var IMGUR_CLIENT_IDS = [
@@ -744,6 +1061,7 @@
         'skyimg_webp',
         'photo_lily',
         '111666_best',
+        'stardots',
         'mock',
         'mock2',
       ]
@@ -757,6 +1075,7 @@
         'skyimg_webp',
         'photo_lily',
         '111666_best',
+        'stardots',
       ]
   var ALLOWED_PROXIES = ['none', 'wsrv.nl', 'duckduckgo', 'wsrv.nl-duckduckgo']
   var ALLOWED_PROXIES_MULTI_HOST = ['wsrv.nl', 'wsrv.nl-duckduckgo']
@@ -770,6 +1089,7 @@
     uploadNameType: 'default',
     autoRetry: true,
   }
+  var import_blueimp_md5 = __toESM(require_md5())
   function detectLanguage() {
     try {
       const browserLang = (
@@ -883,6 +1203,7 @@
   async function ensureAllowedFormat(fmt) {
     return ensureAllowedValue(fmt, await getAllowedFormats(), DEFAULT_FORMAT)
   }
+  var md5 = (str) => (0, import_blueimp_md5.default)(str).toString()
   async function migrateLegacyStorage() {
     try {
       const maybeMove = async (oldKey, newKey) => {
@@ -951,19 +1272,19 @@
               : []
           const arr = Array.isArray(raw) ? raw : raw ? [raw] : []
           const list = arr
-            .map((c) => {
+            .map((c2) => {
               const selector = String(
-                (c == null ? void 0 : c.selector) || ''
+                (c2 == null ? void 0 : c2.selector) || ''
               ).trim()
               if (!selector) return null
-              const p = String((c == null ? void 0 : c.position) || '').trim()
+              const p = String((c2 == null ? void 0 : c2.position) || '').trim()
               const pos = ensureAllowedValue(
                 p,
                 ALLOWED_BUTTON_POSITIONS,
                 DEFAULT_BUTTON_POSITION
               )
               const text = String(
-                (c == null ? void 0 : c.text) ||
+                (c2 == null ? void 0 : c2.text) ||
                   t('insert_image_button_default')
               ).trim()
               return { selector, position: pos, text }
@@ -1018,19 +1339,19 @@
           const raw = preset.buttons || preset.button || []
           const arr = Array.isArray(raw) ? raw : raw ? [raw] : []
           const list = arr
-            .map((c) => {
+            .map((c2) => {
               const selector = String(
-                (c == null ? void 0 : c.selector) || ''
+                (c2 == null ? void 0 : c2.selector) || ''
               ).trim()
               if (!selector) return null
-              const p = String((c == null ? void 0 : c.position) || '').trim()
+              const p = String((c2 == null ? void 0 : c2.position) || '').trim()
               const pos = ensureAllowedValue(
                 p,
                 ALLOWED_BUTTON_POSITIONS,
                 DEFAULT_BUTTON_POSITION
               )
               const text = String(
-                (c == null ? void 0 : c.text) ||
+                (c2 == null ? void 0 : c2.text) ||
                   t('insert_image_button_default')
               ).trim()
               return { selector, position: pos, text }
@@ -1293,7 +1614,7 @@
       else if (k === 'class') el.className = v
       else el.setAttribute(k, v)
     }
-    for (const c of children) el.append(c)
+    for (const c2 of children) el.append(c2)
     return el
   }
   var requestOpenFilePicker = () => {
@@ -1454,6 +1775,135 @@
       selectEl.append(opt)
     }
   }
+  var STARDOTS_CONFIG = { key: '', secret: '', bucket: '' }
+  var injectStarDotsSettings = () => {
+    var _a
+    const hostEl = document.querySelector('#uiu-panel')
+    if (!hostEl) return
+    const shadowRoot = hostEl.shadowRoot
+    if (!shadowRoot) return
+    const container = shadowRoot.querySelectorAll('.uiu-body .uiu-controls')[1]
+    const wrapper = c('div', {
+      attrs: { id: 'sd-configuration-section' },
+      style: {
+        width: '100%',
+        borderTop: '1px solid #F6C844',
+        borderBottom: '1px solid #F6C844',
+        padding: '8px 0px',
+      },
+      children: [
+        c('h3', { text: t('stardots_config_title') }),
+        c('label', {
+          style: { display: 'inline-block', width: '96%' },
+          text: t('stardots_key_title'),
+        }),
+        c('input', {
+          type: 'text',
+          attrs: { id: 'sd-api-key', autocomplete: 'off' },
+          style: { display: 'inline-block', width: '96%' },
+          placeholder: t('stardots_key_placeholder'),
+        }),
+        c('label', {
+          style: { display: 'inline-block', width: '96%' },
+          text: t('stardots_secret_title'),
+        }),
+        c('input', {
+          type: 'password',
+          attrs: { id: 'sd-api-secret', autocomplete: 'new-password' },
+          style: { display: 'inline-block', width: '96%' },
+          placeholder: t('stardots_secret_placeholder'),
+        }),
+        c('label', {
+          style: { display: 'inline-block', width: '96%' },
+          text: t('stardots_bucket_title'),
+        }),
+        c('input', {
+          type: 'text',
+          attrs: { id: 'sd-bucket' },
+          style: { display: 'inline-block', width: '96%' },
+          placeholder: t('stardots_bucket_placeholder'),
+        }),
+        c('div', {
+          style: { width: '100%' },
+          children: [
+            c('button', {
+              attrs: { id: 'sd-save-config' },
+              style: { marginTop: '4px' },
+              text: t('stardots_save_title'),
+            }),
+            c('span', {
+              attrs: { id: 'sd-save-status' },
+              style: { marginLeft: '8px', color: '#00ff9f', display: 'none' },
+            }),
+            c('a', {
+              attrs: {
+                href: 'https://dashboard.stardots.io/openapi/key-and-secret',
+                target: '_blank',
+              },
+              style: { marginLeft: '8px', color: '#F6C844' },
+              text: t('stardots_get_credentials_title'),
+            }),
+          ],
+        }),
+      ],
+    })
+    const scsEl = container.querySelector('#sd-configuration-section')
+    if (scsEl) {
+      scsEl.remove()
+    }
+    container.append(wrapper)
+    void loadStarDotsConfig()
+    ;(_a = shadowRoot.querySelector('#sd-save-config')) == null
+      ? void 0
+      : _a.addEventListener('click', async () => {
+          var _a2, _b, _c
+          const key =
+            (_a2 = shadowRoot.querySelector('#sd-api-key')) == null
+              ? void 0
+              : _a2.value.trim()
+          const secret =
+            (_b = shadowRoot.querySelector('#sd-api-secret')) == null
+              ? void 0
+              : _b.value.trim()
+          const bucket =
+            (_c = shadowRoot.querySelector('#sd-bucket')) == null
+              ? void 0
+              : _c.value.trim()
+          const targetOrigin = '*'
+          window.postMessage(
+            {
+              type: 'uiu:stardots-save-config',
+              payload: { key, secret, bucket },
+            },
+            targetOrigin
+          )
+          const statusEl = shadowRoot.querySelector('#sd-save-status')
+          if (statusEl) {
+            statusEl.style.display = 'inline-block'
+            statusEl.textContent = t('stardots_save_result_title')
+          }
+          setTimeout(() => {
+            if (statusEl) {
+              statusEl.style.display = 'none'
+              statusEl.textContent = ''
+            }
+            const configSection = shadowRoot.querySelector(
+              '#sd-configuration-section'
+            )
+            if (configSection) {
+              configSection.remove()
+            }
+          }, 2e3)
+        })
+  }
+  async function loadStarDotsConfig() {
+    window.postMessage(
+      {
+        type: 'uiu:stardots-get-config',
+      },
+      '*'
+    )
+  }
   var buildHostOptions = (selectEl, selectedValue) => {
     if (!selectEl) return
     selectEl.textContent = ''
@@ -1465,6 +1915,28 @@
       if (val === selected) opt.selected = true
       selectEl.append(opt)
     }
+    selectEl.addEventListener('change', (event) => {
+      var _a, _b
+      const selectedValue2 =
+        (_a = event.target) == null ? void 0 : _a.value.trim()
+      if (selectedValue2 === 'stardots') {
+        injectStarDotsSettings()
+      } else {
+        const shadowRoot = selectEl.getRootNode()
+        const secondaryVal =
+          (_b = shadowRoot.querySelector('#uiu-secondary-host-select')) == null
+            ? void 0
+            : _b.value
+        if (secondaryVal !== 'stardots') {
+          const configSection = shadowRoot.querySelector(
+            '#sd-configuration-section'
+          )
+          if (configSection) {
+            configSection.remove()
+          }
+        }
+      }
+    })
   }
   var buildSecondaryHostOptions = (selectEl, selectedValue, primaryHost) => {
     if (!selectEl) return
@@ -1482,6 +1954,28 @@
       if (val === selected) opt.selected = true
       selectEl.append(opt)
     }
+    selectEl.addEventListener('change', (event) => {
+      var _a, _b
+      const selectedValue2 =
+        (_a = event.target) == null ? void 0 : _a.value.trim()
+      if (selectedValue2 === 'stardots') {
+        injectStarDotsSettings()
+      } else {
+        const shadowRoot = selectEl.getRootNode()
+        const primaryVal =
+          (_b = shadowRoot.querySelector('#uiu-host-select')) == null
+            ? void 0
+            : _b.value
+        if (primaryVal !== 'stardots') {
+          const configSection = shadowRoot.querySelector(
+            '#sd-configuration-section'
+          )
+          if (configSection) {
+            configSection.remove()
+          }
+        }
+      }
+    })
   }
   var getProxyLabelKey = (val) =>
     'proxy_'.concat(val.replaceAll('.', '_').replaceAll('-', '_'))
@@ -1508,7 +2002,7 @@
     }
   }
   var css =
-    '\n  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 440px; max-height: calc(100vh - 32px); overflow: auto; background: #111827cc; color: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }\n  #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; background-color: unset; box-shadow: unset; transition: unset; }\n  #uiu-panel header .uiu-actions { display:flex; gap:8px; }\n  #uiu-panel header .uiu-actions button { font-size: 12px; }\n  /* Active styles for toggles when sections are open */\n  #uiu-panel header.uiu-show-history .uiu-actions .uiu-toggle-history { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }\n  #uiu-panel header.uiu-show-settings .uiu-actions .uiu-toggle-settings { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }\n  #uiu-panel .uiu-body { padding: 8px 12px; }\n  #uiu-panel .uiu-controls { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }\n  #uiu-panel .uiu-controls label { display:inline-flex; align-items:center; }\n  #uiu-panel select, #uiu-panel button { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; }\n  #uiu-panel button.uiu-primary { background:#2563eb; border-color:#1d4ed8; }\n  #uiu-panel .uiu-list { margin-top:8px; max-height: 140px; overflow-y:auto; overflow-x:hidden; font-size: 12px; }\n  #uiu-panel .uiu-list .uiu-item { padding:6px 0; border-bottom: 1px dashed #334155; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }\n  #uiu-panel .uiu-list .uiu-log-item { padding: 6px 8px; background: #1e293b; border: 1px solid #334155; border-radius: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); transition: all .15s; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }\n  #uiu-panel .uiu-list .uiu-log-item:hover { background: #334155; border-color: #475569; }\n  #uiu-panel .uiu-history { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel header.uiu-show-history + .uiu-body .uiu-history { display:block; }\n  #uiu-panel .uiu-history .uiu-controls > span { font-size: 16px; font-weight: 600;}\n  #uiu-panel .uiu-history .uiu-list { max-height: 240px; }\n  #uiu-panel .uiu-history .uiu-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }\n  #uiu-panel .uiu-history .uiu-row .uiu-ops { display:flex; gap:6px; }\n  #uiu-panel .uiu-history .uiu-row .uiu-name { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #uiu-panel .uiu-hint { font-size: 11px; opacity:.85; margin-top:6px; }\n  /* Settings container toggling */\n  #uiu-panel .uiu-settings-container { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel header.uiu-show-settings + .uiu-body .uiu-settings-container { display:block; }\n  #uiu-panel .uiu-settings .uiu-controls > span { font-size: 16px; font-weight: 600;}\n  #uiu-panel .uiu-settings .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }\n  #uiu-panel .uiu-settings .uiu-settings-list { margin-top:6px; max-height: 240px; overflow-y:auto; overflow-x:hidden; }\n  #uiu-panel .uiu-settings .uiu-settings-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; font-size: 12px; flex-wrap: nowrap; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item { flex:1; display:flex; align-items:center; gap:6px; min-width:0; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item input[type="text"] { flex:1; min-width:0; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item select { flex:0 0 auto; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-ops { display:flex; gap:6px; flex-shrink:0; white-space:nowrap; }\n  #uiu-drop { position: fixed; inset: 0; background: rgba(37,99,235,.12); border: 2px dashed #2563eb; display:none; align-items:center; justify-content:center; z-index: 999998; color:#2563eb; font-size: 18px; font-weight: 600; pointer-events:none; }\n  #uiu-drop.show { display:flex; }\n  .uiu-insert-btn { cursor:pointer; }\n  .uiu-insert-btn.uiu-default { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; cursor:pointer; }\n  /* Hover effects for all buttons */\n  #uiu-panel button { transition: background-color .12s ease, box-shadow .12s ease, transform .06s ease, opacity .12s ease, border-color .12s ease; }\n  #uiu-panel button:hover { background:#334155; border-color:#475569; box-shadow: 0 0 0 1px #475569 inset; transform: translateY(-0.5px); }\n  #uiu-panel button.uiu-primary:hover { background:#1d4ed8; border-color:#1e40af; }\n  #uiu-panel button:active { transform: translateY(0); }\n  /* Disabled style for proxy selector */\n  #uiu-panel select:disabled { opacity:.55; cursor:not-allowed; filter: grayscale(80%); background:#111827; color:#9ca3af; border-color:#475569; }\n  /* Custom Formats layout */\n  #uiu-panel .uiu-formats { margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel .uiu-formats .uiu-controls > span { font-size: 16px; font-weight: 600; }\n  #uiu-panel .uiu-formats .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }\n  #uiu-panel .uiu-formats .uiu-formats-list { margin-top:6px; max-height: 200px; overflow-y:auto; overflow-x:hidden; }\n  #uiu-panel .uiu-formats .uiu-formats-row { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }\n  #uiu-panel .uiu-formats .uiu-formats-row .uiu-ops { display:flex; gap:6px; justify-content:flex-end; }\n  #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-template { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-template { overflow: visible; text-overflow: clip; white-space: normal; }\n  #uiu-panel .uiu-formats .uiu-form-add { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; }\n  #uiu-panel .uiu-formats .uiu-formats-row input[type="text"] { width:100%; }\n  #uiu-panel .uiu-formats .uiu-form-add input[type="text"] { width:100%; }\n  #uiu-panel .uiu-formats .uiu-form-add button { justify-self: end; }\n  #uiu-panel .uiu-formats .uiu-formats-header { font-weight: 600; color:#e5e7eb; }\n  #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-template { display:block; min-width:0; }\n  #uiu-panel .uiu-formats .uiu-format-example-row { padding-top:4px; border-bottom: none; }\n  #uiu-panel .uiu-formats .uiu-format-example-row .uiu-fmt-template { font-size:12px; color:#cbd5e1; white-space: normal; overflow: visible; text-overflow: clip; }\n  '
+    '\n  #uiu-panel { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 440px; max-height: calc(100vh - 32px); overflow: auto; background: #111827cc; color: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-family: system-ui, -apple-system, Segoe UI, Roboto; font-size: 13px; line-height: 1.5; }\n  #uiu-panel header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; font-weight: 600; font-size: 16px; background-color: unset; box-shadow: unset; transition: unset; }\n  #uiu-panel header .uiu-actions { display:flex; gap:8px; }\n  #uiu-panel header .uiu-actions button { font-size: 12px; }\n  /* Active styles for toggles when sections are open */\n  #uiu-panel header.uiu-show-history .uiu-actions .uiu-toggle-history { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }\n  #uiu-panel header.uiu-show-settings .uiu-actions .uiu-toggle-settings { background:#2563eb; border-color:#1d4ed8; box-shadow: 0 0 0 1px #1d4ed8 inset; color:#fff; }\n  #uiu-panel .uiu-body { padding: 8px 12px; }\n  #uiu-panel .uiu-controls { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }\n  #uiu-panel .uiu-controls label { display:inline-flex; align-items:center; }\n  #uiu-panel select, #uiu-panel button, #uiu-panel input { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; }\n  #uiu-panel button.uiu-primary { background:#2563eb; border-color:#1d4ed8; }\n  #uiu-panel .uiu-list { margin-top:8px; max-height: 140px; overflow-y:auto; overflow-x:hidden; font-size: 12px; }\n  #uiu-panel .uiu-list .uiu-item { padding:6px 0; border-bottom: 1px dashed #334155; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }\n  #uiu-panel .uiu-list .uiu-log-item { padding: 6px 8px; background: #1e293b; border: 1px solid #334155; border-radius: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); transition: all .15s; white-space: normal; word-break: break-word; overflow-wrap: anywhere; }\n  #uiu-panel .uiu-list .uiu-log-item:hover { background: #334155; border-color: #475569; }\n  #uiu-panel .uiu-history { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel header.uiu-show-history + .uiu-body .uiu-history { display:block; }\n  #uiu-panel .uiu-history .uiu-controls > span { font-size: 16px; font-weight: 600;}\n  #uiu-panel .uiu-history .uiu-list { max-height: 240px; }\n  #uiu-panel .uiu-history .uiu-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }\n  #uiu-panel .uiu-history .uiu-row .uiu-ops { display:flex; gap:6px; }\n  #uiu-panel .uiu-history .uiu-row .uiu-name { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #uiu-panel .uiu-hint { font-size: 11px; opacity:.85; margin-top:6px; }\n  /* Settings container toggling */\n  #uiu-panel .uiu-settings-container { display:none; margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel header.uiu-show-settings + .uiu-body .uiu-settings-container { display:block; }\n  #uiu-panel .uiu-settings .uiu-controls > span { font-size: 16px; font-weight: 600;}\n  #uiu-panel .uiu-settings .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }\n  #uiu-panel .uiu-settings .uiu-settings-list { margin-top:6px; max-height: 240px; overflow-y:auto; overflow-x:hidden; }\n  #uiu-panel .uiu-settings .uiu-settings-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; font-size: 12px; flex-wrap: nowrap; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item { flex:1; display:flex; align-items:center; gap:6px; min-width:0; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item input[type="text"] { flex:1; min-width:0; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-settings-item select { flex:0 0 auto; }\n  #uiu-panel .uiu-settings .uiu-settings-row .uiu-ops { display:flex; gap:6px; flex-shrink:0; white-space:nowrap; }\n  #uiu-drop { position: fixed; inset: 0; background: rgba(37,99,235,.12); border: 2px dashed #2563eb; display:none; align-items:center; justify-content:center; z-index: 999998; color:#2563eb; font-size: 18px; font-weight: 600; pointer-events:none; }\n  #uiu-drop.show { display:flex; }\n  .uiu-insert-btn { cursor:pointer; }\n  .uiu-insert-btn.uiu-default { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid #334155; background:#1f2937; color:#fff; cursor:pointer; }\n  /* Hover effects for all buttons */\n  #uiu-panel button { transition: background-color .12s ease, box-shadow .12s ease, transform .06s ease, opacity .12s ease, border-color .12s ease; }\n  #uiu-panel button:hover { background:#334155; border-color:#475569; box-shadow: 0 0 0 1px #475569 inset; transform: translateY(-0.5px); }\n  #uiu-panel button.uiu-primary:hover { background:#1d4ed8; border-color:#1e40af; }\n  #uiu-panel button:active { transform: translateY(0); }\n  /* Disabled style for proxy selector */\n  #uiu-panel select:disabled { opacity:.55; cursor:not-allowed; filter: grayscale(80%); background:#111827; color:#9ca3af; border-color:#475569; }\n  /* Custom Formats layout */\n  #uiu-panel .uiu-formats { margin-top:12px; border-top: 2px solid #475569; padding-top: 8px; }\n  #uiu-panel .uiu-formats .uiu-controls > span { font-size: 16px; font-weight: 600; }\n  #uiu-panel .uiu-formats .uiu-controls > .uiu-subtitle { font-size: 13px; font-weight: 600; }\n  #uiu-panel .uiu-formats .uiu-formats-list { margin-top:6px; max-height: 200px; overflow-y:auto; overflow-x:hidden; }\n  #uiu-panel .uiu-formats .uiu-formats-row { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; padding:6px 0; border-bottom: 1px dashed #334155; }\n  #uiu-panel .uiu-formats .uiu-formats-row .uiu-ops { display:flex; gap:6px; justify-content:flex-end; }\n  #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row:not(.uiu-editing) .uiu-fmt-template { display:block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n  #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-formats-row.uiu-editing .uiu-fmt-template { overflow: visible; text-overflow: clip; white-space: normal; }\n  #uiu-panel .uiu-formats .uiu-form-add { display:grid; grid-template-columns: 1fr 2fr 180px; align-items:center; gap:8px; }\n  #uiu-panel .uiu-formats .uiu-formats-row input[type="text"] { width:100%; }\n  #uiu-panel .uiu-formats .uiu-form-add input[type="text"] { width:100%; }\n  #uiu-panel .uiu-formats .uiu-form-add button { justify-self: end; }\n  #uiu-panel .uiu-formats .uiu-formats-header { font-weight: 600; color:#e5e7eb; }\n  #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-name, #uiu-panel .uiu-formats .uiu-form-add .uiu-fmt-template { display:block; min-width:0; }\n  #uiu-panel .uiu-formats .uiu-format-example-row { padding-top:4px; border-bottom: none; }\n  #uiu-panel .uiu-formats .uiu-format-example-row .uiu-fmt-template { font-size:12px; color:#cbd5e1; white-space: normal; overflow: visible; text-overflow: clip; }\n  '
   GM_addStyle(css)
   async function loadHistory() {
     return (await getValue(HISTORY_KEY, [])) || []
@@ -1895,6 +2389,57 @@
     }
     throw new Error(t('error_upload_failed'))
   }
+  var STARDOTS_ENDPOINT = 'https://api.stardots.io'
+  async function uploadToStarDots(file) {
+    const apiKey = STARDOTS_CONFIG.key
+    const apiSecret = STARDOTS_CONFIG.secret
+    const bucket = STARDOTS_CONFIG.bucket
+    if (!apiKey || !apiSecret) {
+      alert(t('stardots_set_config_tips'))
+      throw new Error('Missing credentials')
+    }
+    const timestamp = Number.parseInt(
+      (Date.now() / 1e3).toString(),
+      10
+    ).toString()
+    const nonce = ''
+      .concat(Date.now())
+      .concat(Math.random().toString(16))
+      .replace('.', '')
+      .slice(0, 20)
+    const stringToSign = ''
+      .concat(timestamp, '|')
+      .concat(apiSecret, '|')
+      .concat(nonce)
+    const signature = md5(stringToSign).toUpperCase()
+    console.log(timestamp, nonce, stringToSign, signature)
+    const form = new FormData()
+    form.append('file', file)
+    form.append('filename', file.name)
+    form.append('space', bucket)
+    try {
+      const data = await gmRequest({
+        method: 'PUT',
+        url: ''.concat(STARDOTS_ENDPOINT, '/openapi/file/upload'),
+        headers: {
+          'x-stardots-key': apiKey,
+          'x-stardots-nonce': nonce,
+          'x-stardots-timestamp': timestamp,
+          'x-stardots-sign': signature,
+          'x-stardots-assistant-version': 'upload-by-utags',
+        },
+        data: form,
+        responseType: 'json',
+      })
+      if (data.success) {
+        return data.data.url
+      }
+      throw new Error(''.concat(data.message, '(').concat(data.requestId, ')'))
+    } catch (error) {
+      console.log('stardots upload error', error)
+      throw new Error(t('error_upload_failed'))
+    }
+  }
   async function uploadImageToHost(file, host) {
     if (host === 'mock' || host === 'mock2') {
       await new Promise((resolve) => {
@@ -1917,6 +2462,7 @@
     if (host === 'appinn') return uploadToAppinn(file)
     if (host === 'photo_lily') return uploadToPhotoLily(file)
     if (host === '111666_best') return uploadTo111666Best(file)
+    if (host === 'stardots') return uploadToStarDots(file)
     return uploadToImgur(file)
   }
   var lastEditableEl
@@ -2252,7 +2798,7 @@
     },
     true
   )
-  globalThis.addEventListener('message', (event) => {
+  globalThis.addEventListener('message', async (event) => {
     var _a, _b, _c, _d, _e
     const type = (_a = event.data) == null ? void 0 : _a.type
     switch (type) {
@@ -2278,6 +2824,40 @@
       case 'uiu:insert-text': {
         const txt = String(((_e = event.data) == null ? void 0 : _e.text) || '')
         if (txt) insertIntoFocused('\n'.concat(txt, '\n'))
+        break
+      }
+      case 'uiu:stardots-save-config': {
+        const { key, secret, bucket } = event.data.payload
+        await setValue('stardots_key', key)
+        await setValue('stardots_secret', secret)
+        await setValue('stardots_bucket', bucket)
+        break
+      }
+      case 'uiu:stardots-get-config': {
+        const key = await getValue('stardots_key')
+        const secret = await getValue('stardots_secret')
+        const bucket = await getValue('stardots_bucket')
+        const hostEl = document.querySelector('#uiu-panel')
+        if (!hostEl) return
+        const shadowRoot = hostEl.shadowRoot
+        if (!shadowRoot) return
+        const keyInput = shadowRoot.querySelector('#sd-api-key')
+        if (keyInput) {
+          keyInput.value = key != null ? key : ''
+        }
+        const secretInput = shadowRoot.querySelector('#sd-api-secret')
+        if (secretInput) {
+          secretInput.value = secret != null ? secret : ''
+        }
+        const bucketInput = shadowRoot.querySelector('#sd-bucket')
+        if (bucketInput) {
+          bucketInput.value = bucket != null ? bucket : ''
+        }
+        STARDOTS_CONFIG = {
+          key: key || '',
+          secret: secret || '',
+          bucket: bucket || '',
+        }
         break
       }
       default: {
@@ -2474,11 +3054,13 @@
     const host = await getHost()
     const hostSel = createEl('select', {
       style: 'border-left: 3px solid #3b82f6;',
+      id: 'uiu-host-select',
     })
     buildHostOptions(hostSel, host)
     const secondaryHostValue = await getSecondaryHost()
     const secondaryHostSel = createEl('select', {
       style: 'border-left: 3px solid #a855f7;',
+      id: 'uiu-secondary-host-select',
     })
     buildSecondaryHostOptions(secondaryHostSel, secondaryHostValue, host)
     hostSel.addEventListener('change', async () => {
@@ -2914,7 +3496,7 @@
         openFilePicker()
       } catch (e) {}
     })
-    globalThis.addEventListener('message', (event) => {
+    globalThis.addEventListener('message', async (event) => {
       var _a, _b
       const type = (_a = event.data) == null ? void 0 : _a.type
       switch (type) {
@@ -3469,6 +4051,7 @@
           }
         )
       }
+      void loadStarDotsConfig()
     } catch (e) {}
   })()
 })()

@@ -1,5 +1,5 @@
+import blueimpMd5 from 'blueimp-md5'
 import { getValue, setValue } from 'browser-extension-storage'
-import md5 from 'crypto-js/md5'
 
 import {
   ALLOWED_FORMATS,
@@ -157,6 +157,4 @@ export async function ensureAllowedFormat(fmt: any) {
   return ensureAllowedValue(fmt, await getAllowedFormats(), DEFAULT_FORMAT)
 }
 
-export const md5Encode = (str: string) => {
-  return md5(str).toString()
-}
+export const md5 = (str: string) => blueimpMd5(str).toString()

@@ -19,7 +19,7 @@ A user script that lets you paste, drag, or select images and batch-upload them 
 ## Features (MVP)
 
 - 📥 Paste, drag-and-drop, or file picker to collect images
-- 📤 Batch upload to Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best/Skyimg with progress display
+- 📤 Batch upload to Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best/Skyimg/StarDots with progress display
 - 🔄 Support concurrent upload to a secondary backup host (Dual-upload)
 - 🖼️ Optional WebP conversion via proxy or supported hosts
 - 📋 Auto-copy output in `Markdown` / `HTML` / `BBCode` / `Link`
@@ -38,7 +38,7 @@ A user script that lets you paste, drag, or select images and batch-upload them 
 
 - Open any site, paste or drop images onto the page, or use the panel’s file picker
 - Watch the upload queue and progress
-- Choose upload provider via the panel’s host selector (Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best/Skyimg)
+- Choose upload provider via the panel’s host selector (Imgur/Tikolu/MJJ.Today/ImgBB/Appinn/Photo.Lily/111666.best/Skyimg/StarDots)
 - (Optional) Choose a secondary host for dual-upload and automatic fallback
 - Choose proxy via the panel’s proxy selector (default `None`)
 - Toggle WebP option to convert images via proxy
@@ -73,6 +73,11 @@ A user script that lets you paste, drag, or select images and batch-upload them 
 - 🗂 History enhancements: filters by time/provider/tags, batch copy, faster reuse
 
 ## Changelog
+
+### v0.14.x
+
+- **New provider**: Added **StarDots** image hosting support. Requires configuration of API Key, Secret, and Bucket name in the settings panel.
+- **Fix**: Refactored StarDots settings UI to use `c` function instead of `innerHTML` for better compatibility with CSP-restricted sites.
 
 ### v0.13.x
 

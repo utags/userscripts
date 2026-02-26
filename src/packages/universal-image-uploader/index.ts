@@ -6,6 +6,7 @@ import {
 } from 'browser-extension-storage'
 
 import { addStyle, registerMenu, unregisterMenu } from '../../common/gm'
+import { c } from '../../utils/c'
 import { isTopFrame } from '../../utils/is-top-frame'
 import { applyProxy, applyProxyForDualHost } from './apply-proxy.js'
 import {
@@ -39,7 +40,7 @@ import {
   ensureAllowedValue,
   getAllowedFormats,
   getCustomFormats,
-  md5Encode,
+  md5,
   normalizeHost,
   removeCustomFormat,
   setCustomFormats,
@@ -574,7 +575,7 @@ const buildFormatOptions = async (selectEl, selectedValue) => {
   }
 }
 
-var STARDOTS_CONFIG = { key: '', secret: '', bucket: '' }
+let STARDOTS_CONFIG = { key: '', secret: '', bucket: '' }
 
 const injectStarDotsSettings = () => {
   const hostEl = document.querySelector('#uiu-panel')
@@ -582,49 +583,94 @@ const injectStarDotsSettings = () => {
   const shadowRoot = hostEl.shadowRoot
   if (!shadowRoot) return
   const container = shadowRoot.querySelectorAll('.uiu-body .uiu-controls')[1]
-  const wrapper = document.createElement('div')
-  wrapper.innerHTML = `
-  <div id="sd-configuration-section" style="width: 100%;border-top: 1px solid #F6C844;border-bottom: 1px solid #F6C844;padding: 8px 0px;">
-    <h3>${t('stardots_config_title')}</h3>
-    <label style="display: inline-block; width: 96%">${t('stardots_key_title')}</label>
-    <input style="display: inline-block; width: 96%" type="text" id="sd-api-key" placeholder="${t('stardots_key_placeholder')}" />
+  const wrapper = c('div', {
+    attrs: { id: 'sd-configuration-section' },
+    style: {
+      width: '100%',
+      borderTop: '1px solid #F6C844',
+      borderBottom: '1px solid #F6C844',
+      padding: '8px 0px',
+    },
+    children: [
+      c('h3', { text: t('stardots_config_title') }),
+      c('label', {
+        style: { display: 'inline-block', width: '96%' },
+        text: t('stardots_key_title'),
+      }),
+      c('input', {
+        type: 'text',
+        attrs: { id: 'sd-api-key', autocomplete: 'off' },
+        style: { display: 'inline-block', width: '96%' },
+        placeholder: t('stardots_key_placeholder'),
+      }),
+      c('label', {
+        style: { display: 'inline-block', width: '96%' },
+        text: t('stardots_secret_title'),
+      }),
+      c('input', {
+        type: 'password',
+        attrs: { id: 'sd-api-secret', autocomplete: 'new-password' },
+        style: { display: 'inline-block', width: '96%' },
+        placeholder: t('stardots_secret_placeholder'),
+      }),
+      c('label', {
+        style: { display: 'inline-block', width: '96%' },
+        text: t('stardots_bucket_title'),
+      }),
+      c('input', {
+        type: 'text',
+        attrs: { id: 'sd-bucket' },
+        style: { display: 'inline-block', width: '96%' },
+        placeholder: t('stardots_bucket_placeholder'),
+      }),
+      c('div', {
+        style: { width: '100%' },
+        children: [
+          c('button', {
+            attrs: { id: 'sd-save-config' },
+            style: { marginTop: '4px' },
+            text: t('stardots_save_title'),
+          }),
+          c('span', {
+            attrs: { id: 'sd-save-status' },
+            style: { marginLeft: '8px', color: '#00ff9f', display: 'none' },
+          }),
+          c('a', {
+            attrs: {
+              href: 'https://dashboard.stardots.io/openapi/key-and-secret',
+              target: '_blank',
+            },
+            style: { marginLeft: '8px', color: '#F6C844' },
+            text: t('stardots_get_credentials_title'),
+          }),
+        ],
+      }),
+    ],
+  })
 
-    <label style="display: inline-block; width: 96%">${t('stardots_secret_title')}</label>
-    <input style="display: inline-block; width: 96%" type="password" id="sd-api-secret" placeholder="${t('stardots_secret_placeholder')}" />
-
-    <label style="display: inline-block; width: 96%">${t('stardots_bucket_title')}</label>
-    <input style="display: inline-block; width: 96%" type="text" id="sd-bucket" placeholder="${t('stardots_bucket_placeholder')}" />
-
-    <div style="width: 100%;">
-      <button id="sd-save-config" style="margin-top: 4px">${t('stardots_save_title')}</button>
-      <span id="sd-save-status" style="margin-left:8px;color: #00ff9f;"></span>
-      <a style="color: #F6C844;" href="https://dashboard.stardots.io/openapi/key-and-secret" target="_blank">${t('stardots_get_credentials_title')}</a>
-    </div>
-  </div>
-`
   const scsEl = container.querySelector('#sd-configuration-section')
   if (scsEl) {
     scsEl.remove()
   }
 
-  container.appendChild(wrapper)
+  container.append(wrapper)
 
-  loadStarDotsConfig()
+  void loadStarDotsConfig()
 
   shadowRoot
-    .getElementById('sd-save-config')
+    .querySelector('#sd-save-config')
     ?.addEventListener('click', async () => {
-      const key = (
-        shadowRoot.getElementById('sd-api-key') as HTMLInputElement
-      )?.value.trim()
-      const secret = (
-        shadowRoot.getElementById('sd-api-secret') as HTMLInputElement
-      )?.value.trim()
-      const bucket = (
-        shadowRoot.getElementById('sd-bucket') as HTMLInputElement
-      )?.value.trim()
+      const key = shadowRoot
+        .querySelector<HTMLInputElement>('#sd-api-key')
+        ?.value.trim()
+      const secret = shadowRoot
+        .querySelector<HTMLInputElement>('#sd-api-secret')
+        ?.value.trim()
+      const bucket = shadowRoot
+        .querySelector<HTMLInputElement>('#sd-bucket')
+        ?.value.trim()
 
-      const targetOrigin: string = '*'
+      const targetOrigin = '*'
       window.postMessage(
         {
           type: 'uiu:stardots-save-config',
@@ -633,27 +679,30 @@ const injectStarDotsSettings = () => {
         targetOrigin
       )
 
-      const statusEl = shadowRoot.getElementById(
-        'sd-save-status'
-      ) as HTMLSpanElement
+      const statusEl =
+        shadowRoot.querySelector<HTMLSpanElement>('#sd-save-status')!
       if (statusEl) {
-        statusEl.innerText = t('stardots_save_result_title')
+        statusEl.style.display = 'inline-block'
+        statusEl.textContent = t('stardots_save_result_title')
       }
 
       setTimeout(() => {
         if (statusEl) {
-          statusEl.innerText = ''
+          statusEl.style.display = 'none'
+          statusEl.textContent = ''
         }
-        const configSection = shadowRoot.getElementById(
-          'sd-configuration-section'
-        ) as HTMLDivElement
+
+        const configSection = shadowRoot.querySelector<HTMLDivElement>(
+          '#sd-configuration-section'
+        )!
         if (configSection) {
-          configSection.style.display = 'none'
+          configSection.remove()
         }
       }, 2000)
     })
 }
-var loadStarDotsConfig = async () => {
+
+async function loadStarDotsConfig() {
   window.postMessage(
     {
       type: 'uiu:stardots-get-config',
@@ -675,14 +724,26 @@ const buildHostOptions = (selectEl, selectedValue) => {
     if (val === selected) opt.selected = true
     selectEl.append(opt)
   }
-  selectEl.onchange = (event: Event) => {
+
+  selectEl.addEventListener('change', (event: Event) => {
     const selectedValue = (event.target as HTMLSelectElement)?.value.trim()
     if (selectedValue === 'stardots') {
       injectStarDotsSettings()
     } else {
-      //TODO other logic
+      const shadowRoot = selectEl.getRootNode() as ShadowRoot
+      const secondaryVal = shadowRoot.querySelector<HTMLSelectElement>(
+        '#uiu-secondary-host-select'
+      )?.value
+      if (secondaryVal !== 'stardots') {
+        const configSection = shadowRoot.querySelector(
+          '#sd-configuration-section'
+        )
+        if (configSection) {
+          configSection.remove()
+        }
+      }
     }
-  }
+  })
 }
 
 const buildSecondaryHostOptions = (
@@ -705,14 +766,25 @@ const buildSecondaryHostOptions = (
     if (val === selected) opt.selected = true
     selectEl.append(opt)
   }
-  selectEl.onchange = (event: Event) => {
+
+  selectEl.addEventListener('change', (event: Event) => {
     const selectedValue = (event.target as HTMLSelectElement)?.value.trim()
     if (selectedValue === 'stardots') {
       injectStarDotsSettings()
     } else {
-      //TODO other logic
+      const shadowRoot = selectEl.getRootNode() as ShadowRoot
+      const primaryVal =
+        shadowRoot.querySelector<HTMLSelectElement>('#uiu-host-select')?.value
+      if (primaryVal !== 'stardots') {
+        const configSection = shadowRoot.querySelector(
+          '#sd-configuration-section'
+        )
+        if (configSection) {
+          configSection.remove()
+        }
+      }
     }
-  }
+  })
 }
 
 // Helper: get proxy label key
@@ -1231,13 +1303,16 @@ async function uploadToStarDots(file) {
     throw new Error('Missing credentials')
   }
 
-  const timestamp = parseInt((Date.now() / 1000).toString()).toString()
+  const timestamp = Number.parseInt(
+    (Date.now() / 1000).toString(),
+    10
+  ).toString()
   const nonce = `${Date.now()}${Math.random().toString(16)}`
     .replace('.', '')
     .slice(0, 20)
 
   const stringToSign = `${timestamp}|${apiSecret}|${nonce}`
-  const signature = md5Encode(stringToSign).toUpperCase()
+  const signature = md5(stringToSign).toUpperCase()
 
   console.log(timestamp, nonce, stringToSign, signature)
 
@@ -1263,9 +1338,10 @@ async function uploadToStarDots(file) {
     if (data.success) {
       return data.data.url
     }
+
     throw new Error(`${data.message}(${data.requestId})`)
-  } catch (e) {
-    console.log('stardots upload error', e)
+  } catch (error) {
+    console.log('stardots upload error', error)
     throw new Error(t('error_upload_failed'))
   }
 }
@@ -1728,6 +1804,7 @@ globalThis.addEventListener('message', async (event) => {
       await setValue('stardots_bucket', bucket)
       break
     }
+
     case 'uiu:stardots-get-config': {
       const key = await getValue('stardots_key')
       const secret = await getValue('stardots_secret')
@@ -1736,24 +1813,24 @@ globalThis.addEventListener('message', async (event) => {
       if (!hostEl) return
       const shadowRoot = hostEl.shadowRoot
       if (!shadowRoot) return
-      const keyInput = shadowRoot.getElementById(
-        'sd-api-key'
-      ) as HTMLInputElement
+      const keyInput =
+        shadowRoot.querySelector<HTMLInputElement>('#sd-api-key')!
       if (keyInput) {
         keyInput.value = key ?? ''
       }
-      const secretInput = shadowRoot.getElementById(
-        'sd-api-secret'
-      ) as HTMLInputElement
+
+      const secretInput =
+        shadowRoot.querySelector<HTMLInputElement>('#sd-api-secret')!
       if (secretInput) {
         secretInput.value = secret ?? ''
       }
-      const bucketInput = shadowRoot.getElementById(
-        'sd-bucket'
-      ) as HTMLInputElement
+
+      const bucketInput =
+        shadowRoot.querySelector<HTMLInputElement>('#sd-bucket')!
       if (bucketInput) {
         bucketInput.value = bucket ?? ''
       }
+
       STARDOTS_CONFIG = {
         key: key || '',
         secret: secret || '',
@@ -1983,11 +2060,13 @@ async function createPanel(): Promise<
   const host = await getHost()
   const hostSel = createEl('select', {
     style: 'border-left: 3px solid #3b82f6;',
+    id: 'uiu-host-select',
   })
   buildHostOptions(hostSel, host)
   const secondaryHostValue = await getSecondaryHost()
   const secondaryHostSel = createEl('select', {
     style: 'border-left: 3px solid #a855f7;',
+    id: 'uiu-secondary-host-select',
   })
   buildSecondaryHostOptions(secondaryHostSel, secondaryHostValue, host)
 
@@ -3047,7 +3126,7 @@ async function createPanel(): Promise<
       )
     }
 
-    //init while script loaded
-    loadStarDotsConfig()
+    // init while script loaded
+    void loadStarDotsConfig()
   } catch {}
 })()

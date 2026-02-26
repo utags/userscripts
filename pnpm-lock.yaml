@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      blueimp-md5:
+        specifier: ^2.19.0
+        version: 2.19.0
       browser-extension-i18n:
         specifier: ^0.1.3
         version: 0.1.3
@@ -20,9 +23,6 @@ importers:
       browser-extension-utils:
         specifier: ^0.3.4
         version: 0.3.4
-      crypto-js:
-        specifier: ^4.2.0
-        version: 4.2.0
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
@@ -1308,6 +1308,9 @@ packages:
   bidi-js@1.0.3:
     resolution: {integrity: sha512-RKshQI1R3YQ+n9YJz2QQ147P66ELpa1FQEg20Dk8oW9t2KgLbpDLLp9aGZ7y8WHSshDknG0bknqGw5/tyCs5tw==}
 
+  blueimp-md5@2.19.0:
+    resolution: {integrity: sha512-DRQrD6gJyy8FbiE4s+bDoXS9hiW3Vbx5uCdwvcCf3zLHL+Iv7LtGHLpr+GZV8rHG8tK766FGYBwRbu8pELTt+w==}
+
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
@@ -1464,9 +1467,6 @@ packages:
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
-
-  crypto-js@4.2.0:
-    resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
 
   css-declaration-sorter@7.3.0:
     resolution: {integrity: sha512-LQF6N/3vkAMYF4xoHLJfG718HRJh34Z8BnNhd6bosOMIVjMlhuZK5++oZa3uYAgrI5+7x2o27gUqTR2U/KjUOQ==}
@@ -4678,6 +4678,8 @@ snapshots:
     dependencies:
       require-from-string: 2.0.2
 
+  blueimp-md5@2.19.0: {}
+
   boolbase@1.0.0: {}
 
   brace-expansion@1.1.12:
@@ -4840,8 +4842,6 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
-
-  crypto-js@4.2.0: {}
 
   css-declaration-sorter@7.3.0(postcss@8.5.6):
     dependencies:

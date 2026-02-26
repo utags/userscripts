@@ -410,9 +410,9 @@ export const ALLOWED_HOSTS = ENABLE_MOCK_HOST
       'skyimg_webp',
       'photo_lily',
       '111666_best',
+      'stardots',
       'mock',
       'mock2',
-      'stardots',
     ]
   : [
       'imgur',
