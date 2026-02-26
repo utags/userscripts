@@ -168,6 +168,9 @@ function updateFavicon(count: number): void {
     if (link.href !== originalFavicon) {
       link.href = originalFavicon!
       link.dataset.count = '' // Clear count
+      if (originalFavicon.includes('favicon.ico')) {
+        link.removeAttribute('type')
+      }
     }
 
     lastGeneratedFavicon = link.href // Update generated to current to prevent loop
