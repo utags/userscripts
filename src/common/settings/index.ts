@@ -41,6 +41,7 @@ type FieldTextarea = {
   label: string
   rows?: number
   help?: string
+  placeholder?: string
   isSitePref?: boolean
 }
 type FieldRadio = {

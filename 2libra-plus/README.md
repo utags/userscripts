@@ -33,6 +33,7 @@
 ### 4. 个性化设置
 
 - 提供可视化的设置面板，可随时开启或关闭特定功能，按需定制你的使用体验。
+- **屏蔽输入框快捷键**：支持自定义需要屏蔽的快捷键（如 `ctrl+b`、`cmd+9` 等），避免在输入框中操作时与浏览器快捷键冲突。
 
 ### 5. 界面增强
 
@@ -49,6 +50,10 @@
 - **环境要求**：需要安装油猴脚本管理器（如 [Tampermonkey](https://www.tampermonkey.net/)、[Violentmonkey](https://violentmonkey.github.io/)、[ScriptCat](https://scriptcat.org/)）。
 
 ## 📝 更新日志
+
+### v0.5.x
+
+- ✨ 新增屏蔽输入框快捷键功能，支持自定义多个快捷键，避免冲突。
 
 ### v0.4.x
 

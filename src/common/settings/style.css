@@ -99,7 +99,7 @@
 }
 
 .user-settings textarea {
-  @apply px-3 py-2 rounded-md border border-transparent text-gray-700 w-full text-right outline-none;
+  @apply px-3 py-2 rounded-md border border-transparent text-gray-700 w-full text-left outline-none;
 }
 .user-settings textarea:hover,
 .user-settings textarea:focus {

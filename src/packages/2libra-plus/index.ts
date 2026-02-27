@@ -12,6 +12,10 @@ import {
   runAutoMarkNotificationsRead,
 } from './auto-mark-notifications-read'
 import {
+  initBlockKeyboardShortcuts,
+  runBlockKeyboardShortcuts,
+} from './block-keyboard-shortcuts'
+import {
   initCheckNotifications,
   runCheckNotifications,
 } from './check-notifications'
@@ -43,6 +47,7 @@ type Settings = {
   hideSidebarExperience: boolean
   hideSidebarCoins: boolean
   hideSidebarCheckin: boolean
+  blockedShortcuts: string
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -64,6 +69,7 @@ const DEFAULT_SETTINGS: Settings = {
   hideSidebarExperience: false,
   hideSidebarCoins: false,
   hideSidebarCheckin: false,
+  blockedShortcuts: '',
 }
 
 const store = createSettingsStore('settings', DEFAULT_SETTINGS)
@@ -89,6 +95,7 @@ let hideSidebarEmail = DEFAULT_SETTINGS.hideSidebarEmail
 let hideSidebarExperience = DEFAULT_SETTINGS.hideSidebarExperience
 let hideSidebarCoins = DEFAULT_SETTINGS.hideSidebarCoins
 let hideSidebarCheckin = DEFAULT_SETTINGS.hideSidebarCheckin
+let blockedShortcuts = DEFAULT_SETTINGS.blockedShortcuts
 
 function buildSettingsSchema(): PanelSchema {
   const generalFields: Field[] = [
@@ -112,6 +119,13 @@ function buildSettingsSchema(): PanelSchema {
       type: 'toggle',
       key: 'stickyHeader',
       label: '顶部导航栏固定显示',
+    },
+    {
+      type: 'textarea',
+      key: 'blockedShortcuts',
+      label: '屏蔽输入框快捷键',
+      help: '一行一个，例如 ctrl+b, cmd+9',
+      placeholder: 'cmd+1\nctrl+b',
     },
   ]
 
@@ -252,6 +266,9 @@ async function applySettingsFromStore(): Promise<void> {
     hideSidebarExperience = enabled && Boolean(obj.hideSidebarExperience)
     hideSidebarCoins = enabled && Boolean(obj.hideSidebarCoins)
     hideSidebarCheckin = enabled && Boolean(obj.hideSidebarCheckin)
+    blockedShortcuts = String(
+      obj.blockedShortcuts || DEFAULT_SETTINGS.blockedShortcuts
+    )
 
     if (enabled && !featuresInitialized) {
       initFeatures()
@@ -263,9 +280,12 @@ async function applySettingsFromStore(): Promise<void> {
       runPostListSort(getSettingsSnapshot)
       runStickyHeader(getSettingsSnapshot)
       runSidebarHidden(getSettingsSnapshot)
+      runBlockKeyboardShortcuts(getSettingsSnapshot)
     }
   } catch {}
 }
+
+export type GetSettings = () => Settings
 
 export function getSettingsSnapshot(): Settings {
   return {
@@ -287,6 +307,7 @@ export function getSettingsSnapshot(): Settings {
     hideSidebarExperience,
     hideSidebarCoins,
     hideSidebarCheckin,
+    blockedShortcuts,
   }
 }
 
@@ -306,6 +327,7 @@ function initFeatures(): void {
   initPostListSort(getSettingsSnapshot)
   initStickyHeader(getSettingsSnapshot)
   initSidebarHidden(getSettingsSnapshot)
+  initBlockKeyboardShortcuts(getSettingsSnapshot)
 }
 
 function bootstrap(): void {
