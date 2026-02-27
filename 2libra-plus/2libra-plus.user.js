@@ -3,7 +3,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.3.8
+// @version              0.4.0
 // @description          2Libra.com 增强工具
 // @icon                 data:image/png;base64,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
 // @author               Pipecraft
@@ -45,7 +45,7 @@
     return a
   }
   var style_default =
-    '[data-unread-mark="1"]{position:relative}[data-unread-mark="1"]:before{background-color:#f97316;border-radius:9999px;bottom:0;content:"";left:-1px;position:absolute;top:0;width:4px}[data-libra-plus-post-list-sort="1"] .breadcrumbs{flex-basis:28px;flex-grow:1;margin-right:16px;min-width:28px}[data-libra-plus-post-list-sort="1"] [data-libra-plus-sort]{display:flex;flex-basis:28px;flex-grow:1;justify-content:flex-end;margin-left:16px;min-width:28px}[data-libra-plus-post-list-sort="1"] [data-libra-plus-sort]>div{min-width:176px;top:22px}@media(max-width:480px){[data-libra-plus-post-list-sort="1"] .breadcrumbs ul{display:none}}'
+    '[data-unread-mark="1"]{position:relative}[data-unread-mark="1"]:before{background-color:#f97316;border-radius:9999px;bottom:0;content:"";left:-1px;position:absolute;top:0;width:4px}[data-libra-plus-post-list-sort="1"] .breadcrumbs{flex-basis:28px;flex-grow:1;margin-right:16px;min-width:28px}[data-libra-plus-post-list-sort="1"] [data-libra-plus-sort]{display:flex;flex-basis:28px;flex-grow:1;justify-content:flex-end;margin-left:16px;min-width:28px}[data-libra-plus-post-list-sort="1"] [data-libra-plus-sort]>div{min-width:176px;top:22px}.libra-plus-reward-buttons{display:grid;gap:4px;grid-template-columns:repeat(4,1fr);margin-bottom:8px}.libra-plus-reward-buttons .libra-plus-reward-btn{border:1px solid rgba(var(--su,34 197 94),.5);border-radius:4px;color:inherit;cursor:pointer;font-size:10px;line-height:16px;padding-bottom:4px;padding-top:4px;text-align:center;transition:background-color .2s,color .2s;-webkit-user-select:none;-moz-user-select:none;user-select:none}.libra-plus-reward-buttons .libra-plus-reward-btn:hover{background-color:rgb(var(--su,34 197 94));border-color:rgb(var(--su,34 197 94));color:#fff}.libra-plus-reward-confirm-btn{margin-top:56px}@media(max-width:480px){[data-libra-plus-post-list-sort="1"] .breadcrumbs ul{display:none}}'
   function registerMenu(caption, onClick, options) {
     if (typeof GM_registerMenuCommand === 'function') {
       return GM_registerMenuCommand(caption, onClick, options)
@@ -2207,6 +2207,145 @@
     })
     onDomChange(runUpdateColor)
   }
+  var MIN_REWARD_AMOUNT = 100
+  var MAX_REWARD_AMOUNT = 500
+  var stopObserver
+  function initRewardEnhancement(getSettings2) {
+    runRewardEnhancement(getSettings2)
+  }
+  function runRewardEnhancement(getSettings2) {
+    const settings = getSettings2()
+    if (!settings.enhanceReward) {
+      if (stopObserver) {
+        stopObserver()
+        stopObserver = void 0
+      }
+      return
+    }
+    if (stopObserver) return
+    stopObserver = onDomChange(() => {
+      checkAndInject(getSettings2)
+    })
+  }
+  function checkAndInject(getSettings2) {
+    const popupSelector = 'input.range.range-xs.range-success'
+    const inputs = document.querySelectorAll(popupSelector)
+    for (const input of inputs) {
+      if (input instanceof HTMLInputElement) {
+        injectButtons(input, getSettings2)
+      }
+    }
+  }
+  function injectButtons(input, getSettings2) {
+    var _a
+    const container = input.parentElement
+    if (!container) return
+    if (container.querySelector('.libra-plus-reward-buttons')) return
+    const btnContainer = document.createElement('div')
+    btnContainer.className = 'libra-plus-reward-buttons'
+    const settings = getSettings2()
+    const amountsStr = String(
+      settings.rewardAmounts || '100, 150, 200, 300, 350, 400, 500'
+    )
+    const amounts = amountsStr
+      .split(/[,，\s\u3000]/)
+      .map((s) => Number.parseInt(s.trim(), 10))
+      .filter(
+        (n) =>
+          !Number.isNaN(n) && n >= MIN_REWARD_AMOUNT && n <= MAX_REWARD_AMOUNT
+      )
+    for (const amount of amounts) {
+      const btn = createButton(amount.toString(), () => {
+        setValue2(input, amount)
+        clickConfirm(input)
+      })
+      btnContainer.append(btn)
+    }
+    const randomRangeStr = String(settings.rewardRandomRange || '100-500')
+    let [min, max] = randomRangeStr
+      .split(/[-~]/)
+      .map((s) => Number.parseInt(s.trim(), 10))
+      .filter((n) => !Number.isNaN(n))
+    if (!min) min = MIN_REWARD_AMOUNT
+    if (!max) max = MAX_REWARD_AMOUNT
+    if (min > max) {
+      const temp = min
+      min = max
+      max = temp
+    }
+    if (!min || min < MIN_REWARD_AMOUNT || min > MAX_REWARD_AMOUNT)
+      min = MIN_REWARD_AMOUNT
+    if (!max || max < MIN_REWARD_AMOUNT || max > MAX_REWARD_AMOUNT)
+      max = MAX_REWARD_AMOUNT
+    if (min > max) min = max
+    const randomBtn = createButton('\u968F\u673A', () => {
+      let randomAmount = Math.floor(Math.random() * (max - min + 1)) + min
+      console.info(
+        '[2libra-plus] \u{1F4B0} \u968F\u673A\u6253\u8D4F\u91D1\u5E01',
+        randomAmount,
+        '\u8303\u56F4: min',
+        min,
+        'max',
+        max
+      )
+      if (randomAmount === 250) {
+        randomAmount = 200
+      }
+      setValue2(input, randomAmount)
+      clickConfirm(input)
+    })
+    btnContainer.append(randomBtn)
+    input.before(btnContainer)
+    const confirmBtn =
+      (_a = container.parentElement) == null
+        ? void 0
+        : _a.querySelector('button')
+    if (confirmBtn) {
+      confirmBtn.classList.add('libra-plus-reward-confirm-btn')
+    }
+  }
+  function createButton(text, onClick) {
+    const btn = document.createElement('div')
+    btn.className = 'libra-plus-reward-btn'
+    btn.textContent = text
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation()
+      onClick()
+    })
+    return btn
+  }
+  function setValue2(input, value) {
+    var _a
+    const nativeInputValueSetter =
+      (_a = Object.getOwnPropertyDescriptor(
+        globalThis.HTMLInputElement.prototype,
+        'value'
+      )) == null
+        ? void 0
+        : _a.set
+    const originalStep = input.step
+    input.step = '1'
+    if (nativeInputValueSetter) {
+      nativeInputValueSetter.call(input, value)
+    } else {
+      input.value = value.toString()
+    }
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    input.dispatchEvent(new Event('change', { bubbles: true }))
+    if (originalStep && value % Number(originalStep) === 0) {
+      input.step = originalStep
+    }
+  }
+  function clickConfirm(input) {
+    var _a
+    const parent = input.parentElement
+    if (!parent) return
+    const confirmBtn =
+      (_a = parent.parentElement) == null ? void 0 : _a.querySelector('button')
+    if (confirmBtn) {
+      confirmBtn.click()
+    }
+  }
   var initialized5 = false
   function applyHideEmail(cardBody, settings) {
     const emailEl = cardBody.querySelector(':scope > h2 .text-gray-400')
@@ -2337,6 +2476,9 @@
     checkUnreadNotificationsFavicon: true,
     checkUnreadNotificationsUtags: true,
     replyTimeColor: true,
+    enhanceReward: true,
+    rewardAmounts: '100, 150, 200, 300, 350, 400, 500',
+    rewardRandomRange: '100-500',
     postListSort: true,
     rememberSortMode: false,
     stickyHeader: false,
@@ -2356,6 +2498,9 @@
   var checkUnreadNotificationsUtags =
     DEFAULT_SETTINGS.checkUnreadNotificationsUtags
   var replyTimeColor = DEFAULT_SETTINGS.replyTimeColor
+  var enhanceReward = DEFAULT_SETTINGS.enhanceReward
+  var rewardAmounts = DEFAULT_SETTINGS.rewardAmounts
+  var rewardRandomRange = DEFAULT_SETTINGS.rewardRandomRange
   var postListSort = DEFAULT_SETTINGS.postListSort
   var rememberSortMode = DEFAULT_SETTINGS.rememberSortMode
   var stickyHeader = DEFAULT_SETTINGS.stickyHeader
@@ -2437,6 +2582,25 @@
         label: '\u9690\u85CF\u7B7E\u5230',
       },
     ]
+    const rewardFields = [
+      {
+        type: 'toggle',
+        key: 'enhanceReward',
+        label: '\u542F\u7528',
+      },
+      {
+        type: 'input',
+        key: 'rewardAmounts',
+        label: '\u5FEB\u6377\u91D1\u989D\u6309\u94AE',
+        help: '\u4F7F\u7528\u9017\u53F7\u5206\u9694\uFF0C\u8303\u56F4 100-500',
+      },
+      {
+        type: 'input',
+        key: 'rewardRandomRange',
+        label: '\u968F\u673A\u91D1\u989D\u8303\u56F4',
+        help: '\u683C\u5F0F\u5982 100-500',
+      },
+    ]
     return {
       type: 'simple',
       title: '2Libra Plus \u8BBE\u7F6E',
@@ -2445,6 +2609,11 @@
           id: 'general',
           title: '\u901A\u7528\u8BBE\u7F6E',
           fields: generalFields,
+        },
+        {
+          id: 'reward',
+          title: '\u6253\u8D4F\u529F\u80FD\u589E\u5F3A',
+          fields: rewardFields,
         },
         {
           id: 'notifications',
@@ -2505,6 +2674,13 @@
       checkUnreadNotificationsUtags =
         enabled && Boolean(obj.checkUnreadNotificationsUtags)
       replyTimeColor = enabled && Boolean(obj.replyTimeColor)
+      enhanceReward = enabled && Boolean(obj.enhanceReward)
+      rewardAmounts = String(
+        obj.rewardAmounts || DEFAULT_SETTINGS.rewardAmounts
+      )
+      rewardRandomRange = String(
+        obj.rewardRandomRange || DEFAULT_SETTINGS.rewardRandomRange
+      )
       postListSort = enabled && Boolean(obj.postListSort)
       rememberSortMode = enabled && Boolean(obj.rememberSortMode)
       stickyHeader = enabled && Boolean(obj.stickyHeader)
@@ -2518,6 +2694,7 @@
         runAutoMarkNotificationsRead(getSettingsSnapshot)
         runCheckNotifications(getSettingsSnapshot)
         runReplyTimeColor(getSettingsSnapshot)
+        runRewardEnhancement(getSettingsSnapshot)
         runPostListSort(getSettingsSnapshot)
         runStickyHeader(getSettingsSnapshot)
         runSidebarHidden(getSettingsSnapshot)
@@ -2533,6 +2710,9 @@
       checkUnreadNotificationsFavicon,
       checkUnreadNotificationsUtags,
       replyTimeColor,
+      enhanceReward,
+      rewardAmounts,
+      rewardRandomRange,
       postListSort,
       rememberSortMode,
       stickyHeader,
@@ -2552,6 +2732,7 @@
     initAutoMarkNotificationsRead(getSettingsSnapshot)
     initCheckNotifications(getSettingsSnapshot)
     initReplyTimeColor(getSettingsSnapshot)
+    initRewardEnhancement(getSettingsSnapshot)
     initPostListSort(getSettingsSnapshot)
     initStickyHeader(getSettingsSnapshot)
     initSidebarHidden(getSettingsSnapshot)

@@ -36,6 +36,39 @@
   }
 }
 
+.libra-plus-reward-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+
+  .libra-plus-reward-btn {
+    cursor: pointer;
+    text-align: center;
+    font-size: 10px;
+    line-height: 1rem;
+    border: 1px solid rgba(var(--su, 34 197 94), 0.5);
+    border-radius: 0.25rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    user-select: none;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+    color: inherit;
+
+    &:hover {
+      background-color: rgb(var(--su, 34 197 94));
+      color: white;
+      border-color: rgb(var(--su, 34 197 94));
+    }
+  }
+}
+
+.libra-plus-reward-confirm-btn {
+  margin-top: 3.5rem;
+}
+
 @media (max-width: 480px) {
   [data-libra-plus-post-list-sort="1"] {
     .breadcrumbs {

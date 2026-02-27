@@ -17,6 +17,10 @@ import {
 } from './check-notifications'
 import { initPostListSort, runPostListSort } from './post-list-sort'
 import { initReplyTimeColor, runReplyTimeColor } from './reply-time-color'
+import {
+  initRewardEnhancement,
+  runRewardEnhancement,
+} from './reward-enhancement'
 import { initSidebarHidden, runSidebarHidden } from './sidebar-hidden'
 import { initStickyHeader, runStickyHeader } from './sticky-header'
 
@@ -28,6 +32,9 @@ type Settings = {
   checkUnreadNotificationsFavicon: boolean
   checkUnreadNotificationsUtags: boolean
   replyTimeColor: boolean
+  enhanceReward: boolean
+  rewardAmounts: string
+  rewardRandomRange: string
   postListSort: boolean
   rememberSortMode: boolean
   stickyHeader: boolean
@@ -45,6 +52,9 @@ const DEFAULT_SETTINGS: Settings = {
   checkUnreadNotificationsFavicon: true,
   checkUnreadNotificationsUtags: true,
   replyTimeColor: true,
+  enhanceReward: true,
+  rewardAmounts: '100, 150, 200, 300, 350, 400, 500',
+  rewardRandomRange: '100-500',
   postListSort: true,
   rememberSortMode: false,
   stickyHeader: false,
@@ -66,6 +76,9 @@ let checkUnreadNotificationsFavicon =
 let checkUnreadNotificationsUtags =
   DEFAULT_SETTINGS.checkUnreadNotificationsUtags
 let replyTimeColor = DEFAULT_SETTINGS.replyTimeColor
+let enhanceReward = DEFAULT_SETTINGS.enhanceReward
+let rewardAmounts = DEFAULT_SETTINGS.rewardAmounts
+let rewardRandomRange = DEFAULT_SETTINGS.rewardRandomRange
 let postListSort = DEFAULT_SETTINGS.postListSort
 let rememberSortMode = DEFAULT_SETTINGS.rememberSortMode
 let stickyHeader = DEFAULT_SETTINGS.stickyHeader
@@ -134,11 +147,32 @@ function buildSettingsSchema(): PanelSchema {
     { type: 'toggle', key: 'hideSidebarCheckin', label: '隐藏签到' },
   ]
 
+  const rewardFields: Field[] = [
+    {
+      type: 'toggle',
+      key: 'enhanceReward',
+      label: '启用',
+    },
+    {
+      type: 'input',
+      key: 'rewardAmounts',
+      label: '快捷金额按钮',
+      help: '使用逗号分隔，范围 100-500',
+    },
+    {
+      type: 'input',
+      key: 'rewardRandomRange',
+      label: '随机金额范围',
+      help: '格式如 100-500',
+    },
+  ]
+
   return {
     type: 'simple',
     title: '2Libra Plus 设置',
     groups: [
       { id: 'general', title: '通用设置', fields: generalFields },
+      { id: 'reward', title: '打赏功能增强', fields: rewardFields },
       { id: 'notifications', title: '通知管理', fields: notificationFields },
       { id: 'sidebar', title: '右侧栏个人卡片设置', fields: sidebarFields },
     ],
@@ -193,6 +227,11 @@ async function applySettingsFromStore(): Promise<void> {
     checkUnreadNotificationsUtags =
       enabled && Boolean(obj.checkUnreadNotificationsUtags)
     replyTimeColor = enabled && Boolean(obj.replyTimeColor)
+    enhanceReward = enabled && Boolean(obj.enhanceReward)
+    rewardAmounts = String(obj.rewardAmounts || DEFAULT_SETTINGS.rewardAmounts)
+    rewardRandomRange = String(
+      obj.rewardRandomRange || DEFAULT_SETTINGS.rewardRandomRange
+    )
     postListSort = enabled && Boolean(obj.postListSort)
     rememberSortMode = enabled && Boolean(obj.rememberSortMode)
     stickyHeader = enabled && Boolean(obj.stickyHeader)
@@ -207,6 +246,7 @@ async function applySettingsFromStore(): Promise<void> {
       runAutoMarkNotificationsRead(getSettingsSnapshot)
       runCheckNotifications(getSettingsSnapshot)
       runReplyTimeColor(getSettingsSnapshot)
+      runRewardEnhancement(getSettingsSnapshot)
       runPostListSort(getSettingsSnapshot)
       runStickyHeader(getSettingsSnapshot)
       runSidebarHidden(getSettingsSnapshot)
@@ -223,6 +263,9 @@ export function getSettingsSnapshot(): Settings {
     checkUnreadNotificationsFavicon,
     checkUnreadNotificationsUtags,
     replyTimeColor,
+    enhanceReward,
+    rewardAmounts,
+    rewardRandomRange,
     postListSort,
     rememberSortMode,
     stickyHeader,
@@ -245,6 +288,7 @@ function initFeatures(): void {
   initAutoMarkNotificationsRead(getSettingsSnapshot)
   initCheckNotifications(getSettingsSnapshot)
   initReplyTimeColor(getSettingsSnapshot)
+  initRewardEnhancement(getSettingsSnapshot)
   initPostListSort(getSettingsSnapshot)
   initStickyHeader(getSettingsSnapshot)
   initSidebarHidden(getSettingsSnapshot)
