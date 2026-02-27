@@ -109,6 +109,35 @@ function injectButtons(
       randomAmount = 200
     }
 
+    const probability = Number.parseInt(
+      String(settings.rewardProbability || 100),
+      10
+    )
+    const random = Math.floor(Math.random() * 100) + 1
+    // 如果随机值大于概率值，则跳过（即 random <= probability 时才打赏）
+    if (random > probability) {
+      console.info(
+        '[2libra-plus] 🎲 随机打赏跳过',
+        '概率:',
+        probability,
+        '随机值:',
+        random
+      )
+      const originalText = randomBtn.textContent
+      randomBtn.textContent = '未触发'
+      if (randomBtn instanceof HTMLButtonElement) {
+        randomBtn.disabled = true
+      }
+
+      setTimeout(() => {
+        randomBtn.textContent = originalText
+        if (randomBtn instanceof HTMLButtonElement) {
+          randomBtn.disabled = false
+        }
+      }, 1000)
+      return
+    }
+
     setValue(input, randomAmount)
     clickConfirm(input)
   })

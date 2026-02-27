@@ -35,6 +35,7 @@ type Settings = {
   enhanceReward: boolean
   rewardAmounts: string
   rewardRandomRange: string
+  rewardProbability: number
   postListSort: boolean
   rememberSortMode: boolean
   stickyHeader: boolean
@@ -55,6 +56,7 @@ const DEFAULT_SETTINGS: Settings = {
   enhanceReward: true,
   rewardAmounts: '100, 150, 200, 300, 350, 400, 500',
   rewardRandomRange: '100-500',
+  rewardProbability: 100,
   postListSort: true,
   rememberSortMode: false,
   stickyHeader: false,
@@ -79,6 +81,7 @@ let replyTimeColor = DEFAULT_SETTINGS.replyTimeColor
 let enhanceReward = DEFAULT_SETTINGS.enhanceReward
 let rewardAmounts = DEFAULT_SETTINGS.rewardAmounts
 let rewardRandomRange = DEFAULT_SETTINGS.rewardRandomRange
+let rewardProbability = DEFAULT_SETTINGS.rewardProbability
 let postListSort = DEFAULT_SETTINGS.postListSort
 let rememberSortMode = DEFAULT_SETTINGS.rememberSortMode
 let stickyHeader = DEFAULT_SETTINGS.stickyHeader
@@ -165,6 +168,12 @@ function buildSettingsSchema(): PanelSchema {
       label: '随机金额范围',
       help: '格式如 100-500',
     },
+    {
+      type: 'input',
+      key: 'rewardProbability',
+      label: '随机打赏概率 (%)',
+      help: '范围 1-100，100 表示 100% 打赏',
+    },
   ]
 
   return {
@@ -232,6 +241,10 @@ async function applySettingsFromStore(): Promise<void> {
     rewardRandomRange = String(
       obj.rewardRandomRange || DEFAULT_SETTINGS.rewardRandomRange
     )
+    rewardProbability = Number.parseInt(
+      String(obj.rewardProbability || DEFAULT_SETTINGS.rewardProbability),
+      10
+    )
     postListSort = enabled && Boolean(obj.postListSort)
     rememberSortMode = enabled && Boolean(obj.rememberSortMode)
     stickyHeader = enabled && Boolean(obj.stickyHeader)
@@ -266,6 +279,7 @@ export function getSettingsSnapshot(): Settings {
     enhanceReward,
     rewardAmounts,
     rewardRandomRange,
+    rewardProbability,
     postListSort,
     rememberSortMode,
     stickyHeader,
