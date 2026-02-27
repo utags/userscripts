@@ -94,21 +94,6 @@ function injectButtons(
   if (min > max) min = max // In case both were out of bounds in a way that caused flip, though unlikely with above logic
 
   const randomBtn = createButton('随机', () => {
-    let randomAmount = Math.floor(Math.random() * (max - min + 1)) + min
-
-    console.info(
-      '[2libra-plus] 💰 随机打赏金币',
-      randomAmount,
-      '范围: min',
-      min,
-      'max',
-      max
-    )
-
-    if (randomAmount === 250) {
-      randomAmount = 200
-    }
-
     const probability = Number.parseInt(
       String(settings.rewardProbability || 100),
       10
@@ -136,6 +121,21 @@ function injectButtons(
         }
       }, 1000)
       return
+    }
+
+    let randomAmount = Math.floor(Math.random() * (max - min + 1)) + min
+
+    console.info(
+      '[2libra-plus] 💰 随机打赏金币',
+      randomAmount,
+      '范围: min',
+      min,
+      'max',
+      max
+    )
+
+    if (randomAmount === 250) {
+      randomAmount = 200
     }
 
     setValue(input, randomAmount)
