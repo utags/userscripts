@@ -2020,6 +2020,7 @@ function registerHostAutofix(_root: ShadowRoot, cfg: ShortcutsConfig) {
 
 function main() {
   try {
+    if (document.contentType !== 'text/html') return
     const de = document.documentElement as any
     if (!de || de.tagName !== 'HTML') return
     if (de.dataset && de.dataset.utagsShortcuts === '1') return

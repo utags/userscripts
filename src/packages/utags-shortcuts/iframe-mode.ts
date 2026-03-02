@@ -54,6 +54,7 @@ const BLACKLIST_URL_PATTERNS = new Set([
   /^https:\/\/www\.google\.com\/search\?.*[&?]udm=50/,
   /^https:\/\/www\.google\.com\/search\?((?![?&]udm=).)*$/,
   /^https:\/\/(.+\.)?stackexchange\.com\//,
+  /^https:\/\/(.+\.)?slack\.com\//,
   // /^https:\/\/(login|auth)[^.]*\./,
   /\b(login|auth|signin|signup|raw)/i,
   /(login|auth|signin|signup|raw)\b/i,
@@ -154,6 +155,7 @@ export function isIframeModeDisabled() {
 }
 
 export async function checkAndEnableIframeMode() {
+  if (document.contentType !== 'text/html') return
   if (!isTopFrame() || document.documentElement.tagName !== 'HTML') return
 
   // 0. Check if disabled for this site
@@ -365,6 +367,7 @@ function syncFavicon(doc: Document) {
 }
 
 export function initIframeChild() {
+  if (document.contentType !== 'text/html') return
   // Check if we are inside the managed iframe
   if ((globalThis as any).name !== 'utags-shortcuts-iframe') return
 

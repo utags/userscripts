@@ -110,6 +110,10 @@ You can use the following variables in the URL field. They will be replaced with
 
 ## Changelog
 
+### v0.9.x
+
+- **Compatibility**: Automatically disable the script on non-HTML pages (e.g., JSON, XML, text files) to prevent errors and unnecessary execution.
+
 ### v0.8.x
 
 - **Layout Position Normalization**: In Sidebar mode, added a position normalization step that automatically maps the `position` setting to the actual sidebar side (left/right), keeping the edge strip, panel, and menus consistent across different layout configurations.
