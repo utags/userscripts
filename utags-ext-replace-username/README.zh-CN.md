@@ -12,7 +12,7 @@
 
 ### 🏷️ UTags - Add User Tags to Links
 
-- **链接**: [Greasy Fork](https://greasyfork.org/scripts/460718-utags-add-usertags-to-links)
+- **链接**：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/569761-utags-add-usertags-to-links) · [Greasy Fork](https://greasyfork.org/zh-CN/scripts/460718-utags-add-usertags-to-links) · [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/2784) · [GitHub](https://github.com/utags/utags/raw/main/packages/extension/build/userscript-prod/utags.user.js)
 - **功能**: 为用户、帖子、视频等其他链接添加自定义标签和注释
 - **亮点**: 支持特殊标签过滤（如垃圾、屏蔽、点击诱饵等），数据导出/导入，自动标记已查看帖子
 - **支持的网站**: V2EX、X（Twitter）、Reddit、GitHub、Bilibili、Zhihu、Linux.do、Youtube 等 50+ 网站
