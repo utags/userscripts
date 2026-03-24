@@ -1,0 +1,19 @@
+/* ==UserStyle==
+@name           linux.do - 隐藏顶部大标题
+@namespace      https://github.com/utags
+@version        1.0.0
+@description    隐藏顶部大标题，安全摸鱼。
+@author         Pipecraft
+@license        MIT
+@icon           https://www.google.com/s2/favicons?sz=64&domain=linux.do
+==/UserStyle== */
+
+@-moz-document domain("linux.do"), domain("idcflare.com") {
+  .d-header .title-wrapper {
+    opacity: 1%;
+  }
+
+  .d-header .title-wrapper:hover {
+    opacity: 100%;
+  }
+}
