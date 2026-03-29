@@ -3,7 +3,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.5.1
+// @version              0.6.0
 // @description          2Libra.com 增强工具
 // @icon                 data:image/png;base64,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
 // @author               Pipecraft
@@ -1151,6 +1151,21 @@
         beforeSetHook = cb
       },
     }
+  }
+  function randomToken(len = 8) {
+    const bytes = new Uint8Array(len)
+    try {
+      crypto.getRandomValues(bytes)
+    } catch (e) {
+      for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = Math.floor(Math.random() * 256)
+      }
+    }
+    let out = ''
+    for (const b of bytes) {
+      out += (b % 36).toString(36)
+    }
+    return out
   }
   var urlCallbacks = /* @__PURE__ */ new Set()
   var urlWatcherInstalled = false
@@ -2457,6 +2472,63 @@
     }
     return experienceEl
   }
+  function applyAnonymizeNickname(h2, settings) {
+    const nicknameLink = h2.querySelector('a[href^="/user/"]')
+    if (!nicknameLink) return
+    if (nicknameLink.dataset.libraPlusOriginalText === void 0) {
+      nicknameLink.dataset.libraPlusOriginalText =
+        nicknameLink.textContent || ''
+    }
+    if (settings.anonymizeSidebarNickname) {
+      const alias = (settings.sidebarNicknameAlias || '').trim()
+      if (alias !== '' && alias !== nicknameLink.textContent) {
+        nicknameLink.textContent = alias
+        nicknameLink.style.color = 'inherit'
+      }
+    } else {
+      const original = nicknameLink.dataset.libraPlusOriginalText
+      if (original !== void 0 && original !== nicknameLink.textContent) {
+        nicknameLink.textContent = original
+        nicknameLink.style.removeProperty('color')
+      }
+    }
+  }
+  function applyAnonymizeAvatar(h2, settings) {
+    const avatarImg = h2.querySelector(
+      'img[src*="/avatars/"],img[src*="avatars"]'
+    )
+    if (!avatarImg) return
+    if (avatarImg.dataset.libraPlusOriginalSrc === void 0) {
+      avatarImg.dataset.libraPlusOriginalSrc =
+        avatarImg.currentSrc || avatarImg.src
+      avatarImg.dataset.libraPlusOriginalSrcset = avatarImg.srcset
+    }
+    if (settings.anonymizeSidebarAvatar) {
+      let fakeSrc = avatarImg.dataset.libraPlusFakeSrc
+      if (!fakeSrc) {
+        fakeSrc = 'https://r2.2libra.com/avatars/none-'.concat(
+          randomToken(8),
+          '.png'
+        )
+        avatarImg.dataset.libraPlusFakeSrc = fakeSrc
+      }
+      if (avatarImg.src !== fakeSrc) {
+        avatarImg.src = fakeSrc
+      }
+      if (avatarImg.srcset !== '') {
+        avatarImg.srcset = ''
+      }
+    } else {
+      const originalSrc = avatarImg.dataset.libraPlusOriginalSrc
+      if (originalSrc !== void 0 && originalSrc !== avatarImg.src) {
+        avatarImg.src = originalSrc
+      }
+      const originalSrcset = avatarImg.dataset.libraPlusOriginalSrcset
+      if (originalSrcset !== void 0 && originalSrcset !== avatarImg.srcset) {
+        avatarImg.srcset = originalSrcset
+      }
+    }
+  }
   function applyHideActions(experienceEl, settings) {
     var _a
     const actionsContainer = experienceEl.nextElementSibling
@@ -2505,6 +2577,8 @@
     applyHideEmail(cardBody, settings)
     const h2 = cardBody.querySelector(':scope > h2')
     if (h2) {
+      applyAnonymizeNickname(h2, settings)
+      applyAnonymizeAvatar(h2, settings)
       const experienceEl = applyHideExperience(h2, settings)
       if (experienceEl) {
         applyHideActions(experienceEl, settings)
@@ -2578,6 +2652,9 @@
     hideSidebarExperience: false,
     hideSidebarCoins: false,
     hideSidebarCheckin: false,
+    anonymizeSidebarNickname: false,
+    sidebarNicknameAlias: '',
+    anonymizeSidebarAvatar: false,
     blockedShortcuts: '',
   }
   var store = createSettingsStore('settings', DEFAULT_SETTINGS)
@@ -2602,7 +2679,14 @@
   var hideSidebarExperience = DEFAULT_SETTINGS.hideSidebarExperience
   var hideSidebarCoins = DEFAULT_SETTINGS.hideSidebarCoins
   var hideSidebarCheckin = DEFAULT_SETTINGS.hideSidebarCheckin
+  var anonymizeSidebarNickname = DEFAULT_SETTINGS.anonymizeSidebarNickname
+  var sidebarNicknameAlias = DEFAULT_SETTINGS.sidebarNicknameAlias
+  var anonymizeSidebarAvatar = DEFAULT_SETTINGS.anonymizeSidebarAvatar
   var blockedShortcuts = DEFAULT_SETTINGS.blockedShortcuts
+  function generateSidebarAlias() {
+    const len = Math.floor(Math.random() * 6) + 5
+    return randomToken(len)
+  }
   function buildSettingsSchema() {
     const generalFields = [
       { type: 'toggle', key: 'enabled', label: '\u542F\u7528' },
@@ -2682,6 +2766,22 @@
         type: 'toggle',
         key: 'hideSidebarCheckin',
         label: '\u9690\u85CF\u7B7E\u5230',
+      },
+      {
+        type: 'toggle',
+        key: 'anonymizeSidebarNickname',
+        label: '\u968F\u673A\u6635\u79F0\uFF08\u9632\u8BA4\u51FA\uFF09',
+      },
+      {
+        type: 'input',
+        key: 'sidebarNicknameAlias',
+        label: '\u4FA7\u8FB9\u680F\u6635\u79F0',
+        help: '\u7559\u7A7A\u5219\u5728\u5F00\u542F\u65F6\u81EA\u52A8\u751F\u6210\u968F\u673A\u6635\u79F0\uFF08\u4F1A\u5199\u5165\u8BBE\u7F6E\uFF09',
+      },
+      {
+        type: 'toggle',
+        key: 'anonymizeSidebarAvatar',
+        label: '\u968F\u673A\u5934\u50CF\uFF08404\uFF09',
       },
     ]
     const rewardFields = [
@@ -2800,9 +2900,26 @@
       hideSidebarExperience = enabled && Boolean(obj.hideSidebarExperience)
       hideSidebarCoins = enabled && Boolean(obj.hideSidebarCoins)
       hideSidebarCheckin = enabled && Boolean(obj.hideSidebarCheckin)
+      anonymizeSidebarNickname =
+        enabled && Boolean(obj.anonymizeSidebarNickname)
+      sidebarNicknameAlias = String(
+        obj.sidebarNicknameAlias || DEFAULT_SETTINGS.sidebarNicknameAlias
+      )
+      anonymizeSidebarAvatar = enabled && Boolean(obj.anonymizeSidebarAvatar)
       blockedShortcuts = String(
         obj.blockedShortcuts || DEFAULT_SETTINGS.blockedShortcuts
       )
+      if (
+        enabled &&
+        anonymizeSidebarNickname &&
+        sidebarNicknameAlias.trim() === ''
+      ) {
+        const alias = generateSidebarAlias()
+        sidebarNicknameAlias = alias
+        try {
+          await store.set('sidebarNicknameAlias', alias)
+        } catch (e) {}
+      }
       if (enabled && !featuresInitialized) {
         initFeatures()
       } else if (featuresInitialized) {
@@ -2837,6 +2954,9 @@
       hideSidebarExperience,
       hideSidebarCoins,
       hideSidebarCheckin,
+      anonymizeSidebarNickname,
+      sidebarNicknameAlias,
+      anonymizeSidebarAvatar,
       blockedShortcuts,
     }
   }

@@ -1,4 +1,5 @@
 import { onDomChange, onUrlChange } from '../../utils/dom-watcher'
+import { randomToken } from '../../utils/random'
 
 type SettingsSnapshot = {
   enabled: boolean
@@ -6,6 +7,9 @@ type SettingsSnapshot = {
   hideSidebarExperience: boolean
   hideSidebarCoins: boolean
   hideSidebarCheckin: boolean
+  anonymizeSidebarNickname: boolean
+  sidebarNicknameAlias: string
+  anonymizeSidebarAvatar: boolean
 }
 
 type GetSettings = () => SettingsSnapshot
@@ -44,6 +48,74 @@ function applyHideExperience(
   }
 
   return experienceEl
+}
+
+function applyAnonymizeNickname(
+  h2: HTMLElement,
+  settings: SettingsSnapshot
+): void {
+  const nicknameLink = h2.querySelector<HTMLAnchorElement>('a[href^="/user/"]')
+  if (!nicknameLink) return
+
+  if (nicknameLink.dataset.libraPlusOriginalText === undefined) {
+    nicknameLink.dataset.libraPlusOriginalText = nicknameLink.textContent || ''
+  }
+
+  if (settings.anonymizeSidebarNickname) {
+    const alias = (settings.sidebarNicknameAlias || '').trim()
+    if (alias !== '' && alias !== nicknameLink.textContent) {
+      nicknameLink.textContent = alias
+      nicknameLink.style.color = 'inherit'
+    }
+  } else {
+    const original = nicknameLink.dataset.libraPlusOriginalText
+    if (original !== undefined && original !== nicknameLink.textContent) {
+      nicknameLink.textContent = original
+      nicknameLink.style.removeProperty('color')
+    }
+  }
+}
+
+function applyAnonymizeAvatar(
+  h2: HTMLElement,
+  settings: SettingsSnapshot
+): void {
+  const avatarImg = h2.querySelector<HTMLImageElement>(
+    'img[src*="/avatars/"],img[src*="avatars"]'
+  )
+  if (!avatarImg) return
+
+  if (avatarImg.dataset.libraPlusOriginalSrc === undefined) {
+    avatarImg.dataset.libraPlusOriginalSrc =
+      avatarImg.currentSrc || avatarImg.src
+    avatarImg.dataset.libraPlusOriginalSrcset = avatarImg.srcset
+  }
+
+  if (settings.anonymizeSidebarAvatar) {
+    let fakeSrc = avatarImg.dataset.libraPlusFakeSrc
+    if (!fakeSrc) {
+      fakeSrc = `https://r2.2libra.com/avatars/none-${randomToken(8)}.png`
+      avatarImg.dataset.libraPlusFakeSrc = fakeSrc
+    }
+
+    if (avatarImg.src !== fakeSrc) {
+      avatarImg.src = fakeSrc
+    }
+
+    if (avatarImg.srcset !== '') {
+      avatarImg.srcset = ''
+    }
+  } else {
+    const originalSrc = avatarImg.dataset.libraPlusOriginalSrc
+    if (originalSrc !== undefined && originalSrc !== avatarImg.src) {
+      avatarImg.src = originalSrc
+    }
+
+    const originalSrcset = avatarImg.dataset.libraPlusOriginalSrcset
+    if (originalSrcset !== undefined && originalSrcset !== avatarImg.srcset) {
+      avatarImg.srcset = originalSrcset
+    }
+  }
 }
 
 function applyHideActions(
@@ -109,6 +181,8 @@ function applySidebarHidden(getSettings: GetSettings): void {
 
   const h2 = cardBody.querySelector<HTMLElement>(':scope > h2')
   if (h2) {
+    applyAnonymizeNickname(h2, settings)
+    applyAnonymizeAvatar(h2, settings)
     const experienceEl = applyHideExperience(h2, settings)
     if (experienceEl) {
       applyHideActions(experienceEl, settings)

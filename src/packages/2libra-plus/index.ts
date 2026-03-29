@@ -7,6 +7,7 @@ import {
   type Field,
   type PanelSchema,
 } from '../../common/settings'
+import { randomToken } from '../../utils/random'
 import {
   initAutoMarkNotificationsRead,
   runAutoMarkNotificationsRead,
@@ -47,6 +48,9 @@ type Settings = {
   hideSidebarExperience: boolean
   hideSidebarCoins: boolean
   hideSidebarCheckin: boolean
+  anonymizeSidebarNickname: boolean
+  sidebarNicknameAlias: string
+  anonymizeSidebarAvatar: boolean
   blockedShortcuts: string
 }
 
@@ -69,6 +73,9 @@ const DEFAULT_SETTINGS: Settings = {
   hideSidebarExperience: false,
   hideSidebarCoins: false,
   hideSidebarCheckin: false,
+  anonymizeSidebarNickname: false,
+  sidebarNicknameAlias: '',
+  anonymizeSidebarAvatar: false,
   blockedShortcuts: '',
 }
 
@@ -95,7 +102,15 @@ let hideSidebarEmail = DEFAULT_SETTINGS.hideSidebarEmail
 let hideSidebarExperience = DEFAULT_SETTINGS.hideSidebarExperience
 let hideSidebarCoins = DEFAULT_SETTINGS.hideSidebarCoins
 let hideSidebarCheckin = DEFAULT_SETTINGS.hideSidebarCheckin
+let anonymizeSidebarNickname = DEFAULT_SETTINGS.anonymizeSidebarNickname
+let sidebarNicknameAlias = DEFAULT_SETTINGS.sidebarNicknameAlias
+let anonymizeSidebarAvatar = DEFAULT_SETTINGS.anonymizeSidebarAvatar
 let blockedShortcuts = DEFAULT_SETTINGS.blockedShortcuts
+
+function generateSidebarAlias(): string {
+  const len = Math.floor(Math.random() * 6) + 5
+  return randomToken(len)
+}
 
 function buildSettingsSchema(): PanelSchema {
   const generalFields: Field[] = [
@@ -162,6 +177,22 @@ function buildSettingsSchema(): PanelSchema {
     { type: 'toggle', key: 'hideSidebarExperience', label: '隐藏经验值' },
     { type: 'toggle', key: 'hideSidebarCoins', label: '隐藏金币数量' },
     { type: 'toggle', key: 'hideSidebarCheckin', label: '隐藏签到' },
+    {
+      type: 'toggle',
+      key: 'anonymizeSidebarNickname',
+      label: '随机昵称（防认出）',
+    },
+    {
+      type: 'input',
+      key: 'sidebarNicknameAlias',
+      label: '侧边栏昵称',
+      help: '留空则在开启时自动生成随机昵称（会写入设置）',
+    },
+    {
+      type: 'toggle',
+      key: 'anonymizeSidebarAvatar',
+      label: '随机头像（404）',
+    },
   ]
 
   const rewardFields: Field[] = [
@@ -266,9 +297,26 @@ async function applySettingsFromStore(): Promise<void> {
     hideSidebarExperience = enabled && Boolean(obj.hideSidebarExperience)
     hideSidebarCoins = enabled && Boolean(obj.hideSidebarCoins)
     hideSidebarCheckin = enabled && Boolean(obj.hideSidebarCheckin)
+    anonymizeSidebarNickname = enabled && Boolean(obj.anonymizeSidebarNickname)
+    sidebarNicknameAlias = String(
+      obj.sidebarNicknameAlias || DEFAULT_SETTINGS.sidebarNicknameAlias
+    )
+    anonymizeSidebarAvatar = enabled && Boolean(obj.anonymizeSidebarAvatar)
     blockedShortcuts = String(
       obj.blockedShortcuts || DEFAULT_SETTINGS.blockedShortcuts
     )
+
+    if (
+      enabled &&
+      anonymizeSidebarNickname &&
+      sidebarNicknameAlias.trim() === ''
+    ) {
+      const alias = generateSidebarAlias()
+      sidebarNicknameAlias = alias
+      try {
+        await store.set('sidebarNicknameAlias', alias)
+      } catch {}
+    }
 
     if (enabled && !featuresInitialized) {
       initFeatures()
@@ -307,6 +355,9 @@ export function getSettingsSnapshot(): Settings {
     hideSidebarExperience,
     hideSidebarCoins,
     hideSidebarCheckin,
+    anonymizeSidebarNickname,
+    sidebarNicknameAlias,
+    anonymizeSidebarAvatar,
     blockedShortcuts,
   }
 }
