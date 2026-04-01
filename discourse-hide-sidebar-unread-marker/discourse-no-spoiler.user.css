@@ -1,0 +1,15 @@
+/* ==UserStyle==
+@name           Discourse - 隐藏右侧栏未读标记（小蓝点）
+@namespace      https://github.com/utags
+@version        1.0.0
+@description    自动隐藏右侧栏未读标记。
+@author         Pipecraft
+@license        MIT
+@icon           https://www.google.com/s2/favicons?sz=64&domain=meta.discourse.org
+==/UserStyle== */
+
+@-moz-document domain("meta.discourse.org"), domain("linux.do"), domain("idcflare.com"), domain("www.nodeloc.com"), domain("meta.appinn.net"), domain("community.openai.com"), domain("community.cloudflare.com"), domain("community.wanikani.com"), domain("forum.cursor.com"), domain("forum.obsidian.md"), domain("forum-zh.obsidian.md"), domain("www.uscardforum.com") {
+  .sidebar-sections .unread {
+    display: none;
+  }
+}
