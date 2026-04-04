@@ -26,6 +26,9 @@ importers:
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
+      utags-utils:
+        specifier: ^0.3.3
+        version: 0.3.3
     devDependencies:
       '@ianvs/prettier-plugin-sort-imports':
         specifier: ^4.6.2
@@ -3478,6 +3481,10 @@ packages:
 
   url-join@4.0.1:
     resolution: {integrity: sha512-jk1+QP6ZJqyOiuEI9AEWQfju/nB2Pw466kbA0LEZljHwKeMgd9WrAEgEGxjPDD2+TNbbb37rTyhEfrCXfuKXnA==}
+
+  utags-utils@0.3.3:
+    resolution: {integrity: sha512-Y5iskuWHuob3wDAZMQTfYkA+yzKZOJwsgHu9qh6MjemTiECZuKQQrqrEy2bO03U/TqWYV1pyFEGDl2hcpUKNAA==}
+    engines: {node: '>=16.0.0'}
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -7048,6 +7055,8 @@ snapshots:
       punycode: 2.3.1
 
   url-join@4.0.1: {}
+
+  utags-utils@0.3.3: {}
 
   util-deprecate@1.0.2: {}
 

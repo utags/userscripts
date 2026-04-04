@@ -1,0 +1,18 @@
+// ==UserScript==
+// @name                 🏷️ UTags Import Helper
+// @name:zh-CN           🏷️ 小鱼标签 (UTags) 导入助手
+// @namespace            {namespace}
+// @homepageURL          {homepage}
+// @supportURL           {bugs.url}
+// @version              0.1.0
+// @description          Export tags data from other scripts into UTags backup JSON.
+// @description:zh-CN    将其他脚本的标签数据转换为小鱼标签 (UTags) 备份 JSON 并自动下载。
+// @icon                 data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ff6361' class='bi bi-tags-fill' viewBox='0 0 16 16'%3E %3Cpath d='M2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586V2zm3.5 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z'/%3E %3Cpath d='M1.293 7.793A1 1 0 0 1 1 7.086V2a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7 7a1 1 0 0 0 1.414 0l.043-.043-7.457-7.457z'/%3E %3C/svg%3E
+// @author               {author}
+// @license              {license}
+// @match                https://*.v2ex.com/*
+// @match                https://*.v2ex.co/*
+// @run-at               document-end
+// @noframes
+// ==/UserScript==
+//

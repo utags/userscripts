@@ -19,36 +19,35 @@
 ;(() => {
   'use strict'
   function main() {
+    var _a, _b
     console.log('UTags Ext - Custom Rule Template')
-
-    // 百度首页 > 百度热搜
     for (const item of document.querySelectorAll(
       '.s-hotsearch-content a.title-content'
     )) {
       const titleElement = item.querySelector('span.title-content-title')
-      const title = titleElement?.textContent?.trim()
+      const title =
+        (_a = titleElement == null ? void 0 : titleElement.textContent) == null
+          ? void 0
+          : _a.trim()
       if (title) {
-        // data-utags_link 用于存储链接, 可以留空
-        item.dataset.utags_link = `https://www.baidu.com/s?wd=${encodeURIComponent(title)}`
-        // data-utags_title 用于存储标题, 可以留空
+        item.dataset.utags_link = 'https://www.baidu.com/s?wd='.concat(
+          encodeURIComponent(title)
+        )
         item.dataset.utags_title = title
       }
     }
-
-    // 搜索结果 > 侧边栏 > 百度热搜
     for (const item of document.querySelectorAll('#con-ceiling-wrapper a')) {
-      const title = item.textContent?.trim()
+      const title = (_b = item.textContent) == null ? void 0 : _b.trim()
       if (title) {
-        item.dataset.utags_link = `https://www.baidu.com/s?wd=${encodeURIComponent(title)}`
+        item.dataset.utags_link = 'https://www.baidu.com/s?wd='.concat(
+          encodeURIComponent(title)
+        )
       }
     }
-
-    // 搜索结果 > 侧边栏 > 百度热搜标题
     const sectionTitle = document.querySelector(
       '#con-ceiling-wrapper .cr-title a'
     )
     if (sectionTitle) {
-      // 排除 百度热搜标题 中的链接
       sectionTitle.dataset.utags_ignore = ''
     }
   }
