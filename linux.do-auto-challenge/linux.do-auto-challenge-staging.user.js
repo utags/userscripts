@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name                 LINUX.DO CloudFlare Challenge Bypass
-// @name:zh-CN           LINUX.DO CloudFlare 5秒盾自动跳转
+// @name                 LINUX.DO CloudFlare Challenge Bypass - staging
+// @name:zh-CN           LINUX.DO CloudFlare 5秒盾自动跳转 - staging
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues

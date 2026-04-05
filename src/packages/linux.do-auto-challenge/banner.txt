@@ -1,0 +1,15 @@
+// ==UserScript==
+// @name                 LINUX.DO CloudFlare Challenge Bypass
+// @name:zh-CN           LINUX.DO CloudFlare 5秒盾自动跳转
+// @namespace            {namespace}
+// @homepageURL          {homepage}
+// @supportURL           {bugs.url}
+// @version              0.3.0
+// @description          Automatically redirects to the challenge page when CloudFlare protection fails, improving browsing experience on linux.do
+// @description:zh-CN    当 CloudFlare 5秒盾检测失败时，自动跳转到 challenge 页面，提升 linux.do 的浏览体验
+// @author               {author}
+// @license              {license}
+// @match                https://linux.do/*
+// @icon                 https://wsrv.nl/?w=64&h=64&url=https%3A%2F%2Ft3.gstatic.com%2FfaviconV2%3Fclient%3DSOCIAL%26type%3DFAVICON%26fallback_opts%3DTYPE%2CSIZE%2CURL%26url%3Dhttps%3A%2F%2Flinux.do%26size%3D64
+// ==/UserScript==
+//
