@@ -6,6 +6,7 @@ const CONFIG = {
     '该回应是很久以前创建的',
     'reaction was created too long ago',
     '我们无法加载该话题',
+    'You are not allowed to react',
   ],
   // 要查找的元素选择器
   DIALOG_SELECTOR: '.dialog-body',
@@ -33,6 +34,62 @@ const log = (...args) => {
  */
 function isChallengePage() {
   return globalThis.location.pathname.startsWith(CONFIG.CHALLENGE_PATH)
+}
+
+function isNotFoundPage() {
+  return Boolean(document.querySelector('.page-not-found'))
+}
+
+function getRedirectParamUrl(): string | undefined {
+  try {
+    const sp = new URLSearchParams(globalThis.location.search)
+    const raw = sp.get('redirect')
+    if (!raw) return undefined
+
+    const url = new URL(raw, globalThis.location.origin)
+    if (url.origin !== globalThis.location.origin) return undefined
+    return url.href
+  } catch {
+    return undefined
+  }
+}
+
+const NOT_FOUND_REDIRECT_GUARD_KEY = 'linux_do_auto_challenge_nf_guard'
+
+function getNotFoundRedirectGuardTs(): number {
+  try {
+    const raw = sessionStorage.getItem(NOT_FOUND_REDIRECT_GUARD_KEY)
+    const n = raw ? Number(raw) : 0
+    return Number.isFinite(n) ? n : 0
+  } catch {
+    return 0
+  }
+}
+
+function setNotFoundRedirectGuardTs(ts: number): void {
+  try {
+    sessionStorage.setItem(NOT_FOUND_REDIRECT_GUARD_KEY, String(ts))
+  } catch {}
+}
+
+function redirectFromNotFoundPage() {
+  const fallback = `${globalThis.location.origin}/`
+  const target = getRedirectParamUrl() || fallback
+  const now = Date.now()
+  const guardTs = getNotFoundRedirectGuardTs()
+  if (guardTs && now - guardTs < 5000) {
+    // Stay on the current page
+    // globalThis.location.replace(fallback)
+    return
+  }
+
+  setNotFoundRedirectGuardTs(now)
+  if (target === globalThis.location.href) {
+    globalThis.location.replace(fallback)
+    return
+  }
+
+  globalThis.location.replace(target)
 }
 
 /**
@@ -113,6 +170,11 @@ function initScript() {
 
   // 如果已经在 challenge 页面，不需要执行脚本
   if (isChallengePage()) {
+    if (isNotFoundPage()) {
+      redirectFromNotFoundPage()
+      return
+    }
+
     log('已在 challenge 页面，不执行脚本')
     return
   }
@@ -123,7 +185,13 @@ function initScript() {
   // 观察 DOM 变化
   try {
     const observer = new MutationObserver((mutations, obs) => {
-      checkAndRedirect(obs)
+      if (isChallengePage()) {
+        if (isNotFoundPage()) {
+          redirectFromNotFoundPage()
+        }
+      } else {
+        checkAndRedirect(obs)
+      }
     })
 
     observer.observe(document.body, {

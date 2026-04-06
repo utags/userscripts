@@ -4,7 +4,7 @@
 // @namespace            {namespace}
 // @homepageURL          {homepage}
 // @supportURL           {bugs.url}
-// @version              0.3.0
+// @version              0.3.2
 // @description          Automatically redirects to the challenge page when CloudFlare protection fails, improving browsing experience on linux.do
 // @description:zh-CN    当 CloudFlare 5秒盾检测失败时，自动跳转到 challenge 页面，提升 linux.do 的浏览体验
 // @author               {author}

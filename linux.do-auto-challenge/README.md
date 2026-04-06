@@ -29,6 +29,14 @@
 
 ## 更新日志
 
+### v0.3.1
+
+- 404 页面（`.page-not-found`）自动回跳：
+  - 优先跳回 `redirect` 参数指定的原页面
+  - 无 `redirect` 参数时跳回首页
+- 使用 `sessionStorage` 防止 404 场景下的循环跳转
+- 更新错误文本检测覆盖范围，提升失败识别率
+
 ### v0.2.1
 
 - 删除 `@noframes` 声明，兼容 utags-shortcuts 在 iframe 模式下运行

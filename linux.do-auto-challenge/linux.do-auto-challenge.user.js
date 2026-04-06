@@ -4,7 +4,7 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.3.0
+// @version              0.3.2
 // @description          Automatically redirects to the challenge page when CloudFlare protection fails, improving browsing experience on linux.do
 // @description:zh-CN    当 CloudFlare 5秒盾检测失败时，自动跳转到 challenge 页面，提升 linux.do 的浏览体验
 // @author               Pipecraft
@@ -22,6 +22,7 @@
       '\u8BE5\u56DE\u5E94\u662F\u5F88\u4E45\u4EE5\u524D\u521B\u5EFA\u7684',
       'reaction was created too long ago',
       '\u6211\u4EEC\u65E0\u6CD5\u52A0\u8F7D\u8BE5\u8BDD\u9898',
+      'You are not allowed to react',
     ],
     DIALOG_SELECTOR: '.dialog-body',
     CHALLENGE_PATH: '/challenge',
@@ -35,6 +36,51 @@
   }
   function isChallengePage() {
     return globalThis.location.pathname.startsWith(CONFIG.CHALLENGE_PATH)
+  }
+  function isNotFoundPage() {
+    return Boolean(document.querySelector('.page-not-found'))
+  }
+  function getRedirectParamUrl() {
+    try {
+      const sp = new URLSearchParams(globalThis.location.search)
+      const raw = sp.get('redirect')
+      if (!raw) return void 0
+      const url = new URL(raw, globalThis.location.origin)
+      if (url.origin !== globalThis.location.origin) return void 0
+      return url.href
+    } catch (e) {
+      return void 0
+    }
+  }
+  var NOT_FOUND_REDIRECT_GUARD_KEY = 'linux_do_auto_challenge_nf_guard'
+  function getNotFoundRedirectGuardTs() {
+    try {
+      const raw = sessionStorage.getItem(NOT_FOUND_REDIRECT_GUARD_KEY)
+      const n = raw ? Number(raw) : 0
+      return Number.isFinite(n) ? n : 0
+    } catch (e) {
+      return 0
+    }
+  }
+  function setNotFoundRedirectGuardTs(ts) {
+    try {
+      sessionStorage.setItem(NOT_FOUND_REDIRECT_GUARD_KEY, String(ts))
+    } catch (e) {}
+  }
+  function redirectFromNotFoundPage() {
+    const fallback = ''.concat(globalThis.location.origin, '/')
+    const target = getRedirectParamUrl() || fallback
+    const now = Date.now()
+    const guardTs = getNotFoundRedirectGuardTs()
+    if (guardTs && now - guardTs < 5e3) {
+      return
+    }
+    setNotFoundRedirectGuardTs(now)
+    if (target === globalThis.location.href) {
+      globalThis.location.replace(fallback)
+      return
+    }
+    globalThis.location.replace(target)
   }
   function isChallengeFailure() {
     if (isChallengePage()) {
@@ -81,6 +127,10 @@
   function initScript() {
     log('\u521D\u59CB\u5316\u811A\u672C')
     if (isChallengePage()) {
+      if (isNotFoundPage()) {
+        redirectFromNotFoundPage()
+        return
+      }
       log(
         '\u5DF2\u5728 challenge \u9875\u9762\uFF0C\u4E0D\u6267\u884C\u811A\u672C'
       )
@@ -89,7 +139,13 @@
     if (checkAndRedirect()) return
     try {
       const observer = new MutationObserver((mutations, obs) => {
-        checkAndRedirect(obs)
+        if (isChallengePage()) {
+          if (isNotFoundPage()) {
+            redirectFromNotFoundPage()
+          }
+        } else {
+          checkAndRedirect(obs)
+        }
       })
       observer.observe(document.body, {
         childList: true,
