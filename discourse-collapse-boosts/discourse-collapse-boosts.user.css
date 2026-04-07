@@ -1,0 +1,42 @@
+/* ==UserStyle==
+@name           Discourse - Collapse Boosts
+@namespace      https://github.com/utags
+@version        2.0.0
+@description    自动折叠 boost。
+@author         Pipecraft
+@license        MIT
+@icon           https://www.google.com/s2/favicons?sz=64&domain=meta.discourse.org
+==/UserStyle== */
+
+@-moz-document domain("meta.discourse.org"), domain("linux.do"), domain("idcflare.com"), domain("www.nodeloc.com"), domain("meta.appinn.net"), domain("community.openai.com"), domain("community.cloudflare.com"), domain("community.wanikani.com"), domain("forum.cursor.com"), domain("forum.obsidian.md"), domain("forum-zh.obsidian.md"), domain("www.uscardforum.com") {
+  /* 第三个和它后面的 boost */
+  .discourse-boosts__bubble:nth-child(n + 3) {
+    opacity: 0%;
+    display: none;
+    transition-property: opacity, display;
+    transition-duration: 180ms, 180ms;
+    transition-timing-function: ease, ease;
+    transition-behavior: allow-discrete;
+  }
+  /* 第二个 boost */
+  .discourse-boosts__bubble:nth-child(2) {
+    opacity: 50%;
+    transition: opacity 180ms ease;
+  }
+  /* 鼠标移到第二个 boost 上面时，或仅有两个 boost 时 */
+  .discourse-boosts__bubble:nth-child(2):hover,
+  .discourse-boosts__bubble:nth-child(2).discourse-boosts__bubble:last-of-type {
+    opacity: 100%;
+  }
+  /* 鼠标移到前两个 boost 上面时 */
+  .discourse-boosts__bubble:hover ~ .discourse-boosts__bubble {
+    display: inline-flex;
+    opacity: 100%;
+  }
+
+  @starting-style {
+    .discourse-boosts__bubble:hover ~ .discourse-boosts__bubble {
+      opacity: 0%;
+    }
+  }
+}
