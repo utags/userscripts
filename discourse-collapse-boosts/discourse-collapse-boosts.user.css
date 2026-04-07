@@ -1,7 +1,7 @@
 /* ==UserStyle==
 @name           Discourse - Collapse Boosts
 @namespace      https://github.com/utags
-@version        2.0.0
+@version        3.0.0
 @description    自动折叠 boost。
 @author         Pipecraft
 @license        MIT
@@ -9,14 +9,25 @@
 ==/UserStyle== */
 
 @-moz-document domain("meta.discourse.org"), domain("linux.do"), domain("idcflare.com"), domain("www.nodeloc.com"), domain("meta.appinn.net"), domain("community.openai.com"), domain("community.cloudflare.com"), domain("community.wanikani.com"), domain("forum.cursor.com"), domain("forum.obsidian.md"), domain("forum-zh.obsidian.md"), domain("www.uscardforum.com") {
+  .discourse-boosts__list {
+    max-width: fit-content;
+  }
+
   /* 第三个和它后面的 boost */
   .discourse-boosts__bubble:nth-child(n + 3) {
     opacity: 0%;
-    display: none;
-    transition-property: opacity, display;
-    transition-duration: 180ms, 180ms;
-    transition-timing-function: ease, ease;
-    transition-behavior: allow-discrete;
+    display: inline-flex;
+    max-inline-size: 0;
+    max-block-size: 0;
+    padding: 0;
+    margin-inline-start: calc(var(--space-1) * -1);
+    overflow: hidden;
+    pointer-events: none;
+    transition-property:
+      opacity, max-inline-size, max-block-size, padding, margin-inline-start;
+    transition-duration: 180ms, 0ms, 0ms, 0ms, 0ms;
+    transition-delay: 0ms, 0ms, 0ms, 0ms, 0ms;
+    transition-timing-function: ease, linear, linear, linear, linear;
   }
   /* 第二个 boost */
   .discourse-boosts__bubble:nth-child(2) {
@@ -28,15 +39,18 @@
   .discourse-boosts__bubble:nth-child(2).discourse-boosts__bubble:last-of-type {
     opacity: 100%;
   }
-  /* 鼠标移到前两个 boost 上面时 */
-  .discourse-boosts__bubble:hover ~ .discourse-boosts__bubble {
-    display: inline-flex;
+  /* 鼠标移到 boost 上面时 */
+  .discourse-boosts__list:hover .discourse-boosts__bubble {
     opacity: 100%;
+    max-inline-size: 999px;
+    max-block-size: 999px;
+    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
+    margin-inline-start: 0;
+    pointer-events: auto;
+    transition-delay: 120ms, 120ms, 120ms, 120ms, 120ms;
   }
 
-  @starting-style {
-    .discourse-boosts__bubble:hover ~ .discourse-boosts__bubble {
-      opacity: 0%;
-    }
+  .discourse-boosts-trigger {
+    order: -1;
   }
 }
