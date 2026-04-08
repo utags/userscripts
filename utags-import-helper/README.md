@@ -5,8 +5,8 @@ Export tag data from other V2EX-related userscripts and convert it into a UTags 
 ## Install
 
 - GitHub: https://github.com/utags/userscripts/raw/main/utags-import-helper/utags-import-helper.user.js
-- Greasy Fork: (TBD)
-- ScriptCat: (TBD)
+- Greasy Fork: https://greasyfork.org/scripts/572962-utags-import-helper
+- ScriptCat: https://scriptcat.org/script-show-page/5847
 
 ## Supported Sources
 

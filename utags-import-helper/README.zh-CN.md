@@ -4,7 +4,7 @@
 
 ## 安装
 
-- 安装地址： [GitHub](https://github.com/utags/userscripts/raw/main/utags-import-helper/utags-import-helper.user.js) · Greasy Fork（待发布）· ScriptCat（待发布）
+- 安装地址：[Greasy Fork](https://greasyfork.org/zh-CN/scripts/572962-utags-import-helper) · [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/5847) · [GitHub](https://github.com/utags/userscripts/raw/main/utags-import-helper/utags-import-helper.user.js)
 
 ## 支持的数据来源
 
