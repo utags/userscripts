@@ -1,11 +1,13 @@
 /* ==UserStyle==
-@name           Discourse - Collapse Boosts
-@namespace      https://github.com/utags
-@version        4.0.0
-@description    自动折叠 boost。
-@author         Pipecraft
-@license        MIT
-@icon           https://www.google.com/s2/favicons?sz=64&domain=meta.discourse.org
+@name                 Discourse - Collapse Boosts
+@name:zh-CN           Discourse - 自动折叠 boost
+@namespace            https://github.com/utags
+@version              4.0.1
+@description          Collapse Discourse boosts: show first two by default, expand on hover, and display an “N+” counter when there are more.
+@description:zh-CN    折叠 Discourse Boost：默认仅显示前两个，悬停展开其余，超过 2 个时显示“N+”计数。
+@author               Pipecraft
+@license              MIT
+@icon                 https://www.google.com/s2/favicons?sz=64&domain=meta.discourse.org
 ==/UserStyle== */
 
 @-moz-document domain("meta.discourse.org"), domain("linux.do"), domain("idcflare.com") {
