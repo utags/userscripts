@@ -4,6 +4,10 @@ By default, shows only the first two boosts on Discourse. When you hover the lis
 
 ## Changelog
 
+- v5.0.0
+  - Improved mobile usability: constrain list height on small screens and enable scrolling
+  - Added fallback for browsers without :has(): show a “+ more” hint after the second boost and reserve a clickable area to expand
+  - Reduced hover jitter by delaying size/margin changes during collapse/expand
 - v4.0.0
   - Added “N+” counter when there are more than 2 boosts; counter hides on hover
   - Introduced delayed sizing: opacity updates immediately, size and padding collapse after a short delay to prevent hover jitter

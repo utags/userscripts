@@ -2,7 +2,7 @@
 @name:zh-CN           Discourse - 自动折叠 boost
 @name                 Discourse - Collapse Boosts
 @namespace            https://github.com/utags
-@version              4.0.3
+@version              5.0.0
 @description          Collapse Discourse boosts: show first two by default, expand on hover, and display an “N+” counter when there are more.
 @description:zh-CN    折叠 Discourse Boost：默认仅显示前两个，悬停展开其余，超过 2 个时显示“N+”计数。
 @author               Pipecraft
@@ -41,6 +41,53 @@
     transition-timing-function: ease, linear, linear;
     transition-delay: 0ms, 0ms, 0ms;
   }
+
+  @supports not selector(.x:has(.y)) {
+    /* 第二个 boost */
+    .discourse-boosts__list > .discourse-boosts__bubble:nth-of-type(2) {
+      /* opacity: 50%; */
+      position: relative;
+      margin-right: 50px;
+      transition-property: opacity, margin-right;
+      transition-duration: 180ms, 0ms;
+      transition-timing-function: ease, linear;
+      transition-delay: 0ms, 0ms;
+    }
+
+    .discourse-boosts__list
+      > .discourse-boosts__bubble:nth-of-type(2):not(:last-of-type)::after {
+      content: "+ more";
+      opacity: 50%;
+      position: absolute;
+      inset-inline-start: calc(100% + var(--space-1));
+      inset-block-start: 50%;
+      transform: translateY(-50%);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* 鼠标移到第二个 boost 上面时，延迟收起右侧空白，避免 hover 抖动 */
+    .discourse-boosts__list:hover > .discourse-boosts__bubble:nth-of-type(2),
+    .discourse-boosts__list:focus-within
+      > .discourse-boosts__bubble:nth-of-type(2) {
+      opacity: 100%;
+      margin-right: 0;
+      transition-delay: 0ms, 120ms;
+    }
+    /* 仅有两个 boost 时，立即收起右侧空白 */
+    .discourse-boosts__list
+      > .discourse-boosts__bubble:nth-of-type(2):last-of-type {
+      opacity: 100%;
+      margin-right: 0;
+      transition-delay: 0ms, 0ms;
+    }
+    .discourse-boosts__list:hover
+      > .discourse-boosts__bubble:nth-of-type(2)::after,
+    .discourse-boosts__list:focus-within
+      > .discourse-boosts__bubble:nth-of-type(2)::after {
+      display: none;
+    }
+  }
   .discourse-boosts__list:has(> .discourse-boosts__bubble:nth-child(3))::after,
   .discourse-boosts__list:has(
       > .discourse-boosts__bubble:nth-of-type(3)
@@ -54,7 +101,13 @@
   .discourse-boosts__list:hover:has(
       > .discourse-boosts__bubble:nth-child(3)
     )::after,
+  .discourse-boosts__list:focus-within:has(
+      > .discourse-boosts__bubble:nth-child(3)
+    )::after,
   .discourse-boosts__list:hover:has(
+      > .discourse-boosts__bubble:nth-of-type(3)
+    )::after,
+  .discourse-boosts__list:focus-within:has(
       > .discourse-boosts__bubble:nth-of-type(3)
     )::after {
     opacity: 0%;
@@ -81,7 +134,8 @@
     transition-timing-function: ease, linear, linear, linear, linear;
   }
   /* 鼠标移到 boost 上面时 */
-  .discourse-boosts__list:hover .discourse-boosts__bubble {
+  .discourse-boosts__list:hover .discourse-boosts__bubble,
+  .discourse-boosts__list:focus-within .discourse-boosts__bubble {
     opacity: 100%;
     max-inline-size: 999px;
     max-block-size: 999px;
@@ -93,5 +147,12 @@
 
   .discourse-boosts-trigger {
     order: -1;
+  }
+
+  @media (max-width: 560px) or (max-height: 560px) {
+    .discourse-boosts__list {
+      max-block-size: 30dvh;
+      overflow-y: auto;
+    }
   }
 }
