@@ -1,6 +1,14 @@
 # Discourse - Collapse Boosts
 
-自动折叠 boost。
+By default, shows only the first two boosts on Discourse. When you hover the list, the remaining boosts smoothly expand, and an “N+” counter appears when there are more than two. Includes fade and delayed size changes to avoid jitter and layout shifts.
+
+## Changelog
+
+- v4.0.0
+  - Added “N+” counter when there are more than 2 boosts; counter hides on hover
+  - Introduced delayed sizing: opacity updates immediately, size and padding collapse after a short delay to prevent hover jitter
+  - Collapsed state compensates for parent flex gap with negative margin to remove empty spacing
+  - Expand/collapse uses fade-in with instantaneous size toggling to avoid “pop-in” effects
 
 ## More Useful Scripts
 

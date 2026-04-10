@@ -1,16 +1,65 @@
 /* ==UserStyle==
 @name           Discourse - Collapse Boosts
 @namespace      https://github.com/utags
-@version        3.0.0
+@version        4.0.0
 @description    自动折叠 boost。
 @author         Pipecraft
 @license        MIT
 @icon           https://www.google.com/s2/favicons?sz=64&domain=meta.discourse.org
 ==/UserStyle== */
 
-@-moz-document domain("meta.discourse.org"), domain("linux.do"), domain("idcflare.com"), domain("www.nodeloc.com"), domain("meta.appinn.net"), domain("community.openai.com"), domain("community.cloudflare.com"), domain("community.wanikani.com"), domain("forum.cursor.com"), domain("forum.obsidian.md"), domain("forum-zh.obsidian.md"), domain("www.uscardforum.com") {
+@-moz-document domain("meta.discourse.org"), domain("linux.do"), domain("idcflare.com") {
   .discourse-boosts__list {
     max-width: fit-content;
+    /* 初始化计数器 */
+    counter-reset: boosts;
+  }
+  .discourse-boosts__bubble {
+    /* 计数器累加 */
+    counter-increment: boosts;
+    /*如果想尽可能减少 boosts 对信息流干扰，可开启下方透明度*/
+    /*opacity: 70%;*/
+    transition: opacity 180ms ease;
+  }
+  /* boosts 列表后添加数值 */
+  .discourse-boosts__list::after {
+    /*减去默认显示数量*/
+    counter-increment: boosts -2;
+    content: counter(boosts) "+";
+    opacity: 0%;
+    display: inline-flex;
+    pointer-events: none;
+    max-inline-size: 0;
+    max-block-size: 0;
+    overflow: hidden;
+    font-size: var(--font-down-2);
+    line-height: 1;
+    transition-property: opacity, max-inline-size, max-block-size;
+    transition-duration: 180ms, 0ms, 0ms;
+    transition-timing-function: ease, linear, linear;
+    transition-delay: 0ms, 0ms, 0ms;
+  }
+  .discourse-boosts__list:has(> .discourse-boosts__bubble:nth-child(3))::after,
+  .discourse-boosts__list:has(
+      > .discourse-boosts__bubble:nth-of-type(3)
+    )::after {
+    opacity: 50%;
+    max-inline-size: 999px;
+    max-block-size: 999px;
+    transition-delay: 0ms, 0ms, 0ms;
+  }
+  /* 鼠标悬停时隐藏数值*/
+  .discourse-boosts__list:hover:has(
+      > .discourse-boosts__bubble:nth-child(3)
+    )::after,
+  .discourse-boosts__list:hover:has(
+      > .discourse-boosts__bubble:nth-of-type(3)
+    )::after {
+    opacity: 0%;
+    max-inline-size: 0;
+    max-block-size: 0;
+    /* 延迟变小，使数值隐藏更平滑，防止 hover 抖动现象 */
+    transition-delay: 0ms, 120ms, 120ms;
   }
 
   /* 第三个和它后面的 boost */
@@ -28,16 +77,6 @@
     transition-duration: 180ms, 0ms, 0ms, 0ms, 0ms;
     transition-delay: 0ms, 0ms, 0ms, 0ms, 0ms;
     transition-timing-function: ease, linear, linear, linear, linear;
-  }
-  /* 第二个 boost */
-  .discourse-boosts__bubble:nth-child(2) {
-    opacity: 50%;
-    transition: opacity 180ms ease;
-  }
-  /* 鼠标移到第二个 boost 上面时，或仅有两个 boost 时 */
-  .discourse-boosts__bubble:nth-child(2):hover,
-  .discourse-boosts__bubble:nth-child(2).discourse-boosts__bubble:last-of-type {
-    opacity: 100%;
   }
   /* 鼠标移到 boost 上面时 */
   .discourse-boosts__list:hover .discourse-boosts__bubble {
