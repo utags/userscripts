@@ -134,7 +134,7 @@ function injectButtons(
       max
     )
 
-    if (randomAmount === 250) {
+    if (randomAmount >= 247 && randomAmount <= 253) {
       randomAmount = 200
     }
 
