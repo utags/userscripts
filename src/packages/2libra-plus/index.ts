@@ -44,6 +44,7 @@ type Settings = {
   postListSort: boolean
   rememberSortMode: boolean
   stickyHeader: boolean
+  hideLeftSidebar: boolean
   hideSidebarEmail: boolean
   hideSidebarExperience: boolean
   hideSidebarCoins: boolean
@@ -69,6 +70,7 @@ const DEFAULT_SETTINGS: Settings = {
   postListSort: true,
   rememberSortMode: false,
   stickyHeader: false,
+  hideLeftSidebar: false,
   hideSidebarEmail: false,
   hideSidebarExperience: false,
   hideSidebarCoins: false,
@@ -98,6 +100,7 @@ let rewardProbability = DEFAULT_SETTINGS.rewardProbability
 let postListSort = DEFAULT_SETTINGS.postListSort
 let rememberSortMode = DEFAULT_SETTINGS.rememberSortMode
 let stickyHeader = DEFAULT_SETTINGS.stickyHeader
+let hideLeftSidebar = DEFAULT_SETTINGS.hideLeftSidebar
 let hideSidebarEmail = DEFAULT_SETTINGS.hideSidebarEmail
 let hideSidebarExperience = DEFAULT_SETTINGS.hideSidebarExperience
 let hideSidebarCoins = DEFAULT_SETTINGS.hideSidebarCoins
@@ -173,6 +176,11 @@ function buildSettingsSchema(): PanelSchema {
   ]
 
   const sidebarFields: Field[] = [
+    {
+      type: 'toggle',
+      key: 'hideLeftSidebar',
+      label: '隐藏左侧侧边栏',
+    },
     { type: 'toggle', key: 'hideSidebarEmail', label: '隐藏邮箱' },
     { type: 'toggle', key: 'hideSidebarExperience', label: '隐藏经验值' },
     { type: 'toggle', key: 'hideSidebarCoins', label: '隐藏金币数量' },
@@ -293,6 +301,7 @@ async function applySettingsFromStore(): Promise<void> {
     postListSort = enabled && Boolean(obj.postListSort)
     rememberSortMode = enabled && Boolean(obj.rememberSortMode)
     stickyHeader = enabled && Boolean(obj.stickyHeader)
+    hideLeftSidebar = enabled && Boolean(obj.hideLeftSidebar)
     hideSidebarEmail = enabled && Boolean(obj.hideSidebarEmail)
     hideSidebarExperience = enabled && Boolean(obj.hideSidebarExperience)
     hideSidebarCoins = enabled && Boolean(obj.hideSidebarCoins)
@@ -351,6 +360,7 @@ export function getSettingsSnapshot(): Settings {
     postListSort,
     rememberSortMode,
     stickyHeader,
+    hideLeftSidebar,
     hideSidebarEmail,
     hideSidebarExperience,
     hideSidebarCoins,
