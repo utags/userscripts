@@ -3,13 +3,13 @@
 // @namespace            https://github.com/utags
 // @homepageURL          https://github.com/utags/userscripts#readme
 // @supportURL           https://github.com/utags/userscripts/issues
-// @version              0.6.1
+// @version              0.7.0
 // @description          2Libra.com 增强工具
 // @icon                 data:image/png;base64,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
 // @author               Pipecraft
 // @license              MIT
 // @match                https://2libra.com/*
-// @run-at               document-end
+// @run-at               document-start
 // @grant                GM_registerMenuCommand
 // @grant                GM_addStyle
 // @grant                GM.addStyle
@@ -2453,6 +2453,134 @@
     }
   }
   var initialized5 = false
+  var leftSidebarEl
+  var leftLogoEl
+  var leftSidebarStyleEl
+  function ensureLeftSidebarHoverStyle() {
+    if (leftSidebarStyleEl == null ? void 0 : leftSidebarStyleEl.isConnected)
+      return
+    const styleEl = document.createElement('style')
+    styleEl.dataset.libraPlusLeftSidebarStyle = '1'
+    styleEl.textContent =
+      "\nhtml[data-libra-plus-left-sidebar='1'] [data-main-left-sidebar='true'] {\n  display: none !important;\n}\nhtml[data-libra-plus-left-sidebar='1']:has([data-libra-plus-left-logo='1']:hover) [data-main-left-sidebar='true'][data-libra-plus-left-sidebar-floating='1'],\nhtml[data-libra-plus-left-sidebar='1'] [data-main-left-sidebar='true'][data-libra-plus-left-sidebar-floating='1']:hover {\n  display: block !important;\n}\n".trim()
+    ;(document.head || document.documentElement).append(styleEl)
+    leftSidebarStyleEl = styleEl
+  }
+  function saveElStyle(el) {
+    const ds = el.dataset
+    if (ds.libraPlusSavedStyle === '1') return
+    ds.libraPlusSavedStyle = '1'
+    ds.libraPlusOrigDisplay = el.style.display
+    ds.libraPlusOrigPosition = el.style.position
+    ds.libraPlusOrigLeft = el.style.left
+    ds.libraPlusOrigTop = el.style.top
+    ds.libraPlusOrigTransform = el.style.transform
+    ds.libraPlusOrigZIndex = el.style.zIndex
+    ds.libraPlusOrigMaxHeight = el.style.maxHeight
+    ds.libraPlusOrigOverflow = el.style.overflow
+    ds.libraPlusOrigPointerEvents = el.style.pointerEvents
+    ds.libraPlusOrigPaddingTop = el.style.paddingTop
+  }
+  function restoreElStyle(el) {
+    const ds = el.dataset
+    if (ds.libraPlusSavedStyle !== '1') return
+    if (ds.libraPlusOrigDisplay) el.style.display = ds.libraPlusOrigDisplay
+    else el.style.removeProperty('display')
+    if (ds.libraPlusOrigPosition) el.style.position = ds.libraPlusOrigPosition
+    else el.style.removeProperty('position')
+    if (ds.libraPlusOrigLeft) el.style.left = ds.libraPlusOrigLeft
+    else el.style.removeProperty('left')
+    if (ds.libraPlusOrigTop) el.style.top = ds.libraPlusOrigTop
+    else el.style.removeProperty('top')
+    if (ds.libraPlusOrigTransform)
+      el.style.transform = ds.libraPlusOrigTransform
+    else el.style.removeProperty('transform')
+    if (ds.libraPlusOrigZIndex) el.style.zIndex = ds.libraPlusOrigZIndex
+    else el.style.removeProperty('z-index')
+    if (ds.libraPlusOrigMaxHeight)
+      el.style.maxHeight = ds.libraPlusOrigMaxHeight
+    else el.style.removeProperty('max-height')
+    if (ds.libraPlusOrigOverflow) el.style.overflow = ds.libraPlusOrigOverflow
+    else el.style.removeProperty('overflow')
+    if (ds.libraPlusOrigPointerEvents) {
+      el.style.pointerEvents = ds.libraPlusOrigPointerEvents
+    } else {
+      el.style.removeProperty('pointer-events')
+    }
+    if (ds.libraPlusOrigPaddingTop) {
+      el.style.paddingTop = ds.libraPlusOrigPaddingTop
+    } else {
+      el.style.removeProperty('padding-top')
+    }
+  }
+  function applyLeftSidebarHidden(settings) {
+    const rootDs = document.documentElement.dataset
+    const sidebar = document.querySelector('[data-main-left-sidebar="true"]')
+    const logo = document.querySelector(
+      '[role~="work"] + a,.breadcrumbs a[href="/"]'
+    )
+    if (!sidebar || !logo) {
+      if (leftSidebarEl) {
+        restoreElStyle(leftSidebarEl)
+        delete leftSidebarEl.dataset.libraPlusLeftSidebarFloating
+      }
+      if (leftLogoEl) {
+        delete leftLogoEl.dataset.libraPlusLeftLogo
+      }
+      delete rootDs.libraPlusLeftSidebar
+      leftSidebarEl = sidebar || void 0
+      leftLogoEl = logo || void 0
+      return
+    }
+    if (leftSidebarEl !== sidebar) {
+      leftSidebarEl = sidebar
+    }
+    if (leftLogoEl !== logo) {
+      leftLogoEl = logo
+    }
+    saveElStyle(sidebar)
+    if (!settings.hideLeftSidebar) {
+      restoreElStyle(sidebar)
+      delete sidebar.dataset.libraPlusLeftSidebarFloating
+      delete logo.dataset.libraPlusLeftLogo
+      delete rootDs.libraPlusLeftSidebar
+      return
+    }
+    ensureLeftSidebarHoverStyle()
+    rootDs.libraPlusLeftSidebar = '1'
+    sidebar.dataset.libraPlusLeftSidebarFloating = '1'
+    logo.dataset.libraPlusLeftLogo = '1'
+    sidebar.style.position = 'fixed'
+    const logoRect =
+      leftLogoEl == null ? void 0 : leftLogoEl.getBoundingClientRect()
+    const isBreadcrumbsLogo = Boolean(
+      leftLogoEl == null ? void 0 : leftLogoEl.closest('.breadcrumbs')
+    )
+    if (logoRect) {
+      const top = Math.round(logoRect.bottom)
+      if (isBreadcrumbsLogo) {
+        const left = Math.round(logoRect.left)
+        sidebar.style.left = ''.concat(left, 'px')
+        sidebar.style.transform = 'translate(0, 0)'
+      } else {
+        const centerX = Math.round(logoRect.left + logoRect.width / 2)
+        sidebar.style.left = ''.concat(centerX, 'px')
+        sidebar.style.transform = 'translate(-50%, 0)'
+      }
+      sidebar.style.top = ''.concat(top, 'px')
+      sidebar.style.maxHeight = 'calc(100vh - '.concat(top, 'px - 16px)')
+      sidebar.style.paddingTop = '2px'
+    } else {
+      sidebar.style.left = '50%'
+      sidebar.style.top = 'var(--tab-height, 40px)'
+      sidebar.style.transform = 'translate(-50%, 0)'
+      sidebar.style.maxHeight = '80vh'
+      sidebar.style.paddingTop = '2px'
+    }
+    sidebar.style.zIndex = '2147483647'
+    sidebar.style.overflow = 'auto'
+    sidebar.style.pointerEvents = 'auto'
+  }
   function applyHideEmail(cardBody, settings) {
     const emailEl = cardBody.querySelector(':scope > h2 .text-gray-400')
     if (!emailEl) return
@@ -2570,6 +2698,7 @@
   }
   function applySidebarHidden(getSettings2) {
     const settings = getSettings2()
+    applyLeftSidebarHidden(settings)
     const cardBody = document.querySelector(
       '[data-right-sidebar="true"] .card-body'
     )
@@ -2591,6 +2720,7 @@
   function initSidebarHidden(getSettings2) {
     if (initialized5) return
     initialized5 = true
+    ensureLeftSidebarHoverStyle()
     const run = () => {
       applySidebarHidden(getSettings2)
     }
@@ -2648,6 +2778,7 @@
     postListSort: true,
     rememberSortMode: false,
     stickyHeader: false,
+    hideLeftSidebar: false,
     hideSidebarEmail: false,
     hideSidebarExperience: false,
     hideSidebarCoins: false,
@@ -2675,6 +2806,7 @@
   var postListSort = DEFAULT_SETTINGS.postListSort
   var rememberSortMode = DEFAULT_SETTINGS.rememberSortMode
   var stickyHeader = DEFAULT_SETTINGS.stickyHeader
+  var hideLeftSidebar = DEFAULT_SETTINGS.hideLeftSidebar
   var hideSidebarEmail = DEFAULT_SETTINGS.hideSidebarEmail
   var hideSidebarExperience = DEFAULT_SETTINGS.hideSidebarExperience
   var hideSidebarCoins = DEFAULT_SETTINGS.hideSidebarCoins
@@ -2747,6 +2879,11 @@
       },
     ]
     const sidebarFields = [
+      {
+        type: 'toggle',
+        key: 'hideLeftSidebar',
+        label: '\u9690\u85CF\u5DE6\u4FA7\u4FA7\u8FB9\u680F',
+      },
       {
         type: 'toggle',
         key: 'hideSidebarEmail',
@@ -2896,6 +3033,7 @@
       postListSort = enabled && Boolean(obj.postListSort)
       rememberSortMode = enabled && Boolean(obj.rememberSortMode)
       stickyHeader = enabled && Boolean(obj.stickyHeader)
+      hideLeftSidebar = enabled && Boolean(obj.hideLeftSidebar)
       hideSidebarEmail = enabled && Boolean(obj.hideSidebarEmail)
       hideSidebarExperience = enabled && Boolean(obj.hideSidebarExperience)
       hideSidebarCoins = enabled && Boolean(obj.hideSidebarCoins)
@@ -2950,6 +3088,7 @@
       postListSort,
       rememberSortMode,
       stickyHeader,
+      hideLeftSidebar,
       hideSidebarEmail,
       hideSidebarExperience,
       hideSidebarCoins,
