@@ -30,7 +30,8 @@ export function runRewardEnhancement(getSettings: GetSettings): void {
 }
 
 function checkAndInject(getSettings: GetSettings): void {
-  const popupSelector = 'input.range.range-xs.range-success'
+  const popupSelector =
+    'input.range.range-xs.range-success,input.range-xs.range-primary'
   const inputs = document.querySelectorAll(popupSelector)
   for (const input of inputs) {
     if (input instanceof HTMLInputElement) {
