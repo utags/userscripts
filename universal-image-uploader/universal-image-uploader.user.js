@@ -829,11 +829,11 @@
       btn_history_count: 'History ({count})',
       btn_clear_history: 'Clear',
       default_image_name: 'image',
-      proxy_none: 'No proxy',
+      proxy_none: 'No image proxy',
       proxy_wsrv_nl: 'wsrv.nl',
       proxy_duckduckgo: 'DuckDuckGo',
       proxy_wsrv_nl_duckduckgo: 'wsrv.nl -> DuckDuckGo',
-      multi_host_none: 'Also upload to',
+      multi_host_none: 'Primary host only',
       error_network: 'Network error',
       error_upload_failed: 'Upload failed',
       placeholder_uploading: 'Uploading "{name}"...',
@@ -919,11 +919,11 @@
       btn_history_count: '\u5386\u53F2\uFF08{count}\uFF09',
       btn_clear_history: '\u6E05\u7A7A',
       default_image_name: '\u56FE\u7247',
-      proxy_none: '\u65E0\u4EE3\u7406',
+      proxy_none: '\u4E0D\u4F7F\u7528\u56FE\u7247\u4EE3\u7406',
       proxy_wsrv_nl: 'wsrv.nl',
       proxy_duckduckgo: 'DuckDuckGo',
       proxy_wsrv_nl_duckduckgo: 'wsrv.nl \u2192 DuckDuckGo',
-      multi_host_none: '\u540C\u65F6\u4E0A\u4F20\u81F3',
+      multi_host_none: '\u4EC5\u4E0A\u4F20\u81F3\u4E3B\u56FE\u5E8A',
       error_network: '\u7F51\u7EDC\u9519\u8BEF',
       error_upload_failed: '\u4E0A\u4F20\u5931\u8D25',
       placeholder_uploading: '\u6B63\u5728\u4E0A\u4F20\u300C{name}\u300D...',
@@ -1009,11 +1009,11 @@
       btn_history_count: '\u6B77\u53F2\uFF08{count}\uFF09',
       btn_clear_history: '\u6E05\u7A7A',
       default_image_name: '\u5716\u7247',
-      proxy_none: '\u4E0D\u4F7F\u7528\u4EE3\u7406',
+      proxy_none: '\u4E0D\u4F7F\u7528\u5716\u7247\u4EE3\u7406',
       proxy_wsrv_nl: 'wsrv.nl',
       proxy_duckduckgo: 'DuckDuckGo',
       proxy_wsrv_nl_duckduckgo: 'wsrv.nl \u2192 DuckDuckGo',
-      multi_host_none: '\u540C\u6642\u4E0A\u50B3\u81F3',
+      multi_host_none: '\u50C5\u4E0A\u50B3\u81F3\u4E3B\u5716\u5E8A',
       error_network: '\u7DB2\u8DEF\u932F\u8AA4',
       error_upload_failed: '\u4E0A\u50B3\u5931\u6557',
       placeholder_uploading: '\u6B63\u5728\u4E0A\u50B3\u300C{name}\u300D...',
@@ -2529,38 +2529,50 @@
     }
     return false
   }
+  function dedupeImageFiles(files) {
+    var _a
+    const list = []
+    const seen = /* @__PURE__ */ new Set()
+    for (const file of files) {
+      if (
+        !((_a = file == null ? void 0 : file.type) == null
+          ? void 0
+          : _a.includes('image'))
+      )
+        continue
+      const sig = ''.concat(file.type, '|').concat(file.size)
+      if (seen.has(sig)) continue
+      seen.add(sig)
+      list.push(file)
+    }
+    return list
+  }
+  function collectClipboardImageFiles(cd) {
+    var _a, _b
+    const itemFiles = []
+    const items = cd.items ? Array.from(cd.items) : []
+    for (const item of items) {
+      if (
+        (item == null ? void 0 : item.kind) === 'file' &&
+        ((_a = item.type) == null ? void 0 : _a.includes('image'))
+      ) {
+        const file = (_b = item.getAsFile) == null ? void 0 : _b.call(item)
+        if (file) itemFiles.push(file)
+      }
+    }
+    if (itemFiles.length > 0) return dedupeImageFiles(itemFiles)
+    const files = cd.files ? Array.from(cd.files) : []
+    return dedupeImageFiles(files)
+  }
   function initPasteUpload(initialEnabled = true) {
     let pasteHandler
     const enablePaste = () => {
       if (pasteHandler) return
       pasteHandler = (event) => {
-        var _a, _b
+        var _a
         const cd = event.clipboardData
         if (!cd) return
-        const list = []
-        const seen = /* @__PURE__ */ new Set()
-        const addIfNew = (f) => {
-          const sig = ''
-            .concat(f.name, '|')
-            .concat(f.size, '|')
-            .concat(f.type, '|')
-            .concat(f.lastModified || 0)
-          if (!seen.has(sig)) {
-            seen.add(sig)
-            list.push(f)
-          }
-        }
-        const items = cd.items ? Array.from(cd.items) : []
-        for (const i of items) {
-          if (i && i.type && i.type.includes('image')) {
-            const f = (_a = i.getAsFile) == null ? void 0 : _a.call(i)
-            if (f) addIfNew(f)
-          }
-        }
-        const files = cd.files ? Array.from(cd.files) : []
-        for (const f of files) {
-          if (f && f.type && f.type.includes('image')) addIfNew(f)
-        }
+        const list = collectClipboardImageFiles(cd)
         if (list.length > 0) {
           event.preventDefault()
           event.stopPropagation()
@@ -2571,9 +2583,9 @@
             )
           } else {
             try {
-              ;(_b = globalThis.top) == null
+              ;(_a = globalThis.top) == null
                 ? void 0
-                : _b.postMessage(
+                : _a.postMessage(
                     {
                       type: 'iu:uploadFiles',
                       detail,
