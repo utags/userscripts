@@ -1462,6 +1462,40 @@ function isOverEditableOrPanel(target: EventTarget | undefined): boolean {
   return false
 }
 
+function dedupeImageFiles(files: File[]): File[] {
+  const list: File[] = []
+  const seen = new Set<string>()
+
+  for (const file of files) {
+    if (!file?.type?.includes('image')) continue
+
+    const sig = `${file.type}|${file.size}`
+    if (seen.has(sig)) continue
+
+    seen.add(sig)
+    list.push(file)
+  }
+
+  return list
+}
+
+function collectClipboardImageFiles(cd: DataTransfer): File[] {
+  const itemFiles: File[] = []
+  const items = cd.items ? Array.from(cd.items) : []
+
+  for (const item of items) {
+    if (item?.kind === 'file' && item.type?.includes('image')) {
+      const file = item.getAsFile?.()
+      if (file) itemFiles.push(file)
+    }
+  }
+
+  if (itemFiles.length > 0) return dedupeImageFiles(itemFiles)
+
+  const files = cd.files ? Array.from(cd.files) : []
+  return dedupeImageFiles(files)
+}
+
 function initPasteUpload(initialEnabled = true) {
   let pasteHandler: ((event: ClipboardEvent) => void) | undefined
 
@@ -1470,28 +1504,7 @@ function initPasteUpload(initialEnabled = true) {
     pasteHandler = (event) => {
       const cd = event.clipboardData
       if (!cd) return
-      const list: File[] = []
-      const seen = new Set<string>()
-      const addIfNew = (f: File) => {
-        const sig = `${f.name}|${f.size}|${f.type}|${f.lastModified || 0}`
-        if (!seen.has(sig)) {
-          seen.add(sig)
-          list.push(f)
-        }
-      }
-
-      const items = cd.items ? Array.from(cd.items) : []
-      for (const i of items) {
-        if (i && i.type && i.type.includes('image')) {
-          const f = i.getAsFile?.()
-          if (f) addIfNew(f)
-        }
-      }
-
-      const files = cd.files ? Array.from(cd.files) : []
-      for (const f of files) {
-        if (f && f.type && f.type.includes('image')) addIfNew(f)
-      }
+      const list = collectClipboardImageFiles(cd)
 
       if (list.length > 0) {
         event.preventDefault()
