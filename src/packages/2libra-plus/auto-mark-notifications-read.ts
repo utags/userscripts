@@ -15,6 +15,9 @@ type SettingsSnapshot = {
 
 type GetSettings = () => SettingsSnapshot
 
+const MARK_READ_BUTTON_SELECTOR =
+  'div[data-main-left] [aria-label="刷新通知"] + button.btn-primary:not(.btn-disabled)'
+
 let initialized = false
 let clickTimer: number | undefined
 
@@ -54,7 +57,7 @@ function tryClickMarkButton(getSettings: GetSettings): void {
 
   markUnreadItems()
   const btn = document.querySelector<HTMLButtonElement>(
-    'div[data-main-left] button.btn-primary:not(.btn-disabled)'
+    MARK_READ_BUTTON_SELECTOR
   )
   if (!btn) return
   console.info('[2libra-plus] 🔘 自动点击"已读当前页"按钮')
@@ -67,7 +70,7 @@ function bindMarkReadButton(getSettings: GetSettings): void {
   if (!isNotificationsPage()) return
 
   const btn = document.querySelector<HTMLButtonElement>(
-    'div[data-main-left] button.btn-primary:not(.btn-disabled)'
+    MARK_READ_BUTTON_SELECTOR
   )
   if (!btn) return
   if (btn.dataset.listenClick === '1') return
